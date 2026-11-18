@@ -3,8 +3,8 @@
   "title": "Mise en Mosh",
   "tagline": "Everything in its place. Until the tickets start flying.",
   "description": "auto",
-  "genre": "simulation",
+  "genre": "simulation-management",
   "kind": "game",
   "controls": "auto",
-  "players": "single-player"
+  "players": "single"
 }
