@@ -1,0 +1,17 @@
+{
+  "source": "Recraft MCP (mcp.recraft.ai), Papa Jams account",
+  "generated": "2026-11-18",
+  "custom_style_id": "624cc37c-9e4a-4cf5-bfca-32f74db42a29",
+  "style_name": "band-biopic grain (amber pass vs cold teal dining room)",
+  "assets": {
+    "style-refs/": "The 3 reference images used to train the custom style — reuse them as style anchors",
+    "raster/cover-art-ticket-storm.webp": "Hero/cover art: chef silhouette at the pass in a ticket storm",
+    "raster/chef-pistols-poster.webp": "Gig poster for the kitchen wall",
+    "raster/review-clipping-third-star.webp": "Newspaper/review clipping, legible headline",
+    "raster/dish-*.webp": "Plated dish shots on the pass (pre-cutout versions)",
+    "vector/title-lockup.svg": "MISE EN MOSH title lockup",
+    "vector/stamp-*.svg": "Verdict rubber stamps: SERVE / SEND BACK / SMASH",
+    "sprites/*.webp": "Transparent dish sprites (alpha, trimmed) for plates on the pass"
+  },
+  "notes": "All assets are static — bake into the bundle, no runtime Recraft dependency."
+}

@@ -194,3 +194,22 @@ The game is a residency now, not a night:
   untextured preview → tinted tarnished silver in-scene) sits on the
   pass and hops/spins when a fresh plate lands. GLB pipeline proven:
   generation → download → `public/models/` → `useGLTF` → in-scene.
+
+### Generated art pass (Nov 18, night 3, cont.)
+
+First wave of baked art (Recraft, custom "band-biopic grain" style —
+see assets/recraft/manifest.json for provenance):
+
+- **Verdict stamps**: real rubber-stamp SVGs (SERVE / SENT BACK /
+  SMASHED) replace the text stamps — still slam mid-screen.
+- **Dish sprites**: generated plated-dish art on the pass plate by
+  dish name (wellington / sea-bass / quenelle families); criminal
+  plates keep the sad lump. Serviceable plates dim.
+- **Title**: cover-art chef-in-ticket-storm backdrop + SVG lockup
+  replaces the text H1.
+- **Wall**: Chef Pistols gig poster replaces the procedural poster.
+- `src/vite-env.d.ts` added for asset imports.
+
+Provenance note for the judges: every raster/vector asset under
+`assets/recraft/` was generated during the jam window via the Recraft
+MCP (manifest holds style id + date) and is baked into the bundle.

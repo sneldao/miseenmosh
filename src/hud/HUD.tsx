@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
 import { useGame, tierOf, Ticket, PlateTier, VENUES } from "../game/state";
+import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
+import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
+import stampSmash from "../../assets/recraft/vector/stamp-smash.svg";
+import titleLockup from "../../assets/recraft/vector/title-lockup.svg";
+import coverArt from "../../assets/recraft/raster/cover-art-ticket-storm.webp";
+
+const STAMP_IMG: Record<string, string> = {
+  SERVED: stampServe,
+  "SENT BACK": stampBack,
+  SMASHED: stampSmash,
+};
 
 const STATION_COLOR = ["#a8322a", "#b07a2a", "#3a6a9a"];
 const STATION_NAME = ["GRILL", "SAUTÉ", "PASTRY"];
@@ -57,7 +68,7 @@ function Stamp() {
   const cls = stampText === "SERVED" ? "ok" : stampText === "SENT BACK" ? "warn" : "violent";
   return (
     <div className={`stamp ${cls}`} key={stampAt}>
-      {stampText}
+      {STAMP_IMG[stampText] ? <img src={STAMP_IMG[stampText]} alt={stampText} /> : stampText}
     </div>
   );
 }
@@ -363,7 +374,8 @@ export default function HUD() {
     <div className="hud">
       {phase === "title" && (
         <div className="title-card">
-          <h1>MISE EN MOSH</h1>
+          <img className="cover-art" src={coverArt} alt="" aria-hidden />
+          <img className="lockup" src={titleLockup} alt="MISE EN MOSH" />
           <div className="tag">Everything in its place. Until the tickets start flying.</div>
           <div className="tag sub">One guest tonight is the inspector.</div>
           <button className="btn" onClick={start}>

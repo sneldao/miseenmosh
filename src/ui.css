@@ -244,3 +244,15 @@
 .review.ending { border-top: 4px solid #6a4a2a; }
 
 .out-tag.fire { background: #7a1f12; color: #ffb08a; }
+
+/* ---- generated art pass ---- */
+.stamp { border: none; background: transparent; }
+.stamp img { width: 17rem; display: block; filter: drop-shadow(0 6px 18px rgba(0,0,0,.55)); }
+.title-card { position: relative; overflow: hidden; }
+.title-card .cover-art {
+  position: absolute; inset: -8%; width: 116%; height: 116%;
+  object-fit: cover; opacity: .3; filter: saturate(.85) brightness(.75);
+  pointer-events: none;
+}
+.title-card .lockup { position: relative; width: 26rem; max-width: 80vw; height: auto; margin-bottom: .4rem; }
+.title-card > *:not(.cover-art) { position: relative; }

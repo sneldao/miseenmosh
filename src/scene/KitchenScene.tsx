@@ -4,9 +4,36 @@ import { useGame } from "../game/state";
 import Stations from "./Stations";
 import DiningRoom from "./DiningRoom";
 import Cloche from "./Cloche";
-import { tileTexture, floorTexture, posterTexture } from "./tex";
+import { useTexture } from "@react-three/drei";
+import { tileTexture, floorTexture } from "./tex";
 import { Group, PointLight } from "three";
+import chefPoster from "../../assets/recraft/raster/chef-pistols-poster.webp";
+import wellingtonSprite from "../../assets/recraft/sprites/wellington.webp";
+import seaBassSprite from "../../assets/recraft/sprites/sea-bass.webp";
+import quenelleSprite from "../../assets/recraft/sprites/dessert-quenelle.webp";
 
+const DISH_SPRITE: Record<string, string> = {
+  "Beef Wellington": wellingtonSprite,
+  "Scallop, one": seaBassSprite,
+  "Red mullet, crying": seaBassSprite,
+  "Foie torchon": seaBassSprite,
+  "Risotto (stood up)": quenelleSprite,
+  "Lamb sauce (missing)": quenelleSprite,
+  "Pommes purée": quenelleSprite,
+  "Soufflé (weeping)": quenelleSprite,
+  "Tart of the day": quenelleSprite,
+};
+
+/** Generated dish art as a camera-facing sprite — criminal plates
+ *  still get the sad lump, which is funnier. */
+function DishSprite({ url, dim }: { url: string; dim?: boolean }) {
+  const tex = useTexture(url);
+  return (
+    <sprite position={[0, 0.3, 0]} scale={[0.66, 0.66, 1]}>
+      <spriteMaterial map={tex} transparent color={dim ? "#a89a8c" : "#ffffff"} />
+    </sprite>
+  );
+}
 const STEEL = "#8a8d91";
 const STEEL_DARK = "#4a4d52";
 const WARM = "#ffb066";
@@ -103,10 +130,12 @@ function Plate({
   quality,
   position,
   slideFromX,
+  dish,
 }: {
   quality: number;
   position: [number, number, number];
   slideFromX?: number;
+  dish?: string;
 }) {
   const root = useRef<Group>(null);
   const steam = useRef<Group>(null);
@@ -134,17 +163,21 @@ function Plate({
         <cylinderGeometry args={[0.22, 0.18, 0.035, 20]} />
         <meshStandardMaterial color="#e8e4dc" roughness={0.4} />
       </mesh>
-      <mesh position={[0, 0.04, 0]}>
-        {tier === "criminal" ? (
-          <sphereGeometry args={[0.1, 10, 8]} />
-        ) : (
-          <cylinderGeometry args={[0.12, 0.14, 0.06, 12]} />
-        )}
-        <meshStandardMaterial
-          color={tier === "criminal" ? "#1a120c" : tier === "pristine" ? "#c9803a" : "#8a6a44"}
-          roughness={tier === "criminal" ? 1 : 0.6}
-        />
-      </mesh>
+      {dish && DISH_SPRITE[dish] && tier !== "criminal" ? (
+        <DishSprite url={DISH_SPRITE[dish]} dim={tier === "serviceable"} />
+      ) : (
+        <mesh position={[0, 0.04, 0]}>
+          {tier === "criminal" ? (
+            <sphereGeometry args={[0.1, 10, 8]} />
+          ) : (
+            <cylinderGeometry args={[0.12, 0.14, 0.06, 12]} />
+          )}
+          <meshStandardMaterial
+            color={tier === "criminal" ? "#1a120c" : tier === "pristine" ? "#c9803a" : "#8a6a44"}
+            roughness={tier === "criminal" ? 1 : 0.6}
+          />
+        </mesh>
+      )}
       {tier === "pristine" && (
         <group ref={steam}>
           {[0, 1, 2].map((i) => (
@@ -175,10 +208,15 @@ function Plates() {
           quality={atPass.quality}
           position={[0, 1.18, 2.2]}
           slideFromX={[-3.6, 0, 3.6][atPass.station]}
+          dish={atPass.dish}
         />
       )}
       {plating && (
-        <Plate quality={60} position={[[-3.6, 0, 3.6][plating.station], 1.2, -3.0]} />
+        <Plate
+          quality={60}
+          position={[[-3.6, 0, 3.6][plating.station], 1.2, -3.0]}
+          dish={plating.dish}
+        />
       )}
     </group>
   );
@@ -233,7 +271,7 @@ function Room() {
     t.repeat.set(5, 4);
     return t;
   }, []);
-  const poster = useMemo(() => posterTexture(), []);
+  const poster = useTexture(chefPoster);
   return (
     <group>
       {/* floor: worn dark squares */}
