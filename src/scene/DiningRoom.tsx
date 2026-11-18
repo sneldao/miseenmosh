@@ -3,21 +3,30 @@ import { useFrame } from "@react-three/fiber";
 import { useGame } from "../game/state";
 import { Group, Mesh, MeshStandardMaterial } from "three";
 
-/** Guests beyond the pass-through window. The critic's tell: a periodic
- *  camera-flash pulse. Click a guest to flag them (one shot). */
+/** Guests beyond the pass-through window. The tell: the guest raises a
+ *  phone and flashes — the critic does it often, civilians rarely.
+ *  Click a guest to flag them (one shot). */
 function Guest({ id, table, x }: { id: number; table: number; x: number }) {
   const guests = useGame((s) => s.guests);
   const flagGuest = useGame((s) => s.flagGuest);
   const criticFlagged = useGame((s) => s.criticFlagged);
   const g = guests.find((g) => g.id === id);
   const body = useRef<Group>(null);
+  const phone = useRef<Group>(null);
   const flash = useRef<Mesh>(null);
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
+    const st = useGame.getState();
     if (body.current) body.current.rotation.y = Math.sin(t * 0.5 + id) * 0.2;
-    if (flash.current && g) {
-      const phase = (t % Math.max(4, g.tellClock)) - 0;
-      const on = g.isCritic && phase > 0 && phase < 0.12;
+    if (!g) return;
+    const telling = g.tellAt >= 0 && st.serviceTime - g.tellAt < 3.5;
+    if (phone.current) {
+      // phone slides up to face height while telling
+      const target = telling ? 1.08 : 0.72;
+      phone.current.position.y += (target - phone.current.position.y) * 0.15;
+    }
+    if (flash.current) {
+      const on = telling && g.isCritic && t % 0.8 < 0.1;
       (flash.current.material as MeshStandardMaterial).emissiveIntensity = on ? 8 : 0;
     }
   });
@@ -36,6 +45,11 @@ function Guest({ id, table, x }: { id: number; table: number; x: number }) {
       onPointerOut={() => (document.body.style.cursor = "default")}
     >
       <group ref={body}>
+        {/* fat invisible hit proxy — the capsule is a hard target from this camera */}
+        <mesh position={[0, 0.9, 0]} visible={false}>
+          <sphereGeometry args={[0.55, 8, 8]} />
+          <meshBasicMaterial />
+        </mesh>
         {/* seated figure: dark eveningwear silhouette */}
         <mesh position={[0, 0.62, 0]}>
           <capsuleGeometry args={[0.2, 0.5, 6, 10]} />
@@ -48,11 +62,21 @@ function Guest({ id, table, x }: { id: number; table: number; x: number }) {
           <sphereGeometry args={[0.13, 12, 12]} />
           <meshStandardMaterial color="#c49a78" />
         </mesh>
-        {/* the tell: a tiny camera flash */}
-        <mesh ref={flash} position={[0.12, 1.05, 0.2]}>
-          <sphereGeometry args={[0.05, 8, 8]} />
-          <meshStandardMaterial color="#fff" emissive="#ffffff" emissiveIntensity={0} />
-        </mesh>
+        {/* the tell: phone raised to face, screen lit */}
+        <group ref={phone} position={[0.16, 0.72, 0.22]}>
+          <mesh>
+            <boxGeometry args={[0.07, 0.12, 0.015]} />
+            <meshStandardMaterial color="#111" roughness={0.4} />
+          </mesh>
+          <mesh ref={flash} position={[0, 0, 0.012]}>
+            <boxGeometry args={[0.055, 0.1, 0.004]} />
+            <meshStandardMaterial
+              color="#bcd0ff"
+              emissive="#bcd0ff"
+              emissiveIntensity={0.9}
+            />
+          </mesh>
+        </group>
       </group>
       {/* table */}
       <mesh position={[0, 0.42, 0.75]}>
