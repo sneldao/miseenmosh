@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opengame.io/schema/opengame.json",
+  "title": "Mise en Mosh",
+  "tagline": "Everything in its place. Until the tickets start flying.",
+  "description": "auto",
+  "genre": "simulation",
+  "kind": "game",
+  "controls": "auto",
+  "players": "single-player"
+}
