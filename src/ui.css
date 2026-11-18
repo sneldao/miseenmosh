@@ -242,3 +242,5 @@
 .btn.big { display: block; width: 100%; font-size: 1rem; padding: .8rem; letter-spacing: .2em; }
 .btn.ghost { background: transparent; border-color: #4a3a28; color: #8a7a5a; margin-top: .6rem; font-size: .7rem; }
 .review.ending { border-top: 4px solid #6a4a2a; }
+
+.out-tag.fire { background: #7a1f12; color: #ffb08a; }

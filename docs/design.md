@@ -173,3 +173,24 @@ The game is a residency now, not a night:
 | agnej / pinball — physics chaos | service-floor physics |
 | enigmagift / writersarcade — gen pipelines | asset pipeline patterns |
 | Beef Cakes (unused name) | rival chef character |
+
+### Chaos & personality (Nov 18, night 3)
+
+- **Station fires**: a station holding 3+ live tickets for 8s ignites —
+  flickering cones + orange light, morale drains ×2, plates carry −8
+  quality, brigade panel shows FIRE. Click the station: "You smother
+  the fire with a hotel pan." Physics chaos v2 done: fires + falling
+  pans (shelf pans clatter, bounce, spin and fade when a cook storms
+  off) + fumbles (a cook under 30 morale bins 15% of plates — ticket
+  back on the rail at 60% age).
+- **BEEFCAKES has a body**: a hulking silhouette shoulder-checks into
+  the pass window for ~4s at every rival event, red rim light,
+  absurd delts, backward cap.
+- **Scream heat-pulse**: the whole kitchen floods red for ~1.2s.
+- **Vocabulary expanded**: 14 chef barks, station-directed insults
+  ("PETRA — charred is a flavour. Cremated is not."), more heckles
+  and rival lines.
+- **First sponsor asset landed**: Meshy meshy-t2.5 cloche (5 credits,
+  untextured preview → tinted tarnished silver in-scene) sits on the
+  pass and hops/spins when a fresh plate lands. GLB pipeline proven:
+  generation → download → `public/models/` → `useGLTF` → in-scene.

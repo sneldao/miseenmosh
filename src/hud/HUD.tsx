@@ -92,6 +92,7 @@ function Brigade() {
             />
           </div>
           {c.walkedOut && <span className="out-tag">WALKED</span>}
+          {c.burning && <span className="out-tag fire">FIRE</span>}
         </div>
       ))}
     </div>

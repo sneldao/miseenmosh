@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { mulberry32, daySeed } from "./seed";
 import { sfx, unlockAudio } from "./sound";
-import { CHEF_BARKS, BRIGADE_RESPONSES, GUEST_HECKLES, RIVAL_LINES, pick } from "./barks";
+import { CHEF_BARKS, STATION_BARKS, BRIGADE_RESPONSES, GUEST_HECKLES, RIVAL_LINES, pick } from "./barks";
 
 export type Verdict = "serve" | "sendback" | "smash";
 export type Phase = "title" | "briefing" | "service" | "review" | "ending";
@@ -31,6 +31,9 @@ export interface Cook {
   morale: number; // 0..100
   walkedOut: boolean;
   trauma: number; // nights spent broken — drains faster forever
+  overloadT: number; // seconds spent drowning (>3 live tickets)
+  burning: boolean; // station is on fire
+  walkoutAt: number; // serviceTime of the apron throw, for physics
 }
 
 export interface Guest {
@@ -179,6 +182,7 @@ interface GameState {
   stampAt: number;
   paused: boolean;
   rivalIdx: number;
+  rivalAt: number; // serviceTime of last Beefcakes appearance
   barkAt: number;
   criticAnnounced: boolean;
   criticServed: number;
@@ -204,6 +208,7 @@ interface GameState {
   scream: () => void;
   flagGuest: (id: number) => void;
   togglePause: () => void;
+  smotherFire: (station: number) => void;
 }
 
 function pushFeed(feed: FeedItem[], text: string, kind: FeedItem["kind"]) {
@@ -269,6 +274,11 @@ function loadSave(): { career: Career; cooks: Cook[] } | null {
   }
 }
 
+type NightFields = "walkedOut" | "overloadT" | "burning" | "walkoutAt";
+function withFreshNight(c: Omit<Cook, NightFields> & Partial<Pick<Cook, NightFields>>): Cook {
+  return { ...c, walkedOut: false, overloadT: 0, burning: false, walkoutAt: -1 };
+}
+
 function makeFeud(career: Career, cooks: Cook[]): Feud | null {
   if (career.night <= 1) return null;
   const def = FEUD_DECK[(career.night - 2) % FEUD_DECK.length];
@@ -318,6 +328,7 @@ export const useGame = create<GameState>((set, get) => ({
   stampAt: 0,
   paused: false,
   rivalIdx: 0,
+  rivalAt: -10,
   barkAt: 16,
   criticAnnounced: false,
   criticServed: 0,
@@ -335,7 +346,7 @@ export const useGame = create<GameState>((set, get) => ({
     unlockAudio();
     const saved = loadSave();
     if (saved) {
-      const cooks = saved.cooks.map((c) => ({ ...c, walkedOut: false }));
+      const cooks = saved.cooks.map(withFreshNight);
       const career = saved.career;
       set({
         phase: career.night > MAX_NIGHTS ? "ending" : "briefing",
@@ -356,7 +367,9 @@ export const useGame = create<GameState>((set, get) => ({
       localStorage.removeItem(SAVE_KEY);
     } catch {}
     const career = freshCareer();
-    const cooks = COOK_ROSTER.map((c, i) => ({ ...c, id: i, morale: 70, walkedOut: false, trauma: 0 }));
+    const cooks = COOK_ROSTER.map((c, i) =>
+      withFreshNight({ ...c, id: i, morale: 70, trauma: 0 })
+    );
     set({
       phase: "briefing",
       career,
@@ -395,7 +408,7 @@ export const useGame = create<GameState>((set, get) => ({
       spawnMul: v.spawnMul,
       tellMul: v.tellMul,
       // cooks persist across nights — they rest a little, they don't forget
-      cooks: s.cooks.map((c) => ({ ...c, walkedOut: false, morale: Math.min(85, c.morale + 20) })),
+      cooks: s.cooks.map((c) => withFreshNight({ ...c, morale: Math.min(85, c.morale + 20) })),
       tickets: [],
       feed: [
         { id: feedId++, text: `Night ${career.night} — ${v.name}. ${v.sub}.`, kind: "drama" },
@@ -422,6 +435,7 @@ export const useGame = create<GameState>((set, get) => ({
       stampAt: 0,
       paused: false,
       rivalIdx: 0,
+      rivalAt: -10,
       barkAt: 16 + rng() * 10,
       criticAnnounced: false,
       criticServed: 0,
@@ -503,7 +517,13 @@ export const useGame = create<GameState>((set, get) => ({
         const weakest = cooks.reduce((a, b) => (a.skill < b.skill ? a : b));
         const j = cooks.indexOf(weakest);
         const name = NEW_BLOOD[(c.defections + c.night) % NEW_BLOOD.length];
-        cooks[j] = { ...weakest, name, skill: 0.35 + Math.random() * 0.3, morale: 70, trauma: 0 };
+        cooks[j] = withFreshNight({
+          ...weakest,
+          name,
+          skill: 0.35 + Math.random() * 0.3,
+          morale: 70,
+          trauma: 0,
+        });
         c.defections += 1;
         c.aggro += 1;
         outcome = `${weakest.name} defected to the protein people. ${name} starts tonight.`;
@@ -566,7 +586,16 @@ export const useGame = create<GameState>((set, get) => ({
       const age = t.age + dt;
       if (t.state === "plating" && serviceTime >= t.plateAt) {
         const cook = s.cooks.find((c) => c.station === t.station);
+        // a broken cook fumbles — plate in the bin, ticket back on the rail
+        if (cook && !cook.walkedOut && cook.morale < 30 && rng() < 0.15) {
+          feed = pushFeed(feed, `${cook.name} fumbles the ${t.dish} — straight in the bin.`, "bad");
+          sfx("shatter");
+          cook.morale = Math.max(0, cook.morale - 3);
+          tickets.push({ ...t, state: "rail", age: age * 0.6, quality: -1 });
+          continue;
+        }
         const chefPenalty = t.byChef ? 12 : 0;
+        const burnPenalty = cook?.burning ? 8 : 0;
         const quality = Math.max(
           5 + s.career.gear * 3,
           Math.min(
@@ -575,7 +604,8 @@ export const useGame = create<GameState>((set, get) => ({
               (cook?.skill ?? 0.5) * 30 +
               ((cook?.morale ?? 50) - 50) * 0.35 -
               age * 0.5 -
-              chefPenalty +
+              chefPenalty -
+              burnPenalty +
               (rng() - 0.5) * 30
           )
         );
@@ -620,15 +650,24 @@ export const useGame = create<GameState>((set, get) => ({
         Math.max(floor, 7.5 - serviceTime / 25) * s.spawnMul * (0.8 + rng() * 0.5);
     }
 
-    // --- ambient bark ---
+    // --- ambient bark: general rage, or a station-directed insult ---
     if (serviceTime >= barkAt) {
-      feed = pushFeed(feed, pick(rng, CHEF_BARKS), "drama");
+      const target = s.cooks.find((c) => !c.walkedOut && rng() < 0.4);
+      feed = pushFeed(
+        feed,
+        target
+          ? pick(rng, STATION_BARKS[target.station]).replace("{N}", target.name)
+          : pick(rng, CHEF_BARKS),
+        "drama"
+      );
       barkAt = serviceTime + 16 + rng() * 14;
     }
 
     // --- BEEFCAKES does something unforgivable ---
     const rivalTimes = [35, 75, 118];
+    let rivalAt = s.rivalAt;
     if (rivalIdx < rivalTimes.length && serviceTime >= rivalTimes[rivalIdx]) {
+      rivalAt = serviceTime;
       const steal = rivalIdx === 1 || (rivalIdx === 2 && s.career.aggro > 0);
       if (steal) {
         const victim = tickets.find((t) => t.state === "rail");
@@ -649,21 +688,34 @@ export const useGame = create<GameState>((set, get) => ({
       rivalIdx += 1;
     }
 
-    // --- cooks: morale decay under load, walkouts ---
+    // --- cooks: overload → fires, morale decay under load, walkouts ---
     const cooks = s.cooks.map((c) => {
       if (c.walkedOut) return c;
       const load = tickets.filter((t) => t.station === c.station && t.state !== "done").length;
+      // drowning stations ignite — 3+ live tickets for 8s and the grease goes up
+      let overloadT = load >= 3 ? c.overloadT + dt : Math.max(0, c.overloadT - 2 * dt);
+      let burning = c.burning;
+      if (!burning && overloadT > 8) {
+        burning = true;
+        overloadT = 0;
+        feed = pushFeed(
+          feed,
+          `FLAMBÉ NOBODY ORDERED — ${c.name}'s station is ON FIRE. Click it. Smother it.`,
+          "drama"
+        );
+        sfx("sting");
+      }
       // idle stations recover; loaded stations drain — drowning is what kills.
-      // trauma from past walkouts makes them fragile forever.
+      // trauma from past walkouts makes them fragile forever; fire is worse.
       const drain = load === 0 ? -1.4 : (0.22 + load * 0.15) * (1 + c.trauma * 0.35);
-      const morale = Math.min(100, Math.max(0, c.morale - dt * drain));
+      const morale = Math.min(100, Math.max(0, c.morale - dt * drain * (burning ? 2 : 1)));
       if (morale <= WALKOUT_AT) {
         feed = pushFeed(feed, `${c.name} throws their apron. WALKOUT.`, "drama");
         sfx("sting");
         ego += 4; // the room watches
-        return { ...c, morale, walkedOut: true };
+        return { ...c, morale, overloadT, burning, walkedOut: true, walkoutAt: serviceTime };
       }
-      return { ...c, morale };
+      return { ...c, morale, overloadT, burning };
     });
     // stalled plating on a walked-out station → the chef finishes it, slower
     for (const t of tickets) {
@@ -754,7 +806,7 @@ export const useGame = create<GameState>((set, get) => ({
     set({
       tickets, cooks, guests, feed, nextTicketIn, serviceTime,
       ego, complaints, misses, served, qualitySum, streak, bestStreak, dessertDone,
-      barkAt, rivalIdx, criticAnnounced,
+      barkAt, rivalIdx, rivalAt, criticAnnounced,
     });
   },
 
@@ -932,5 +984,23 @@ export const useGame = create<GameState>((set, get) => ({
     const s = get();
     if (s.phase !== "service") return;
     set({ paused: !s.paused });
+  },
+
+  smotherFire: (station) => {
+    const s = get();
+    if (s.phase !== "service" || s.paused) return;
+    const cook = s.cooks.find((c) => c.station === station && c.burning);
+    if (!cook) return;
+    sfx("slam");
+    set({
+      cooks: s.cooks.map((c) =>
+        c === cook ? { ...c, burning: false, overloadT: 0 } : c
+      ),
+      feed: pushFeed(
+        s.feed,
+        `You smother the fire on ${cook.name}'s station with a hotel pan. Sizzling applause.`,
+        "good"
+      ),
+    });
   },
 }));

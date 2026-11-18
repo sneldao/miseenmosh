@@ -3,8 +3,9 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useGame } from "../game/state";
 import Stations from "./Stations";
 import DiningRoom from "./DiningRoom";
+import Cloche from "./Cloche";
 import { tileTexture, floorTexture, posterTexture } from "./tex";
-import { Group } from "three";
+import { Group, PointLight } from "three";
 
 const STEEL = "#8a8d91";
 const STEEL_DARK = "#4a4d52";
@@ -277,6 +278,65 @@ function Room() {
   );
 }
 
+/** BEEFCAKES leans through the pass window during his events. */
+function RivalSilhouette() {
+  const g = useRef<Group>(null);
+  useFrame(({ clock }) => {
+    const s = useGame.getState();
+    const g2 = g.current;
+    if (!g2) return;
+    const p = s.serviceTime - s.rivalAt;
+    if (p < 0 || p > 4.2) {
+      g2.visible = false;
+      return;
+    }
+    g2.visible = true;
+    const in_ = Math.min(1, p / 0.5); // shoulder-checks in fast
+    const out = p > 3.4 ? Math.max(0, 1 - (p - 3.4) / 0.8) : 1;
+    g2.position.z = -4.35 - (1 - in_) * 1.2 - (1 - out) * 1.2;
+    g2.position.y = Math.sin(clock.elapsedTime * 1.7) * 0.03;
+    g2.rotation.y = Math.sin(clock.elapsedTime * 0.9) * 0.08;
+  });
+  return (
+    <group ref={g} position={[1.4, 0, -5.5]} visible={false}>
+      {/* a silhouette with shoulders — unmistakably him */}
+      <mesh position={[0, 1.05, 0]} castShadow>
+        <capsuleGeometry args={[0.34, 0.95, 6, 14]} />
+        <meshStandardMaterial color="#120d0a" roughness={0.95} />
+      </mesh>
+      {/* absurd delts */}
+      <mesh position={[0, 1.42, 0]}>
+        <boxGeometry args={[1.05, 0.3, 0.42]} />
+        <meshStandardMaterial color="#120d0a" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 1.82, 0]}>
+        <sphereGeometry args={[0.19, 14, 14]} />
+        <meshStandardMaterial color="#0f0b08" roughness={0.9} />
+      </mesh>
+      {/* backward cap */}
+      <mesh position={[0, 1.95, -0.02]} rotation={[0.15, 0, 0]}>
+        <cylinderGeometry args={[0.19, 0.21, 0.09, 12]} />
+        <meshStandardMaterial color="#1a1410" roughness={0.9} />
+      </mesh>
+      {/* rim light so the silhouette reads against the dark wall */}
+      <pointLight position={[0, 1.9, -0.6]} color="#ff5a2a" intensity={6} distance={3.5} />
+    </group>
+  );
+}
+
+/** The scream pulses the whole kitchen red for a beat. */
+function HeatPulse() {
+  const l = useRef<PointLight>(null);
+  useFrame(() => {
+    const s = useGame.getState();
+    const el = l.current;
+    if (!el) return;
+    const p = s.screamAt ? (performance.now() - s.screamAt) / 1200 : Infinity;
+    el.intensity = p < 1 ? (1 - p) * 40 : 0;
+  });
+  return <pointLight ref={l} position={[0, 3.2, 0]} color="#ff2a14" intensity={0} distance={14} />;
+}
+
 function CameraShake() {
   const screamAt = useGame((s) => s.screamAt);
   const smashAt = useGame((s) => s.smashAt);
@@ -321,7 +381,10 @@ export default function KitchenScene() {
       <BrigadeFigure cookId={1} x={0} stationHue="#b07a2a" />
       <BrigadeFigure cookId={2} x={3.6} stationHue="#3a6a9a" />
       <Plates />
+      <Cloche />
       <SmashBurst />
+      <RivalSilhouette />
+      <HeatPulse />
       <CameraShake />
     </>
   );
