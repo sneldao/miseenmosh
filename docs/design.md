@@ -137,6 +137,31 @@ Single-night vertical slice, browser-verified end to end:
 - **Share artifact**: receipt-style review card + COPY REVIEW block;
   SAME SERVICE, AGAIN replays the identical seeded night.
 
+### Career layer (Nov 18, night 2)
+
+The game is a residency now, not a night:
+
+- **9-night arc**: title → office briefing → service → review →
+  briefing → … → ending. Three endings: bankruptcy flame-out
+  (cash < −£60), three-star win (≥10★ total), or "footnote in the guide."
+- **The office**: ledger header (night, venue, cash, stars, services
+  left), last-night take (covers × venue price − wages − breakage;
+  walked-out cooks still draw half pay), brigade panel showing morale,
+  skill and trauma scars (✕ per past walkout — they drain faster
+  forever), a shop (drinks £40 / better pans £80 ×3 / comp the press
+  £60), and the night's BEEFCAKES feud card.
+- **Feud cards**: one per night from a 4-event deck — poach attempt on
+  the weakest cook (match £90 or lose them to the protein people; a
+  NEW_BLOOD replacement joins), press quote (trash-talk = +heat vs
+  classy = +morale), stolen fish delivery, food-truck blockade. Heat
+  (aggro) makes his runner steal a second ticket mid-service.
+- **Persistence**: localStorage career save (career + brigade incl.
+  trauma and feud resolution), title offers CONTINUE/NEW RESIDENCY,
+  save-blocked browsers get told.
+- **Venues**: STALL 86 → LE MOSH (≥5★) → MOSH & SON (≥10★), each
+  repricing covers and raising pressure (faster printer, faster critic
+  tells).
+
 ## Reused DNA (ideas only — legal per rules §06)
 
 | Source | Becomes |

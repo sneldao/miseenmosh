@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useGame, tierOf, Ticket, PlateTier } from "../game/state";
+import { useGame, tierOf, Ticket, PlateTier, VENUES } from "../game/state";
 
 const STATION_COLOR = ["#a8322a", "#b07a2a", "#3a6a9a"];
 const STATION_NAME = ["GRILL", "SAUTÉ", "PASTRY"];
@@ -100,11 +100,12 @@ function Brigade() {
 
 function ReviewCard() {
   const review = useGame((s) => s.review);
-  const start = useGame((s) => s.start);
+  const career = useGame((s) => s.career);
+  const continueNext = useGame((s) => s.continueNext);
   const [copied, setCopied] = useState(false);
   if (!review) return null;
   const card =
-    `MISE EN MOSH — tonight's review\n` +
+    `MISE EN MOSH — night ${career.night} review\n` +
     `${"★".repeat(review.stars)}${"☆".repeat(5 - review.stars)}\n` +
     `"${review.quote}"\n` +
     `${review.covers} covers · ${review.misses} walks · ` +
@@ -112,7 +113,9 @@ function ReviewCard() {
   return (
     <div className="review-wrap">
       <div className="review">
-        <div className="rhead">TONIGHT'S REVIEW</div>
+        <div className="rhead">
+          TONIGHT'S REVIEW — {VENUES[career.venue].name}, NIGHT {career.night}
+        </div>
         <div className="stars">
           {"★".repeat(review.stars)}
           <span className="dim">{"★".repeat(5 - review.stars)}</span>
@@ -139,8 +142,136 @@ function ReviewCard() {
           >
             {copied ? "COPIED" : "COPY REVIEW"}
           </button>
-          <button className="btn serve" onClick={start}>
-            SAME SERVICE, AGAIN
+          <button className="btn serve" onClick={continueNext}>
+            NEXT MORNING <span className="kbd">↵</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Briefing() {
+  const career = useGame((s) => s.career);
+  const cooks = useGame((s) => s.cooks);
+  const feud = useGame((s) => s.feud);
+  const nightTake = useGame((s) => s.nightTake);
+  const briefAction = useGame((s) => s.briefAction);
+  const feudChoice = useGame((s) => s.feudChoice);
+  const startService = useGame((s) => s.startService);
+  const canSave = useGame((s) => s.canSave);
+  const v = VENUES[career.venue];
+  return (
+    <div className="brief-wrap">
+      <div className="brief">
+        <div className="bhead">
+          NIGHT {career.night} — {v.name}
+          <div className="bsub">{v.sub}</div>
+        </div>
+        <div className="bstats">
+          <span>£{career.cash}</span>
+          <span>{"★".repeat(Math.min(12, career.stars)) || "☆"} {career.stars}★ total</span>
+          <span>{9 - career.night + 1} services left</span>
+        </div>
+        {nightTake && (
+          <div className="btake">
+            Last night: £{nightTake.covers} covers − £{nightTake.wages} wages − £
+            {nightTake.breakage} breakage ={" "}
+            <b className={nightTake.net >= 0 ? "up" : "down"}>
+              {nightTake.net >= 0 ? "+" : ""}£{nightTake.net}
+            </b>
+          </div>
+        )}
+        <div className="bbrigade">
+          {cooks.map((c) => (
+            <div key={c.id} className="bcook">
+              <span className="cname">
+                {c.name}
+                {c.trauma > 0 && <span className="scar">{" ✕".repeat(Math.min(3, c.trauma))}</span>}
+              </span>
+              <div className="mbar">
+                <div
+                  className="mfill"
+                  style={{ width: `${c.morale}%`, background: c.morale > 45 ? "#c9a44a" : "#a8322a" }}
+                />
+              </div>
+              <span className="bskill">skill {Math.round(c.skill * 100)}</span>
+            </div>
+          ))}
+        </div>
+        <div className="bshop">
+          <button className="btn shop" disabled={career.cash < 40} onClick={() => briefAction("drinks")}>
+            TAKE THEM FOR DRINKS <span className="cost">£40 · +25 morale</span>
+          </button>
+          <button
+            className="btn shop"
+            disabled={career.cash < 80 || career.gear >= 3}
+            onClick={() => briefAction("gear")}
+          >
+            BETTER PANS <span className="cost">£80 · quality floor {career.gear}/3</span>
+          </button>
+          <button className="btn shop" disabled={career.cash < 60} onClick={() => briefAction("press")}>
+            COMP THE FOOD PRESS <span className="cost">£60 · −heat, +5 morale</span>
+          </button>
+        </div>
+        {feud && (
+          <div className="feud">
+            <div className="ftext">{feud.text}</div>
+            {feud.resolved ? (
+              <div className="fout">{feud.outcome}</div>
+            ) : (
+              <div className="fbtns">
+                {feud.options.map((o, i) => (
+                  <button
+                    key={i}
+                    className="btn fbtn"
+                    disabled={i === 0 && career.cash < [90, 0, 50, 70][(career.night - 2) % 4]}
+                    onClick={() => feudChoice(i)}
+                  >
+                    {o}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        {!canSave && <div className="bwarn">Progress won't persist — this browser blocks storage.</div>}
+        <button className="btn serve big" onClick={startService}>
+          RUN SERVICE <span className="kbd">↵</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Ending() {
+  const career = useGame((s) => s.career);
+  const resetCareer = useGame((s) => s.resetCareer);
+  const broke = career.cash < -60;
+  const won = career.stars >= 10;
+  return (
+    <div className="review-wrap">
+      <div className="review ending">
+        <div className="rhead">THE RESIDENCY ENDS</div>
+        <div className="stars">
+          {"★".repeat(Math.min(5, Math.ceil(career.stars / 3)))}
+          <span className="dim">{"★".repeat(5 - Math.min(5, Math.ceil(career.stars / 3)))}</span>
+        </div>
+        <div className="quote">
+          {broke
+            ? "The suppliers stopped answering. The lights stayed on out of pity. It's over."
+            : won
+              ? "Three stars. The room says YES, CHEF to itself. You are the venue now."
+              : "Nine nights of sweat and shouting. A footnote in the guide — but your brigade still calls you chef."}
+        </div>
+        <div className="rstats">
+          <span>{career.stars}★ earned</span>
+          <span>£{career.cash} in the till</span>
+          <span>{career.defections} defections</span>
+        </div>
+        <div className="rbtns">
+          <button className="btn serve" onClick={resetCareer}>
+            NEW RESIDENCY <span className="kbd">↵</span>
           </button>
         </div>
       </div>
@@ -158,9 +289,19 @@ function useHotkeys() {
         s.start();
         return;
       }
+      if (s.phase === "briefing" && e.key === "Enter") {
+        e.preventDefault();
+        s.startService();
+        return;
+      }
+      if (s.phase === "ending" && (e.key === " " || e.key === "Enter")) {
+        e.preventDefault();
+        s.resetCareer();
+        return;
+      }
       if (s.phase === "review" && (e.key === " " || e.key === "Enter")) {
         e.preventDefault();
-        s.start();
+        s.continueNext();
         return;
       }
       if (s.phase !== "service") return;
@@ -194,6 +335,9 @@ export default function HUD() {
   useHotkeys();
   const phase = useGame((s) => s.phase);
   const start = useGame((s) => s.start);
+  const resetCareer = useGame((s) => s.resetCareer);
+  const hasSave = useGame((s) => s.hasSave);
+  const career = useGame((s) => s.career);
   const tickets = useGame((s) => s.tickets);
   const judge = useGame((s) => s.judge);
   const scream = useGame((s) => s.scream);
@@ -222,10 +366,16 @@ export default function HUD() {
           <div className="tag">Everything in its place. Until the tickets start flying.</div>
           <div className="tag sub">One guest tonight is the inspector.</div>
           <button className="btn" onClick={start}>
-            BEGIN SERVICE
+            {hasSave ? `CONTINUE RESIDENCY — NIGHT ${career.night}` : "BEGIN RESIDENCY"}
           </button>
+          {hasSave && (
+            <button className="btn ghost" onClick={resetCareer}>
+              NEW RESIDENCY
+            </button>
+          )}
         </div>
       )}
+      {phase === "briefing" && <Briefing />}
       {phase === "service" && (
         <>
           <div className="hint">
@@ -272,7 +422,7 @@ export default function HUD() {
             </div>
           )}
           <div className="status">
-            SERVICE{" "}
+            NIGHT {career.night} · SERVICE{" "}
             <b>
               {Math.floor(serviceTime / 60)}:
               {String(Math.floor(serviceTime % 60)).padStart(2, "0")}
@@ -297,6 +447,7 @@ export default function HUD() {
         </>
       )}
       {phase === "review" && <ReviewCard />}
+      {phase === "ending" && <Ending />}
     </div>
   );
 }

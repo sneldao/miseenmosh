@@ -39,9 +39,16 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       dessert-course stampede, BEEFCAKES rival events (incl. ticket theft)
 - [x] Feel layer: full keyboard play (1-9/S/B/X/space/P), pause,
       ambient chef barks, guest heckles, verdict stamps, synth SFX
-- [ ] Brigade sim depth: trauma, coaching between services, defections
-- [ ] Morning fish-market bidding + menu setting
-- [ ] Progression skeleton: stall → bistro → flagship, star gating
+- [x] Brigade sim depth: trauma scars on walkouts (persist, drain
+      faster), defections via feud (NEW_BLOOD replacements), morale
+      carries overnight with partial rest
+- [x] Progression skeleton: 3 venues star-gated (5★→LE MOSH,
+      10★→MOSH & SON), per-venue price/spawn/critic-tell multipliers
+- [x] Multi-night residency: 9-night arc, cash ledger (covers − wages
+      − breakage), office briefing screen, feud cards with choices,
+      localStorage save/resume, three endings
+- [ ] Morning fish-market bidding + menu setting (slots into briefing)
+- [ ] Dedicated coaching actions (drinks/press exist; named training TBD)
 
 ## Week 3 — dress it like a band biopic
 
