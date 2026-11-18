@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useGame } from "../game/state";
 import Stations from "./Stations";
 import DiningRoom from "./DiningRoom";
+import { tileTexture, floorTexture, posterTexture } from "./tex";
 import { Group } from "three";
 
 const STEEL = "#8a8d91";
@@ -97,9 +98,27 @@ function BrigadeFigure({ cookId, x, stationHue }: { cookId: number; x: number; s
 }
 
 /** A plate: pristine gets steam, criminal gets a sad black lump. */
-function Plate({ quality, position }: { quality: number; position: [number, number, number] }) {
+function Plate({
+  quality,
+  position,
+  slideFromX,
+}: {
+  quality: number;
+  position: [number, number, number];
+  slideFromX?: number;
+}) {
+  const root = useRef<Group>(null);
   const steam = useRef<Group>(null);
+  const born = useRef<number | null>(null);
   const tier = quality >= 72 ? "pristine" : quality >= 45 ? "serviceable" : "criminal";
+  useFrame(({ clock }) => {
+    if (root.current && slideFromX !== undefined) {
+      if (born.current === null) born.current = clock.elapsedTime;
+      const p = Math.min(1, (clock.elapsedTime - born.current) / 0.55);
+      const ease = 1 - (1 - p) * (1 - p);
+      root.current.position.x = slideFromX + (position[0] - slideFromX) * ease;
+    }
+  });
   useFrame(({ clock }) => {
     if (!steam.current) return;
     const t = clock.elapsedTime;
@@ -109,7 +128,7 @@ function Plate({ quality, position }: { quality: number; position: [number, numb
     });
   });
   return (
-    <group position={position}>
+    <group ref={root} position={[slideFromX ?? position[0], position[1], position[2]]}>
       <mesh castShadow>
         <cylinderGeometry args={[0.22, 0.18, 0.035, 20]} />
         <meshStandardMaterial color="#e8e4dc" roughness={0.4} />
@@ -149,7 +168,14 @@ function Plates() {
   const plating = tickets.find((t) => t.state === "plating");
   return (
     <group>
-      {atPass && <Plate quality={atPass.quality} position={[0, 1.18, 2.2]} />}
+      {atPass && (
+        <Plate
+          key={atPass.id}
+          quality={atPass.quality}
+          position={[0, 1.18, 2.2]}
+          slideFromX={[-3.6, 0, 3.6][atPass.station]}
+        />
+      )}
       {plating && (
         <Plate quality={60} position={[[-3.6, 0, 3.6][plating.station], 1.2, -3.0]} />
       )}
@@ -196,21 +222,32 @@ function SmashBurst() {
 }
 
 function Room() {
+  const tile = useMemo(() => {
+    const t = tileTexture();
+    t.repeat.set(8, 3);
+    return t;
+  }, []);
+  const floor = useMemo(() => {
+    const t = floorTexture();
+    t.repeat.set(5, 4);
+    return t;
+  }, []);
+  const poster = useMemo(() => posterTexture(), []);
   return (
     <group>
-      {/* floor: checker-ish dark tile */}
+      {/* floor: worn dark squares */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[20, 14]} />
-        <meshStandardMaterial color="#181410" roughness={0.95} />
+        <meshStandardMaterial map={floor} roughness={0.95} />
       </mesh>
       {/* back wall with pass-through window hole (two segments) */}
       <mesh position={[0, 0.5, -5]}>
         <boxGeometry args={[20, 1.0, 0.3]} />
-        <meshStandardMaterial color="#241d16" roughness={0.9} />
+        <meshStandardMaterial map={tile} roughness={0.9} />
       </mesh>
       <mesh position={[0, 4.65, -5]}>
         <boxGeometry args={[20, 2.9, 0.3]} />
-        <meshStandardMaterial color="#241d16" roughness={0.9} />
+        <meshStandardMaterial map={tile} roughness={0.9} />
       </mesh>
       {/* window sill / pass shelf */}
       <mesh position={[0, 1.02, -4.9]}>
@@ -220,11 +257,21 @@ function Room() {
       {/* side walls */}
       <mesh position={[-9, 3, 0]} rotation={[0, Math.PI / 2, 0]}>
         <boxGeometry args={[14, 6, 0.3]} />
-        <meshStandardMaterial color="#1e1813" roughness={0.9} />
+        <meshStandardMaterial map={tile} roughness={0.9} />
       </mesh>
       <mesh position={[9, 3, 0]} rotation={[0, -Math.PI / 2, 0]}>
         <boxGeometry args={[14, 6, 0.3]} />
-        <meshStandardMaterial color="#1e1813" roughness={0.9} />
+        <meshStandardMaterial map={tile} roughness={0.9} />
+      </mesh>
+      {/* the gig poster — the game is the band */}
+      <mesh position={[-8.82, 2.9, 1.2]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[1.35, 1.8]} />
+        <meshStandardMaterial map={poster} roughness={0.85} />
+      </mesh>
+      {/* frame shadow lip */}
+      <mesh position={[-8.86, 2.9, 1.2]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[1.5, 1.95]} />
+        <meshStandardMaterial color="#100c08" roughness={0.95} />
       </mesh>
     </group>
   );

@@ -10,7 +10,7 @@ const TIER_LINE: Record<PlateTier, string> = {
   criminal: "A war crime on a plate.",
 };
 
-function TicketCard({ t }: { t: Ticket }) {
+function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
   const plateToPass = useGame((s) => s.plateToPass);
   const frac = Math.min(1, t.age / 55);
   const plating = t.state === "plating";
@@ -21,6 +21,7 @@ function TicketCard({ t }: { t: Ticket }) {
     >
       <div className="tno">
         TABLE {t.table} · #{t.id}
+        {hotkey && <span className="kbd">{hotkey}</span>}
       </div>
       <div className="dish">{t.dish}</div>
       <div className="trow">
@@ -110,6 +111,7 @@ function ReviewCard() {
           <span>{review.complaints} send-backs</span>
           <span>{review.smashed} smashed</span>
           <span>{review.walkouts} walkouts</span>
+          <span>streak ×{review.bestStreak}</span>
           <span>inspector {review.spotted ? "CLOCKED" : "missed"}</span>
         </div>
         <div className="rfoot">EGO {Math.round(review.ego)}</div>
@@ -132,7 +134,45 @@ function ReviewCard() {
   );
 }
 
+function useHotkeys() {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+      const s = useGame.getState();
+      if (s.phase === "title" && (e.key === " " || e.key === "Enter")) {
+        e.preventDefault();
+        s.start();
+        return;
+      }
+      if (s.phase === "review" && (e.key === " " || e.key === "Enter")) {
+        e.preventDefault();
+        s.start();
+        return;
+      }
+      if (s.phase !== "service") return;
+      if (e.key === " ") {
+        e.preventDefault();
+        s.scream();
+        return;
+      }
+      const k = e.key.toLowerCase();
+      if (k === "s") return s.judge("serve");
+      if (k === "b") return s.judge("sendback");
+      if (k === "x") return s.judge("smash");
+      const n = Number(e.key);
+      if (n >= 1 && n <= 9) {
+        const rail = s.tickets.filter((t) => t.state === "rail");
+        const t = rail[n - 1];
+        if (t) s.plateToPass(t.id);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+}
+
 export default function HUD() {
+  useHotkeys();
   const phase = useGame((s) => s.phase);
   const start = useGame((s) => s.start);
   const tickets = useGame((s) => s.tickets);
@@ -148,6 +188,7 @@ export default function HUD() {
   const adrenalineTil = useGame((s) => s.adrenalineTil);
   const criticFlagged = useGame((s) => s.criticFlagged);
   const criticSpotted = useGame((s) => s.criticSpotted);
+  const streak = useGame((s) => s.streak);
 
   const atPass = tickets.find((t) => t.state === "pass");
   const live = tickets.filter((t) => t.state === "rail" || t.state === "plating");
@@ -176,25 +217,37 @@ export default function HUD() {
             {criticFlagged
               ? criticSpotted
                 ? "Inspector clocked."
-                : "Wrong guest flagged."
-              : "Spot the inspector — click them."}
+                : serviceTime < 100
+                  ? "Wrong guest flagged."
+                  : "Inspector slipped the net."
+              : serviceTime < 100
+                ? "Spot the inspector — click them before dessert."
+                : "DESSERT COURSE."}
           </div>
           <div className="rail">
             {live.map((t) => (
-              <TicketCard key={t.id} t={t} />
+              <TicketCard
+                key={t.id}
+                t={t}
+                hotkey={
+                  t.state === "rail"
+                    ? live.filter((x) => x.state === "rail").indexOf(t) + 1
+                    : undefined
+                }
+              />
             ))}
           </div>
           {atPass && (
             <div className="pass-actions">
               <div className="plate-note">{TIER_LINE[tierOf(atPass.quality)]}</div>
               <button className="btn serve" onClick={() => judge("serve")}>
-                SERVE
+                SERVE <span className="kbd">S</span>
               </button>
               <button className="btn back" onClick={() => judge("sendback")}>
-                SEND BACK
+                SEND BACK <span className="kbd">B</span>
               </button>
               <button className="btn smash" onClick={() => judge("smash")}>
-                SMASH
+                SMASH <span className="kbd">X</span>
               </button>
             </div>
           )}
@@ -210,11 +263,13 @@ export default function HUD() {
             <b>{misses}</b>
             <br />
             EGO <b>{Math.round(ego)}</b>
+            {streak >= 3 && <span className="amped"> · STREAK ×{streak}</span>}
           </div>
           <Brigade />
           <Ticker />
           <button className="btn scream" onClick={scream}>
-            SCREAM <span className="cost">−{3 + Math.floor(screams / 2)} morale</span>
+            SCREAM <span className="kbd">␣</span>{" "}
+            <span className="cost">−{3 + Math.floor(screams / 2)} morale</span>
           </button>
           <Chorus />
         </>

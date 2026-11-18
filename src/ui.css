@@ -102,6 +102,12 @@
 
 .amped { color: #ff9a4a; font-weight: bold; }
 .scream .cost { font-size: .6rem; opacity: .7; letter-spacing: .04em; }
+.kbd {
+  font-size: .6rem; opacity: .7; border: 1px solid currentColor;
+  border-radius: 3px; padding: 0 .3em; margin-left: .4em;
+  vertical-align: middle;
+}
+.ticket .kbd { float: right; border-color: #8a6a44; color: #8a6a44; }
 
 /* ---- review card ---- */
 .review-wrap {

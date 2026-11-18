@@ -56,6 +56,7 @@ export interface Review {
   smashed: number;
   spotted: boolean;
   ego: number;
+  bestStreak: number;
 }
 
 const DISHES: { name: string; station: number }[] = [
@@ -77,6 +78,7 @@ const COOK_ROSTER: { name: string; station: number; skill: number }[] = [
 ];
 
 const SERVICE_LEN = 150;
+const DESSERT_AT = 100; // escalation beat + inspector flag deadline
 const TICKET_TTL = 55;
 const WALKOUT_AT = 12;
 
@@ -116,6 +118,9 @@ interface GameState {
   adrenalineTil: number;
   criticFlagged: boolean;
   criticSpotted: boolean;
+  dessertDone: boolean;
+  streak: number;
+  bestStreak: number;
   screamAt: number;
   smashAt: number;
   review: Review | null;
@@ -129,6 +134,23 @@ interface GameState {
 
 function pushFeed(feed: FeedItem[], text: string, kind: FeedItem["kind"]) {
   return [...feed.slice(-23), { id: feedId++, text, kind }];
+}
+
+function spawnTicket(rng: () => number): Ticket {
+  const d = DISHES[Math.floor(rng() * DISHES.length)];
+  return {
+    id: nextId++,
+    dish: d.name,
+    table: 10 + Math.floor(rng() * 5),
+    station: d.station,
+    age: 0,
+    state: "rail",
+    plateAt: 0,
+    plateDur: 0,
+    byChef: false,
+    quality: -1,
+    verdict: null,
+  };
 }
 
 export const useGame = create<GameState>((set, get) => ({
@@ -151,6 +173,9 @@ export const useGame = create<GameState>((set, get) => ({
   adrenalineTil: 0,
   criticFlagged: false,
   criticSpotted: false,
+  dessertDone: false,
+  streak: 0,
+  bestStreak: 0,
   screamAt: 0,
   smashAt: 0,
   review: null,
@@ -192,6 +217,9 @@ export const useGame = create<GameState>((set, get) => ({
       adrenalineTil: 0,
       criticFlagged: false,
       criticSpotted: false,
+      dessertDone: false,
+      streak: 0,
+      bestStreak: 0,
       review: null,
     });
   },
@@ -201,8 +229,9 @@ export const useGame = create<GameState>((set, get) => ({
     if (s.phase !== "service") return;
     const serviceTime = s.serviceTime + dt;
     const rng = s.rng;
-    let { feed, ego, complaints, misses, served, qualitySum } = s;
+    let { feed, ego, complaints, misses, served, qualitySum, streak, bestStreak } = s;
     let nextTicketIn = s.nextTicketIn - dt;
+    let dessertDone = s.dessertDone;
 
     // --- tickets: age, expire, finish plating ---
     const tickets: Ticket[] = [];
@@ -230,29 +259,29 @@ export const useGame = create<GameState>((set, get) => ({
       if (age > TICKET_TTL) {
         feed = pushFeed(feed, `Table ${t.table} walks — ${t.dish} never came.`, "bad");
         misses += 1;
+        streak = 0;
         continue;
       }
       tickets.push({ ...t, age });
     }
 
+    // --- dessert course: one-time stampede, then faster printer ---
+    if (!dessertDone && serviceTime >= DESSERT_AT) {
+      dessertDone = true;
+      feed = pushFeed(
+        feed,
+        "DESSERT COURSE. If the inspector's out there, they're on the soufflé now.",
+        "drama"
+      );
+      for (let i = 0; i < 3; i++) tickets.push(spawnTicket(rng));
+    }
+
     // --- new tickets ---
     const live = tickets.filter((t) => t.state !== "done").length;
     if (nextTicketIn <= 0 && live < 9) {
-      const d = DISHES[Math.floor(rng() * DISHES.length)];
-      tickets.push({
-        id: nextId++,
-        dish: d.name,
-        table: 10 + Math.floor(rng() * 5),
-        station: d.station,
-        age: 0,
-        state: "rail",
-        plateAt: 0,
-        plateDur: 0,
-        byChef: false,
-        quality: -1,
-        verdict: null,
-      });
-      nextTicketIn = Math.max(2.5, 7.5 - serviceTime / 25) * (0.8 + rng() * 0.5);
+      tickets.push(spawnTicket(rng));
+      const floor = dessertDone ? 1.8 : 2.5;
+      nextTicketIn = Math.max(floor, 7.5 - serviceTime / 25) * (0.8 + rng() * 0.5);
     }
 
     // --- cooks: morale decay under load, walkouts ---
@@ -337,12 +366,16 @@ export const useGame = create<GameState>((set, get) => ({
           smashed: s.smashed,
           spotted,
           ego,
+          bestStreak,
         },
       });
       return;
     }
 
-    set({ tickets, cooks, guests, feed, nextTicketIn, serviceTime, ego, complaints, misses, served, qualitySum });
+    set({
+      tickets, cooks, guests, feed, nextTicketIn, serviceTime,
+      ego, complaints, misses, served, qualitySum, streak, bestStreak, dessertDone,
+    });
   },
 
   plateToPass: (id) => {
@@ -373,20 +406,30 @@ export const useGame = create<GameState>((set, get) => ({
     const s = get();
     const plate = s.tickets.find((t) => t.state === "pass");
     if (!plate) return;
-    let { feed, ego, served, sentBack, smashed, complaints, qualitySum } = s;
+    let { feed, ego, served, sentBack, smashed, complaints, qualitySum, streak, bestStreak } = s;
     const cooks = s.cooks.map((c) => ({ ...c }));
     const cook = cooks[plate.station];
 
     if (v === "serve") {
       served += 1;
       qualitySum += plate.quality;
-      if (plate.quality >= 72) {
-        feed = pushFeed(feed, `Table ${plate.table}: clean plate club.`, "good");
-        if (cook) cook.morale = Math.min(100, cook.morale + 3);
-      } else if (plate.quality >= 45) {
-        feed = pushFeed(feed, `Table ${plate.table} eats in silence. Acceptable.`, "info");
+      if (plate.quality >= 45) {
+        streak += 1;
+        bestStreak = Math.max(bestStreak, streak);
+        if (plate.quality >= 72) {
+          feed = pushFeed(feed, `Table ${plate.table}: clean plate club.`, "good");
+          if (cook) cook.morale = Math.min(100, cook.morale + 3);
+        } else {
+          feed = pushFeed(feed, `Table ${plate.table} eats in silence. Acceptable.`, "info");
+        }
+        if (streak > 0 && streak % 5 === 0) {
+          feed = pushFeed(feed, `The kitchen is humming — streak ×${streak}.`, "drama");
+          ego += 2;
+          for (const c of cooks) if (!c.walkedOut) c.morale = Math.min(100, c.morale + 2);
+        }
       } else {
         complaints += 1;
+        streak = 0;
         feed = pushFeed(feed, `Table ${plate.table} sends it back. Loudly.`, "bad");
         if (cook) cook.morale = Math.max(0, cook.morale - 5);
       }
@@ -397,6 +440,9 @@ export const useGame = create<GameState>((set, get) => ({
         qualitySum,
         cooks,
         feed,
+        ego,
+        streak,
+        bestStreak,
       });
       return;
     }
@@ -418,6 +464,7 @@ export const useGame = create<GameState>((set, get) => ({
 
     // smash
     smashed += 1;
+    streak = 0;
     ego += 4;
     feed = pushFeed(feed, `You launch the ${plate.dish} into the tiles. The room stares.`, "drama");
     if (cook && !cook.walkedOut) cook.morale = Math.max(0, cook.morale - 6);
@@ -427,6 +474,7 @@ export const useGame = create<GameState>((set, get) => ({
       ego,
       cooks,
       feed,
+      streak,
       smashAt: performance.now(),
     });
   },
@@ -457,6 +505,13 @@ export const useGame = create<GameState>((set, get) => ({
   flagGuest: (id) => {
     const s = get();
     if (s.criticFlagged || s.phase !== "service") return;
+    if (s.serviceTime >= DESSERT_AT) {
+      set({
+        criticFlagged: true,
+        feed: pushFeed(s.feed, "Too late — they're already on the soufflé.", "bad"),
+      });
+      return;
+    }
     const g = s.guests.find((g) => g.id === id);
     if (!g) return;
     set({
