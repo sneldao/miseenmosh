@@ -132,6 +132,31 @@
 .review .rfoot { font-size: .8rem; letter-spacing: .15em; margin-bottom: 1.4rem; }
 .review .rbtns { display: flex; gap: .8rem; justify-content: center; }
 .review .btn { background: #2a1608; font-size: .85rem; padding: .6rem 1.2rem; }
+.review .critic-line { font-size: .75rem; letter-spacing: .05em; margin: -0.6rem 0 1.2rem; color: #6a4a2a; }
+
+/* ---- verdict stamp (Papers, Please energy) ---- */
+.stamp {
+  position: absolute; top: 38%; left: 50%;
+  font-size: 3.4rem; font-weight: bold; letter-spacing: .12em;
+  border: 5px solid currentColor; border-radius: 6px;
+  padding: .2rem 1.4rem; pointer-events: none;
+  transform-origin: center;
+  animation: stampIn .8s cubic-bezier(.2,1.6,.4,1) forwards;
+}
+.stamp.ok { color: rgba(140,190,110,.9); }
+.stamp.warn { color: rgba(220,170,80,.9); }
+.stamp.violent { color: rgba(210,80,50,.95); }
+@keyframes stampIn {
+  0% { transform: translateX(-50%) scale(2.4) rotate(-14deg); opacity: 0; }
+  25% { transform: translateX(-50%) scale(1) rotate(-8deg); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateX(-50%) scale(1) rotate(-8deg); opacity: 0; }
+}
+
+.paused {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(13,11,9,.72); font-size: 1.2rem; letter-spacing: .25em; color: #ffd9a0;
+}
 
 /* ---- pass actions ---- */
 .pass-actions {

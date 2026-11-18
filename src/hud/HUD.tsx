@@ -37,6 +37,7 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
 
 function Chorus() {
   const screamAt = useGame((s) => s.screamAt);
+  const chorusText = useGame((s) => s.chorusText);
   const [shown, setShown] = useState(0);
   useEffect(() => {
     if (screamAt) setShown(screamAt);
@@ -44,7 +45,19 @@ function Chorus() {
   if (!shown) return null;
   return (
     <div className="chorus" key={shown}>
-      "YES, CHEF!"
+      {chorusText}
+    </div>
+  );
+}
+
+function Stamp() {
+  const stampText = useGame((s) => s.stampText);
+  const stampAt = useGame((s) => s.stampAt);
+  if (!stampAt || !stampText) return null;
+  const cls = stampText === "SERVED" ? "ok" : stampText === "SENT BACK" ? "warn" : "violent";
+  return (
+    <div className={`stamp ${cls}`} key={stampAt}>
+      {stampText}
     </div>
   );
 }
@@ -105,6 +118,7 @@ function ReviewCard() {
           <span className="dim">{"★".repeat(5 - review.stars)}</span>
         </div>
         <div className="quote">“{review.quote}”</div>
+        <div className="critic-line">{review.criticVerdict}</div>
         <div className="rstats">
           <span>{review.covers} covers</span>
           <span>{review.misses} walked</span>
@@ -150,11 +164,16 @@ function useHotkeys() {
         return;
       }
       if (s.phase !== "service") return;
-      if (e.key === " ") {
+      if (e.key === " " ) {
         e.preventDefault();
         s.scream();
         return;
       }
+      if (e.key.toLowerCase() === "p" || e.key === "Escape") {
+        s.togglePause();
+        return;
+      }
+      if (s.paused) return;
       const k = e.key.toLowerCase();
       if (k === "s") return s.judge("serve");
       if (k === "b") return s.judge("sendback");
@@ -189,6 +208,7 @@ export default function HUD() {
   const criticFlagged = useGame((s) => s.criticFlagged);
   const criticSpotted = useGame((s) => s.criticSpotted);
   const streak = useGame((s) => s.streak);
+  const paused = useGame((s) => s.paused);
 
   const atPass = tickets.find((t) => t.state === "pass");
   const live = tickets.filter((t) => t.state === "rail" || t.state === "plating");
@@ -272,6 +292,8 @@ export default function HUD() {
             <span className="cost">−{3 + Math.floor(screams / 2)} morale</span>
           </button>
           <Chorus />
+          <Stamp />
+          {paused && <div className="paused">PAUSED — P to resume</div>}
         </>
       )}
       {phase === "review" && <ReviewCard />}

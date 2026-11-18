@@ -6,27 +6,40 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
 
 ## Week 0 — prove the pipeline (Nov 18–20)
 
-- [ ] `opengame init`, Vite + Three.js (or R3F) scaffold, boots to frame
+- [x] `opengame init`, Vite + R3F scaffold, boots to frame (day 1)
 - [ ] Spike the sponsor pipeline end-to-end on ONE character:
       MiniMax H3 portrait → Idol Max Turbo rigged GLB → renders in-scene
+      (blocked on fal + ElevenLabs keys from user)
 - [ ] One brigade voice (Voice Design) + one bark (Text to Dialogue) +
       one SFX + music sting, all baked, playing on a click
-- [ ] Kitchen mock: pass counter, ticket rail, 3 stations, dining window
+      (WebAudio synth SFX live as placeholder: print/bell/slam/rip/
+      shatter/gasp/sting/chorus/review)
+- [x] Kitchen mock: pass counter, ticket rail, 3 stations, dining window
+      (dressed: tile walls, worn floor, gig poster, pans, bottles)
 
 ## Week 1 — the service loop is fun with no art
 
-- [ ] Ticket rail → stations → plates to the pass → SERVE/SEND BACK/SMASH
-- [ ] Brigade agents: cook at stations, get tired, tilt, mess up
-- [ ] Physics chaos v1: dropped plates, fires, pans
-- [ ] Scream mechanic + YES-CHEF chorus (audio in, morale effect wired)
-- [ ] Review card v1 (seeded service, shareable output)
+- [x] Ticket rail → stations → plates to the pass → SERVE/SEND BACK/SMASH
+      (plating delay by skill, quality tiers, plate slide-in, verdict stamps)
+- [x] Brigade agents: PETRA/DIMITRI/ANWAR — skill + morale, load-driven
+      drain, walkouts with storm-off animation, chef covers dead stations
+- [x] Physics chaos v1: smash debris burst; dropped plates done
+      (fires/pans TBD)
+- [x] Scream mechanic + YES-CHEF chorus (randomized call-backs,
+      adrenaline window, rising morale cost)
+- [x] Review card v1 — receipt-style card, quotable critic line, stat row,
+      COPY REVIEW clipboard artifact, seeded replay
 
 ## Week 2 — the game gets its brain
 
-- [ ] Critic detection: dining-room guests, tell taxonomy
-      (visual/behavioral/audio), flag mechanic, blindsided outcome
-- [ ] Brigade sim: skill/speed/morale/trauma, coaching between services,
-      walkouts, flame-outs
+- [x] Critic detection v1: inspector on a fast tell clock (phone + notes),
+      civilian decoys, flag via raycast click, dessert deadline slams shut,
+      signature-dish ordering (always the Wellington), critic verdict on card
+- [x] Service pressure: 55s ticket TTL + table walks, streak system,
+      dessert-course stampede, BEEFCAKES rival events (incl. ticket theft)
+- [x] Feel layer: full keyboard play (1-9/S/B/X/space/P), pause,
+      ambient chef barks, guest heckles, verdict stamps, synth SFX
+- [ ] Brigade sim depth: trauma, coaching between services, defections
 - [ ] Morning fish-market bidding + menu setting
 - [ ] Progression skeleton: stall → bistro → flagship, star gating
 

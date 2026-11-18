@@ -111,6 +111,32 @@ game here:
 - Sponsors: ElevenLabs (flagship), fal, Meshy — all three, earned via
   real usage.
 
+## Implemented (as of Nov 18, night 1 build)
+
+Single-night vertical slice, browser-verified end to end:
+
+- **Service loop**: seeded ticket rail → plate (skill-timed delay) →
+  quality-tiered plate slides to the pass → SERVE / SEND BACK / SMASH
+  with branching consequences and rubber-stamp verdicts.
+- **Brigade**: three named cooks; morale drains under load, recovers
+  idle, bottoms out into animated walkouts; chef covers dead stations
+  at 1.8×. SCREAM buys a 6s adrenaline window at rising cost; the
+  brigade answers with rotating chorus lines.
+- **The room talks**: ambient chef barks, guest heckles on send-back,
+  BEEFCAKES rival drama at 35s/75s/118s (the middle one steals a ticket
+  off your rail).
+- **Inspector**: faster tell clock (phone raise + screen flash),
+  civilian decoys, flag-before-dessert deadline, always orders the
+  signature Wellington; critic verdict lands on the review card.
+- **Escalation**: dessert-course stampede at 100s + printer speed-up.
+- **Scoring**: streaks (heal brigade every 5), ego, stars formula with
+  theatre bonus for smashing without misses.
+- **Feel**: full keyboard play, pause, WebAudio synth SFX placeholder
+  bus (replaced by baked ElevenLabs later), smash shrapnel, camera
+  shake, plate slide-in.
+- **Share artifact**: receipt-style review card + COPY REVIEW block;
+  SAME SERVICE, AGAIN replays the identical seeded night.
+
 ## Reused DNA (ideas only — legal per rules §06)
 
 | Source | Becomes |
