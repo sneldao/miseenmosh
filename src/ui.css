@@ -256,3 +256,23 @@
 }
 .title-card .lockup { position: relative; width: 26rem; max-width: 80vw; height: auto; margin-bottom: .4rem; }
 .title-card > *:not(.cover-art) { position: relative; }
+
+.review .press-clip {
+  width: 9.5rem; display: block; margin: 0 auto .7rem;
+  transform: rotate(-2.5deg); box-shadow: 0 3px 10px rgba(0,0,0,.3);
+  border: 3px solid #fff;
+}
+
+.market { margin: .9rem 0; border: 1px dashed rgba(201,164,74,.4); padding: .6rem .8rem; }
+.mhead { font-size: .68rem; letter-spacing: .18em; color: #c9a44a; margin-bottom: .5rem; }
+.lot { display: flex; align-items: center; gap: .7rem; padding: .35rem 0; border-top: 1px dotted rgba(255,255,255,.08); }
+.lot:first-of-type { border-top: 0; }
+.lname { min-width: 9.5rem; font-weight: 700; font-size: .82rem; color: #efe6d4; }
+.ldesc { flex: 1; font-size: .75rem; color: #9a917f; font-style: italic; }
+.lot.gone .lname, .lot.gone .ldesc { opacity: .35; text-decoration: line-through; }
+.ltaken { font-size: .72rem; color: #6d8a5f; letter-spacing: .08em; }
+.lbtns { display: flex; flex-direction: column; gap: .3rem; align-items: flex-end; }
+.lwants { font-size: .68rem; color: #d0735a; letter-spacing: .06em; }
+.lbtn { font-size: .72rem; padding: .3rem .6rem; }
+.lbtn.dim { opacity: .55; }
+.bfeed { font-size: .76rem; color: #8fa86a; font-style: italic; margin: .5rem 0 .2rem; }

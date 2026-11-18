@@ -117,6 +117,28 @@ export interface Feud {
   outcome?: string;
 }
 
+export interface Lot {
+  name: string;
+  desc: string;
+  cost: number;
+  station: number; // -1 = whole kitchen
+  qBonus: number;
+  contested: boolean; // BEEFCAKES wants it too
+  bought: boolean;
+}
+
+// the morning fish market — what the sea surrendered today
+const LOT_DECK: Omit<Lot, "bought">[] = [
+  { name: "Day-boat scallops", desc: "still twitching. sea dishes +7", cost: 45, station: -1, qBonus: 7, contested: false },
+  { name: "Dry-aged belted beef", desc: "28 days of funk. grill +8", cost: 60, station: 0, qBonus: 8, contested: true },
+  { name: "Heritage tomatoes", desc: "ugly, perfect. sauté +6", cost: 35, station: 1, qBonus: 6, contested: false },
+  { name: "Normandy butter", desc: "a brick of gold. pastry +6", cost: 40, station: 2, qBonus: 6, contested: false },
+  { name: "Yesterday's fish", desc: "technically fish. everything −2, but it's £8", cost: 8, station: -1, qBonus: -2, contested: false },
+  { name: "A lamb", desc: "with the sauce already inside it. grill +9", cost: 70, station: 0, qBonus: 9, contested: true },
+  { name: "Saffron threads", desc: "worth more than the pans. sauté +8", cost: 65, station: 1, qBonus: 8, contested: true },
+  { name: "Farm eggs, still warm", desc: "the hen glared. pastry +5", cost: 28, station: 2, qBonus: 5, contested: false },
+];
+
 const FEUD_DECK: { text: (cook: string) => string; options: string[] }[] = [
   {
     text: (c) => `BEEFCAKES slid ${c} a napkin offer. Double your money, says the gym-bro.`,
@@ -194,6 +216,8 @@ interface GameState {
   spawnMul: number;
   tellMul: number;
   nightTake: { covers: number; wages: number; breakage: number; net: number } | null;
+  lots: Lot[];
+  menuBuffs: number[]; // per-station quality bonus for tonight
   hasSave: boolean;
   canSave: boolean;
   start: () => void;
@@ -201,6 +225,7 @@ interface GameState {
   continueNext: () => void;
   briefAction: (id: "drinks" | "gear" | "press") => void;
   feudChoice: (i: number) => void;
+  buyLot: (i: number, outbid: boolean) => void;
   resetCareer: () => void;
   tick: (dt: number) => void;
   plateToPass: (id: number) => void;
@@ -275,6 +300,22 @@ function loadSave(): { career: Career; cooks: Cook[] } | null {
 }
 
 type NightFields = "walkedOut" | "overloadT" | "burning" | "walkoutAt";
+function makeLots(night: number): Lot[] {
+  const r = mulberry32(daySeed() + night * 31337);
+  const pool = [...LOT_DECK];
+  const lots: Lot[] = [];
+  for (let i = 0; i < 3; i++) {
+    const d = pool.splice(Math.floor(r() * pool.length), 1)[0];
+    lots.push({ ...d, bought: false });
+  }
+  // Beefcakes shops the same market — guarantee a contested lot when one fits
+  if (!lots.some((l) => l.contested)) {
+    const extra = LOT_DECK.find((d) => d.contested && !lots.some((l) => l.name === d.name));
+    if (extra) lots[Math.floor(r() * 3)] = { ...extra, bought: false };
+  }
+  return lots;
+}
+
 function withFreshNight(c: Omit<Cook, NightFields> & Partial<Pick<Cook, NightFields>>): Cook {
   return { ...c, walkedOut: false, overloadT: 0, burning: false, walkoutAt: -1 };
 }
@@ -339,6 +380,8 @@ export const useGame = create<GameState>((set, get) => ({
   spawnMul: 1,
   tellMul: 1,
   nightTake: null,
+  lots: [],
+  menuBuffs: [0, 0, 0],
   hasSave: !!bootSave,
   canSave: canPersist(),
 
@@ -353,6 +396,8 @@ export const useGame = create<GameState>((set, get) => ({
         career,
         cooks,
         feud: makeFeud(career, cooks),
+        lots: makeLots(career.night),
+        menuBuffs: [0, 0, 0],
         hasSave: true,
         feed: [],
       });
@@ -379,6 +424,8 @@ export const useGame = create<GameState>((set, get) => ({
       feed: [{ id: feedId++, text: `Night 1 — ${VENUES[0].name}. ${VENUES[0].sub}.`, kind: "info" }],
       review: null,
       nightTake: null,
+      lots: makeLots(1),
+      menuBuffs: [0, 0, 0],
     });
   },
 
@@ -477,6 +524,8 @@ export const useGame = create<GameState>((set, get) => ({
       cooks,
       nightTake,
       feud: done ? null : makeFeud(career, cooks),
+      lots: done ? [] : makeLots(career.night),
+      menuBuffs: [0, 0, 0],
       hasSave: true,
     });
   },
@@ -566,6 +615,40 @@ export const useGame = create<GameState>((set, get) => ({
     });
   },
 
+  buyLot: (i, outbid) => {
+    const s = get();
+    if (s.phase !== "briefing") return;
+    const lot = s.lots[i];
+    if (!lot || lot.bought) return;
+    if (lot.contested && !outbid) {
+      set({
+        lots: s.lots.map((l, j) => (j === i ? { ...l, bought: true } : l)),
+        feed: pushFeed(s.feed, `BEEFCAKES took the ${lot.name}. His protein bowls get shinier.`, "bad"),
+      });
+      return;
+    }
+    const price = lot.contested ? lot.cost + 20 : lot.cost;
+    if (s.career.cash < price) return;
+    const c = { ...s.career, cash: s.career.cash - price };
+    if (lot.contested) c.aggro += 1;
+    const menuBuffs = [...s.menuBuffs];
+    if (lot.station < 0) menuBuffs.forEach((_, k) => (menuBuffs[k] += lot.qBonus));
+    else menuBuffs[lot.station] += lot.qBonus;
+    saveCareer(c, s.cooks);
+    set({
+      career: c,
+      menuBuffs,
+      lots: s.lots.map((l, j) => (j === i ? { ...l, bought: true } : l)),
+      feed: pushFeed(
+        s.feed,
+        lot.contested
+          ? `You outbid BEEFCAKES for the ${lot.name}. He watched you take it home.`
+          : `Bought the ${lot.name}. Tonight eats better.`,
+        "good"
+      ),
+    });
+  },
+
   tick: (dt) => {
     const s = get();
     if (s.phase !== "service" || s.paused) return;
@@ -596,6 +679,7 @@ export const useGame = create<GameState>((set, get) => ({
         }
         const chefPenalty = t.byChef ? 12 : 0;
         const burnPenalty = cook?.burning ? 8 : 0;
+        const marketBonus = s.menuBuffs[t.station] ?? 0;
         const quality = Math.max(
           5 + s.career.gear * 3,
           Math.min(
@@ -606,6 +690,7 @@ export const useGame = create<GameState>((set, get) => ({
               age * 0.5 -
               chefPenalty -
               burnPenalty +
+              marketBonus +
               (rng() - 0.5) * 30
           )
         );

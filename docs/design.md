@@ -13,9 +13,12 @@ roar when the third star lands — and the pan-throwing cost of getting there.
 
 ## Core loop — one night
 
-1. **PREP (morning)** — bid at the fish market (fast order-book minigame,
-   snapflip mechanic), set tonight's menu (3 courses from what you bought),
-   brief the brigade (assign stations; tired cook on grill = risk).
+1. **PREP (morning)** — the MORNING MARKET offers 3 seeded lots per night
+   (day-boat scallops, dry-aged beef, "yesterday's fish"...). One lot is
+   contested: BEEFCAKES wants it too — outbid him (+£20, +1 heat) or let him
+   have it. Bought lots buff a station's plate quality tonight; walk-ins are
+   per-night (not saved, so reload can't double-buy). Then the back-office
+   shop (drinks / pans / press) and the night's feud card.
 2. **SERVICE (the action layer)** — tickets fly in on a rail; brigade works
    stations (physics chaos: pans, flames, dropped plates); finished plates
    hit the pass and YOU judge: SERVE / SEND BACK / SMASH. Escalating

@@ -5,6 +5,7 @@ import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
 import stampSmash from "../../assets/recraft/vector/stamp-smash.svg";
 import titleLockup from "../../assets/recraft/vector/title-lockup.svg";
 import coverArt from "../../assets/recraft/raster/cover-art-ticket-storm.webp";
+import reviewClip from "../../assets/recraft/raster/review-clipping-third-star.webp";
 
 const STAMP_IMG: Record<string, string> = {
   SERVED: stampServe,
@@ -124,7 +125,14 @@ function ReviewCard() {
     `${review.smashed} plates smashed · inspector ${review.spotted ? "CLOCKED" : "missed"}`;
   return (
     <div className="review-wrap">
-      <div className="review">
+      <div
+        className="review"
+        style={{
+          backgroundImage: `linear-gradient(rgba(244,234,210,.90), rgba(244,234,210,.97)), url(${reviewClip})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         <div className="rhead">
           TONIGHT'S REVIEW — {VENUES[career.venue].name}, NIGHT {career.night}
         </div>
@@ -132,6 +140,7 @@ function ReviewCard() {
           {"★".repeat(review.stars)}
           <span className="dim">{"★".repeat(5 - review.stars)}</span>
         </div>
+        <img className="press-clip" src={reviewClip} alt="Press clipping" />
         <div className="quote">“{review.quote}”</div>
         <div className="critic-line">{review.criticVerdict}</div>
         <div className="rstats">
@@ -170,6 +179,9 @@ function Briefing() {
   const nightTake = useGame((s) => s.nightTake);
   const briefAction = useGame((s) => s.briefAction);
   const feudChoice = useGame((s) => s.feudChoice);
+  const lots = useGame((s) => s.lots);
+  const buyLot = useGame((s) => s.buyLot);
+  const feed = useGame((s) => s.feed);
   const startService = useGame((s) => s.startService);
   const canSave = useGame((s) => s.canSave);
   const v = VENUES[career.venue];
@@ -226,6 +238,39 @@ function Briefing() {
             COMP THE FOOD PRESS <span className="cost">£60 · −heat, +5 morale</span>
           </button>
         </div>
+        {lots.length > 0 && (
+          <div className="market">
+            <div className="mhead">MORNING MARKET — what the sea surrendered</div>
+            {lots.map((l, i) => (
+              <div key={i} className={`lot ${l.bought ? "gone" : ""}`}>
+                <span className="lname">{l.name}</span>
+                <span className="ldesc">{l.desc}</span>
+                {l.bought ? (
+                  <span className="ltaken">in the walk-in</span>
+                ) : l.contested ? (
+                  <span className="lbtns">
+                    <span className="lwants">BEEFCAKES wants it too.</span>
+                    <button
+                      className="btn lbtn"
+                      disabled={career.cash < l.cost + 20}
+                      onClick={() => buyLot(i, true)}
+                    >
+                      OUTBID HIM £{l.cost + 20}
+                    </button>
+                    <button className="btn lbtn dim" onClick={() => buyLot(i, false)}>
+                      LET HIM HAVE IT
+                    </button>
+                  </span>
+                ) : (
+                  <button className="btn lbtn" disabled={career.cash < l.cost} onClick={() => buyLot(i, true)}>
+                    £{l.cost}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {feed.length > 0 && <div className="bfeed">{feed[feed.length - 1].text}</div>}
         {feud && (
           <div className="feud">
             <div className="ftext">{feud.text}</div>

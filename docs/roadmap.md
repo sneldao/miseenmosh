@@ -47,7 +47,8 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
 - [x] Multi-night residency: 9-night arc, cash ledger (covers − wages
       − breakage), office briefing screen, feud cards with choices,
       localStorage save/resume, three endings
-- [ ] Morning fish-market bidding + menu setting (slots into briefing)
+- [x] Morning fish-market bidding (3 seeded lots, contested outbid vs Beefcakes, per-station quality buffs)
+- [ ] Menu setting / station assignment layer on top of bought stock
 - [ ] Dedicated coaching actions (drinks/press exist; named training TBD)
 
 ## Week 3 — dress it like a band biopic
