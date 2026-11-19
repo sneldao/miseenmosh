@@ -2,12 +2,14 @@
 
 *Same game. New camera. Delete the seam between world and UI.*
 
-**Status:** Phase 1 built and deployed (19 Nov, release `de6d1a82`).
-Phase 2 started: the room answers. The Phase 2 build is committed but
-not deployed — the day's fifth deploy went to Phase 1; the budget resets
-23:46 UTC. Verified in a same-origin iframe harness (service, plate,
-inspect, charge/scream, `V` fallback); pointer lock itself is not
-testable headless, so confirm it on a real browser at the next preview.
+**Status:** Phase 1 built and deployed (19 Nov, release `de6d1a82`);
+Phase 2 slice 2 (dining room, aim reticle, rail cap, physical ticket
+rail) deployed 19 Nov 23:50 UTC as release `47b6bc21`. Verified locally
+in the built preview: service boots, dockets hang and age, aiming one
+reads PLATE IT, a centre click sends it to plating, `V` restores the DOM
+rail with its `+N` chip, and the console is clean apart from two
+three.js deprecation warnings. Pointer lock does engage under CDP-driven
+Chrome; the live preview URL itself needs the owner's sign-in.
 
 ## Why — what the platform actually shows
 

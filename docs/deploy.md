@@ -114,3 +114,12 @@ first 90 seconds and the cold open changes what it sees.
   landed on `9i7mjkmdx4` after a duplicate game was created and deleted.
   That used the fifth deploy of the day; the Phase 2 build (dining room,
   aim reticle, rail cap) is committed but waits for the 23:46 UTC reset.
+- **19 Nov, 23:50 UTC** — release `47b6bc21` (dining room, aim reticle,
+  DOM rail cap, physical ticket rail with PLATE IT) is Ready; deployment
+  `5dc01c3c`, 26 files / 7.7 MiB. The daily deploy allowance did not
+  actually reset at 23:46 — the quota page reports the next slot at
+  **01:44 UTC on 20 Nov** — but the deploy went through, so treat the
+  reported reset time as advisory and check `opengame status` before
+  planning a last-minute deploy. Preview links need the owner's sign-in;
+  the game origin refuses a bare visit, so live checks happen inside the
+  OpenGame page or a hosted playtest.
