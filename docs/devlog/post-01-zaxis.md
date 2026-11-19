@@ -1,7 +1,8 @@
 # Build-in-public post 01 — the kitchen gets props (draft for owner to post)
 
-Attach: /tmp/mem-props2.png (service shot with plate stack + cloche) or
-/tmp/mem-market3.png (fishmonger + market). Repo: github.com/sneldao/miseenmosh
+Attach: docs/devlog/media/service-props.png (plate stack + cloche in service)
+or docs/devlog/media/morning-market.png (fishmonger + market).
+Repo: github.com/sneldao/miseenmosh
 
 ## X version (single post, ~270 chars)
 
