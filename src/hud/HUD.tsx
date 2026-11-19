@@ -3,9 +3,35 @@ import { useGame, tierOf, Ticket, PlateTier, VENUES } from "../game/state";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
 import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
 import stampSmash from "../../assets/recraft/vector/stamp-smash.svg";
-import titleLockup from "../../assets/recraft/vector/title-lockup.svg";
-import coverArt from "../../assets/recraft/raster/cover-art-ticket-storm.webp";
+import lineupArt from "../../assets/recraft/cast-gilliam/title-lineup.webp";
+import castPetra from "../../assets/recraft/cast-gilliam/petra.webp";
+import castDimitri from "../../assets/recraft/cast-gilliam/dimitri.webp";
+import castAnwar from "../../assets/recraft/cast-gilliam/anwar.webp";
+import castBeefcakes from "../../assets/recraft/cast-gilliam/beefcakes.webp";
+import marketSign from "../../assets/recraft/paper-cookery/market-sign.webp";
 import reviewClip from "../../assets/recraft/raster/review-clipping-third-star.webp";
+
+const SPLASH = [
+  "“WHERE'S THE LAMB SAUCE?”",
+  "“Protein.” — BEEFCAKES",
+  "0 stars. Still open.",
+  "The inspector is already in the dining room.",
+  "“Technically fish.” — the fishmonger",
+  "No walkouts. No refunds. No mercy.",
+  "“It's not the pan. It's you.”",
+  "Pans will fall. Morale will too.",
+  "Serves 5 tables. Ego serves 1.",
+  "“He called it a protein bowl.” — the press",
+];
+
+const CAST_IMG: Record<string, string> = { PETRA: castPetra, DIMITRI: castDimitri, ANWAR: castAnwar };
+const CAST_INTRO: Record<string, string> = {
+  PETRA: "runs grill. Do not touch her tongs.",
+  DIMITRI: "runs sauté. He's seen things.",
+  ANWAR: "runs pastry. Fragile. Handle with care.",
+};
+const moodOf = (m: number, out: boolean) =>
+  out ? "walked out" : m >= 70 ? "sharp" : m >= 45 ? "tired" : m >= 25 ? "dangerous" : "feral";
 
 const STAMP_IMG: Record<string, string> = {
   SERVED: stampServe,
@@ -185,6 +211,19 @@ function Briefing() {
   const startService = useGame((s) => s.startService);
   const canSave = useGame((s) => s.canSave);
   const v = VENUES[career.venue];
+  const [beat, setBeat] = useState(0);
+  const lastBeat = feud ? 2 : 1;
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      if (beat < lastBeat) setBeat(beat + 1);
+      else startService();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [beat, lastBeat, startService]);
+  const fwdLabel = beat < lastBeat ? (beat === 0 ? "TO THE MARKET →" : "TONIGHT'S PROBLEM →") : "RUN SERVICE ↵";
   return (
     <div className="brief-wrap">
       <div className="brief">
@@ -206,39 +245,38 @@ function Briefing() {
             </b>
           </div>
         )}
-        <div className="bbrigade">
-          {cooks.map((c) => (
-            <div key={c.id} className="bcook">
-              <span className="cname">
-                {c.name}
-                {c.trauma > 0 && <span className="scar">{" ✕".repeat(Math.min(3, c.trauma))}</span>}
-              </span>
-              <div className="mbar">
-                <div
-                  className="mfill"
-                  style={{ width: `${c.morale}%`, background: c.morale > 45 ? "#c9a44a" : "#a8322a" }}
-                />
-              </div>
-              <span className="bskill">skill {Math.round(c.skill * 100)}</span>
+        {beat === 0 && (
+          <div className="beat">
+            <div className="mhead">
+              THE BRIGADE{career.night === 1 ? " — first night, so: introductions" : ""}
             </div>
-          ))}
-        </div>
-        <div className="bshop">
-          <button className="btn shop" disabled={career.cash < 40} onClick={() => briefAction("drinks")}>
-            TAKE THEM FOR DRINKS <span className="cost">£40 · +25 morale</span>
-          </button>
-          <button
-            className="btn shop"
-            disabled={career.cash < 80 || career.gear >= 3}
-            onClick={() => briefAction("gear")}
-          >
-            BETTER PANS <span className="cost">£80 · quality floor {career.gear}/3</span>
-          </button>
-          <button className="btn shop" disabled={career.cash < 60} onClick={() => briefAction("press")}>
-            COMP THE FOOD PRESS <span className="cost">£60 · −heat, +5 morale</span>
-          </button>
-        </div>
-        {lots.length > 0 && (
+            <div className="cast row">
+              {cooks.map((c) => (
+                <div key={c.id} className={`ccard tall ${c.walkedOut ? "gone" : ""}`}>
+                  {CAST_IMG[c.name] ? (
+                    <img src={CAST_IMG[c.name]} alt={c.name} />
+                  ) : (
+                    <div className="noimg">FRESH MEAT</div>
+                  )}
+                  <span className="cname">
+                    {c.name}
+                    {c.trauma > 0 && <span className="scar">{" ✕".repeat(Math.min(3, c.trauma))}</span>}
+                  </span>
+                  <span className="mood">
+                    {moodOf(c.morale, c.walkedOut)} · skill {Math.round(c.skill * 100)}
+                  </span>
+                  {career.night === 1 && CAST_INTRO[c.name] && (
+                    <span className="intro">{CAST_INTRO[c.name]}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {beat === 1 && (
+          <div className="beat">
+            <img className="market-sign" src={marketSign} alt="MORNING MARKET — what the sea surrendered" />
+            {lots.length > 0 && (
           <div className="market">
             <div className="mhead">MORNING MARKET — what the sea surrendered</div>
             {lots.map((l, i) => (
@@ -270,31 +308,52 @@ function Briefing() {
             ))}
           </div>
         )}
-        {feed.length > 0 && <div className="bfeed">{feed[feed.length - 1].text}</div>}
-        {feud && (
-          <div className="feud">
-            <div className="ftext">{feud.text}</div>
-            {feud.resolved ? (
-              <div className="fout">{feud.outcome}</div>
-            ) : (
-              <div className="fbtns">
-                {feud.options.map((o, i) => (
-                  <button
-                    key={i}
-                    className="btn fbtn"
-                    disabled={i === 0 && career.cash < [90, 0, 50, 70][(career.night - 2) % 4]}
-                    onClick={() => feudChoice(i)}
-                  >
-                    {o}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="bshop slim">
+              <div className="mhead">BACK OFFICE</div>
+              <button className="btn shop" disabled={career.cash < 40} onClick={() => briefAction("drinks")}>
+                TAKE THEM FOR DRINKS <span className="cost">£40 · +25 morale</span>
+              </button>
+              <button
+                className="btn shop"
+                disabled={career.cash < 80 || career.gear >= 3}
+                onClick={() => briefAction("gear")}
+              >
+                BETTER PANS <span className="cost">£80 · quality floor {career.gear}/3</span>
+              </button>
+              <button className="btn shop" disabled={career.cash < 60} onClick={() => briefAction("press")}>
+                COMP THE FOOD PRESS <span className="cost">£60 · −heat, +5 morale</span>
+              </button>
+            </div>
           </div>
         )}
+        {beat === 2 && feud && (
+          <div className="beat feudbeat">
+            <img className="feudface" src={castBeefcakes} alt="BEEFCAKES" />
+            <div className="feud">
+              <div className="ftext">{feud.text}</div>
+              {feud.resolved ? (
+                <div className="fout">{feud.outcome}</div>
+              ) : (
+                <div className="fbtns">
+                  {feud.options.map((o, i) => (
+                    <button
+                      key={i}
+                      className="btn fbtn"
+                      disabled={i === 0 && career.cash < [90, 0, 50, 70][(career.night - 2) % 4]}
+                      onClick={() => feudChoice(i)}
+                    >
+                      {o}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {feed.length > 0 && <div className="bfeed">{feed[feed.length - 1].text}</div>}
         {!canSave && <div className="bwarn">Progress won't persist — this browser blocks storage.</div>}
-        <button className="btn serve big" onClick={startService}>
-          RUN SERVICE <span className="kbd">↵</span>
+        <button className="btn serve big" onClick={() => (beat < lastBeat ? setBeat(beat + 1) : startService())}>
+          {fwdLabel}
         </button>
       </div>
     </div>
@@ -346,11 +405,7 @@ function useHotkeys() {
         s.start();
         return;
       }
-      if (s.phase === "briefing" && e.key === "Enter") {
-        e.preventDefault();
-        s.startService();
-        return;
-      }
+      if (s.phase === "briefing" && e.key === "Enter") return; // Briefing owns Enter (beat advance)
       if (s.phase === "ending" && (e.key === " " || e.key === "Enter")) {
         e.preventDefault();
         s.resetCareer();
@@ -411,6 +466,13 @@ export default function HUD() {
   const streak = useGame((s) => s.streak);
   const paused = useGame((s) => s.paused);
 
+  const [splashIdx, setSplashIdx] = useState(() => Math.floor(Math.random() * SPLASH.length));
+  useEffect(() => {
+    const t = setInterval(() => setSplashIdx((i) => (i + 1) % SPLASH.length), 3800);
+    return () => clearInterval(t);
+  }, []);
+  const splash = SPLASH[splashIdx];
+
   const atPass = tickets.find((t) => t.state === "pass");
   const live = tickets.filter((t) => t.state === "rail" || t.state === "plating");
   const amped = serviceTime < adrenalineTil;
@@ -419,9 +481,26 @@ export default function HUD() {
     <div className="hud">
       {phase === "title" && (
         <div className="title-card">
-          <img className="cover-art" src={coverArt} alt="" aria-hidden />
-          <img className="lockup" src={titleLockup} alt="MISE EN MOSH" />
-          <div className="tag">Everything in its place. Until the tickets start flying.</div>
+          <img className="hero-lineup" src={lineupArt} alt="MISE EN MOSH — the brigade at the pass" />
+          <div className="splash">{splash}</div>
+          <div className="cast">
+            <div className="ccard">
+              <img src={castPetra} alt="PETRA" />
+              <span>PETRA — grill.<br />Do not touch her tongs.</span>
+            </div>
+            <div className="ccard">
+              <img src={castDimitri} alt="DIMITRI" />
+              <span>DIMITRI — sauté.<br />He's seen things.</span>
+            </div>
+            <div className="ccard">
+              <img src={castAnwar} alt="ANWAR" />
+              <span>ANWAR — pastry.<br />Fragile. Handle with care.</span>
+            </div>
+            <div className="ccard wanted">
+              <img src={castBeefcakes} alt="BEEFCAKES" />
+              <span>BEEFCAKES<br />WANTED for ticket theft.</span>
+            </div>
+          </div>
           <div className="tag sub">One guest tonight is the inspector.</div>
           <button className="btn" onClick={start}>
             {hasSave ? `CONTINUE RESIDENCY — NIGHT ${career.night}` : "BEGIN RESIDENCY"}

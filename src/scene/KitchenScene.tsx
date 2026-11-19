@@ -8,9 +8,9 @@ import { useTexture } from "@react-three/drei";
 import { tileTexture, floorTexture } from "./tex";
 import { Group, PointLight } from "three";
 import chefPoster from "../../assets/recraft/raster/chef-pistols-poster.webp";
-import wellingtonSprite from "../../assets/recraft/sprites/wellington.webp";
-import seaBassSprite from "../../assets/recraft/sprites/sea-bass.webp";
-import quenelleSprite from "../../assets/recraft/sprites/dessert-quenelle.webp";
+import wellingtonSprite from "../../assets/recraft/food-lino/wellington.webp";
+import seaBassSprite from "../../assets/recraft/food-lino/sea-bass.webp";
+import quenelleSprite from "../../assets/recraft/food-lino/quenelle.webp";
 
 const DISH_SPRITE: Record<string, string> = {
   "Beef Wellington": wellingtonSprite,

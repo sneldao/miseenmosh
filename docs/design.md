@@ -216,3 +216,13 @@ see assets/recraft/manifest.json for provenance):
 Provenance note for the judges: every raster/vector asset under
 `assets/recraft/` was generated during the jam window via the Recraft
 MCP (manifest holds style id + date) and is baked into the bundle.
+
+
+## Art direction — locked (19 Nov)
+
+**Gilliam collage people / linocut food / '70s cookery paper.**
+Recraft styles: gilliam-collage da25e4f6, linocut-food 4d3d77fd,
+cookery-70s f7f7d7fa (riso-punk f7ae045b banked as alternate).
+Band-biopic retired — it produced the cinematic brooding we escaped.
+Cast cards + title lineup in assets/recraft/cast-gilliam, dishes in
+food-lino, market chalkboard in paper-cookery.
