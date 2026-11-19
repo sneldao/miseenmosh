@@ -3,7 +3,11 @@
 *Same game. New camera. Delete the seam between world and UI.*
 
 **Status:** Phase 1 built and deployed (19 Nov, release `de6d1a82`).
-Phase 2 started: the room answers.
+Phase 2 started: the room answers. The Phase 2 build is committed but
+not deployed — the day's fifth deploy went to Phase 1; the budget resets
+23:46 UTC. Verified in a same-origin iframe harness (service, plate,
+inspect, charge/scream, `V` fallback); pointer lock itself is not
+testable headless, so confirm it on a real browser at the next preview.
 
 ## Why — what the platform actually shows
 

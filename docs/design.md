@@ -239,16 +239,26 @@ first-person service drama with a brigade you manage by voice. No
 first-person cooking game has shipped the tyrant-chef fantasy; the
 originality is in the form.
 
-**Phase 1 (in build):** pointer-lock camera anchored at the pass,
-constrained look, shimmy along the line, hands + plate in hand, RMB to
-inspect, center-screen reticle with world raycasts, charge-and-release
-scream, `V` fallback to the cinematic camera.
+**Phase 1 (built, deployed 19 Nov — release `de6d1a82`):** pointer-lock
+camera anchored at the pass, constrained look, shimmy along the line,
+hands + plate in hand, RMB to inspect, center-screen reticle with world
+raycasts, charge-and-release scream, `V` fallback to the cinematic
+camera.
 
-**Phase 2:** look-to-aim the room (smother fires, flag guests, read the
-rail), 3D speech bubbles replace the ticker, spatial audio tells.
+**Phase 2 (in progress):** the room answers. Built so far: the dining
+room reads as a room (seated diners in eveningwear, tables and candles,
+timber architrave round the pass opening, far wall with prints and
+sconces), the reticle reports what it is on (counter / guest / fire,
+with SMOTHER and FLAG THEM tags), and the rail caps at six dockets so a
+bad run cannot push tickets off-screen. Still to do: a physical ticket
+rail, 3D speech bubbles replacing the ticker, spatial audio tells.
 **Phase 3:** prep becomes a place — the office, desk objects, one
 decision per object, night-gated disclosure. **Phase 4:** venue
 re-dress, performance, playtest, deploy.
+
+Shipping runs through [deploy.md](deploy.md): the manifest declares
+`build.output: dist`, so deploys go from the repo root and spend one of
+five daily slots.
 
 **Rule:** never delete a readable DOM surface without a physical
 replacement in the room.

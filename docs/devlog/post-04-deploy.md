@@ -1,22 +1,26 @@
-# Build-in-public post 04 — playable link (draft; needs deploy URL)
+# Build-in-public post 04 — playable link (draft)
 
 Attach: docs/devlog/media/night1-chaos-clip.gif (autoplay loop)
-Fill in the preview URL after `opengame deploy dist`.
+
+Get the link from `opengame status` after `opengame deploy --wait` (run it
+from the repo root — see [deploy.md](../deploy.md)).
 
 ## X version
 
-LIVE at: https://opengame.io/g/9i7mjkmdx4?preview=ed446439-733a-4b07-bfeb-b59ed5932111
-(deploy b638dee7, ready; same preview link as before — the URL never
-changes, so posts stay valid across redeploys)
+LIVE at: https://opengame.io/g/9i7mjkmdx4?preview=de6d1a82-9c23-4f62-955b-4b2d249fd7e3
+(first-person build, release `de6d1a82`. The `preview=` id changes with
+every release, so re-copy it from `opengame status` before posting.)
 
-MISE EN MOSH is playable. Judge plates, spot the hidden critic,
-scream at your brigade, get a receipt-shaped review.
+MISE EN MOSH is playable. You stand at the pass now: judge plates, spot
+the inspector in the dining room, scream at your brigade, get a
+receipt-shaped review.
 
-https://opengame.io/g/9i7mjkmdx4?preview=ed446439-733a-4b07-bfeb-b59ed5932111
+https://opengame.io/g/9i7mjkmdx4?preview=de6d1a82-9c23-4f62-955b-4b2d249fd7e3
 
 Night 1 tip: the SCREAM button is not a strategy. #ZAxisAwards
 
 ## Notes
 
-- Post AFTER the refreshed deploy is live (all the new art + props).
+- Post AFTER the current deploy is live and has passed checks.
 - The GIF autoplaying in feeds is the whole ad.
+- Preview links are per-release; a stale `preview=` id is a dead link.
