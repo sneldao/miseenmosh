@@ -206,6 +206,11 @@ function Docket({ t, hotkey }: { t: Ticket; hotkey: number }) {
           <planeGeometry args={[CARD_W, CARD_H]} />
           <meshBasicMaterial map={tex} toneMapped={false} side={DoubleSide} />
         </mesh>
+        {/* a forgiving hit pad — you should not have to thread a needle */}
+        <mesh position={[0, -0.019 - CARD_H / 2, 0.006]}>
+          <planeGeometry args={[CARD_W * 1.4, CARD_H * 1.18]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
         {/* grime blooms on old paper */}
         <mesh
           ref={stainMesh}
@@ -240,6 +245,17 @@ export default function RailDockets() {
 
   return (
     <group>
+      {/* the rail the dockets actually hang on, dropped from the dark above */}
+      <mesh position={[0, HANG_Y + 0.022, HANG_Z]} castShadow>
+        <boxGeometry args={[3.5, 0.042, 0.052]} />
+        <meshStandardMaterial color="#4a4d52" metalness={0.7} roughness={0.42} />
+      </mesh>
+      {[-1.68, 1.68].map((x) => (
+        <mesh key={x} position={[x, HANG_Y + 1.0, HANG_Z]}>
+          <cylinderGeometry args={[0.011, 0.011, 1.96, 6]} />
+          <meshStandardMaterial color="#3c3f44" metalness={0.6} roughness={0.5} />
+        </mesh>
+      ))}
       {rail.map((t, i) => (
         <group key={t.id} position={[(i - 2.5) * SLOT, 0, 0]}>
           <Docket t={t} hotkey={i + 1} />

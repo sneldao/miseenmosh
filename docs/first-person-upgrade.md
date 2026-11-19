@@ -117,7 +117,9 @@ station counters and the pass sill.
   the rail.
 - 3D speech bubbles replace the ticker; one transient line maximum.
 - Spatial audio cues for station distress, the printer, the dining room.
-- Physical ticket rail: tickets visibly hang, age, and tear.
+- Physical ticket rail: tickets visibly hang, age, and tear. (Hanging,
+  aging and click-to-plate are in; the tear/rip on BEEFCAKES theft is
+  still to come.)
 
 **Built so far (19 Nov):** the dining room reads as a room — seated
 diners in eveningwear over candles and table settings, a timber
@@ -126,6 +128,16 @@ and a brass lip on the sill. The reticle now reports what it is on
 (pale = counter, amber = a guest you can flag, red = a fire you can
 smother, with a SMOTHER / FLAG THEM tag). The DOM rail caps at six
 dockets with a `+N` chip so a bad run cannot push the rail off-screen.
+
+**Built (slice 2):** the ticket rail is a rail. Dockets are 3D cards on
+a steel bar above the pass — table number, dish, station stripe, the
+hotkey digit, and a printed age rule that fills as the ticket dies;
+paper yellows and a grime bloom spreads, and each card barely swings on
+its clip. They are the centre-raycast target: aim at one and the tag
+reads PLATE IT, click, and it goes to plating. The tag only offers
+`ticket` when nothing is on the pass or plating. While `firstPerson`
+holds during service the DOM `.rail` is hidden (the fallback camera and
+hotkeys 1–9 keep it).
 
 ### Phase 3 — prep as a place
 

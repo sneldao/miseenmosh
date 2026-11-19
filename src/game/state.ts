@@ -211,7 +211,7 @@ interface GameState {
   /** user preference: embodied first-person pass during service */
   firstPerson: boolean;
   /** what the centre of the screen is aimed at, for the reticle */
-  aim: "fire" | "guest" | "station" | null;
+  aim: "fire" | "guest" | "ticket" | "station" | null;
   rivalIdx: number;
   rivalAt: number; // serviceTime of last Beefcakes appearance
   barkAt: number;
@@ -243,7 +243,7 @@ interface GameState {
   flagGuest: (id: number) => void;
   togglePause: () => void;
   toggleFirstPerson: () => void;
-  setAim: (aim: "fire" | "guest" | "station" | null) => void;
+  setAim: (aim: "fire" | "guest" | "ticket" | "station" | null) => void;
   smotherFire: (station: number) => void;
 }
 

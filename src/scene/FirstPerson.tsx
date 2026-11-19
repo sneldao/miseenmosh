@@ -34,6 +34,15 @@ const FOV_FP = 66;
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
+type Interact =
+  | { kind: "station"; index: number }
+  | { kind: "guest"; id: number }
+  | { kind: "ticket"; id: number };
+
+/** A docket can only be taken when nothing is already on the pass or plating. */
+const canPullTicket = (g: { tickets: { state: string }[] }) =>
+  !g.tickets.some((t) => t.state === "pass" || t.state === "plating");
+
 const SKIN = "#c99772";
 const SLEEVE = "#2a2320";
 const CUFF = "#e8e2d5";
@@ -92,14 +101,12 @@ export default function FirstPerson() {
       for (const h of hits) {
         let o: Object3D | null = h.object;
         while (o) {
-          const it = o.userData?.interact as
-            | { kind: "station"; index: number }
-            | { kind: "guest"; id: number }
-            | undefined;
+          const it = o.userData?.interact as Interact | undefined;
           if (it) {
             const g = useGame.getState();
             if (it.kind === "station") g.smotherFire(it.index);
             else if (it.kind === "guest") g.flagGuest(it.id);
+            else if (it.kind === "ticket") g.plateToPass(it.id);
             return;
           }
           o = o.parent;
@@ -259,23 +266,24 @@ export default function FirstPerson() {
     aimTick.current += d;
     if (aimTick.current >= 0.08) {
       aimTick.current = 0;
-      let kind: "fire" | "guest" | "station" | null = null;
+      let kind: "fire" | "guest" | "ticket" | "station" | null = null;
       if (s.phase === "service" && s.firstPerson && !s.paused) {
         camera.updateMatrixWorld();
         sc.ray.setFromCamera(sc.centre, camera);
         const hits = sc.ray.intersectObjects(scene.children, true);
+        const freePlate = canPullTicket(s);
         search: for (const hit of hits) {
           let o: Object3D | null = hit.object;
           while (o) {
-            const it = o.userData?.interact as
-              | { kind: "station"; index: number }
-              | { kind: "guest"; id: number }
-              | undefined;
+            const it = o.userData?.interact as Interact | undefined;
             if (it) {
               if (it.kind === "station") {
                 kind = s.cooks[it.index]?.burning ? "fire" : "station";
-              } else if (!s.criticFlagged) {
-                kind = "guest";
+              } else if (it.kind === "guest") {
+                if (!s.criticFlagged) kind = "guest";
+              } else if (it.kind === "ticket") {
+                // the rail is only actionable when the pass is empty
+                kind = freePlate ? "ticket" : "station";
               }
               break search;
             }

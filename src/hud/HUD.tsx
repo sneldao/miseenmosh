@@ -623,9 +623,9 @@ export default function HUD() {
           {firstPerson && (
             <div className={`reticle${aim ? ` aim-${aim}` : ""}`} aria-hidden />
           )}
-          {firstPerson && (aim === "fire" || aim === "guest") && (
+          {firstPerson && (aim === "fire" || aim === "guest" || aim === "ticket") && (
             <div className={`aimtag ${aim}`}>
-              {aim === "fire" ? "SMOTHER" : "FLAG THEM"}
+              {aim === "fire" ? "SMOTHER" : aim === "ticket" ? "PLATE IT" : "FLAG THEM"}
             </div>
           )}
           {firstPerson && !locked && !paused && (
@@ -650,10 +650,11 @@ export default function HUD() {
             {atPass
               ? firstPerson
                 ? "Hold right mouse to look at the plate."
-                : "Judge the plate."
-              : live.some((t) => t.state === "plating")
-                ? "Plating…"
-                : "Click a ticket to plate it."}{" "}
+                : "Judge the plate."                : live.some((t) => t.state === "plating")
+                  ? "Plating…"
+                  : firstPerson
+                    ? "Look at a docket on the rail and click."
+                    : "Click a ticket to plate it."}{" "}
             {criticFlagged
               ? criticSpotted
                 ? "Inspector clocked."
@@ -664,21 +665,25 @@ export default function HUD() {
                 ? "Spot the inspector — click them before dessert."
                 : "DESSERT COURSE."}
           </div>
-          <div className="rail">
-            {live
-              .filter((t) => t.state === "plating")
-              .map((t) => (
-                <TicketCard key={t.id} t={t} />
+          {/* In first person the dockets hang on the steel; the DOM rail
+              is the fallback camera's (and the keyboard's) rail. */}
+          {!firstPerson && (
+            <div className="rail">
+              {live
+                .filter((t) => t.state === "plating")
+                .map((t) => (
+                  <TicketCard key={t.id} t={t} />
+                ))}
+              {railShown.map((t) => (
+                <TicketCard key={t.id} t={t} hotkey={railAll.indexOf(t) + 1} />
               ))}
-            {railShown.map((t) => (
-              <TicketCard key={t.id} t={t} hotkey={railAll.indexOf(t) + 1} />
-            ))}
-            {hiddenRail > 0 && (
-              <div className="rail-more" title={`${hiddenRail} more on the rail`}>
-                +{hiddenRail}
-              </div>
-            )}
-          </div>
+              {hiddenRail > 0 && (
+                <div className="rail-more" title={`${hiddenRail} more on the rail`}>
+                  +{hiddenRail}
+                </div>
+              )}
+            </div>
+          )}
           {atPass && firstPerson && (
             <div className="plate-note fp-note">{TIER_LINE[tierOf(atPass.quality)]}</div>
           )}

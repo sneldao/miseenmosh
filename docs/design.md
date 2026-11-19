@@ -250,8 +250,11 @@ room reads as a room (seated diners in eveningwear, tables and candles,
 timber architrave round the pass opening, far wall with prints and
 sconces), the reticle reports what it is on (counter / guest / fire,
 with SMOTHER and FLAG THEM tags), and the rail caps at six dockets so a
-bad run cannot push tickets off-screen. Still to do: a physical ticket
-rail, 3D speech bubbles replacing the ticker, spatial audio tells.
+bad run cannot push tickets off-screen. The ticket rail is now physical:
+dockets hang on a steel bar over the pass as 3D cards that age, grime and
+swing, and PLATE IT on the reticle takes one — the DOM rail is now only
+the `V` fallback camera's rail. Still to do: 3D speech bubbles replacing
+the ticker, spatial audio tells.
 **Phase 3:** prep becomes a place — the office, desk objects, one
 decision per object, night-gated disclosure. **Phase 4:** venue
 re-dress, performance, playtest, deploy.
