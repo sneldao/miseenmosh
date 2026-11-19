@@ -226,3 +226,29 @@ cookery-70s f7f7d7fa (riso-punk f7ae045b banked as alternate).
 Band-biopic retired — it produced the cinematic brooding we escaped.
 Cast cards + title lineup in assets/recraft/cast-gilliam, dishes in
 food-lino, market chalkboard in paper-cookery.
+
+## Form upgrade — first person (19 Nov)
+
+The fixed diorama camera + DOM HUD reads as a bygone-era management
+game. The art stays; the interface grammar changes. Full plan:
+[first-person-upgrade.md](first-person-upgrade.md).
+
+**Thesis:** you are the chef — first person, hands on the pass, a kitchen
+that flinches when you scream. Same systems, new form. The *Chef-em-up*:
+first-person service drama with a brigade you manage by voice. No
+first-person cooking game has shipped the tyrant-chef fantasy; the
+originality is in the form.
+
+**Phase 1 (in build):** pointer-lock camera anchored at the pass,
+constrained look, shimmy along the line, hands + plate in hand, RMB to
+inspect, center-screen reticle with world raycasts, charge-and-release
+scream, `V` fallback to the cinematic camera.
+
+**Phase 2:** look-to-aim the room (smother fires, flag guests, read the
+rail), 3D speech bubbles replace the ticker, spatial audio tells.
+**Phase 3:** prep becomes a place — the office, desk objects, one
+decision per object, night-gated disclosure. **Phase 4:** venue
+re-dress, performance, playtest, deploy.
+
+**Rule:** never delete a readable DOM surface without a physical
+replacement in the room.

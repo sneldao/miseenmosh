@@ -7,34 +7,10 @@ import Cloche from "./Cloche";
 import MeshyProp from "./MeshyProp";
 import { useTexture } from "@react-three/drei";
 import { tileTexture, floorTexture } from "./tex";
-import { Group, PointLight, AmbientLight, DirectionalLight, Color, Fog } from "three";
+import { Group, PointLight, AmbientLight, DirectionalLight, SpotLight, Color, Fog } from "three";
 import chefPoster from "../../assets/recraft/raster/chef-pistols-poster.webp";
-import wellingtonSprite from "../../assets/recraft/food-lino/wellington.webp";
-import seaBassSprite from "../../assets/recraft/food-lino/sea-bass.webp";
-import quenelleSprite from "../../assets/recraft/food-lino/quenelle.webp";
-
-const DISH_SPRITE: Record<string, string> = {
-  "Beef Wellington": wellingtonSprite,
-  "Scallop, one": seaBassSprite,
-  "Red mullet, crying": seaBassSprite,
-  "Foie torchon": seaBassSprite,
-  "Risotto (stood up)": quenelleSprite,
-  "Lamb sauce (missing)": quenelleSprite,
-  "Pommes purée": quenelleSprite,
-  "Soufflé (weeping)": quenelleSprite,
-  "Tart of the day": quenelleSprite,
-};
-
-/** Generated dish art as a camera-facing sprite — criminal plates
- *  still get the sad lump, which is funnier. */
-function DishSprite({ url, dim }: { url: string; dim?: boolean }) {
-  const tex = useTexture(url);
-  return (
-    <sprite position={[0, 0.3, 0]} scale={[0.66, 0.66, 1]}>
-      <spriteMaterial map={tex} transparent color={dim ? "#a89a8c" : "#ffffff"} />
-    </sprite>
-  );
-}
+import DishSprite, { DISH_SPRITE } from "./DishSprite";
+import FirstPerson from "./FirstPerson";
 const STEEL = "#8a8d91";
 const STEEL_DARK = "#4a4d52";
 const WARM = "#ffb066";
@@ -45,13 +21,71 @@ function PassCounter() {
       {/* counter body */}
       <mesh position={[0, 0.55, 0]} castShadow receiveShadow>
         <boxGeometry args={[11, 1.1, 0.9]} />
-        <meshStandardMaterial color="#3a2415" roughness={0.8} />
+        <meshStandardMaterial color="#4a2f1c" roughness={0.8} />
       </mesh>
-      {/* steel top */}
+      {/* steel top — rough enough to catch the heat lamps (metals need an env) */}
       <mesh position={[0, 1.12, 0]} castShadow receiveShadow>
         <boxGeometry args={[11.3, 0.06, 1.1]} />
-        <meshStandardMaterial color={STEEL} metalness={0.85} roughness={0.3} />
+        <meshStandardMaterial color="#9aa0a6" metalness={0.4} roughness={0.42} />
       </mesh>
+      {/* front lip catching the service light */}
+      <mesh position={[0, 1.125, 0.54]}>
+        <boxGeometry args={[11.3, 0.018, 0.055]} />
+        <meshStandardMaterial color="#c2c6ca" metalness={0.3} roughness={0.35} />
+      </mesh>
+      {/* order spike + dockets */}
+      <group position={[-1.7, 1.16, 0.12]}>
+        <mesh position={[0, 0.012, 0]}>
+          <cylinderGeometry args={[0.04, 0.055, 0.025, 12]} />
+          <meshStandardMaterial color={STEEL_DARK} metalness={0.5} roughness={0.4} />
+        </mesh>
+        <mesh position={[0, 0.11, 0]}>
+          <cylinderGeometry args={[0.0045, 0.0045, 0.2, 6]} />
+          <meshStandardMaterial color="#c2c6ca" metalness={0.6} roughness={0.3} />
+        </mesh>
+        {[0, 1, 2].map((i) => (
+          <mesh
+            key={i}
+            position={[0.006 * i, 0.1 + i * 0.014, 0.004 * i]}
+            rotation={[-0.18 + i * 0.1, 0.5 + i * 0.7, 0.1 - i * 0.08]}
+          >
+            <boxGeometry args={[0.11, 0.0016, 0.15]} />
+            <meshStandardMaterial color="#efe6cf" roughness={0.95} />
+          </mesh>
+        ))}
+      </group>
+      {/* folded towel */}
+      <group position={[1.34, 1.16, 0.18]} rotation={[0, 0.42, 0]}>
+        <mesh position={[0, 0.012, 0]}>
+          <boxGeometry args={[0.26, 0.024, 0.2]} />
+          <meshStandardMaterial color="#e6dfcf" roughness={1} />
+        </mesh>
+        <mesh position={[0, 0.033, 0]}>
+          <boxGeometry args={[0.24, 0.018, 0.18]} />
+          <meshStandardMaterial color="#efe9dd" roughness={1} />
+        </mesh>
+        <mesh position={[0, 0.043, 0.055]}>
+          <boxGeometry args={[0.24, 0.002, 0.03]} />
+          <meshStandardMaterial color="#8a3a2a" roughness={1} />
+        </mesh>
+      </group>
+      {/* service bell */}
+      <group position={[-0.72, 1.16, 0.24]}>
+        <mesh position={[0, 0.006, 0]}>
+          <cylinderGeometry args={[0.055, 0.062, 0.012, 16]} />
+          <meshStandardMaterial color={STEEL_DARK} metalness={0.5} roughness={0.35} />
+        </mesh>
+        <mesh position={[0, 0.03, 0]}>
+          <sphereGeometry args={[0.046, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#c9a24a" metalness={0.5} roughness={0.3} />
+        </mesh>
+        <mesh position={[0, 0.078, 0]}>
+          <sphereGeometry args={[0.012, 8, 8]} />
+          <meshStandardMaterial color="#e0bd63" metalness={0.5} roughness={0.3} />
+        </mesh>
+      </group>
+      {/* the pass has its own little pool of light */}
+      <pointLight position={[0, 1.95, 0.3]} color={WARM} intensity={3.2} distance={3.2} />
       {/* ticket rail */}
       <mesh position={[0, 2.35, -0.15]} rotation={[0.35, 0, 0]}>
         <boxGeometry args={[11, 0.08, 0.3]} />
@@ -59,16 +93,16 @@ function PassCounter() {
       </mesh>
       {/* heat lamps */}
       {[-3.2, 0, 3.2].map((x) => (
-        <group key={x} position={[x, 1.9, 0]}>
+        <group key={x} position={[x, 2.46, 0]}>
           <mesh>
             <cylinderGeometry args={[0.02, 0.02, 0.5]} />
             <meshStandardMaterial color={STEEL_DARK} />
           </mesh>
           <mesh position={[0, -0.3, 0]}>
-            <coneGeometry args={[0.28, 0.3, 16, 1, true]} />
-            <meshStandardMaterial color="#7a1f12" emissive={WARM} emissiveIntensity={0.6} side={2} />
+            <coneGeometry args={[0.2, 0.24, 16, 1, true]} />
+            <meshStandardMaterial color="#241310" emissive={WARM} emissiveIntensity={0.35} side={2} />
           </mesh>
-          <pointLight position={[0, -0.5, 0.2]} color={WARM} intensity={4} distance={4} />
+          <pointLight position={[0, -0.5, 0.2]} color={WARM} intensity={2.2} distance={4} />
         </group>
       ))}
     </group>
@@ -107,6 +141,22 @@ function BrigadeFigure({ cookId, x, stationHue }: { cookId: number; x: number; s
         <capsuleGeometry args={[0.22, 0.75, 6, 12]} />
         <meshStandardMaterial color="#e8e2d5" roughness={0.9} />
       </mesh>
+      {/* shoulders and arms — the silhouette has to read as a person */}
+      <mesh position={[0, 1.33, 0]} castShadow>
+        <boxGeometry args={[0.52, 0.15, 0.3]} />
+        <meshStandardMaterial color="#e8e2d5" roughness={0.9} />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <mesh
+          key={side}
+          position={[side * 0.29, 1.16, 0.08]}
+          rotation={[0.25, 0, side * -0.2]}
+          castShadow
+        >
+          <capsuleGeometry args={[0.055, 0.34, 4, 8]} />
+          <meshStandardMaterial color="#e8e2d5" roughness={0.9} />
+        </mesh>
+      ))}
       {/* apron stripe = station color coding */}
       <mesh position={[0, 0.75, 0.19]}>
         <boxGeometry args={[0.28, 0.5, 0.02]} />
@@ -116,6 +166,23 @@ function BrigadeFigure({ cookId, x, stationHue }: { cookId: number; x: number; s
       <mesh position={[0, 1.55, 0]} castShadow>
         <sphereGeometry args={[0.16, 16, 16]} />
         <meshStandardMaterial color="#d9a877" />
+      </mesh>
+      {/* the face: just enough to read as a person at the pass */}
+      {[-1, 1].map((e) => (
+        <mesh key={e} position={[e * 0.055, 1.57, 0.145]}>
+          <sphereGeometry args={[0.017, 8, 8]} />
+          <meshStandardMaterial color="#241a12" roughness={0.6} />
+        </mesh>
+      ))}
+      {[-1, 1].map((e) => (
+        <mesh key={e} position={[e * 0.055, 1.61, 0.148]} rotation={[0, 0, e * -0.22]}>
+          <boxGeometry args={[0.05, 0.011, 0.012]} />
+          <meshStandardMaterial color="#3a2a1c" roughness={0.9} />
+        </mesh>
+      ))}
+      <mesh position={[0, 1.49, 0.15]}>
+        <boxGeometry args={[0.045, 0.008, 0.01]} />
+        <meshStandardMaterial color="#7a3a2a" roughness={0.9} />
       </mesh>
       {/* toque */}
       <mesh position={[0, 1.78, 0]}>
@@ -165,7 +232,7 @@ function Plate({
         <meshStandardMaterial color="#e8e4dc" roughness={0.4} />
       </mesh>
       {dish && DISH_SPRITE[dish] && tier !== "criminal" ? (
-        <DishSprite url={DISH_SPRITE[dish]} dim={tier === "serviceable"} />
+        <DishSprite url={DISH_SPRITE[dish]} dim={tier === "serviceable"} mask />
       ) : (
         <mesh position={[0, 0.04, 0]}>
           {tier === "criminal" ? (
@@ -199,11 +266,15 @@ function Plate({
 /** Plates on the pass (judging) and at stations (plating). */
 function Plates() {
   const tickets = useGame((s) => s.tickets);
+  const phase = useGame((s) => s.phase);
+  const firstPerson = useGame((s) => s.firstPerson);
   const atPass = tickets.find((t) => t.state === "pass");
   const plating = tickets.find((t) => t.state === "plating");
+  // in first person the pass plate lives in your hands (see FirstPerson)
+  const inHand = phase === "service" && firstPerson;
   return (
     <group>
-      {atPass && (
+      {atPass && !inHand && (
         <Plate
           key={atPass.id}
           quality={atPass.quality}
@@ -376,29 +447,6 @@ function HeatPulse() {
   return <pointLight ref={l} position={[0, 3.2, 0]} color="#ff2a14" intensity={0} distance={14} />;
 }
 
-function CameraShake() {
-  const screamAt = useGame((s) => s.screamAt);
-  const smashAt = useGame((s) => s.smashAt);
-  const { camera } = useThree();
-  const base = useRef({ x: 0, y: 4.6, z: 7.2 });
-  useFrame(({ clock }) => {
-    const sinceScream = screamAt ? performance.now() - screamAt : Infinity;
-    const sinceSmash = smashAt ? performance.now() - smashAt : Infinity;
-    const k =
-      (sinceScream < 600 ? (1 - sinceScream / 600) * 0.14 : 0) +
-      (sinceSmash < 400 ? (1 - sinceSmash / 400) * 0.08 : 0);
-    if (k > 0) {
-      camera.position.x = base.current.x + Math.sin(clock.elapsedTime * 55) * k;
-      camera.position.y = base.current.y + Math.cos(clock.elapsedTime * 47) * k * 0.6;
-    } else {
-      camera.position.x = base.current.x;
-      camera.position.y = base.current.y;
-    }
-    camera.lookAt(0, 1.6, -2);
-  });
-  return null;
-}
-
 const AMB_MENU = new Color("#8a6a44");
 const AMB_SVC = new Color("#3a4050");
 const DIR_MENU = new Color("#e8c9a0");
@@ -410,13 +458,14 @@ export default function KitchenScene() {
   const tick = useGame((s) => s.tick);
   const amb = useRef<AmbientLight>(null);
   const dir = useRef<DirectionalLight>(null);
+  const spot = useRef<SpotLight>(null);
   const { scene } = useThree();
   useFrame((_, dt) => {
     tick(Math.min(dt, 0.1));
     // house lights: warm the room during menus, dim to service mood on RUN
     const menu = useGame.getState().phase !== "service";
     const k = 1 - Math.exp(-dt * 4);
-    const ambT = menu ? 0.55 : 0.25;
+    const ambT = menu ? 0.55 : 0.3;
     const dirT = menu ? 0.55 : 0.4;
     if (amb.current) {
       amb.current.intensity += (ambT - amb.current.intensity) * k;
@@ -429,6 +478,11 @@ export default function KitchenScene() {
     const fogT = menu ? FOG_MENU : FOG_SVC;
     (scene.fog as Fog)?.color.lerp(fogT, k);
     (scene.background as Color)?.lerp(fogT, k);
+    if (spot.current) {
+      // eye-level service sees the counter close up — don't blow it out
+      const spotT = menu ? 80 : 32;
+      spot.current.intensity += (spotT - spot.current.intensity) * k;
+    }
   });
   return (
     <>
@@ -436,9 +490,13 @@ export default function KitchenScene() {
       <fog attach="fog" args={["#0d0b09", 14, 30]} />
       <ambientLight ref={amb} intensity={0.25} color="#3a4050" />
       {/* warm key over the kitchen */}
-      <spotLight position={[0, 7, 2]} angle={0.9} penumbra={0.5} intensity={80} color={WARM} castShadow />
+      <spotLight ref={spot} position={[0, 7, 2]} angle={0.9} penumbra={0.5} intensity={80} color={WARM} castShadow />
       {/* steel fill */}
       <directionalLight ref={dir} position={[-5, 6, -1]} intensity={0.4} color="#9fb4d8" />
+      {/* station fill so the brigade reads from eye level without flattening the mood */}
+      {[-3.6, 0, 3.6].map((x) => (
+        <pointLight key={x} position={[x, 2.55, -2.5]} color="#ffb066" intensity={7} distance={5.5} />
+      ))}
       <Room />
       <Stations />
       <PassCounter />
@@ -458,7 +516,7 @@ export default function KitchenScene() {
       <SmashBurst />
       <RivalSilhouette />
       <HeatPulse />
-      <CameraShake />
+      <FirstPerson />
     </>
   );
 }

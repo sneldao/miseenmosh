@@ -53,6 +53,17 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
 
 ## Week 3 — dress it like a band biopic
 
+> **Pivot (19 Nov): the form upgrade.** The art direction is locked; the
+> camera is not. Full plan: [first-person-upgrade.md](first-person-upgrade.md).
+
+- [x] Phase 1 — first-person pass: pointer-lock camera, constrained look,
+      shimmy, hands + plate, RMB inspect, center reticle, charge scream,
+      `V` fallback (dates to Week 3)
+- [ ] Phase 2 — the room answers: look-to-aim fires/guests/rail, 3D speech
+      bubbles replace the ticker, spatial audio tells
+- [ ] Phase 3 — prep as a place: office scene, desk objects, one decision
+      each, night-gated disclosure; Night 1 cold open into service
+- [ ] Phase 4 — venue re-dress (stall → bistro → flagship), lighting tiers
 - [ ] Full cast + props via the pipeline (Idol Max / meshy-t2.5)
 - [ ] Complete audio pass: 8–12 voices, SFX bus, music score
 - [ ] Feud system + rival chefs (incl. Beefcakes), newspaper clippings

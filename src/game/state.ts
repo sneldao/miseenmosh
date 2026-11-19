@@ -208,6 +208,8 @@ interface GameState {
   stampText: string;
   stampAt: number;
   paused: boolean;
+  /** user preference: embodied first-person pass during service */
+  firstPerson: boolean;
   rivalIdx: number;
   rivalAt: number; // serviceTime of last Beefcakes appearance
   barkAt: number;
@@ -235,9 +237,10 @@ interface GameState {
   tick: (dt: number) => void;
   plateToPass: (id: number) => void;
   judge: (v: Verdict) => void;
-  scream: () => void;
+  scream: (power?: number) => void;
   flagGuest: (id: number) => void;
   togglePause: () => void;
+  toggleFirstPerson: () => void;
   smotherFire: (station: number) => void;
 }
 
@@ -374,6 +377,7 @@ export const useGame = create<GameState>((set, get) => ({
   stampText: "",
   stampAt: 0,
   paused: false,
+  firstPerson: true,
   rivalIdx: 0,
   rivalAt: -10,
   barkAt: 16,
@@ -1019,27 +1023,36 @@ export const useGame = create<GameState>((set, get) => ({
     });
   },
 
-  scream: () => {
+  scream: (power = 1) => {
     const s = get();
     if (s.phase !== "service") return;
-    const cost = 3 + Math.floor(s.screams / 2);
+    // charge-and-release: short jab = cheap and brief, full roar = long
+    // adrenaline window, over-held = the brigade stops answering.
+    const p = Math.max(0.2, Math.min(1.4, power));
+    const over = p > 1.05;
+    const cost = 2 + Math.floor(s.screams / 2) + Math.round(p * 2) + (over ? 3 : 0);
     const cooks = s.cooks.map((c) =>
       c.walkedOut ? c : { ...c, morale: Math.max(0, c.morale - cost) }
     );
-    sfx("chorus");
+    sfx(over ? "gasp" : "chorus");
+    if (over) setTimeout(() => sfx("gasp"), 140);
     set({
       screamAt: performance.now(),
-      chorusText: pick(s.rng, BRIGADE_RESPONSES),
+      chorusText: over
+        ? `"..." — nobody answers.`
+        : pick(s.rng, BRIGADE_RESPONSES),
       screams: s.screams + 1,
-      adrenalineTil: s.serviceTime + 6,
+      adrenalineTil: s.serviceTime + 2 + 5 * Math.min(p, 1.05),
       cooks,
-      ego: s.ego + 2,
+      ego: s.ego + (over ? -2 : 2),
       feed: pushFeed(
         s.feed,
-        s.screams === 0
-          ? "You scream. The kitchen moves faster. Everyone hates you."
-          : `Scream #${s.screams + 1}. It's working less.`,
-        "drama"
+        over
+          ? "You held it too long. The kitchen flinches — and stops."
+          : s.screams === 0
+            ? "You scream. The kitchen moves faster. Everyone hates you."
+            : `Scream #${s.screams + 1}. It's working less.`,
+        over ? "bad" : "drama"
       ),
     });
   },
@@ -1075,6 +1088,10 @@ export const useGame = create<GameState>((set, get) => ({
     const s = get();
     if (s.phase !== "service") return;
     set({ paused: !s.paused });
+  },
+
+  toggleFirstPerson: () => {
+    set({ firstPerson: !get().firstPerson });
   },
 
   smotherFire: (station) => {

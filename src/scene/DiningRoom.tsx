@@ -22,7 +22,7 @@ function Guest({ id, table, x }: { id: number; table: number; x: number }) {
     const telling = g.tellAt >= 0 && st.serviceTime - g.tellAt < 3.5;
     if (phone.current) {
       // phone slides up to face height while telling
-      const target = telling ? 1.08 : 0.72;
+      const target = telling ? 1.3 : 0.74;
       phone.current.position.y += (target - phone.current.position.y) * 0.15;
     }
     if (flash.current) {
@@ -33,7 +33,8 @@ function Guest({ id, table, x }: { id: number; table: number; x: number }) {
   if (!g) return null;
   return (
     <group
-      position={[x, 0, -8.6]}
+      position={[x, 0, -7.0]}
+      userData={{ interact: { kind: "guest", id } }}
       onClick={(e) => {
         e.stopPropagation();
         flagGuest(id);
@@ -51,19 +52,19 @@ function Guest({ id, table, x }: { id: number; table: number; x: number }) {
           <meshBasicMaterial />
         </mesh>
         {/* seated figure: dark eveningwear silhouette */}
-        <mesh position={[0, 0.62, 0]}>
+        <mesh position={[0, 0.72, 0]}>
           <capsuleGeometry args={[0.2, 0.5, 6, 10]} />
           <meshStandardMaterial
-            color={criticFlagged && g.isCritic ? "#5a1f8a" : "#3a3a48"}
-            emissive={criticFlagged && g.isCritic ? "#3a1060" : "#000000"}
+            color={criticFlagged && g.isCritic ? "#8a3ac0" : "#7a7a92"}
+            emissive={criticFlagged && g.isCritic ? "#3a1060" : "#16161f"}
           />
         </mesh>
-        <mesh position={[0, 1.15, 0]}>
+        <mesh position={[0, 1.26, 0]}>
           <sphereGeometry args={[0.13, 12, 12]} />
-          <meshStandardMaterial color="#c49a78" />
+          <meshStandardMaterial color="#c49a78" emissive="#241a16" />
         </mesh>
         {/* the tell: phone raised to face, screen lit */}
-        <group ref={phone} position={[0.16, 0.72, 0.22]}>
+        <group ref={phone} position={[0.16, 0.74, 0.22]}>
           <mesh>
             <boxGeometry args={[0.07, 0.12, 0.015]} />
             <meshStandardMaterial color="#111" roughness={0.4} />
@@ -88,14 +89,14 @@ function Guest({ id, table, x }: { id: number; table: number; x: number }) {
         <meshStandardMaterial color="#3a3a42" />
       </mesh>
       {/* candle = visibility anchor */}
-      <pointLight position={[0, 0.7, 0.75]} color="#ff9a4a" intensity={5} distance={2.6} />
+      <pointLight position={[0, 0.7, 0.75]} color="#ff9a4a" intensity={11} distance={3.4} />
     </group>
   );
 }
 
 export default function DiningRoom() {
   return (
-    <group>
+    <group position={[0, 0.26, 0]}>
       {/* dining room floor: cooler, dimmer */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -9]} receiveShadow>
         <planeGeometry args={[16, 9]} />
@@ -104,18 +105,20 @@ export default function DiningRoom() {
       {/* back wall behind the guests */}
       <mesh position={[0, 3, -12]}>
         <boxGeometry args={[16, 6, 0.3]} />
-        <meshStandardMaterial color="#201828" roughness={0.9} />
+        <meshStandardMaterial color="#3a2f3e" roughness={0.9} />
       </mesh>
       {/* cool ceiling wash + warm sconces so guests read through the window */}
       <pointLight position={[0, 4.5, -9]} color="#6a7ab8" intensity={40} distance={16} />
+      {/* window-side wash: the pass needs faces to read at 12m */}
+      <pointLight position={[0, 2.4, -6.4]} color="#ffc08a" intensity={30} distance={7} />
       {[-3.4, 0, 3.4].map((x) => (
         <pointLight key={x} position={[x, 2.8, -11.6]} color="#ff9a4a" intensity={8} distance={7} />
       ))}
-      <Guest id={0} table={10} x={-3.4} />
-      <Guest id={1} table={11} x={-1.7} />
+      <Guest id={0} table={10} x={-3.9} />
+      <Guest id={1} table={11} x={-2.2} />
       <Guest id={2} table={12} x={0} />
-      <Guest id={3} table={13} x={1.7} />
-      <Guest id={4} table={14} x={3.4} />
+      <Guest id={3} table={13} x={2.2} />
+      <Guest id={4} table={14} x={3.9} />
     </group>
   );
 }

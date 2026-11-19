@@ -160,12 +160,17 @@
 
 /* ---- pass actions ---- */
 .pass-actions {
-  position: absolute; bottom: 5.2rem; left: 50%; transform: translateX(-50%);
+  position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
   display: flex; gap: .7rem;
 }
 .pass-actions .btn.serve { border-color: #6aa84f; color: #cfe8bd; }
 .pass-actions .btn.back  { border-color: #b08a2a; color: #eed9a0; }
 .pass-actions .btn.smash { border-color: #a83a2a; color: #f0b0a0; }
+/* in first person the plate owns the bottom centre — the tier line moves up */
+.plate-note.fp-note {
+  position: absolute; top: 11.2rem; left: 50%; transform: translateX(-50%);
+  bottom: auto; margin: 0;
+}
 
 /* ---- status ---- */
 .status {
@@ -192,6 +197,47 @@
   position: absolute; top: 1rem; left: 1rem; font-size: .75rem; opacity: .65;
   max-width: 16rem; line-height: 1.5;
 }
+
+/* ---- first-person pass ---- */
+.reticle {
+  position: absolute; left: 50%; top: 50%; width: 6px; height: 6px;
+  margin: -3px 0 0 -3px; border-radius: 50%;
+  background: rgba(255, 225, 180, .78);
+  box-shadow: 0 0 0 1px rgba(20, 10, 4, .65), 0 0 12px rgba(255, 170, 80, .55);
+  pointer-events: none;
+}
+.lockhint {
+  position: absolute; top: 12.4rem; left: 50%; transform: translateX(-50%);
+  font-size: .66rem; letter-spacing: .11em; color: #ffe2b8;
+  background: rgba(24, 16, 9, .74); border: 1px solid rgba(176, 106, 42, .55);
+  padding: .45rem .8rem; border-radius: 2px; white-space: nowrap;
+  pointer-events: none; animation: lockhint 14s ease forwards;
+}
+.lockhint .sep { opacity: .45; margin: 0 .25rem; }
+@keyframes lockhint {
+  0%, 72% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.charge {
+  position: absolute; left: 50%; top: 63%; transform: translateX(-50%);
+  width: 13rem; height: .62rem; background: rgba(10, 6, 3, .92);
+  border: 1px solid rgba(255, 200, 150, .55); border-radius: 2px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, .8);
+  overflow: visible; pointer-events: none;
+}
+.chargefill {
+  height: 100%; background: linear-gradient(90deg, #e08a2a, #ffe6b0);
+  border-radius: 1px;
+  box-shadow: 0 0 14px rgba(255, 170, 80, .7);
+}
+.charge.over { border-color: #ff6a4a; }
+.charge.over .chargefill { background: linear-gradient(90deg, #c8322a, #ff7a3a); box-shadow: 0 0 16px rgba(255, 70, 40, .9); }
+.chargelabel {
+  position: absolute; top: 1rem; left: 50%; transform: translateX(-50%);
+  font-size: .62rem; letter-spacing: .3em; color: #ffe0b4; white-space: nowrap;
+  text-shadow: 0 1px 6px #000, 0 0 10px rgba(0, 0, 0, .9);
+}
+.charge.over .chargelabel { color: #ffb4a0; }
 
 /* ---- the office (between-nights briefing) ---- */
 .brief-wrap {

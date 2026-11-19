@@ -106,7 +106,7 @@ function Station({
       </mesh>
       <mesh position={[0, 1.12, 0]} castShadow>
         <boxGeometry args={[3.3, 0.06, 1.3]} />
-        <meshStandardMaterial color={STEEL} metalness={0.85} roughness={0.3} />
+        <meshStandardMaterial color={STEEL} metalness={0.45} roughness={0.4} />
       </mesh>
       {/* accent stripe */}
       <mesh position={[0, 0.9, 0.62]}>
@@ -129,6 +129,7 @@ function Station({
       <mesh
         position={[0, 1.3, 0]}
         visible={false}
+        userData={{ interact: { kind: "station", index } }}
         onClick={(e) => {
           e.stopPropagation();
           smotherFire(index);

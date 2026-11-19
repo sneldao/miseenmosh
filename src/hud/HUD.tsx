@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGame, tierOf, Ticket, PlateTier, VENUES } from "../game/state";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
 import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
@@ -41,6 +41,73 @@ const CAST_INTRO: Record<string, string> = {
 };
 const moodOf = (m: number, out: boolean) =>
   out ? "walked out" : m >= 70 ? "sharp" : m >= 45 ? "tired" : m >= 25 ? "dangerous" : "feral";
+
+/** Charge-and-release scream: hold Space, the meter fills, let go. */
+function useScreamCharge() {
+  const [charge, setCharge] = useState(0);
+  const start = useRef(0);
+  const on = useRef(false);
+  useEffect(() => {
+    let raf = 0;
+    const loop = () => {
+      if (!on.current) return;
+      setCharge(Math.min(1.4, (performance.now() - start.current) / 900));
+      raf = requestAnimationFrame(loop);
+    };
+    const down = (e: KeyboardEvent) => {
+      if (e.key !== " " || e.repeat) return;
+      const s = useGame.getState();
+      if (s.phase !== "service" || s.paused) return;
+      e.preventDefault();
+      if (on.current) return;
+      on.current = true;
+      start.current = performance.now();
+      setCharge(0.02);
+      raf = requestAnimationFrame(loop);
+    };
+    const release = () => {
+      if (!on.current) return;
+      on.current = false;
+      cancelAnimationFrame(raf);
+      const s = useGame.getState();
+      const p = Math.max(0.2, Math.min(1.4, (performance.now() - start.current) / 900));
+      setCharge(0);
+      if (s.phase === "service" && !s.paused) s.scream(p);
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.key !== " ") return;
+      e.preventDefault();
+      release();
+    };
+    const blur = () => {
+      on.current = false;
+      cancelAnimationFrame(raf);
+      setCharge(0);
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    window.addEventListener("blur", blur);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", blur);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  return charge;
+}
+
+function usePointerLocked() {
+  const [locked, setLocked] = useState(false);
+  useEffect(() => {
+    const h = () => setLocked(!!document.pointerLockElement);
+    document.addEventListener("pointerlockchange", h);
+    h();
+    return () => document.removeEventListener("pointerlockchange", h);
+  }, []);
+  return locked;
+}
+
 
 const STAMP_IMG: Record<string, string> = {
   SERVED: stampServe,
@@ -233,6 +300,22 @@ function Briefing() {
     return () => window.removeEventListener("keydown", h);
   }, [beat, lastBeat, startService]);
   const fwdLabel = beat < lastBeat ? (beat === 0 ? "TO THE MARKET →" : "TONIGHT'S PROBLEM →") : "RUN SERVICE ↵";
+  const go = () => {
+    if (beat < lastBeat) {
+      setBeat(beat + 1);
+      return;
+    }
+    startService();
+    // the click is the gesture, so the pass can be taken immediately
+    if (useGame.getState().firstPerson) {
+      const c = document.querySelector("canvas") as HTMLCanvasElement | null;
+      try {
+        c?.requestPointerLock?.();
+      } catch {
+        // pointer lock unavailable — V still switches to the cinematic camera
+      }
+    }
+  };
   return (
     <div className="brief-wrap">
       <div className="brief">
@@ -361,7 +444,7 @@ function Briefing() {
         )}
         {feed.length > 0 && <div className="bfeed">{feed[feed.length - 1].text}</div>}
         {!canSave && <div className="bwarn">Progress won't persist — this browser blocks storage.</div>}
-        <button className="btn serve big" onClick={() => (beat < lastBeat ? setBeat(beat + 1) : startService())}>
+        <button className="btn serve big" onClick={go}>
           {fwdLabel}
         </button>
       </div>
@@ -426,9 +509,9 @@ function useHotkeys() {
         return;
       }
       if (s.phase !== "service") return;
-      if (e.key === " " ) {
-        e.preventDefault();
-        s.scream();
+      if (e.key.toLowerCase() === "v") {
+        if (document.pointerLockElement) document.exitPointerLock();
+        s.toggleFirstPerson();
         return;
       }
       if (e.key.toLowerCase() === "p" || e.key === "Escape") {
@@ -462,7 +545,6 @@ export default function HUD() {
   const tickets = useGame((s) => s.tickets);
   const judge = useGame((s) => s.judge);
   const scream = useGame((s) => s.scream);
-  const screams = useGame((s) => s.screams);
   const served = useGame((s) => s.served);
   const sentBack = useGame((s) => s.sentBack);
   const smashed = useGame((s) => s.smashed);
@@ -474,6 +556,15 @@ export default function HUD() {
   const criticSpotted = useGame((s) => s.criticSpotted);
   const streak = useGame((s) => s.streak);
   const paused = useGame((s) => s.paused);
+  const firstPerson = useGame((s) => s.firstPerson);
+  const charge = useScreamCharge();
+  const locked = usePointerLocked();
+
+  useEffect(() => {
+    if (phase !== "service" || paused) {
+      if (document.pointerLockElement) document.exitPointerLock();
+    }
+  }, [phase, paused]);
 
   const [splashIdx, setSplashIdx] = useState(() => Math.floor(Math.random() * SPLASH.length));
   useEffect(() => {
@@ -524,9 +615,30 @@ export default function HUD() {
       {phase === "briefing" && <Briefing />}
       {phase === "service" && (
         <>
+          {firstPerson && <div className="reticle" aria-hidden />}
+          {firstPerson && !locked && !paused && (
+            <div className="lockhint">
+              CLICK TO TAKE THE PASS <span className="sep">·</span> MOUSE LOOKS
+              <span className="sep">·</span> ARROWS SHIMMY <span className="sep">·</span> HOLD
+              SPACE TO SCREAM <span className="sep">·</span> V CAMERA
+            </div>
+          )}
+          {charge > 0 && (
+            <div className={`charge ${charge > 1.05 ? "over" : ""}`}>
+              <div
+                className="chargefill"
+                style={{ width: `${Math.min(100, (charge / 1.4) * 100)}%` }}
+              />
+              <span className="chargelabel">
+                {charge > 1.05 ? "TOO LONG" : charge > 0.75 ? "ROAR" : "INHALE"}
+              </span>
+            </div>
+          )}
           <div className="hint">
             {atPass
-              ? "Judge the plate."
+              ? firstPerson
+                ? "Hold right mouse to look at the plate."
+                : "Judge the plate."
               : live.some((t) => t.state === "plating")
                 ? "Plating…"
                 : "Click a ticket to plate it."}{" "}
@@ -553,9 +665,14 @@ export default function HUD() {
               />
             ))}
           </div>
+          {atPass && firstPerson && (
+            <div className="plate-note fp-note">{TIER_LINE[tierOf(atPass.quality)]}</div>
+          )}
           {atPass && (
-            <div className="pass-actions">
-              <div className="plate-note">{TIER_LINE[tierOf(atPass.quality)]}</div>
+            <div className={`pass-actions${firstPerson ? " fp" : ""}`}>
+              {!firstPerson && (
+                <div className="plate-note">{TIER_LINE[tierOf(atPass.quality)]}</div>
+              )}
               <button className="btn serve" onClick={() => judge("serve")}>
                 SERVE <span className="kbd">S</span>
               </button>
@@ -583,9 +700,9 @@ export default function HUD() {
           </div>
           <Brigade />
           <Ticker />
-          <button className="btn scream" onClick={scream}>
-            SCREAM <span className="kbd">␣</span>{" "}
-            <span className="cost">−{3 + Math.floor(screams / 2)} morale</span>
+          <button className="btn scream" onClick={() => scream(1)}>
+            SCREAM <span className="kbd">SPACE</span>{" "}
+            <span className="cost">hold to charge · costs morale</span>
           </button>
           <Chorus />
           <Stamp />
