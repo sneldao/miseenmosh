@@ -26,7 +26,9 @@
     "cast-gilliam/inspector.webp": "Gilliam cast card \u2014 notebook face, monocle, tiny dish",
     "food-lino/wellington.webp": "linocut dish \u2014 Beef Wellington, ORDER# ticket + knife",
     "food-lino/sea-bass.webp": "linocut dish \u2014 whole sea bass, lemon, herbs",
-    "paper-cookery/market-sign.webp": "cookery-'70s market chalkboard \u2014 'what the sea surrendered' + pointing fishmonger hand"
+    "paper-cookery/market-sign.webp": "cookery-'70s market chalkboard \u2014 'what the sea surrendered' + pointing fishmonger hand",
+    "cast-gilliam/title-lineup.webp": "Gilliam 16:9 hero \u2014 full cast lineup at the pass, Beefcakes in the doorway; title art",
+    "food-lino/quenelle.webp": "linocut dish \u2014 quenelle dessert, chocolate drizzle, mint"
   },
   "notes": "All assets are static \u2014 bake into the bundle, no runtime Recraft dependency. | riso-punk style f7ae045b locked from 2 seed gens; cast + title art in cast/ (7 assets, ~10cr). | Art direction locked: gilliam people / lino food / cookery paper. 3 styles, 12 proof assets, ~30cr.",
   "styles": {
