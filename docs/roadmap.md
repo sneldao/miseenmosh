@@ -59,8 +59,8 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
 - [x] Phase 1 — first-person pass: pointer-lock camera, constrained look,
       shimmy, hands + plate, RMB inspect, center reticle, charge scream,
       `V` fallback (dates to Week 3)
-- [ ] Phase 2 — the room answers: look-to-aim fires/guests/rail, 3D speech
-      bubbles replace the ticker, spatial audio tells
+- [ ] Phase 2 — the room answers: look-to-aim fires/guests/rail *(aim
+      reticle + dining room + rail cap done; bubbles and audio to go)*
 - [ ] Phase 3 — prep as a place: office scene, desk objects, one decision
       each, night-gated disclosure; Night 1 cold open into service
 - [ ] Phase 4 — venue re-dress (stall → bistro → flagship), lighting tiers

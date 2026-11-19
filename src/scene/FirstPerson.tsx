@@ -53,6 +53,7 @@ export default function FirstPerson() {
   const inspect = useRef(false);
   const lift = useRef(0);
   const locked = useRef(false);
+  const aimTick = useRef(0);
   const keys = useRef({ left: false, right: false, fwd: false, back: false });
 
   const scratch = useRef({
@@ -253,6 +254,37 @@ export default function FirstPerson() {
       const sc2 = pg.scale.x + (1 + lv * 0.18 - pg.scale.x) * 0.3;
       pg.scale.setScalar(sc2);
     }
+
+    // --- what the reticle is on: fires, guests, or plain counter
+    aimTick.current += d;
+    if (aimTick.current >= 0.08) {
+      aimTick.current = 0;
+      let kind: "fire" | "guest" | "station" | null = null;
+      if (s.phase === "service" && s.firstPerson && !s.paused) {
+        camera.updateMatrixWorld();
+        sc.ray.setFromCamera(sc.centre, camera);
+        const hits = sc.ray.intersectObjects(scene.children, true);
+        search: for (const hit of hits) {
+          let o: Object3D | null = hit.object;
+          while (o) {
+            const it = o.userData?.interact as
+              | { kind: "station"; index: number }
+              | { kind: "guest"; id: number }
+              | undefined;
+            if (it) {
+              if (it.kind === "station") {
+                kind = s.cooks[it.index]?.burning ? "fire" : "station";
+              } else if (!s.criticFlagged) {
+                kind = "guest";
+              }
+              break search;
+            }
+            o = o.parent;
+          }
+        }
+      }
+      s.setAim(kind);
+    }
   });
 
   // The dish on the hand plate follows the current pass ticket.
@@ -278,9 +310,9 @@ export default function FirstPerson() {
           <DishDecal
             url={DISH_SPRITE[pass.dish]}
             dim={tier === "serviceable"}
-            size={0.27}
+            size={0.235}
             lift={0.022}
-            crop={1}
+            crop={0.8}
           />
         ) : (
           <mesh ref={lump} position={[0, 0.04, 0]}>

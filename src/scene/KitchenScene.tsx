@@ -363,8 +363,26 @@ function Room() {
       {/* window sill / pass shelf */}
       <mesh position={[0, 1.02, -4.9]}>
         <boxGeometry args={[8.4, 0.1, 0.6]} />
-        <meshStandardMaterial color={STEEL} metalness={0.8} roughness={0.35} />
+        <meshStandardMaterial color="#8f9296" metalness={0.45} roughness={0.4} />
       </mesh>
+      {/* brass lip on the sill — the one line that says "pass, not wall" */}
+      <mesh position={[0, 1.075, -4.62]}>
+        <boxGeometry args={[8.44, 0.022, 0.06]} />
+        <meshStandardMaterial color="#b8913e" metalness={0.5} roughness={0.3} />
+      </mesh>
+      {/* timber architrave: the opening has to read as a hole in a wall */}
+      {[-4.28, 4.28].map((x) => (
+        <mesh key={x} position={[x, 2.15, -5]} castShadow>
+          <boxGeometry args={[0.3, 2.3, 0.42]} />
+          <meshStandardMaterial color="#2a1a12" roughness={0.85} />
+        </mesh>
+      ))}
+      <mesh position={[0, 3.31, -5]} castShadow>
+        <boxGeometry args={[8.86, 0.3, 0.42]} />
+        <meshStandardMaterial color="#2a1a12" roughness={0.85} />
+      </mesh>
+      {/* the dining room spills a little warm light through the opening */}
+      <pointLight position={[0, 2.9, -5.5]} color="#ffb066" intensity={6} distance={5} />
       {/* side walls */}
       <mesh position={[-9, 3, 0]} rotation={[0, Math.PI / 2, 0]}>
         <boxGeometry args={[14, 6, 0.3]} />

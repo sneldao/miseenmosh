@@ -2,7 +2,8 @@
 
 *Same game. New camera. Delete the seam between world and UI.*
 
-**Status:** Phase 1 built (19 Nov). In preview, pending iframe/pointer-lock check.
+**Status:** Phase 1 built and deployed (19 Nov, release `de6d1a82`).
+Phase 2 started: the room answers.
 
 ## Why — what the platform actually shows
 
@@ -106,13 +107,21 @@ shoulders and arms so they read as people from eye level. The dining
 room was put on a low step and given a front wash so guests clear the
 station counters and the pass sill.
 
-### Phase 2 — the room answers
+### Phase 2 — the room answers (in progress)
 
 - Look-to-aim interactions: smother fires, flag guests, read tickets on
   the rail.
 - 3D speech bubbles replace the ticker; one transient line maximum.
 - Spatial audio cues for station distress, the printer, the dining room.
 - Physical ticket rail: tickets visibly hang, age, and tear.
+
+**Built so far (19 Nov):** the dining room reads as a room — seated
+diners in eveningwear over candles and table settings, a timber
+architrave around the pass opening, a far wall with prints and sconces,
+and a brass lip on the sill. The reticle now reports what it is on
+(pale = counter, amber = a guest you can flag, red = a fire you can
+smother, with a SMOTHER / FLAG THEM tag). The DOM rail caps at six
+dockets with a `+N` chip so a bad run cannot push the rail off-screen.
 
 ### Phase 3 — prep as a place
 

@@ -210,6 +210,8 @@ interface GameState {
   paused: boolean;
   /** user preference: embodied first-person pass during service */
   firstPerson: boolean;
+  /** what the centre of the screen is aimed at, for the reticle */
+  aim: "fire" | "guest" | "station" | null;
   rivalIdx: number;
   rivalAt: number; // serviceTime of last Beefcakes appearance
   barkAt: number;
@@ -241,6 +243,7 @@ interface GameState {
   flagGuest: (id: number) => void;
   togglePause: () => void;
   toggleFirstPerson: () => void;
+  setAim: (aim: "fire" | "guest" | "station" | null) => void;
   smotherFire: (station: number) => void;
 }
 
@@ -378,6 +381,7 @@ export const useGame = create<GameState>((set, get) => ({
   stampAt: 0,
   paused: false,
   firstPerson: true,
+  aim: null,
   rivalIdx: 0,
   rivalAt: -10,
   barkAt: 16,
@@ -1092,6 +1096,10 @@ export const useGame = create<GameState>((set, get) => ({
 
   toggleFirstPerson: () => {
     set({ firstPerson: !get().firstPerson });
+  },
+
+  setAim: (aim) => {
+    if (get().aim !== aim) set({ aim });
   },
 
   smotherFire: (station) => {

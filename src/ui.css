@@ -39,6 +39,12 @@
   position: absolute; top: 1rem; left: 50%; transform: translateX(-50%);
   display: flex; gap: .5rem; max-width: 92vw; overflow: hidden;
 }
+.rail-more {
+  align-self: flex-start; min-width: 2.4rem; padding: .45rem .5rem;
+  background: rgba(20, 13, 7, .9); color: #ffd9a0;
+  border: 1px dashed rgba(176, 106, 42, .8); border-radius: 0 0 3px 3px;
+  font-size: .72rem; letter-spacing: .08em; text-align: center;
+}
 .ticket {
   background: #f4ead2; color: #221408;
   padding: .45rem .6rem; min-width: 7.2rem;
@@ -166,9 +172,10 @@
 .pass-actions .btn.serve { border-color: #6aa84f; color: #cfe8bd; }
 .pass-actions .btn.back  { border-color: #b08a2a; color: #eed9a0; }
 .pass-actions .btn.smash { border-color: #a83a2a; color: #f0b0a0; }
-/* in first person the plate owns the bottom centre — the tier line moves up */
+/* in first person the plate owns the bottom centre — the tier line moves up,
+   under the lock hint and over the dark wall band above the diners */
 .plate-note.fp-note {
-  position: absolute; top: 11.2rem; left: 50%; transform: translateX(-50%);
+  position: absolute; top: 16rem; left: 50%; transform: translateX(-50%);
   bottom: auto; margin: 0;
 }
 
@@ -204,8 +211,27 @@
   margin: -3px 0 0 -3px; border-radius: 50%;
   background: rgba(255, 225, 180, .78);
   box-shadow: 0 0 0 1px rgba(20, 10, 4, .65), 0 0 12px rgba(255, 170, 80, .55);
+  pointer-events: none; transition: box-shadow .09s linear, background .09s linear;
+}
+.reticle.aim-fire {
+  width: 12px; height: 12px; margin: -6px 0 0 -6px;
+  background: rgba(255, 120, 70, .55);
+  box-shadow: 0 0 0 2px rgba(255, 120, 70, .95), 0 0 22px rgba(255, 90, 40, .85);
+}
+.reticle.aim-guest {
+  width: 10px; height: 10px; margin: -5px 0 0 -5px;
+  background: rgba(255, 200, 120, .5);
+  box-shadow: 0 0 0 2px rgba(255, 205, 130, .9), 0 0 20px rgba(255, 180, 90, .7);
+}
+.aimtag {
+  position: absolute; left: 50%; top: calc(50% + 1.1rem); transform: translateX(-50%);
+  font-size: .58rem; letter-spacing: .28em; white-space: nowrap;
+  padding: .16rem .45rem; border-radius: 1px;
+  background: rgba(12, 8, 4, .82);
   pointer-events: none;
 }
+.aimtag.fire { color: #ffb0a0; border: 1px solid rgba(255, 120, 70, .8); }
+.aimtag.guest { color: #ffe0b4; border: 1px solid rgba(255, 205, 130, .7); }
 .lockhint {
   position: absolute; top: 12.4rem; left: 50%; transform: translateX(-50%);
   font-size: .66rem; letter-spacing: .11em; color: #ffe2b8;

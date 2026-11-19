@@ -557,6 +557,7 @@ export default function HUD() {
   const streak = useGame((s) => s.streak);
   const paused = useGame((s) => s.paused);
   const firstPerson = useGame((s) => s.firstPerson);
+  const aim = useGame((s) => s.aim);
   const charge = useScreamCharge();
   const locked = usePointerLocked();
 
@@ -575,6 +576,10 @@ export default function HUD() {
 
   const atPass = tickets.find((t) => t.state === "pass");
   const live = tickets.filter((t) => t.state === "rail" || t.state === "plating");
+  // the rail is a fixed shelf: six dockets fit, the rest queue behind a chip
+  const railAll = live.filter((t) => t.state === "rail");
+  const railShown = railAll.slice(0, 6);
+  const hiddenRail = railAll.length - railShown.length;
   const amped = serviceTime < adrenalineTil;
 
   return (
@@ -615,7 +620,14 @@ export default function HUD() {
       {phase === "briefing" && <Briefing />}
       {phase === "service" && (
         <>
-          {firstPerson && <div className="reticle" aria-hidden />}
+          {firstPerson && (
+            <div className={`reticle${aim ? ` aim-${aim}` : ""}`} aria-hidden />
+          )}
+          {firstPerson && (aim === "fire" || aim === "guest") && (
+            <div className={`aimtag ${aim}`}>
+              {aim === "fire" ? "SMOTHER" : "FLAG THEM"}
+            </div>
+          )}
           {firstPerson && !locked && !paused && (
             <div className="lockhint">
               CLICK TO TAKE THE PASS <span className="sep">·</span> MOUSE LOOKS
@@ -653,17 +665,19 @@ export default function HUD() {
                 : "DESSERT COURSE."}
           </div>
           <div className="rail">
-            {live.map((t) => (
-              <TicketCard
-                key={t.id}
-                t={t}
-                hotkey={
-                  t.state === "rail"
-                    ? live.filter((x) => x.state === "rail").indexOf(t) + 1
-                    : undefined
-                }
-              />
+            {live
+              .filter((t) => t.state === "plating")
+              .map((t) => (
+                <TicketCard key={t.id} t={t} />
+              ))}
+            {railShown.map((t) => (
+              <TicketCard key={t.id} t={t} hotkey={railAll.indexOf(t) + 1} />
             ))}
+            {hiddenRail > 0 && (
+              <div className="rail-more" title={`${hiddenRail} more on the rail`}>
+                +{hiddenRail}
+              </div>
+            )}
           </div>
           {atPass && firstPerson && (
             <div className="plate-note fp-note">{TIER_LINE[tierOf(atPass.quality)]}</div>
