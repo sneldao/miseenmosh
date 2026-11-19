@@ -4,14 +4,36 @@
   "custom_style_id": "624cc37c-9e4a-4cf5-bfca-32f74db42a29",
   "style_name": "band-biopic grain (amber pass vs cold teal dining room)",
   "assets": {
-    "style-refs/": "The 3 reference images used to train the custom style — reuse them as style anchors",
+    "style-refs/": "The 3 reference images used to train the custom style \u2014 reuse them as style anchors",
     "raster/cover-art-ticket-storm.webp": "Hero/cover art: chef silhouette at the pass in a ticket storm",
     "raster/chef-pistols-poster.webp": "Gig poster for the kitchen wall",
     "raster/review-clipping-third-star.webp": "Newspaper/review clipping, legible headline",
     "raster/dish-*.webp": "Plated dish shots on the pass (pre-cutout versions)",
     "vector/title-lockup.svg": "MISE EN MOSH title lockup",
     "vector/stamp-*.svg": "Verdict rubber stamps: SERVE / SEND BACK / SMASH",
-    "sprites/*.webp": "Transparent dish sprites (alpha, trimmed) for plates on the pass"
+    "sprites/*.webp": "Transparent dish sprites (alpha, trimmed) for plates on the pass",
+    "cast/petra.webp": "riso-punk cast card \u2014 grill cook, tongs crossed; title + brigade cards",
+    "cast/dimitri.webp": "riso-punk cast card \u2014 veteran saut\u00e9, mustache, ticket flip",
+    "cast/anwar.webp": "riso-punk cast card \u2014 nervous pastry cook, dessert tower",
+    "cast/beefcakes.webp": "riso-punk cast card \u2014 gym-bro rival, shaker trophy, smug",
+    "cast/inspector.webp": "riso-punk cast card \u2014 notebook, monocle, camera, tiny dish",
+    "cast/title-lineup.webp": "riso-punk 16:9 hero \u2014 full cast lineup, title screen art",
+    "cast/wellington-riso.webp": "riso-punk wellington with ORDER ticket + knife \u2014 dish art candidate",
+    "cast-gilliam/petra.webp": "Gilliam cast card \u2014 grill cook on her grill, tongs crossed",
+    "cast-gilliam/dimitri.webp": "Gilliam cast card \u2014 mustached veteran, cigarette, pan",
+    "cast-gilliam/anwar.webp": "Gilliam cast card \u2014 nervous pastry lad, quenelle tower",
+    "cast-gilliam/beefcakes.webp": "Gilliam cast card \u2014 engraving muscles, shaker trophy",
+    "cast-gilliam/inspector.webp": "Gilliam cast card \u2014 notebook face, monocle, tiny dish",
+    "food-lino/wellington.webp": "linocut dish \u2014 Beef Wellington, ORDER# ticket + knife",
+    "food-lino/sea-bass.webp": "linocut dish \u2014 whole sea bass, lemon, herbs",
+    "paper-cookery/market-sign.webp": "cookery-'70s market chalkboard \u2014 'what the sea surrendered' + pointing fishmonger hand"
   },
-  "notes": "All assets are static — bake into the bundle, no runtime Recraft dependency."
+  "notes": "All assets are static \u2014 bake into the bundle, no runtime Recraft dependency. | riso-punk style f7ae045b locked from 2 seed gens; cast + title art in cast/ (7 assets, ~10cr). | Art direction locked: gilliam people / lino food / cookery paper. 3 styles, 12 proof assets, ~30cr.",
+  "styles": {
+    "band-biopic (legacy)": "624cc37c-9e4a-4cf5-bfca-32f74db42a29",
+    "riso-punk": "f7ae045b-315a-445a-b902-174a075223fc",
+    "gilliam-collage": "da25e4f6-5499-454f-8dd4-d73ff3ed98f9",
+    "cookery-70s": "f7f7d7fa-b70c-4a40-a049-2aa978d13483",
+    "linocut-food": "4d3d77fd-d464-4494-a6fb-72834776f6e8"
+  }
 }
