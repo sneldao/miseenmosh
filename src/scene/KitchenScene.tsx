@@ -11,6 +11,7 @@ import { Group, PointLight, AmbientLight, DirectionalLight, SpotLight, Color, Fo
 import chefPoster from "../../assets/recraft/raster/chef-pistols-poster.webp";
 import DishSprite, { DISH_SPRITE } from "./DishSprite";
 import FirstPerson from "./FirstPerson";
+import RailDockets from "./RailDockets";
 const STEEL = "#8a8d91";
 const STEEL_DARK = "#4a4d52";
 const WARM = "#ffb066";
@@ -518,6 +519,7 @@ export default function KitchenScene() {
       <Room />
       <Stations />
       <PassCounter />
+      <RailDockets />
       <DiningRoom />
       {/* brigade: one figure per station, color-coded */}
       <BrigadeFigure cookId={0} x={-3.6} stationHue="#a8322a" />
