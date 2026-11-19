@@ -5,10 +5,14 @@ Fill in the preview URL after `opengame deploy dist`.
 
 ## X version
 
+LIVE at: https://opengame.io/g/9i7mjkmdx4?preview=ed446439-733a-4b07-bfeb-b59ed5932111
+(deploy b638dee7, ready; same preview link as before — the URL never
+changes, so posts stay valid across redeploys)
+
 MISE EN MOSH is playable. Judge plates, spot the hidden critic,
 scream at your brigade, get a receipt-shaped review.
 
-<preview link here>
+https://opengame.io/g/9i7mjkmdx4?preview=ed446439-733a-4b07-bfeb-b59ed5932111
 
 Night 1 tip: the SCREAM button is not a strategy. #ZAxisAwards
 
