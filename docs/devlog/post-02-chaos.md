@@ -1,6 +1,7 @@
 # Build-in-public post 02 — the scream cascade (draft for owner to post)
 
 Attach: docs/devlog/media/night1-chaos-clip.mp4 (15s, 783KB, 12fps)
+GIF variant for autoplay embeds: night1-chaos-clip.gif (857KB, 640px)
 
 ## X version
 
