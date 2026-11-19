@@ -7,7 +7,7 @@ import Cloche from "./Cloche";
 import MeshyProp from "./MeshyProp";
 import { useTexture } from "@react-three/drei";
 import { tileTexture, floorTexture } from "./tex";
-import { Group, PointLight } from "three";
+import { Group, PointLight, AmbientLight, DirectionalLight, Color, Fog } from "three";
 import chefPoster from "../../assets/recraft/raster/chef-pistols-poster.webp";
 import wellingtonSprite from "../../assets/recraft/food-lino/wellington.webp";
 import seaBassSprite from "../../assets/recraft/food-lino/sea-bass.webp";
@@ -399,18 +399,46 @@ function CameraShake() {
   return null;
 }
 
+const AMB_MENU = new Color("#8a6a44");
+const AMB_SVC = new Color("#3a4050");
+const DIR_MENU = new Color("#e8c9a0");
+const DIR_SVC = new Color("#9fb4d8");
+const FOG_MENU = new Color("#241a12");
+const FOG_SVC = new Color("#0d0b09");
+
 export default function KitchenScene() {
   const tick = useGame((s) => s.tick);
-  useFrame((_, dt) => tick(Math.min(dt, 0.1)));
+  const amb = useRef<AmbientLight>(null);
+  const dir = useRef<DirectionalLight>(null);
+  const { scene } = useThree();
+  useFrame((_, dt) => {
+    tick(Math.min(dt, 0.1));
+    // house lights: warm the room during menus, dim to service mood on RUN
+    const menu = useGame.getState().phase !== "service";
+    const k = 1 - Math.exp(-dt * 4);
+    const ambT = menu ? 0.55 : 0.25;
+    const dirT = menu ? 0.55 : 0.4;
+    if (amb.current) {
+      amb.current.intensity += (ambT - amb.current.intensity) * k;
+      amb.current.color.lerp(menu ? AMB_MENU : AMB_SVC, k);
+    }
+    if (dir.current) {
+      dir.current.intensity += (dirT - dir.current.intensity) * k;
+      dir.current.color.lerp(menu ? DIR_MENU : DIR_SVC, k);
+    }
+    const fogT = menu ? FOG_MENU : FOG_SVC;
+    (scene.fog as Fog)?.color.lerp(fogT, k);
+    (scene.background as Color)?.lerp(fogT, k);
+  });
   return (
     <>
       <color attach="background" args={["#0d0b09"]} />
       <fog attach="fog" args={["#0d0b09", 14, 30]} />
-      <ambientLight intensity={0.25} color="#3a4050" />
+      <ambientLight ref={amb} intensity={0.25} color="#3a4050" />
       {/* warm key over the kitchen */}
       <spotLight position={[0, 7, 2]} angle={0.9} penumbra={0.5} intensity={80} color={WARM} castShadow />
       {/* steel fill */}
-      <directionalLight position={[-5, 6, -1]} intensity={0.4} color="#9fb4d8" />
+      <directionalLight ref={dir} position={[-5, 6, -1]} intensity={0.4} color="#9fb4d8" />
       <Room />
       <Stations />
       <PassCounter />
