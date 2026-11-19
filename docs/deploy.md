@@ -112,3 +112,5 @@ first 90 seconds and the cold open changes what it sees.
 
 - **19 Nov** — `build.output` added; release `de6d1a82` (first-person pass)
   landed on `9i7mjkmdx4` after a duplicate game was created and deleted.
+  That used the fifth deploy of the day; the Phase 2 build (dining room,
+  aim reticle, rail cap) is committed but waits for the 23:46 UTC reset.
