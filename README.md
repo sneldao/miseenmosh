@@ -11,6 +11,7 @@ A kitchen-tyrant service game for **OpenGame Game Jam #1** (Nov 18 – Dec 18,
 
 - Design: [docs/design.md](docs/design.md)
 - Build plan: [docs/roadmap.md](docs/roadmap.md)
+- Deploy: [docs/deploy.md](docs/deploy.md)
 - Research: [docs/research/](docs/research)
 
 ## Elevator test

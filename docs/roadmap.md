@@ -75,7 +75,8 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
 - [ ] opengame check --build cycles; resize across the 5 viewports
 - [ ] Performance pass: 45fps @1080p on ordinary laptop, <50MB first frame
 - [ ] Playtest sessions (10/day allowance); fix confirmed findings only
-- [ ] Deploy early, iterate — latest live version at deadline is judged
+- [ ] Deploy early, iterate — latest live version at deadline is judged.
+      Runbook: [deploy.md](deploy.md) (deploy from the root; `build.output` packages `dist/`)
 - [ ] Publish → Simulation & management + all three sponsor tracks
 - [ ] Cross-submit to Chroma Awards (by Jan 7) — interactive narrative
 

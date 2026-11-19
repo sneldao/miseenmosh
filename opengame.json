@@ -6,5 +6,9 @@
   "genre": "simulation-management",
   "kind": "game",
   "controls": "auto",
-  "players": "single"
+  "players": "single",
+  "build": {
+    "command": "npm run build",
+    "output": "dist"
+  }
 }
