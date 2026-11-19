@@ -4,6 +4,7 @@ import { useGame } from "../game/state";
 import Stations from "./Stations";
 import DiningRoom from "./DiningRoom";
 import Cloche from "./Cloche";
+import MeshyProp from "./MeshyProp";
 import { useTexture } from "@react-three/drei";
 import { tileTexture, floorTexture } from "./tex";
 import { Group, PointLight } from "three";
@@ -420,6 +421,12 @@ export default function KitchenScene() {
       <BrigadeFigure cookId={2} x={3.6} stationHue="#3a6a9a" />
       <Plates />
       <Cloche />
+      {/* Meshy prop batch — sill + pass (see docs/meshy-pipeline.md) */}
+      <MeshyProp url="/models/platestack.glb" height={0.42} position={[-2.7, 1.16, 2.15]} tint={{ color: "#e8e4dc", metalness: 0.05, roughness: 0.55 }} wobble="scream" />
+      <MeshyProp url="/models/panstack.glb" height={0.45} position={[-3.8, 1.07, -4.85]} tint={{ color: "#b87333", metalness: 0.85, roughness: 0.4 }} />
+      <MeshyProp url="/models/seabass.glb" height={0.3} position={[-1.9, 1.07, -4.85]} rotation={0.5} tint={{ color: "#c8ccd4", metalness: 0.55, roughness: 0.4 }} />
+      <MeshyProp url="/models/lamb.glb" height={0.5} position={[1.8, 1.07, -4.85]} tint={{ color: "#c96a5a", metalness: 0.05, roughness: 0.7 }} />
+      <MeshyProp url="/models/shaker.glb" height={0.5} position={[3.8, 1.07, -4.85]} rotation={-0.4} tint={{ color: "#9fe060", metalness: 0.4, roughness: 0.5 }} />
       <SmashBurst />
       <RivalSilhouette />
       <HeatPulse />
