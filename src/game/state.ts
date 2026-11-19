@@ -114,6 +114,7 @@ export interface Feud {
   text: string;
   options: string[];
   resolved: boolean;
+  actor: "beefcakes" | "critic" | "fishmonger";
   outcome?: string;
 }
 
@@ -139,20 +140,24 @@ const LOT_DECK: Omit<Lot, "bought">[] = [
   { name: "Farm eggs, still warm", desc: "the hen glared. pastry +5", cost: 28, station: 2, qBonus: 5, contested: false },
 ];
 
-const FEUD_DECK: { text: (cook: string) => string; options: string[] }[] = [
+const FEUD_DECK: { actor: Feud["actor"]; text: (cook: string) => string; options: string[] }[] = [
   {
+    actor: "beefcakes",
     text: (c) => `BEEFCAKES slid ${c} a napkin offer. Double your money, says the gym-bro.`,
     options: ["Match it. (−£90, keep them)", "Let them walk. You don't chase talent."],
   },
   {
+    actor: "critic",
     text: () => "The food press wants your take on BEEFCAKES' protein-only tasting menu.",
     options: [`"It's a smoothie with plates." (+ego, +heat)`, `"I wish him well." (+brigade morale)`],
   },
   {
+    actor: "fishmonger",
     text: () => "A refrigerated van pulls up. The driver offers you BEEFCAKES' fish order. Still cold.",
     options: ["Take it. (−£50, brigade feasts)", "Refuse. You're not that kind of kitchen."],
   },
   {
+    actor: "beefcakes",
     text: () => "BEEFCAKES bought every food-truck pitch within a mile of your door.",
     options: ["Outbid him. (−£70)", "Eat it. He can't buy taste. (+heat)"],
   },
@@ -329,6 +334,7 @@ function makeFeud(career: Career, cooks: Cook[]): Feud | null {
     text: def.text(weakest?.name ?? "your sous"),
     options: def.options,
     resolved,
+    actor: def.actor,
     outcome: resolved ? career.feudOutcome : undefined,
   };
 }

@@ -305,13 +305,20 @@
 .ccard.tall .cname { font-size: .82rem; font-weight: 700; }
 .ccard .mood { color: #c9a44a; }
 .ccard .intro { color: #9a917f; font-style: italic; }
-.ccard .noimg {
-  height: 8.6rem; display: flex; align-items: center; justify-content: center;
-  color: #9a917f; font-size: .7rem; letter-spacing: .12em;
-  border: 1px dashed rgba(255,255,255,.2);
+.ccard .freshmeat {
+  color: #d0735a; font-size: .62rem; letter-spacing: .1em; font-weight: 700;
 }
 .ccard.gone { opacity: .38; filter: grayscale(1); }
 .beat { min-height: 15rem; }
+.market-head {
+  display: flex; gap: .7rem; align-items: center; justify-content: center;
+  margin-bottom: .6rem;
+}
+.market-head .fishmonger {
+  width: 7rem; border: 2px solid #efe6d4; transform: rotate(2deg);
+  box-shadow: 3px 3px 0 rgba(0,0,0,.4); flex-shrink: 0;
+}
+.market-head .market-sign { width: min(60%, 16rem); margin: 0; }
 .market-sign { width: min(92%, 21rem); display: block; margin: 0 auto .6rem; border: 2px solid #efe6d4; }
 .bshop.slim { display: flex; flex-direction: column; gap: .35rem; margin-top: .7rem; }
 .bshop.slim .mhead { margin-bottom: .1rem; }

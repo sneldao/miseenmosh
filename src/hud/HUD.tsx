@@ -8,6 +8,9 @@ import castPetra from "../../assets/recraft/cast-gilliam/petra.webp";
 import castDimitri from "../../assets/recraft/cast-gilliam/dimitri.webp";
 import castAnwar from "../../assets/recraft/cast-gilliam/anwar.webp";
 import castBeefcakes from "../../assets/recraft/cast-gilliam/beefcakes.webp";
+import castCritic from "../../assets/recraft/cast-gilliam/critic.webp";
+import castFishmonger from "../../assets/recraft/cast-gilliam/fishmonger.webp";
+import castCommis from "../../assets/recraft/cast-gilliam/commis.webp";
 import marketSign from "../../assets/recraft/paper-cookery/market-sign.webp";
 import reviewClip from "../../assets/recraft/raster/review-clipping-third-star.webp";
 
@@ -25,6 +28,12 @@ const SPLASH = [
 ];
 
 const CAST_IMG: Record<string, string> = { PETRA: castPetra, DIMITRI: castDimitri, ANWAR: castAnwar };
+const FEUD_ART: Record<string, string> = { beefcakes: castBeefcakes, critic: castCritic, fishmonger: castFishmonger };
+const FEUD_ALT: Record<string, string> = {
+  beefcakes: "BEEFCAKES — protein dealer",
+  critic: "THE PRESS — hungry for the best",
+  fishmonger: "THE FISH VAN — still cold",
+};
 const CAST_INTRO: Record<string, string> = {
   PETRA: "runs grill. Do not touch her tongs.",
   DIMITRI: "runs sauté. He's seen things.",
@@ -253,11 +262,8 @@ function Briefing() {
             <div className="cast row">
               {cooks.map((c) => (
                 <div key={c.id} className={`ccard tall ${c.walkedOut ? "gone" : ""}`}>
-                  {CAST_IMG[c.name] ? (
-                    <img src={CAST_IMG[c.name]} alt={c.name} />
-                  ) : (
-                    <div className="noimg">FRESH MEAT</div>
-                  )}
+                  <img src={CAST_IMG[c.name] ?? castCommis} alt={c.name} />
+                  {!CAST_IMG[c.name] && <span className="freshmeat">FRESH MEAT — first night</span>}
                   <span className="cname">
                     {c.name}
                     {c.trauma > 0 && <span className="scar">{" ✕".repeat(Math.min(3, c.trauma))}</span>}
@@ -275,7 +281,10 @@ function Briefing() {
         )}
         {beat === 1 && (
           <div className="beat">
-            <img className="market-sign" src={marketSign} alt="MORNING MARKET — what the sea surrendered" />
+            <div className="market-head">
+              <img className="fishmonger" src={castFishmonger} alt="The fishmonger — what the sea surrendered" />
+              <img className="market-sign" src={marketSign} alt="MORNING MARKET — what the sea surrendered" />
+            </div>
             {lots.length > 0 && (
           <div className="market">
             <div className="mhead">MORNING MARKET — what the sea surrendered</div>
@@ -328,7 +337,7 @@ function Briefing() {
         )}
         {beat === 2 && feud && (
           <div className="beat feudbeat">
-            <img className="feudface" src={castBeefcakes} alt="BEEFCAKES" />
+            <img className="feudface" src={FEUD_ART[feud.actor] ?? castBeefcakes} alt={FEUD_ALT[feud.actor] ?? "BEEFCAKES"} />
             <div className="feud">
               <div className="ftext">{feud.text}</div>
               {feud.resolved ? (

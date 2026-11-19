@@ -28,7 +28,10 @@
     "food-lino/sea-bass.webp": "linocut dish \u2014 whole sea bass, lemon, herbs",
     "paper-cookery/market-sign.webp": "cookery-'70s market chalkboard \u2014 'what the sea surrendered' + pointing fishmonger hand",
     "cast-gilliam/title-lineup.webp": "Gilliam 16:9 hero \u2014 full cast lineup at the pass, Beefcakes in the doorway; title art",
-    "food-lino/quenelle.webp": "linocut dish \u2014 quenelle dessert, chocolate drizzle, mint"
+    "food-lino/quenelle.webp": "linocut dish \u2014 quenelle dessert, chocolate drizzle, mint",
+    "cast-gilliam/fishmonger.webp": "Gilliam \u2014 fishmonger shouting \"FISH! SIXPENCE\", market seller face",
+    "cast-gilliam/critic.webp": "Gilliam \u2014 press critic \"THE CRITIC \u2014 hungry for the best\", press feud art",
+    "cast-gilliam/commis.webp": "Gilliam \u2014 \"COMMIS CHEF \u2014 FIRST NIGHT\", fallback portrait for NEW_BLOOD cooks"
   },
   "notes": "All assets are static \u2014 bake into the bundle, no runtime Recraft dependency. | riso-punk style f7ae045b locked from 2 seed gens; cast + title art in cast/ (7 assets, ~10cr). | Art direction locked: gilliam people / lino food / cookery paper. 3 styles, 12 proof assets, ~30cr.",
   "styles": {
