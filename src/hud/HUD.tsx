@@ -222,13 +222,21 @@ function Stamp() {
   );
 }
 
+const VERB_RE = /(\([A-Z]\)|\bCORNER\b|\bFIRE\w*|\bWHISK\w*|\bSHOO\w*|\bSMASH\w*|\bJUDG\w*|\bCLOCK\w*|\bSPOT\w*|\bHANDS\b|\bREFUS\w*|\bCOMP\w*|(?<!STALL )86\w*)/i;
+function rich(text: string) {
+  return text.split(VERB_RE).map((part, i) => {
+    if (/^\([A-Z]\)$/.test(part)) return <span key={i} className="kbd">{part}</span>;
+    if (VERB_RE.test(part)) return <b key={i} className="verb">{part}</b>;
+    return <span key={i}>{part}</span>;
+  });
+}
 function Ticker() {
   const feed = useGame((s) => s.feed);
   return (
     <div className="ticker">
       {feed.slice(-4).map((f) => (
         <div key={f.id} className={`line ${f.kind}`}>
-          {f.text}
+          {rich(f.text)}
         </div>
       ))}
     </div>
@@ -682,6 +690,7 @@ function Briefing() {
                 <div className="ltaken">101: {career.seating101.toUpperCase()} · window +patience for the rest</div>
               ) : (
                 <>
+                  {career.night >= 8 && <div className="ltaken">No call? MARA &amp; JUNE take 101 without being asked. Override below.</div>}
                   <button className="btn shop" onClick={() => chooseSeating("regulars")}>REGULARS TO 101 <span className="cost">they love it · +ego if honoured</span></button>
                   <button className="btn shop" onClick={() => chooseSeating("press")}>PRESS TO WINDOW <span className="cost">fast, writes fast</span></button>
                   <button className="btn shop" onClick={() => chooseSeating("walkin")}>WALK-INS TO 101 <span className="cost">impatient, big spend</span></button>
@@ -799,6 +808,14 @@ function useHotkeys() {
         s.continueNext();
         return;
       }
+      if (e.key === "?" && (s.phase !== "service" || s.paused)) {
+        s.toggleGlossary();
+        return;
+      }
+      if (e.key === "Escape" && s.phase !== "service" && s.glossary) {
+        s.toggleGlossary();
+        return;
+      }
       if (s.phase !== "service") return;
       if (e.key.toLowerCase() === "v") {
         if (document.pointerLockElement) document.exitPointerLock();
@@ -836,9 +853,41 @@ function useHotkeys() {
   }, []);
 }
 
+function Glossary() {
+  const toggleGlossary = useGame((s) => s.toggleGlossary);
+  const rows: [string, string][] = [
+    ["1–9", "plate rail ticket to pass"],
+    ["S / B / X", "serve · send back · smash the judged plate"],
+    ["F", "fire plate to station"],
+    ["E", "86 the dish (bin it, slate wiped)"],
+    ["M", "whisk a splitting sauce back"],
+    ["T", "move 101 mid-rush"],
+    ["H", "shoo BEEFCAKES' runner"],
+    ["D", "refuse request · refuse-with-grace (cold plate)"],
+    ["R", "fix the folklore (fork/glass/coat)"],
+    ["C", "comp the hanging table (champagne)"],
+    ["click table", "flag the inspector (before dessert)"],
+    ["P / Esc", "pause"],
+    ["V", "first-person pass view"],
+    ["?", "this card"],
+  ];
+  return (
+    <div className="glossary" onClick={toggleGlossary}>
+      <div className="gcard" onClick={(e) => e.stopPropagation()}>
+        <div className="ghead">HOUSE MANUAL — ? to close</div>
+        {rows.map(([k, v]) => (
+          <div key={k} className="grow"><span className="gkey">{k}</span><span>{v}</span></div>
+        ))}
+        <button className="btn" onClick={toggleGlossary}>BACK TO WORK</button>
+      </div>
+    </div>
+  );
+}
+
 export default function HUD() {
   useHotkeys();
   const phase = useGame((s) => s.phase);
+  const glossary = useGame((s) => s.glossary);
   const start = useGame((s) => s.start);
   const resetCareer = useGame((s) => s.resetCareer);
   const hasSave = useGame((s) => s.hasSave);
@@ -901,6 +950,7 @@ export default function HUD() {
 
   return (
     <div className="hud">
+      {glossary && <Glossary />}
       {phase === "title" && (
         <div className="title-card">
           <img className="hero-lineup" src={lineupArt} alt="MISE EN MOSH — the brigade at the pass" />

@@ -184,6 +184,9 @@ export interface Career {
   beefcakesTruce?: boolean;
   /** BEEFCAKES night (N5): rivalry doubles his runners tonight */
   beefcakesWar?: boolean;
+  /** first-time gentling: first sauce gets 7s, first runner warns 10s out */
+  sauceGentled?: boolean;
+  runnerGentled?: boolean;
   /** covers earned this run (4–5★ reviews name the magazine) */
   covers?: string[];
   /** coaching: night a cook was coached (one session a night) */
@@ -429,6 +432,8 @@ interface GameState {
   madameNodded: boolean;
   /** the brigade is flying: announced once, favourites land harder */
   flyingAnnounced: boolean;
+  /** on-demand key glossary overlay (never in unpaused service) */
+  glossary: boolean;
   /** the critic's exit: head high (fed, spotted) or coat on (slipped away) */
   criticLeft: boolean;
   criticServeAt: number;
@@ -501,6 +506,7 @@ interface GameState {
   scream: (power?: number) => void;
   flagGuest: (id: number) => void;
   togglePause: () => void;
+  toggleGlossary: () => void;
   toggleFirstPerson: () => void;
   setAim: (aim: "fire" | "guest" | "ticket" | "station" | null) => void;
   smotherFire: (station: number) => void;
@@ -686,7 +692,9 @@ function venueFor(stars: number) {
 /** 101 migrates up with the room: wobbly corner → window → center stage */
 const ONE_OH_ONE_IDX = [4, 2, 0];
 export function oneOhOneTable(career: Career): number {
-  return career.seating101 ? 10 + ONE_OH_ONE_IDX[Math.min(2, career.venue)] : -1;
+  // N8+: no call is still a call — MARA & JUNE take 101 without being asked
+  const seat = career.seating101 ?? (career.night >= 8 ? "regulars" : null);
+  return seat ? 10 + ONE_OH_ONE_IDX[Math.min(2, career.venue)] : -1;
 }
 
 const bootSave = loadSave();
@@ -724,6 +732,7 @@ export const useGame = create<GameState>((set, get) => ({
   kidNoticed: false,
   madameNodded: false,
   flyingAnnounced: false,
+  glossary: false,
   criticLeft: false,
   criticServeAt: -1,
   screamAt: 0,
@@ -825,7 +834,7 @@ export const useGame = create<GameState>((set, get) => ({
     // dessert on the house: the regulars forgive twice tonight
     const sweetNight = (career.dessertNight ?? -1) === career.night;
     // maitre-d': seating101 forces that party to 101 — which migrates up with the room
-    const seat101 = career.seating101 ?? null;
+    const seat101 = career.seating101 ?? (career.night >= 8 ? "regulars" : null);
     const hundredOne = seat101 ? ONE_OH_ONE_IDX[Math.min(2, career.venue)] : -1;
     let ki = 0;
     for (let i = 0; i < 5; i++) {
@@ -905,6 +914,7 @@ export const useGame = create<GameState>((set, get) => ({
       kidNoticed: false,
       madameNodded: false,
       flyingAnnounced: false,
+      glossary: false,
       criticLeft: false,
       criticServeAt: -1,
       chorusText: `"YES, CHEF!"`,
@@ -1320,6 +1330,7 @@ export const useGame = create<GameState>((set, get) => ({
       barkAt, rivalIdx, criticAnnounced,
     } = s;
     let flyingAnnounced = s.flyingAnnounced;
+    let career = s.career;
     const liveEarly = s.cooks.filter((c) => !c.walkedOut);
     const flying = liveEarly.length > 0 && liveEarly.reduce((t, c) => t + c.morale, 0) / liveEarly.length > 80 && streak >= 5;
     let nextTicketIn = s.nextTicketIn - dt;
@@ -1419,7 +1430,9 @@ export const useGame = create<GameState>((set, get) => ({
     if (!sauce && !s.folklore && serviceTime > 20 && s.career.night >= 2) {
       const plating = tickets.find((t) => t.state === "plating");
       if (plating && rng() < dt / 45) {
-        sauce = { ticketId: plating.id, until: serviceTime + 4 };
+        // first split of the run gets a 7s window — establish, then test
+        sauce = { ticketId: plating.id, until: serviceTime + (career.sauceGentled ? 4 : 7) };
+        career = { ...career, sauceGentled: true };
         feed = pushFeed(feed, `The ${plating.dish} is splitting! WHISK it (M) or lose it.`, "drama");
         sfx("hiss", { pan: STATION_PAN[plating.station] ?? 0, vol: 0.5 });
       }
@@ -1578,8 +1591,11 @@ export const useGame = create<GameState>((set, get) => ({
     const willSteal = !s.career.beefcakesTruce && (rivalIdx === 1 || (rivalIdx === 2 && s.career.aggro > 0) || !!s.career.beefcakesWar);
     // six seconds out, the runner stretches by your bins. You were warned.
     // SHOO him (H) before he reaches the rail — it costs you a second. Waits if folklore holds the room.
-    if (rivalWarned < rivalIdx && rivalIdx < rivalTimes.length && serviceTime >= rivalTimes[rivalIdx] - 6 && !folklore) {
+    // the first runner of the run stretches a little longer — 10s out, then 6s
+    const warnGap = rivalIdx === 0 && !career.runnerGentled ? 10 : 6;
+    if (rivalWarned < rivalIdx && rivalIdx < rivalTimes.length && serviceTime >= rivalTimes[rivalIdx] - warnGap && !folklore) {
       rivalWarned = rivalIdx;
+      if (rivalIdx === 0) career = { ...career, runnerGentled: true };
       runner = { at: rivalTimes[rivalIdx], steal: willSteal, shooed: false, fled: false };
       feed = pushFeed(feed, pick(rng, BEEFCAKES_WARN), "drama", "BEEFCAKES");
       sfx("gasp", { pan: 0.8, vol: 0.6 });
@@ -1721,7 +1737,10 @@ export const useGame = create<GameState>((set, get) => ({
         } else if (g.kind === "walkin") {
           line = `Table ${g.table} is taking photos.`;
         }
-        if (line && !s.criticFlagged) feed = pushFeed(feed, line, kind, who);
+        // tell-volume governor: in the last 40s only the critic, the press, and first-kindness get lines
+        const finale = serviceTime > SERVICE_LEN - 40;
+        const keep = g.kind === "critic" || g.kind === "press" || (g.kind === "regulars" && tells === 1);
+        if (line && !s.criticFlagged && (!finale || keep)) feed = pushFeed(feed, line, kind, who);
         const next =
           g.kind === "critic" ? (9 + rng() * 7) * (kidPerforming ? 0.55 : camGilliam ? 1.6 : 1)
           : g.kind === "press" ? 24 + rng() * 18
@@ -1873,7 +1892,7 @@ export const useGame = create<GameState>((set, get) => ({
 
     set({
       tickets, cooks, guests, feed, nextTicketIn, serviceTime,
-      ego, complaints, misses, served, qualitySum, streak, bestStreak, dessertDone,
+      ego, complaints, misses, served, qualitySum, streak, bestStreak, dessertDone, career,
       barkAt, rivalIdx, rivalAt, rivalWarned, lastSteal, criticAnnounced,
       sauce, request, runner, criticLeft, folklore, folkloreDone,
       criticQ: s.criticQ + folkloreQ,
@@ -2438,6 +2457,10 @@ export const useGame = create<GameState>((set, get) => ({
     const s = get();
     if (s.phase !== "service") return;
     set({ paused: !s.paused });
+  },
+
+  toggleGlossary: () => {
+    set({ glossary: !get().glossary });
   },
 
   toggleFirstPerson: () => {

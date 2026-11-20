@@ -118,6 +118,10 @@
 .ticker .line.good { color: #a8d88a; }
 .ticker .line.bad { color: #f08060; }
 .ticker .line.drama { color: #ffd9a0; font-style: italic; }
+.ticker .verb { color: #ffd479; font-weight: 700; font-style: normal; }
+.ticker .line.good .verb { color: #d6f0b8; }
+.ticker .line.bad .verb { color: #ffb08a; }
+.ticker .kbd { font-size: .62rem; border: 1px solid currentColor; border-radius: 3px; padding: 0 .3em; opacity: .9; }
 
 .amped { color: #ff9a4a; font-weight: bold; }
 .silent { color: #a8d88a; font-weight: bold; letter-spacing: .06em; }
@@ -144,10 +148,10 @@
 .review .rhead { font-size: .7rem; letter-spacing: .3em; opacity: .6; margin-bottom: .8rem; }
 .review .stars { font-size: 2.4rem; color: #b06a2a; letter-spacing: .1em; }
 .review .stars .dim { color: #9a7e52; }
-.review .quote { font-style: italic; margin: 1rem 0 1.4rem; font-size: 1rem; line-height: 1.5; }
+.review .quote { font-style: italic; margin: 1rem 0 1.4rem; font-size: 1.18rem; line-height: 1.5; }
 .review .rstats {
   display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem 1rem;
-  font-size: .72rem; opacity: .75; margin-bottom: 1.2rem;
+  font-size: .66rem; opacity: .7; margin-bottom: 1.2rem;
 }
 .review .rfoot { font-size: .8rem; letter-spacing: .15em; margin-bottom: 1.4rem; }
 .review .rbtns { display: flex; gap: .8rem; justify-content: center; }
@@ -155,7 +159,14 @@
 .review .critic-line.epi { border-left: 2px solid #d0735a; padding-left: .5rem; font-style: italic; }
 .cover-line { margin-top: .5rem; padding: .45rem .6rem; border: 1px dashed #8a6230; font-style: italic; opacity: .95; }
 .legends-line { margin-top: .5rem; font-size: .8rem; letter-spacing: .04em; opacity: .85; }
-.critic-line { font-size: .75rem; letter-spacing: .05em; margin: -0.6rem 0 1.2rem; color: #6a4a2a; }
+.glossary { position: absolute; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(13,11,9,.72); }
+.gcard { background: #f4ead2; color: #221408; padding: 1.2rem 1.6rem; max-width: 26rem; max-height: 82vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.7); }
+.ghead { font-size: .7rem; letter-spacing: .3em; opacity: .6; margin-bottom: .8rem; text-align: center; }
+.grow { display: flex; gap: .8rem; align-items: baseline; font-size: .78rem; padding: .18rem 0; border-bottom: 1px dotted #c9a86a; }
+.gkey { flex: 0 0 7.5rem; font-weight: 700; color: #7a4a1a; }
+.gcard .btn { margin-top: .9rem; width: 100%; background: #2a1608; }
+.critic-line { font-size: .8rem; letter-spacing: .04em; margin: .1rem 0 1rem; color: #6a4a2a; }
+.board-line { font-size: .8rem; }
 
 /* ---- verdict stamp (Papers, Please energy) ---- */
 .stamp {
