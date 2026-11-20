@@ -168,6 +168,8 @@ export interface Career {
   /** 9/10 missions: named critic rotation + grudges */
   criticPersona?: "gilliam" | "madameV" | "kid";
   criticGrudge?: number;
+  /** coaching: night a cook was coached (one session a night) */
+  coachNight?: number;
   /** maitre-d': who sits at wobbly 101 tonight */
   seating101?: "regulars" | "press" | "walkin" | null;
   /** one vow a night: star / house / brigade */
@@ -443,6 +445,7 @@ interface GameState {
   feudChoice: (i: number) => void;
   buyLot: (i: number, outbid: boolean) => void;
   chooseVow: (v: "star" | "house" | "brigade") => void;
+  coach: (id: number, kind: "praise" | "drill" | "rest") => void;
   chooseSeating: (k: "regulars" | "press" | "walkin") => void;
   answerFolklore: (ok: boolean) => void;
   move101: () => void;
@@ -1068,6 +1071,34 @@ export const useGame = create<GameState>((set, get) => ({
     const career = { ...s.career, vow: v };
     saveCareer(career, s.cooks);
     set({ career, feed: pushFeed(s.feed, VOW_LINES[v], "drama") });
+  },
+
+  coach: (id, kind) => {
+    const s = get();
+    if (s.phase !== "briefing" || (s.career.coachNight ?? -1) >= s.career.night) return;
+    if (s.career.night < 2) return;
+    const cooks = s.cooks.map((k) => ({ ...k }));
+    const c = cooks.find((k) => k.id === id);
+    if (!c || c.walkedOut) return;
+    let line: string;
+    if (kind === "praise") {
+      c.morale = Math.min(100, c.morale + 10);
+      c.grudge = null;
+      line = `You pull ${c.name} aside: that ${c.fave} last night — cook like that every night. They stand taller.`;
+    } else if (kind === "drill") {
+      c.skill = Math.min(0.95, c.skill + 0.03);
+      c.morale = Math.max(0, c.morale - 8);
+      if (s.rng() < 0.25 && !c.grudge) c.grudge = "drilled";
+      line = `Drill: ${c.name} runs ${c.fave} three times before doors. Faster. Angrier. Better?`;
+    } else {
+      c.morale = Math.min(100, c.morale + 5);
+      c.trauma = Math.max(0, c.trauma - (c.walkedOut || c.trauma > 0 ? 1 : 0));
+      c.skill = Math.max(0.3, c.skill - 0.005);
+      line = `${c.name} sits out prep, ices their wrists. Old scars fade a little. The knife stays sharp enough.`;
+    }
+    const career = { ...s.career, coachNight: s.career.night };
+    saveCareer(career, cooks);
+    set({ career, cooks, feed: pushFeed(s.feed, line, kind === "drill" ? "drama" : "good", c.name) });
   },
 
   chooseSeating: (k) => {

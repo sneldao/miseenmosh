@@ -369,6 +369,7 @@ function Briefing() {
   const feudChoice = useGame((s) => s.feudChoice);
   const lots = useGame((s) => s.lots);
   const buyLot = useGame((s) => s.buyLot);
+  const coach = useGame((s) => s.coach);
   const chooseVow = useGame((s) => s.chooseVow);
   const chooseSeating = useGame((s) => s.chooseSeating);
   const meal = useGame((s) => s.meal);
@@ -474,6 +475,28 @@ function Briefing() {
                 </>
               )}
             </div>
+            {career.night >= 2 && (
+            <div className="market">
+              <div className="mhead">COACHING — one session a night, they adapt or crack</div>
+              {(career.coachNight ?? -1) >= career.night ? (
+                <div className="ltaken">session done. let it simmer.</div>
+              ) : (
+                <>
+                  {cooks.map((c) => (
+                    <div key={c.id} className="lot">
+                      <span className="lname">{c.name}</span>
+                      <span className="ldesc">skill {Math.round(c.skill * 100)} · {moodOf(c.morale, c.walkedOut)}{c.grudge ? ` · holding: ${c.grudge}` : ""}</span>
+                      <span className="lbtns">
+                        <button className="btn lbtn" disabled={c.walkedOut} onClick={() => coach(c.id, "praise")}>PRAISE</button>
+                        <button className="btn lbtn" disabled={c.walkedOut} onClick={() => coach(c.id, "drill")}>DRILL <span className="cost">+3 skill, −8 morale</span></button>
+                        <button className="btn lbtn dim" disabled={c.walkedOut} onClick={() => coach(c.id, "rest")}>REST <span className="cost">−1 trauma</span></button>
+                      </span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+            )}
           </div>
         )}
         {beat === 1 && (
