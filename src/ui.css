@@ -204,6 +204,43 @@
   position: absolute; right: 1rem; bottom: 1rem;
   font-size: 1.1rem; letter-spacing: .1em;
 }
+.comp {
+  position: absolute; right: 1rem; bottom: 4.6rem;
+  font-size: .8rem; letter-spacing: .08em; opacity: .92;
+}
+.comp:disabled { opacity: .35; }
+.comp .cost { font-size: .6rem; opacity: .7; letter-spacing: .04em; }
+
+/* ---- streak ceremony: the room leans in ---- */
+.milestone {
+  position: absolute; top: 24%; left: 50%; transform: translateX(-50%);
+  font-size: 1.35rem; font-style: italic; letter-spacing: .06em;
+  color: #ffd76a; text-shadow: 0 2px 18px rgba(255, 160, 40, .6);
+  white-space: nowrap; pointer-events: none;
+  animation: milestone 4s ease-out forwards;
+}
+@keyframes milestone {
+  0% { opacity: 0; transform: translateX(-50%) scale(.85); }
+  12% { opacity: 1; transform: translateX(-50%) scale(1.04); }
+  20% { transform: translateX(-50%) scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+}
+
+/* ---- table request tag + split-sauce panic ---- */
+.modline {
+  font-size: .62rem; letter-spacing: .08em; color: #ffd76a;
+  border-top: 1px dashed rgba(176, 106, 42, .6);
+  padding-top: .2rem; margin-bottom: .25rem;
+}
+.ticket.sauced { box-shadow: 0 3px 14px rgba(90, 160, 220, .8); }
+.ticket.sauced .tstate { color: #2a6a9a; font-weight: bold; }
+
+/* ---- call the board result ---- */
+.board-line {
+  font-size: .8rem; letter-spacing: .04em; color: #8a6a10;
+  margin: -0.4rem 0 1rem;
+}
 .chorus {
   position: absolute; right: 1rem; bottom: 4.4rem;
   font-size: 1rem; font-style: italic; opacity: 0;

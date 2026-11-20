@@ -48,6 +48,15 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       +1★), ego-gated review lines, lifetime-ego LEGEND ending
 - [x] The quiet virtue (20 Nov): zero screams over 8+ covers earns the
       SILENT SERVICE star + review line — restraint is a strategy now
+- [x] All-eleven push (20 Nov): coursing (tables eat together +6), 86 the
+      dish (E, slate-wipe with a price), table requests (FAST/EXTRA CHAR
+      bets, D to refuse), streak ceremonies (×10/×15/×20), Beefcakes'
+      runner (visible body, H to shoo), critic's exit (head high / coat on),
+      ego tiers (COMMIS→LEGEND, door needs CHEF), call the board (3 wagers),
+      the man with the van (£100/£130 loan), split-sauce whisk (M),
+      edge-char from smouldering stations (+4, fire sooner), mid-service
+      table comp (C, £20). Verification caught a real bug: requests were
+      cleared on pull — cravings now survive to the pass.
 - [x] Brigade sim depth: trauma scars on walkouts (persist, drain
       faster), defections via feud (NEW_BLOOD replacements), morale
       carries overnight with partial rest, cook memory (favourite dish

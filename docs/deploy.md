@@ -151,3 +151,10 @@ first 90 seconds and the cold open changes what it sees.
   through a tunnel (25 golden fires, rushed-fire line, champagne bought
   for 15 ego, SILENT SERVICE ★ + tail quote on the review card). After
   the reset: `opengame deploy --wait --idempotency-key "$(uuidgen)"`.
+- **20 Nov, ~06:40 UTC** — the all-eleven build (coursing, 86, requests,
+  milestones, runner, critic exit, ego tiers, board, loan, sauce, edge,
+  comp) committed but NOT live: still no deploy slots until **12:01
+  UTC**. Verified each slice in-browser on the local build through a
+  tunnel (5★ silent review, both request verdicts, both shoo outcomes,
+  board payout, loan + repay, whisk saves, coursing, 86, milestones).
+  After the reset: `opengame deploy --wait --idempotency-key "$(uuidgen)"`.

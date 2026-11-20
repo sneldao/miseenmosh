@@ -27,6 +27,14 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    playing. Escalating disasters: fires, equipment failure, walk-in
    shortages, staff tilting. Zero screams across a real service (8+ covers)
    earns the SILENT SERVICE star — the food shouted instead.
+   Tables course: plates for one table landing within 20s of each other
+   ride the heat (+6 each). Mid-rush you can 86 a dish (E) — dockets binned,
+   tables wait, the cook takes it personally. Tables send requests (FAST /
+   EXTRA CHAR): nail them (+10) or get noticed (−8), refuse them (D) and
+   the press writes it down. Split sauces can be whisked back (M). A
+   smouldering station kisses plates with smoke (+4, fire comes sooner).
+   Champagne can be comped mid-service (C, £20): the room exhales, the
+   regulars remember.
 3. **CRITIC DETECTION (the deduction layer)** — one guest tonight is a
    mystery inspector. Watch the dining room between tickets: tells across
    three channels — visual (photographing dishes, notebook, measuring a
@@ -42,6 +50,12 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    spendable clout in the back office (comp the inspector's champagne,
    dessert on the house, your name above the door for +1★) — it doesn't
    keep, so spend it or sober up. Lifetime ego gates the LEGEND ending.
+   Ego wears tiers (COMMIS → LEGEND); the room says the new name out loud.
+   Call the board: one wager a night (covers / no walks / clock the
+   inspector). A man with a van floats you £100 — he wants £130 back
+   before the residency ends. Streaks detonate at ×10/×15/×20. BEEFCAKES
+   sends a runner you can shoo (H) — it costs you a second. A spotted,
+   well-fed inspector leaves head high; an unspotted one slips away.
 
 ## Progression
 

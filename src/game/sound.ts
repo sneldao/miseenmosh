@@ -67,7 +67,8 @@ export type Sfx =
   | "flash"
   | "applause"
   | "hiss"
-  | "sear";
+  | "sear"
+  | "whisk";
 
 export interface SfxOpts {
   /** -1 (far left, grill) .. +1 (far right, pastry) */
@@ -140,6 +141,11 @@ export function sfx(kind: Sfx, opts: SfxOpts = {}) {
       // the kiss of the pan: a sizzle pop with a high singing edge
       noise(t, 0.25, 0.5, 4500, bus);
       osc("sine", 1900, 2600, t, 0.18, 0.15, bus);
+      break;
+    case "whisk":
+      // three fast stirs and a save: wire whisk on steel
+      for (let i = 0; i < 3; i++) noise(t + i * 0.06, 0.05, 0.4, 3200, bus);
+      osc("sine", 2400, 3200, t + 0.18, 0.12, 0.12, bus);
       break;
   }
 }

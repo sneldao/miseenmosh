@@ -476,6 +476,65 @@ function RivalSilhouette() {
   );
 }
 
+/** BEEFCAKES' runner: a body on the floor, not just a feed line. He
+ * stretches in from the bins (right) during the warning, reaches the rail
+ * at the beat, and scurries back — shooed, scored, or merely menacing. */
+function Runner() {
+  const g = useRef<Group>(null);
+  useFrame(({ clock }) => {
+    const s = useGame.getState();
+    const g2 = g.current;
+    if (!g2) return;
+    const r = s.runner;
+    const t = clock.elapsedTime;
+    if (!r || s.serviceTime < r.at - 6 || s.serviceTime > r.at + 4) {
+      g2.visible = false;
+      return;
+    }
+    g2.visible = true;
+    const since = s.serviceTime - (r.at - 6); // 0..10 across approach + beat + flee
+    const reach = Math.min(1, since / 6); // approach over the warning window
+    const flee = s.serviceTime > r.at ? Math.min(1, (s.serviceTime - r.at) / 3) : 0;
+    const ease = 1 - (1 - reach) * (1 - reach);
+    g2.position.x = (5.2 - ease * 3.0) + flee * 3.2;
+    g2.position.y = Math.abs(Math.sin(t * (r.fled ? 14 : 9))) * (r.fled ? 0.09 : 0.05);
+    g2.rotation.y = -0.5 + Math.sin(t * 2) * 0.05;
+  });
+  return (
+    <group ref={g} position={[5.2, 0, 1.4]} visible={false}>
+      {/* protein-bro in a tank top — the wrong kind of regular */}
+      <mesh position={[0, 0.8, 0]} castShadow>
+        <capsuleGeometry args={[0.2, 0.7, 6, 12]} />
+        <meshStandardMaterial color="#5a2a8a" roughness={0.9} />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[side * 0.3, 1.05, 0.1]} rotation={[0.5, 0, side * -0.3]}>
+          <capsuleGeometry args={[0.07, 0.4, 4, 8]} />
+          <meshStandardMaterial color="#d9a877" roughness={0.9} />
+        </mesh>
+      ))}
+      {/* the bowl he eats out of, held out front like an offering */}
+      <mesh position={[0, 0.95, 0.35]}>
+        <cylinderGeometry args={[0.16, 0.1, 0.12, 12]} />
+        <meshStandardMaterial color="#e8e4dc" roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 1.48, 0]}>
+        <sphereGeometry args={[0.15, 14, 14]} />
+        <meshStandardMaterial color="#c9906a" roughness={0.9} />
+      </mesh>
+      {/* backwards cap */}
+      <mesh position={[0, 1.6, 0.03]} rotation={[-0.15, 0, 0]}>
+        <cylinderGeometry args={[0.16, 0.17, 0.08, 12]} />
+        <meshStandardMaterial color="#1a1410" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.6, -0.2]} rotation={[0.1, 0, 0]}>
+        <boxGeometry args={[0.14, 0.02, 0.16]} />
+        <meshStandardMaterial color="#1a1410" roughness={0.9} />
+      </mesh>
+    </group>
+  );
+}
+
 /** The scream pulses the whole kitchen red for a beat. */
 function HeatPulse() {
   const l = useRef<PointLight>(null);
@@ -560,6 +619,7 @@ export default function KitchenScene() {
       <MeshyProp url="/models/shaker.glb" height={0.5} position={[3.8, 1.07, -4.85]} rotation={-0.4} tint={{ color: "#9fe060", metalness: 0.4, roughness: 0.5 }} />
       <SmashBurst />
       <RivalSilhouette />
+      <Runner />
       <HeatPulse />
       <FirstPerson />
     </>

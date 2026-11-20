@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useGame, tierOf, Ticket, PlateTier, VENUES } from "../game/state";
+import { useGame, tierOf, tierName, BOARD, Ticket, PlateTier, VENUES } from "../game/state";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
 import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
 import stampSmash from "../../assets/recraft/vector/stamp-smash.svg";
@@ -128,6 +128,8 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
   const plateToPass = useGame((s) => s.plateToPass);
   const firePlate = useGame((s) => s.firePlate);
   const serviceTime = useGame((s) => s.serviceTime);
+  const request = useGame((s) => s.request);
+  const sauce = useGame((s) => s.sauce);
   const frac = Math.min(1, t.age / 55);
   const plating = t.state === "plating";
   // the sear: the last 30% of the cook glows gold — fire inside it (F or click)
@@ -135,9 +137,11 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
     ? Math.max(0, Math.min(1, 1 - (t.plateAt - serviceTime) / t.plateDur))
     : 0;
   const golden = searFrac >= 0.7;
+  const myReq = request?.ticketId === t.id ? request : null;
+  const splitting = plating && sauce?.ticketId === t.id;
   return (
     <div
-      className={`ticket ${frac > 0.45 ? "aging" : ""} ${frac > 0.72 ? "dying" : ""} ${plating ? "plating" : ""} ${golden ? "golden" : ""}`}
+      className={`ticket ${frac > 0.45 ? "aging" : ""} ${frac > 0.72 ? "dying" : ""} ${plating ? "plating" : ""} ${golden ? "golden" : ""} ${splitting ? "sauced" : ""}`}
       onClick={() => (plating ? firePlate() : plateToPass(t.id))}
     >
       <div className="tno">
@@ -145,12 +149,23 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
         {hotkey && <span className="kbd">{hotkey}</span>}
       </div>
       <div className="dish">{t.dish}</div>
+      {myReq && (
+        <div className="modline">
+          {myReq.mod} — T{myReq.table}{myReq.mod === "FAST" ? " · <30s" : " · fire it golden"}
+        </div>
+      )}
       <div className="trow">
         <span className="chip" style={{ background: STATION_COLOR[t.station] }}>
           {STATION_NAME[t.station]}
         </span>
         <span className="tstate">
-          {plating ? (golden ? "SEAR — FIRE IT" : "PLATING…") : `${Math.floor(t.age)}s`}
+          {plating
+            ? splitting
+              ? "SPLIT! — M TO WHISK"
+              : golden
+                ? "SEAR — FIRE IT"
+                : `PLATING…${t.sauce === "saved" ? " ✓" : ""}`
+            : `${Math.floor(t.age)}s`}
         </span>
       </div>
       {plating ? (
@@ -161,6 +176,21 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
       ) : (
         <div className="agebar" style={{ width: `${frac * 100}%` }} />
       )}
+    </div>
+  );
+}
+
+function Milestone() {
+  const milestoneAt = useGame((s) => s.milestoneAt);
+  const milestoneText = useGame((s) => s.milestoneText);
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (milestoneAt) setShown(milestoneAt);
+  }, [milestoneAt]);
+  if (!shown || !milestoneText) return null;
+  return (
+    <div className="milestone" key={shown}>
+      {milestoneText}
     </div>
   );
 }
@@ -272,7 +302,8 @@ function ReviewCard() {
           {review.silent && <span>SILENT SERVICE ★</span>}
           <span>inspector {review.spotted ? "CLOCKED" : "missed"}</span>
         </div>
-        <div className="rfoot">EGO {Math.round(review.ego)}</div>
+        {review.betLine && <div className="board-line">{review.betLine}</div>}
+        <div className="rfoot">EGO {Math.round(review.ego)} · {tierName(review.ego)}</div>
         <div className="rbtns">
           <button
             className="btn"
@@ -299,6 +330,9 @@ function Briefing() {
   const nightTake = useGame((s) => s.nightTake);
   const briefAction = useGame((s) => s.briefAction);
   const clout = useGame((s) => s.clout);
+  const bet = useGame((s) => s.bet);
+  const borrow = useGame((s) => s.borrow);
+  const repay = useGame((s) => s.repay);
   const ego = useGame((s) => s.ego);
   const feudChoice = useGame((s) => s.feudChoice);
   const lots = useGame((s) => s.lots);
@@ -481,8 +515,38 @@ function Briefing() {
               {career.doorNamed ? (
                 <div className="ltaken">your name is above the door</div>
               ) : (
-                <button className="btn shop" disabled={ego < 30} onClick={() => clout("door")}>
-                  NAME ABOVE THE DOOR <span className="cost">30 ego · +1★, once ever</span>
+                <button className="btn shop" disabled={ego < 40} onClick={() => clout("door")}>
+                  NAME ABOVE THE DOOR <span className="cost">40 ego to ask · 30 to buy · +1★, once ever</span>
+                </button>
+              )}
+            </div>
+            <div className="bshop slim">
+              <div className="mhead">CALL THE BOARD — one wager a night</div>
+              {career.bet ? (
+                <div className="ltaken">board called: {BOARD[career.bet.kind].label}</div>
+              ) : (
+                <>
+                  <button className="btn shop" disabled={career.cash < BOARD.covers.stake} onClick={() => bet("covers")}>
+                    8+ COVERS <span className="cost">{BOARD.covers.blurb}</span>
+                  </button>
+                  <button className="btn shop" disabled={career.cash < BOARD.walks.stake} onClick={() => bet("walks")}>
+                    NO WALKS <span className="cost">{BOARD.walks.blurb}</span>
+                  </button>
+                  <button className="btn shop" disabled={ego < BOARD.spot.stakeEgo} onClick={() => bet("spot")}>
+                    CLOCK THE INSPECTOR <span className="cost">{BOARD.spot.blurb}</span>
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="bshop slim">
+              <div className="mhead">A MAN WITH A VAN</div>
+              {(career.debt ?? 0) > 0 ? (
+                <button className="btn shop" disabled={career.cash < (career.debt ?? 0) + 30} onClick={repay}>
+                  PAY THE MAN £{(career.debt ?? 0) + 30} <span className="cost">before the residency ends</span>
+                </button>
+              ) : (
+                <button className="btn shop" onClick={borrow}>
+                  BORROW £100 <span className="cost">he&apos;ll want £130 back</span>
                 </button>
               )}
             </div>
@@ -550,6 +614,7 @@ function Ending() {
           <span>£{career.cash} in the till</span>
           <span>{career.defections} defections</span>
           <span>{Math.round(career.totalEgo ?? 0)} lifetime ego</span>
+          {(career.debt ?? 0) > 0 && <span>the man takes £{career.debt} off the top</span>}
         </div>
         <div className="rbtns">
           <button className="btn serve" onClick={resetCareer}>
@@ -598,6 +663,11 @@ function useHotkeys() {
       if (k === "b") return s.judge("sendback");
       if (k === "x") return s.judge("smash");
       if (k === "f") return s.firePlate();
+      if (k === "e") return s.eightySix();
+      if (k === "m") return s.whisk();
+      if (k === "h") return s.shooRunner();
+      if (k === "d") return s.declineRequest();
+      if (k === "c") return s.compTable();
       const n = Number(e.key);
       if (n >= 1 && n <= 9) {
         const rail = s.tickets.filter((t) => t.state === "rail");
@@ -627,6 +697,10 @@ export default function HUD() {
   const misses = useGame((s) => s.misses);
   const ego = useGame((s) => s.ego);
   const serviceTime = useGame((s) => s.serviceTime);
+  const runner = useGame((s) => s.runner);
+  const request = useGame((s) => s.request);
+  const comped = useGame((s) => s.comped);
+  const compTable = useGame((s) => s.compTable);
   const adrenalineTil = useGame((s) => s.adrenalineTil);
   const criticFlagged = useGame((s) => s.criticFlagged);
   const criticSpotted = useGame((s) => s.criticSpotted);
@@ -721,16 +795,20 @@ export default function HUD() {
                 {charge > 1.05 ? "TOO LONG" : charge > 0.75 ? "ROAR" : "INHALE"}
               </span>
             </div>
-          )}
-          <div className="hint">
-            {atPass
-              ? firstPerson
-                ? "Hold right mouse to look at the plate."
-                : "Judge the plate."                : live.some((t) => t.state === "plating")
-                  ? "Plating… F fires it early — wait for the gold."
-                  : firstPerson
-                    ? "Look at a docket on the rail and click."
-                    : "Click a ticket to plate it."}{" "}
+          )}          <div className="hint">
+            {runner && !runner.fled
+              ? "Runner on the floor — SHOO HIM (H)!"
+              : request
+                ? `Table ${request.table} wants it ${request.mod} — D to refuse.`
+                : atPass
+                  ? firstPerson
+                    ? "Hold right mouse to look at the plate."
+                    : "Judge the plate."
+                  : live.some((t) => t.state === "plating")
+                    ? "Plating… F fires it early — wait for the gold."
+                    : firstPerson
+                      ? "Look at a docket on the rail and click."
+                      : "Click a ticket to plate it. E 86s the oldest dish."}{" "}
             {criticFlagged
               ? criticSpotted
                 ? "Inspector clocked."
@@ -790,7 +868,7 @@ export default function HUD() {
             SERVED <b>{served}</b> · BACK <b>{sentBack}</b> · SMASHED <b>{smashed}</b> · WALKED{" "}
             <b>{misses}</b>
             <br />
-            EGO <b>{Math.round(ego)}</b>
+            EGO <b>{Math.round(ego)}</b> · {tierName(ego)}
             {streak >= 3 && <span className="amped"> · STREAK ×{streak}</span>}
             {screams === 0 ? (
               <span className="silent"> · SILENT — hold it for a ★</span>
@@ -805,8 +883,12 @@ export default function HUD() {
             SCREAM <span className="kbd">SPACE</span>{" "}
             <span className="cost">hold to charge · costs morale</span>
           </button>
+          <button className="btn comp" disabled={comped || career.cash < 20} onClick={() => compTable()}>
+            COMP A TABLE <span className="kbd">C</span> <span className="cost">£20 · the room exhales</span>
+          </button>
           <Chorus />
           <Stamp />
+          <Milestone />
           {paused && <div className="paused">PAUSED — P to resume</div>}
         </>
       )}

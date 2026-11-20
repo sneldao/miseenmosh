@@ -28,6 +28,8 @@ export interface Ticket {
   verdict: Verdict | null;
   /** fire-early call: golden = kissed by the pan, rushed = raw but free */
   sear: "golden" | "rushed" | null;
+  /** split-sauce event: whisked back (saved) or gone out broken (split) */
+  sauce: "saved" | "split" | null;
 }
 
 export interface Cook {
@@ -85,6 +87,9 @@ export interface Review {
   criticVerdict: string;
   /** nobody screamed across a real service — the food shouted instead */
   silent: boolean;
+  /** call-the-board result line + cash payout (applied next morning) */
+  betLine?: string;
+  betCash?: number;
 }
 
 const DISHES: { name: string; station: number }[] = [
@@ -142,6 +147,10 @@ export interface Career {
   dessertNight?: number; // clout: regulars forgive twice tonight
   doorNamed?: boolean; // clout: name above the door, +1 star banked
   totalEgo?: number; // lifetime ego banked at reviews — legends need 200
+  /** call the board: one wager a night, resolved at review */
+  bet?: { kind: "covers" | "walks" | "spot"; stake: number; stakeEgo: number };
+  /** the man with the van: £100 now, £130 before the residency ends */
+  debt?: number;
 }
 
 export interface Feud {
@@ -215,12 +224,54 @@ const SILENT_TAILS = [
   "Not one raised voice all night. The plates arrived like apologies that meant it.",
 ];
 
+/** ego wears a name: the room addresses you by the loudest thing about you */
+export const EGO_TIERS: [number, string][] = [
+  [55, "LEGEND"],
+  [38, "CHEF"],
+  [24, "SOUS CHEF"],
+  [12, "COOK"],
+  [0, "COMMIS"],
+];
+
+export function tierName(ego: number): string {
+  return EGO_TIERS.find(([floor]) => ego >= floor)?.[1] ?? "COMMIS";
+}
+
+const MILESTONES: Record<number, string> = {
+  10: "STREAK ×10 — the room leans in. Somewhere, the guide is watching.",
+  15: "STREAK ×15 — the dining room applauds without being asked.",
+  20: "STREAK ×20 — they will talk about this service for years.",
+};
+
+export const BOARD = {
+  covers: { label: "8+ COVERS", stake: 20, stakeEgo: 0, pays: 45, blurb: "stake £20, pays £45" },
+  walks: { label: "NO WALKS", stake: 30, stakeEgo: 0, pays: 70, blurb: "stake £30, pays £70" },
+  spot: { label: "CLOCK THE INSPECTOR", stake: 0, stakeEgo: 10, pays: 25, blurb: "stake 10 ego, pays +25" },
+} as const;
+
+export interface ServiceRequest {
+  ticketId: number;
+  table: number;
+  dish: string;
+  mod: "FAST" | "EXTRA CHAR";
+  until: number;
+}
+
+/** after a tier change the room says the new name out loud */
+function tiered(feed: FeedItem[], before: number, after: number): FeedItem[] {
+  const a = tierName(before);
+  const b = tierName(after);
+  return b !== a ? pushFeed(feed, `The room calls you ${b} now.`, "drama") : feed;
+}
+
 interface PlateCtx {
   rng: () => number;
   menuBuffs: number[];
   gear: number;
   criticTable: number;
   champagne: boolean;
+  /** fired off a smouldering station: kissed by the edge (+4, fire comes sooner) */
+  simmer: boolean;
 }
 
 /** Shared by the auto-complete in tick() and the early fire in firePlate():
@@ -230,12 +281,12 @@ function finishPlating(
   age: number,
   cook: Cook | undefined,
   ctx: PlateCtx
-): { fumble: boolean; quality: number } {
+): { fumble: boolean; quality: number; edged: boolean } {
   const { rng } = ctx;
   // a broken cook fumbles — plate in the bin, ticket back on the rail.
   // one holding a grudge fumbles half as often again.
   if (cook && !cook.walkedOut && cook.morale < 30 && rng() < (cook.grudge ? 0.25 : 0.15)) {
-    return { fumble: true, quality: -1 };
+    return { fumble: true, quality: -1, edged: false };
   }
   const chefPenalty = t.byChef ? 12 : 0;
   const burnPenalty = cook?.burning ? 8 : 0;
@@ -247,6 +298,10 @@ function finishPlating(
   const searBonus = t.sear === "golden" ? 8 : t.sear === "rushed" ? -6 : 0;
   // comped champagne for the inspector's table smooths everything
   const champagneBonus = ctx.champagne && t.table === ctx.criticTable ? 10 : 0;
+  // kissed by the edge: smouldering stations char beautifully and dangerously
+  const edgeBonus = ctx.simmer ? 4 : 0;
+  // the split sauce: whisked back (+6) or gone out broken (−8)
+  const sauceBonus = t.sauce === "saved" ? 6 : t.sauce === "split" ? -8 : 0;
   const quality = Math.max(
     5 + ctx.gear * 3,
     Math.min(
@@ -262,10 +317,12 @@ function finishPlating(
         marketBonus +
         searBonus +
         champagneBonus +
+        edgeBonus +
+        sauceBonus +
         (rng() - 0.5) * 30
     )
   );
-  return { fumble: false, quality };
+  return { fumble: false, quality, edged: ctx.simmer };
 }
 
 let nextId = 1;
@@ -294,6 +351,22 @@ interface GameState {
   dessertDone: boolean;
   streak: number;
   bestStreak: number;
+  /** streak-ceremony overlay: what the room just witnessed, and when */
+  milestoneAt: number;
+  milestoneText: string;
+  /** coursing: last good-serve serviceTime per table — eat together (+6) */
+  tableServeAt: Record<number, number>;
+  /** BEEFCAKES' runner: approaching the rail until at, stealing unless shooed */
+  runner: { at: number; steal: boolean; shooed: boolean; fled: boolean } | null;
+  /** one table request at a time: FAST or EXTRA CHAR, D to refuse */
+  request: ServiceRequest | null;
+  /** split-sauce event on a plating ticket: WHISK (M) it back */
+  sauce: { ticketId: number; until: number } | null;
+  /** champagne comped mid-service: once, and the room exhales */
+  comped: boolean;
+  /** the critic's exit: head high (fed, spotted) or coat on (slipped away) */
+  criticLeft: boolean;
+  criticServeAt: number;
   screamAt: number;
   smashAt: number;
   chorusText: string;
@@ -336,6 +409,14 @@ interface GameState {
   tick: (dt: number) => void;
   plateToPass: (id: number) => void;
   firePlate: () => void;
+  eightySix: () => void;
+  whisk: () => void;
+  shooRunner: () => void;
+  declineRequest: () => void;
+  compTable: () => void;
+  bet: (kind: "covers" | "walks" | "spot") => void;
+  borrow: () => void;
+  repay: () => void;
   judge: (v: Verdict) => void;
   scream: (power?: number) => void;
   flagGuest: (id: number) => void;
@@ -367,6 +448,7 @@ function spawnTicket(rng: () => number, criticTable = -1): Ticket {
     plateAt: 0,
     plateDur: 0,
     sear: null,
+    sauce: null,
     byChef: false,
     quality: -1,
     verdict: null,
@@ -493,6 +575,15 @@ export const useGame = create<GameState>((set, get) => ({
   dessertDone: false,
   streak: 0,
   bestStreak: 0,
+  milestoneAt: 0,
+  milestoneText: "",
+  tableServeAt: {},
+  runner: null,
+  request: null,
+  sauce: null,
+  comped: false,
+  criticLeft: false,
+  criticServeAt: -1,
   screamAt: 0,
   smashAt: 0,
   chorusText: `"YES, CHEF!"`,
@@ -635,6 +726,15 @@ export const useGame = create<GameState>((set, get) => ({
       dessertDone: false,
       streak: 0,
       bestStreak: 0,
+      milestoneAt: 0,
+      milestoneText: "",
+      tableServeAt: {},
+      runner: null,
+      request: null,
+      sauce: null,
+      comped: false,
+      criticLeft: false,
+      criticServeAt: -1,
       chorusText: `"YES, CHEF!"`,
       stampText: "",
       stampAt: 0,
@@ -663,12 +763,17 @@ export const useGame = create<GameState>((set, get) => ({
     const breakage = s.smashed * 12;
     const net = covers - wages - breakage;
     const c = s.career;
+    const betCash = s.review.betCash ?? 0;
+    // the man with the van collects when the residency ends — off the top, no arguments
+    const lastNight = c.night + 1 > MAX_NIGHTS;
+    const debtTake = lastNight ? (c.debt ?? 0) : 0;
     const career: Career = {
       ...c,
       night: c.night + 1,
-      cash: c.cash + net,
+      cash: c.cash + net + betCash - debtTake,
       stars: c.stars + s.review.stars,
       totalEgo: (c.totalEgo ?? 0) + s.review.ego,
+      bet: undefined,
     };
     career.venue = venueFor(career.stars);
     const cooks = s.cooks.map((k) => ({
@@ -871,6 +976,9 @@ export const useGame = create<GameState>((set, get) => ({
     } = s;
     let nextTicketIn = s.nextTicketIn - dt;
     let dessertDone = s.dessertDone;
+    let sauce = s.sauce;
+    let request = s.request;
+    let runner = s.runner;
 
     // --- tickets: age, expire, finish plating ---
     const tickets: Ticket[] = [];
@@ -885,13 +993,20 @@ export const useGame = create<GameState>((set, get) => ({
           gear: s.career.gear,
           criticTable,
           champagne: (s.career.champagneNight ?? -1) === s.career.night,
+          simmer: !!cook && !cook.walkedOut && !cook.burning && cook.overloadT > 5,
         });
+        if (sauce?.ticketId === t.id) sauce = null; // plated out from under it
         if (res.fumble && cook) {
           feed = pushFeed(feed, `${cook.name} fumbles the ${t.dish} — straight in the bin.`, "bad", cook.name);
           sfx("shatter");
           cook.morale = Math.max(0, cook.morale - 3);
           tickets.push({ ...t, state: "rail", age: age * 0.6, quality: -1, sear: null });
           continue;
+        }
+        if (res.edged && cook && !cook.walkedOut) {
+          // playing with fire brings the fire sooner
+          cook.overloadT += 2;
+          feed = pushFeed(feed, `${cook.name}'s station kisses the ${t.dish} with smoke. Worth it. Probably.`, "info", cook.name);
         }
         tickets.push({ ...t, age, state: "pass", quality: res.quality });
         sfx("bell");
@@ -912,6 +1027,55 @@ export const useGame = create<GameState>((set, get) => ({
         continue;
       }
       tickets.push({ ...t, age });
+    }
+
+    // --- split sauce + table requests: validate the live ones, maybe start new ones ---
+    if (sauce) {
+      const st = tickets.find((t) => t.id === sauce!.ticketId);
+      if (!st || st.state !== "plating") sauce = null; // plated, fired or binned — drama over
+      else if (serviceTime >= sauce.until) {
+        sauce = null;
+        st.sauce = "split";
+        feed = pushFeed(feed, `The ${st.dish} split. It goes out broken.`, "bad");
+        sfx("hiss", { pan: STATION_PAN[st.station] ?? 0, vol: 0.6 });
+      }
+    }
+    if (!sauce && serviceTime > 20) {
+      const plating = tickets.find((t) => t.state === "plating");
+      if (plating && rng() < dt / 45) {
+        sauce = { ticketId: plating.id, until: serviceTime + 4 };
+        feed = pushFeed(feed, `The ${plating.dish} is splitting! WHISK it (M) or lose it.`, "drama");
+        sfx("hiss", { pan: STATION_PAN[plating.station] ?? 0, vol: 0.5 });
+      }
+    }
+    if (request) {
+      const rt = tickets.find((t) => t.id === request!.ticketId);
+      if (!rt) {
+        // walked, stolen or 86ed mid-craving — the room moves on
+        feed = pushFeed(feed, `Table ${request!.table} never mind about the ${request!.dish}.`, "info");
+        request = null;
+      } else if (rt.state === "rail" && serviceTime >= request.until) {
+        // still hanging, still ordinary — they stop believing
+        feed = pushFeed(feed, `Table ${request!.table} gives up on the ${request!.dish}.`, "info");
+        request = null;
+      }
+      // plating/pass keeps the craving pinned — FAST and EXTRA CHAR are judged at the pass
+    }
+    if (!request && serviceTime > 30) {
+      const rail = tickets.filter((t) => t.state === "rail");
+      if (rail.length > 0 && rng() < dt / 50) {
+        const want = rail[Math.floor(rng() * rail.length)];
+        const mod = rng() < 0.5 ? "FAST" : ("EXTRA CHAR" as const);
+        request = { ticketId: want.id, table: want.table, dish: want.dish, mod, until: serviceTime + 35 };
+        feed = pushFeed(
+          feed,
+          mod === "FAST"
+            ? `Table ${want.table} wants the ${want.dish} FAST. Under 30 seconds old or they notice. (D to refuse)`
+            : `Table ${want.table} wants the ${want.dish} with EXTRA CHAR. Kiss it with the sear. (D to refuse)`,
+          "drama"
+        );
+        sfx("print", { pan: tablePan(want.table), vol: 0.6 });
+      }
     }
 
     // --- dessert course: one-time stampede, then faster printer ---
@@ -960,21 +1124,23 @@ export const useGame = create<GameState>((set, get) => ({
       barkAt = serviceTime + 16 + rng() * 14;
     }
 
-    // --- BEEFCAKES does something unforgivable ---
+    // --- BEEFCAKES does something unforgivable — and this time he sends a body ---
     const rivalTimes = [35, 75, 118];
     let rivalAt = s.rivalAt;
     let rivalWarned = s.rivalWarned;
     let lastSteal = s.lastSteal;
+    const willSteal = rivalIdx === 1 || (rivalIdx === 2 && s.career.aggro > 0);
     // six seconds out, the runner stretches by your bins. You were warned.
+    // SHOO him (H) before he reaches the rail — it costs you a second.
     if (rivalWarned < rivalIdx && rivalIdx < rivalTimes.length && serviceTime >= rivalTimes[rivalIdx] - 6) {
       rivalWarned = rivalIdx;
+      runner = { at: rivalTimes[rivalIdx], steal: willSteal, shooed: false, fled: false };
       feed = pushFeed(feed, pick(rng, BEEFCAKES_WARN), "drama", "BEEFCAKES");
       sfx("gasp", { pan: 0.8, vol: 0.6 });
     }
     if (rivalIdx < rivalTimes.length && serviceTime >= rivalTimes[rivalIdx]) {
       rivalAt = serviceTime;
-      const steal = rivalIdx === 1 || (rivalIdx === 2 && s.career.aggro > 0);
-      if (steal) {
+      if (willSteal && !runner?.shooed) {
         const railNow = tickets.filter((t) => t.state === "rail");
         const victim = railNow[0];
         if (victim) {
@@ -993,11 +1159,17 @@ export const useGame = create<GameState>((set, get) => ({
         } else {
           feed = pushFeed(feed, pick(rng, RIVAL_LINES), "drama", "BEEFCAKES");
         }
+      } else if (willSteal) {
+        // shooed: he points at you from the door instead
+        feed = pushFeed(feed, "BEEFCAKES points at you from the door. Noted. The ticket stays.", "good", "BEEFCAKES");
+        sfx("gasp", { pan: 0.8, vol: 0.5 });
       } else {
         feed = pushFeed(feed, pick(rng, RIVAL_LINES), "drama", "BEEFCAKES");
       }
+      if (runner) runner = { ...runner, fled: true };
       rivalIdx += 1;
     }
+    if (runner && serviceTime > runner.at + 4) runner = null; // gone — scored or scattered
 
     // --- cooks: overload → fires, morale decay under load, walkouts ---
     const cooks = s.cooks.map((c) => {
@@ -1031,7 +1203,9 @@ export const useGame = create<GameState>((set, get) => ({
       if (morale <= WALKOUT_AT) {
         feed = pushFeed(feed, `${c.name} throws their apron. WALKOUT.`, "drama", c.name);
         sfx("sting");
+        const egoBeforeWalk = ego;
         ego += 4; // the room watches
+        feed = tiered(feed, egoBeforeWalk, ego);
         return { ...c, morale, overloadT, burning, walkedOut: true, walkoutAt: serviceTime };
       }
       return { ...c, morale, overloadT, burning, smoked };
@@ -1107,6 +1281,27 @@ export const useGame = create<GameState>((set, get) => ({
       if (silent) quote += " " + pick(rng, SILENT_TAILS);
       if (ego >= 40) quote += " They chant your name in the alley.";
       else if (ego <= 0 && served > 0) quote += " Nobody remembers your name. Possibly for the best.";
+      // --- call the board: the wager resolves ---
+      let betLine: string | undefined;
+      let betCash = 0;
+      const bet = s.career.bet;
+      if (bet) {
+        const label = BOARD[bet.kind].label;
+        const wonBoard = bet.kind === "covers" ? served >= 8 : bet.kind === "walks" ? misses === 0 : spotted;
+        if (wonBoard) {
+          if (bet.kind === "spot") {
+            ego += BOARD.spot.pays;
+            betLine = `Called the board (${label}) — PAID +${BOARD.spot.pays} ego.`;
+          } else {
+            betCash = BOARD[bet.kind].pays;
+            betLine = `Called the board (${label}) — PAID £${betCash}.`;
+          }
+          feed = pushFeed(feed, betLine, "good");
+        } else {
+          betLine = `Called the board (${label}) — the house wins.`;
+          feed = pushFeed(feed, betLine, "bad");
+        }
+      }
       if (allOut) quote = "The brigade abandoned ship mid-service. " + quote;
       const criticAvg = s.criticServed > 0 ? s.criticQ / s.criticServed : -1;
       const criticVerdict = !s.criticSpotted
@@ -1140,15 +1335,35 @@ export const useGame = create<GameState>((set, get) => ({
           bestStreak,
           criticVerdict,
           silent,
+          betLine,
+          betCash,
         },
       });
       return;
+    }
+
+    // --- the critic's exit: fed and spotted, they leave head high; unspotted, they slip away at 120 ---
+    let criticLeft = s.criticLeft;
+    if (!criticLeft) {
+      const cg = guests.find((g) => g.isCritic);
+      if (s.criticSpotted && s.criticServed > 0 && serviceTime - s.criticServeAt > 25) {
+        criticLeft = true;
+        if (cg) cg.tellClock = 1e9;
+        feed = pushFeed(feed, `Table ${criticTable} pays and leaves head high. The inspector got what they came for.`, "drama");
+        sfx("bell", { pan: tablePan(criticTable) });
+      } else if (!s.criticSpotted && serviceTime >= 120) {
+        criticLeft = true;
+        if (cg) cg.tellClock = 1e9;
+        feed = pushFeed(feed, `Table ${criticTable} slips out, coat on, notebook shut. If that was the inspector, they're gone.`, "bad");
+        sfx("gasp", { pan: tablePan(criticTable) });
+      }
     }
 
     set({
       tickets, cooks, guests, feed, nextTicketIn, serviceTime,
       ego, complaints, misses, served, qualitySum, streak, bestStreak, dessertDone,
       barkAt, rivalIdx, rivalAt, rivalWarned, lastSteal, criticAnnounced,
+      sauce, request, runner, criticLeft,
     });
   },
 
@@ -1197,11 +1412,18 @@ export const useGame = create<GameState>((set, get) => ({
         gear: s.career.gear,
         criticTable,
         champagne: (s.career.champagneNight ?? -1) === s.career.night,
+        simmer: !!cook && !cook.walkedOut && !cook.burning && cook.overloadT > 5,
       }
     );
     const cooks = s.cooks.map((c) => ({ ...c }));
     const liveCook = cooks.find((c) => c.station === t.station);
     let feed = s.feed;
+    let sauce = s.sauce;
+    if (sauce?.ticketId === t.id) sauce = null; // fired out from under it — the save stands
+    if (res.edged && liveCook && !liveCook.walkedOut) {
+      liveCook.overloadT += 2;
+      feed = pushFeed(feed, `${liveCook.name}'s station kisses the ${t.dish} with smoke. Worth it. Probably.`, "info", liveCook.name);
+    }
     if (res.fumble && liveCook) {
       liveCook.morale = Math.max(0, liveCook.morale - 3);
       feed = pushFeed(feed, `${liveCook.name} fumbles the ${t.dish} — straight in the bin.`, "bad", liveCook.name);
@@ -1209,6 +1431,7 @@ export const useGame = create<GameState>((set, get) => ({
       set({
         cooks,
         feed,
+        sauce,
         tickets: s.tickets.map((x) =>
           x.id === t.id ? { ...x, state: "rail", age: x.age * 0.6, quality: -1, sear: null } : x
         ),
@@ -1234,9 +1457,168 @@ export const useGame = create<GameState>((set, get) => ({
     set({
       cooks,
       feed,
+      sauce,
       tickets: s.tickets.map((x) =>
         x.id === t.id ? { ...x, state: "pass", quality: res.quality } : x
       ),
+    });
+  },
+
+  eightySix: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused) return;
+    const rail = s.tickets.filter((t) => t.state === "rail");
+    if (rail.length === 0) return;
+    // the oldest docket names the dish. The dish dies.
+    const dish = rail[0].dish;
+    const station = rail[0].station;
+    const ids = new Set(rail.filter((t) => t.dish === dish).map((t) => t.id));
+    const tables = [...new Set(rail.filter((t) => ids.has(t.id)).map((t) => t.table))];
+    const cooks = s.cooks.map((c) => ({ ...c }));
+    const cook = cooks.find((c) => c.station === station);
+    if (cook && !cook.walkedOut) {
+      cook.morale = Math.max(0, cook.morale - 4);
+      if (!cook.grudge && s.rng() < 0.35) cook.grudge = "86ed";
+    }
+    const guests = s.guests.map((g) =>
+      g.kind === "press" ? { ...g, tellClock: Math.max(0, g.tellClock - 12) } : g
+    );
+    sfx("rip");
+    set({
+      cooks,
+      guests,
+      ego: s.ego + 2,
+      feed: tiered(
+        pushFeed(
+          s.feed,
+          `86 the ${dish}. ${ids.size} docket${ids.size > 1 ? "s" : ""} in the bin. Tables ${tables.join(", ")} wait longer; ${cook?.name ?? "the kitchen"} takes it personally.`,
+          "drama"
+        ),
+        s.ego,
+        s.ego + 2
+      ),
+      tickets: s.tickets.map((t) =>
+        ids.has(t.id)
+          ? { ...t, state: "done", verdict: null }
+          : t.state === "rail" && tables.includes(t.table)
+            ? { ...t, age: t.age + 8 }
+            : t
+      ),
+    });
+  },
+
+  whisk: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused) return;
+    const ev = s.sauce;
+    if (!ev) return;
+    const t = s.tickets.find((x) => x.id === ev.ticketId && x.state === "plating");
+    if (!t) return; // too late — it plated, fired or split already
+    const cook = s.cooks.find((c) => c.station === t.station);
+    sfx("whisk", { pan: STATION_PAN[t.station] ?? 0 });
+    set({
+      sauce: null,
+      feed: pushFeed(s.feed, `You catch the ${t.dish} mid-split and whisk it back from the edge.`, "good", cook?.name),
+      tickets: s.tickets.map((x) => (x.id === t.id ? { ...x, sauce: "saved" } : x)),
+    });
+  },
+
+  shooRunner: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused) return;
+    const r = s.runner;
+    if (!r || r.fled || r.shooed) return;
+    if (s.serviceTime > r.at + 1) return; // too late — he's at the rail
+    sfx("slam", { pan: 0.8 });
+    set({
+      runner: { ...r, shooed: true, fled: true },
+      ego: s.ego + 2,
+      feed: tiered(
+        pushFeed(s.feed, "You catch his wrist over the rail. 'Wrong kitchen, sunshine.' He leaves with the wrist.", "good"),
+        s.ego,
+        s.ego + 2
+      ),
+      // eyes off the rail for a second: everything ages a breath
+      tickets: s.tickets.map((t) => (t.state === "rail" ? { ...t, age: t.age + 3 } : t)),
+    });
+  },
+
+  declineRequest: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused) return;
+    const req = s.request;
+    if (!req) return;
+    set({
+      request: null,
+      guests: s.guests.map((g) =>
+        g.kind === "press" ? { ...g, tellClock: Math.max(0, g.tellClock - 15) } : g
+      ),
+      feed: pushFeed(s.feed, `Not tonight — table ${req.table}'s ${req.mod} can wait. The press writes it down.`, "info"),
+    });
+    sfx("gasp");
+  },
+
+  compTable: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused || s.comped || s.career.cash < 20) return;
+    const rail = s.tickets.filter((t) => t.state === "rail");
+    // the table with the most hanging fire gets the champagne
+    const counts = new Map<number, number>();
+    for (const t of rail) counts.set(t.table, (counts.get(t.table) ?? 0) + 1);
+    let target = -1;
+    let best = 0;
+    for (const [table, n] of counts) if (n > best) { best = n; target = table; }
+    if (target < 0) return;
+    const guests = s.guests.map((g) => ({
+      ...g,
+      tellClock: g.tellClock + 20, // the room exhales
+      mercy: g.kind === "regulars" && g.table === target ? Math.min(2, g.mercy + 1) : g.mercy,
+    }));
+    sfx("applause", { pan: tablePan(target) });
+    set({
+      comped: true,
+      guests,
+      career: { ...s.career, cash: s.career.cash - 20 },
+      feed: pushFeed(s.feed, `Champagne for table ${target} — on the house. The room exhales.`, "good", "THE REGULARS"),
+      tickets: s.tickets.map((t) =>
+        t.state === "rail" && t.table === target ? { ...t, age: Math.max(0, t.age - 10) } : t
+      ),
+    });
+  },
+
+  bet: (kind) => {
+    const s = get();
+    if (s.phase !== "briefing" || s.career.bet) return;
+    const b = BOARD[kind];
+    if (s.career.cash < b.stake || s.ego < b.stakeEgo) return;
+    set({
+      career: { ...s.career, cash: s.career.cash - b.stake, bet: { kind, stake: b.stake, stakeEgo: b.stakeEgo } },
+      ego: s.ego - b.stakeEgo,
+      feed: pushFeed(s.feed, `Called the board: ${b.label}. ${b.blurb}. No take-backs.`, "drama"),
+    });
+  },
+
+  borrow: () => {
+    const s = get();
+    if (s.phase !== "briefing" || (s.career.debt ?? 0) > 0) return;
+    const career = { ...s.career, cash: s.career.cash + 100, debt: 100 };
+    saveCareer(career, s.cooks);
+    set({
+      career,
+      feed: pushFeed(s.feed, "A man with a van floats you £100. He'll want £130 before the residency ends. He always gets it.", "drama"),
+    });
+  },
+
+  repay: () => {
+    const s = get();
+    if (s.phase !== "briefing") return;
+    const debt = s.career.debt ?? 0;
+    if (debt <= 0 || s.career.cash < debt + 30) return;
+    const career = { ...s.career, cash: s.career.cash - debt - 30, debt: 0 };
+    saveCareer(career, s.cooks);
+    set({
+      career,
+      feed: pushFeed(s.feed, "Paid. The man nods once and dissolves into the night.", "good"),
     });
   },
 
@@ -1260,7 +1642,7 @@ export const useGame = create<GameState>((set, get) => ({
         career,
         feed: pushFeed(s.feed, "Dessert on the house for the regulars. Twenty years buys two walkouts tonight.", "good", "THE REGULARS"),
       });
-    } else if (id === "door" && s.ego >= 30 && !s.career.doorNamed) {
+    } else if (id === "door" && s.ego >= 40 && !s.career.doorNamed) {
       const career = { ...s.career, doorNamed: true, stars: s.career.stars + 1 };
       saveCareer(career, s.cooks);
       set({
@@ -1277,20 +1659,47 @@ export const useGame = create<GameState>((set, get) => ({
     if (!plate) return;
     let { feed, ego, served, sentBack, smashed, complaints, qualitySum, streak, bestStreak } = s;
     let { criticServed, criticQ } = s;
+    let criticServeAt = s.criticServeAt;
     const cooks = s.cooks.map((c) => ({ ...c }));
     const cook = cooks[plate.station];
     const criticTable = s.guests.find((g) => g.isCritic)?.table;
     const stamp = (text: string) => ({ stampText: text, stampAt: performance.now() });
 
     if (v === "serve") {
+      const egoBefore = ego;
       served += 1;
-      qualitySum += plate.quality;
+      let q = plate.quality;
+      let req = s.request;
+      let ms: { at: number; text: string } | null = null;
+      // coursing: the table eats together — a good plate landing within 20s
+      // of the table's last one rides its heat (+6)
+      let tableServeAt = s.tableServeAt;
+      if (q >= 45 && s.serviceTime - (s.tableServeAt[plate.table] ?? -99) <= 20) {
+        q += 6;
+        feed = pushFeed(feed, `Table ${plate.table} eats together. The room approves.`, "good");
+      }
+      // table requests: FAST (under 30s old) or EXTRA CHAR (fired golden) — nailed it or noticed
+      if (req && req.ticketId === plate.id) {
+        const mod = req.mod;
+        req = null;
+        const nailed = mod === "FAST" ? plate.age < 30 : plate.sear === "golden";
+        if (nailed) {
+          q += 10;
+          feed = pushFeed(feed, `Table ${plate.table} wanted ${mod} — nailed it. The room saw.`, "good");
+        } else {
+          q -= 8;
+          feed = pushFeed(feed, `Table ${plate.table} asked for ${mod}. They noticed you didn't.`, "bad");
+        }
+      }
+      qualitySum += q;
       sfx("slam");
       if (plate.table === criticTable) {
         criticServed += 1;
-        criticQ += plate.quality;
+        criticQ += q;
+        criticServeAt = s.serviceTime;
       }
       if (plate.quality >= 45) {
+        tableServeAt = { ...tableServeAt, [plate.table]: s.serviceTime };
         streak += 1;
         bestStreak = Math.max(bestStreak, streak);
         if (plate.quality >= 72) {
@@ -1304,6 +1713,12 @@ export const useGame = create<GameState>((set, get) => ({
           ego += 2;
           for (const c of cooks) if (!c.walkedOut) c.morale = Math.min(100, c.morale + 2);
         }
+        // streak ceremonies: ×10 leans in, ×15 applauds unasked, ×20 gets remembered
+        if (streak === 10 || streak === 15 || streak === 20) {
+          ms = { at: performance.now(), text: MILESTONES[streak] };
+          feed = pushFeed(feed, MILESTONES[streak], "drama");
+          sfx("applause", { vol: streak === 15 ? 1 : 0.7 });
+        }
       } else {
         complaints += 1;
         streak = 0;
@@ -1311,6 +1726,7 @@ export const useGame = create<GameState>((set, get) => ({
         feed = pushFeed(feed, pick(s.rng, GUEST_HECKLES).replace("{T}", String(plate.table)), "bad");
         if (cook) cook.morale = Math.max(0, cook.morale - 5);
       }
+      feed = tiered(feed, egoBefore, ego);
       set({
         tickets: s.tickets.map((t) => (t.id === plate.id ? { ...t, state: "done", verdict: v } : t)),
         served,
@@ -1323,6 +1739,11 @@ export const useGame = create<GameState>((set, get) => ({
         bestStreak,
         criticServed,
         criticQ,
+        criticServeAt,
+        tableServeAt,
+        request: req,
+        milestoneAt: ms?.at ?? s.milestoneAt,
+        milestoneText: ms?.text ?? s.milestoneText,
         ...stamp("SERVED"),
       });
       return;
@@ -1348,12 +1769,14 @@ export const useGame = create<GameState>((set, get) => ({
     }
 
     // smash
+    const egoBeforeSmash = ego;
     smashed += 1;
     streak = 0;
     ego += 4;
     sfx("shatter");
     setTimeout(() => sfx("gasp"), 120);
     feed = pushFeed(feed, `You launch the ${plate.dish} into the tiles. The room stares.`, "drama");
+    feed = tiered(feed, egoBeforeSmash, ego);
     if (cook && !cook.walkedOut) cook.morale = Math.max(0, cook.morale - 6);
     set({
       tickets: s.tickets.map((t) => (t.id === plate.id ? { ...t, state: "done", verdict: v } : t)),
@@ -1362,6 +1785,7 @@ export const useGame = create<GameState>((set, get) => ({
       cooks,
       feed,
       streak,
+      request: s.request?.ticketId === plate.id ? null : s.request,
       smashAt: performance.now(),
       ...stamp("SMASHED"),
     });
@@ -1393,15 +1817,19 @@ export const useGame = create<GameState>((set, get) => ({
       adrenalineTil: s.serviceTime + 2 + 5 * Math.min(p, 1.05),
       cooks,
       ego: s.ego + (over ? -2 : 2),
-      feed: pushFeed(
-        s.feed,
-        over
-          ? "You held it too long. The kitchen flinches — and stops."
-          : s.screams === 0
-            ? "You scream. The kitchen moves faster. Everyone hates you."
-            : `Scream #${s.screams + 1}. It's working less.`,
-        over ? "bad" : "drama",
-        "THE PASS"
+      feed: tiered(
+        pushFeed(
+          s.feed,
+          over
+            ? "You held it too long. The kitchen flinches — and stops."
+            : s.screams === 0
+              ? "You scream. The kitchen moves faster. Everyone hates you."
+              : `Scream #${s.screams + 1}. It's working less.`,
+          over ? "bad" : "drama",
+          "THE PASS"
+        ),
+        s.ego,
+        s.ego + (over ? -2 : 2)
       ),
     });
   },
@@ -1419,16 +1847,21 @@ export const useGame = create<GameState>((set, get) => ({
     const g = s.guests.find((g) => g.id === id);
     if (!g) return;
     sfx(g.isCritic ? "bell" : "gasp");
+    const egoAfterFlag = s.ego + (g.isCritic ? 15 : -10);
     set({
       criticFlagged: true,
       criticSpotted: g.isCritic,
-      ego: s.ego + (g.isCritic ? 15 : -10),
-      feed: pushFeed(
-        s.feed,
-        g.isCritic
-          ? `You clock the inspector at table ${g.table}. Comped before they asked.`
-          : `You accuse table ${g.table}. Wrong guest. They heard.`,
-        g.isCritic ? "good" : "bad"
+      ego: egoAfterFlag,
+      feed: tiered(
+        pushFeed(
+          s.feed,
+          g.isCritic
+            ? `You clock the inspector at table ${g.table}. Comped before they asked.`
+            : `You accuse table ${g.table}. Wrong guest. They heard.`,
+          g.isCritic ? "good" : "bad"
+        ),
+        s.ego,
+        egoAfterFlag
       ),
     });
   },
