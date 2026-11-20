@@ -53,6 +53,10 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    101's cloth goes starched white and the wobble finally gets fixed. Hidden:
    poke the BEEFCAKES wanted poster 3× on the title card to wire CRITIC CAM —
    live telemetry (photos, last flash, fed/gone) but never the table number.
+   101 migrates up with the room (14 wobbly corner → 12 window → 10 center
+   stage); T-move and wedge/cloth follow the table. Cam counterplay: on the
+   Kid's night a wired cam gets NOTICED — flashes come ~2× faster (easier to
+   spot) but every photo tags the pass (−2 ego).
    Phasing: N1 plate→judge only, N2 sauce + coaching, N3-5 GILLIAM,
    N4 clout, N5 requests+86, N6-8 MADAME V + folklore (R to fix),
    N7 101 harsh + seating (T to move), N8 board+vows, N9 THE KID.

@@ -262,6 +262,7 @@ function CriticCam() {
   const criticSpotted = useGame((s) => s.criticSpotted);
   const criticServed = useGame((s) => s.criticServed);
   const criticLeft = useGame((s) => s.criticLeft);
+  const kidNoticed = useGame((s) => s.kidNoticed);
   const cg = guests.find((g) => g.isCritic);
   if (!cg) return null;
   const ago = cg.tellAt >= 0 ? Math.max(0, Math.round(serviceTime - cg.tellAt)) : -1;
@@ -269,7 +270,7 @@ function CriticCam() {
   return (
     <div className="critic-cam" title="A little red eye above the pass. Tell no one.">
       <span className="cam-dot" />
-      CAM 3 · TABLE {criticFlagged && criticSpotted ? cg.table : "???"} · {cg.tells} PHOTO{cg.tells === 1 ? "" : "S"} ·{" "}
+      CAM 3{kidNoticed ? " · NOTICED" : ""} · TABLE {criticFlagged && criticSpotted ? cg.table : "???"} · {cg.tells} PHOTO{cg.tells === 1 ? "" : "S"} ·{" "}
       {ago < 0 ? "NO FLASH YET" : ago < 5 ? "FLASHING NOW" : `FLASH ${ago}s AGO`} · {status}
     </div>
   );
@@ -673,7 +674,7 @@ function Briefing() {
             )}
             {career.night >= 7 && (
             <div className="bshop slim">
-              <div className="mhead">MAITRE-D' — who gets wobbly 101 (table 14)?</div>
+              <div className="mhead">MAITRE-D' — who gets 101 {(["(table 14, wobbly corner)", "(table 12, the window)", "(table 10, center stage)"] as const)[Math.min(2, career.venue)]}?</div>
               {career.seating101 ? (
                 <div className="ltaken">101: {career.seating101.toUpperCase()} · window +patience for the rest</div>
               ) : (

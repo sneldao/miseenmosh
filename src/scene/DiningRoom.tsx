@@ -22,6 +22,8 @@ function Guest({
   scale?: number;
   venue?: number;
 }) {
+  // 101 migrates up with the room: wobbly corner → window → center stage
+  const hundredOne = [14, 12, 10][Math.min(2, venue ?? 0)];
   const guests = useGame((s) => s.guests);
   const flagGuest = useGame((s) => s.flagGuest);
   const criticFlagged = useGame((s) => s.criticFlagged);
@@ -127,7 +129,7 @@ function Guest({
       <mesh position={[0, 0.62, 0.62]}>
         <cylinderGeometry args={[0.5, 0.5, 0.34, 18, 1, true]} />
         {/* the flagship starches 101's cloth — white, pressed, no excuses */}
-        <meshStandardMaterial color={g?.table === 14 && venue >= 2 ? "#f7f2e6" : "#efe6d2"} roughness={1} side={2} />
+        <meshStandardMaterial color={g?.table === hundredOne && venue >= 2 ? "#f7f2e6" : "#efe6d2"} roughness={1} side={2} />
       </mesh>
       {/* candle = visibility anchor */}
       <mesh position={[0.2, 0.86, 0.62]}>
@@ -140,7 +142,7 @@ function Guest({
       </mesh>
       <pointLight position={[0.2, 0.99, 0.62]} color="#ff9a4a" intensity={6} distance={3} />
       {/* 101 wobbles: table 14 sits a degree off — until the flagship fixes it */}
-      {g?.table === 14 && venue < 2 && (
+      {g?.table === hundredOne && venue < 2 && (
         <mesh position={[0, 0.44, 0.62]} rotation={[0, 0, 0.06]}>
           <boxGeometry args={[0.1, 0.02, 0.1]} />
           <meshStandardMaterial color="#7a2a1a" roughness={0.9} />

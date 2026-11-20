@@ -220,11 +220,16 @@ export const FOLKLORE_RETURN_WARN = "Table {T} sends it back: 'too cold'. It's a
 export const FOLKLORE_FLASH_WARN = "Table {T} lifts a phone. Flash on. Don't react. Let them post.";
 
 export const TABLE101_WARN = "101's wobbling again. Don't put anyone you love there.";
+export const TABLE101_SEAT = [
+  "101 takes table 14 — the wobbly corner. Don't put anyone you love there.",
+  "101 moves up to table 12, the window. Better light, same wobble.",
+  "101 center stage, table 10. Starched cloth, fixed leg. They've arrived.",
+];
 export const TABLE101_MOVE = "You move 101 mid-rush. Chairs scrape, runners sprint. Worth it.";
 export const SEATING_LINES: Record<string, string> = {
   regulars: "The regulars get 101 for old times' sake. Twenty years they've sat there.",
   press: "The press get the window. They order fast and write faster.",
-  walkin: "Walk-ins at 101. Impatient, big spenders, already photographing the wobble.",
+  walkin: "Walk-ins at 101. Impatient, big spenders, already photographing everything.",
 };
 
 export const VOW_LINES: Record<string, string> = {

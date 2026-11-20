@@ -11,7 +11,7 @@ import {
   FOLKLORE_FORK_WARN, FOLKLORE_FORK_SAVED, FOLKLORE_FORK_IGNORED,
   FOLKLORE_GLASS_WARN, FOLKLORE_GLASS_SAVED, FOLKLORE_COAT_WARN,
   FOLKLORE_COAT_SAVED, FOLKLORE_RETURN_WARN, FOLKLORE_FLASH_WARN,
-  TABLE101_WARN, TABLE101_MOVE, SEATING_LINES, VOW_LINES,
+  TABLE101_WARN, TABLE101_SEAT, TABLE101_MOVE, SEATING_LINES, VOW_LINES,
 } from "./barks";
 
 export type Verdict = "serve" | "sendback" | "smash";
@@ -403,6 +403,8 @@ interface GameState {
   sauce: { ticketId: number; until: number } | null;
   /** champagne comped mid-service: once, and the room exhales */
   comped: boolean;
+  /** the Kid noticed the red eye (critic cam counterplay, N9) */
+  kidNoticed: boolean;
   /** the critic's exit: head high (fed, spotted) or coat on (slipped away) */
   criticLeft: boolean;
   criticServeAt: number;
@@ -611,6 +613,12 @@ function venueFor(stars: number) {
   return stars >= 10 ? 2 : stars >= 5 ? 1 : 0;
 }
 
+/** 101 migrates up with the room: wobbly corner → window → center stage */
+const ONE_OH_ONE_IDX = [4, 2, 0];
+export function oneOhOneTable(career: Career): number {
+  return career.seating101 ? 10 + ONE_OH_ONE_IDX[Math.min(2, career.venue)] : -1;
+}
+
 const bootSave = loadSave();
 
 export const useGame = create<GameState>((set, get) => ({
@@ -643,6 +651,7 @@ export const useGame = create<GameState>((set, get) => ({
   request: null,
   sauce: null,
   comped: false,
+  kidNoticed: false,
   criticLeft: false,
   criticServeAt: -1,
   screamAt: 0,
@@ -743,14 +752,15 @@ export const useGame = create<GameState>((set, get) => ({
     const guests: Guest[] = [];
     // dessert on the house: the regulars forgive twice tonight
     const sweetNight = (career.dessertNight ?? -1) === career.night;
-    // maitre-d': seating101 forces that party to wobbly table 14 (101)
+    // maitre-d': seating101 forces that party to 101 — which migrates up with the room
     const seat101 = career.seating101 ?? null;
+    const hundredOne = seat101 ? ONE_OH_ONE_IDX[Math.min(2, career.venue)] : -1;
     let ki = 0;
     for (let i = 0; i < 5; i++) {
       const isCritic = i === criticId;
       let kind: GuestKind = isCritic ? "critic" : kinds[ki++];
-      // table 14 is 101 — seat the chosen party there (unless it's the critic's table)
-      if (10 + i === 14 && seat101 && !isCritic) kind = seat101;
+      // 101's table migrates with the venue (unless it's the critic's table)
+      if (i === hundredOne && seat101 && !isCritic) kind = seat101;
       const base =
         kind === "critic" ? 7 + rng() * 6
         : kind === "press" ? 20 + rng() * 15
@@ -786,7 +796,7 @@ export const useGame = create<GameState>((set, get) => ({
         { id: feedId++, text: `Night ${career.night} — ${v.name}. ${v.sub}.`, kind: "drama" },
         { id: feedId++, text: CRITIC_DREAD[persona], kind: "drama" },
         ...(career.vow ? [{ id: feedId++, text: VOW_LINES[career.vow], kind: "drama" as const }] : []),
-        ...(seat101 ? [{ id: feedId++, text: TABLE101_WARN, kind: "info" as const }] : []),
+        ...(seat101 ? [{ id: feedId++, text: TABLE101_SEAT[Math.min(2, career.venue)], kind: "info" as const }] : []),
         { id: feedId++, text: "Doors open. Somewhere out there is the inspector.", kind: "info" },
         ...((s.career.debt ?? 0) > 0
           ? [{ id: feedId++, text: pick(rng, VAN_REMINDER), kind: "drama" as const }]
@@ -818,6 +828,7 @@ export const useGame = create<GameState>((set, get) => ({
       request: null,
       sauce: null,
       comped: false,
+      kidNoticed: false,
       criticLeft: false,
       criticServeAt: -1,
       chorusText: `"YES, CHEF!"`,
@@ -1138,7 +1149,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (s.phase !== "briefing" || s.career.seating101 || s.career.night < 7) return;
     const career = { ...s.career, seating101: k };
     saveCareer(career, s.cooks);
-    set({ career, feed: pushFeed(pushFeed(s.feed, SEATING_LINES[k], "info"), TABLE101_WARN, "drama") });
+    set({ career, feed: pushFeed(pushFeed(s.feed, SEATING_LINES[k], "info"), TABLE101_SEAT[Math.min(2, s.career.venue)], "drama") });
   },
 
   answerFolklore: (ok) => {
@@ -1179,17 +1190,16 @@ export const useGame = create<GameState>((set, get) => ({
     }
     // flash: correct answer is nothing — handled by expiry
     set({ folklore: null, folkloreDone: true, feed, criticQ });
-  },
-
-  move101: () => {
+  },    move101: () => {
     const s = get();
     if (s.phase !== "service" || s.moved101 || s.career.night < 7) return;
     sfx("slam");
+    const t101 = oneOhOneTable(s.career);
     set({
       moved101: true,
       ego: s.ego + 1,
       feed: pushFeed(s.feed, TABLE101_MOVE, "good"),
-      tickets: s.tickets.map((t) => (t.state === "rail" && t.table === 14 ? { ...t, age: Math.max(0, t.age - 12) } : t)),
+      tickets: s.tickets.map((t) => (t.state === "rail" && t.table === t101 ? { ...t, age: Math.max(0, t.age - 12) } : t)),
     });
   },
 
@@ -1515,6 +1525,10 @@ export const useGame = create<GameState>((set, get) => ({
 
     // --- the dining room tells on itself: critic escalates, press flashes,
     // the couple fights, the regulars nod through it ---
+    // cam counterplay: on the Kid's night a wired cam gets noticed — they perform for it
+    const personaTick = s.career.criticPersona ?? (s.career.night >= 9 ? "kid" : s.career.night >= 6 ? "madameV" : "gilliam");
+    const kidPerforming = !!s.career.criticCam && personaTick === "kid";
+    let kidNoticed = s.kidNoticed;
     const guests = s.guests.map((g) => {
       const tickClock = g.tellClock - dt;
       if (tickClock <= 0) {
@@ -1527,6 +1541,13 @@ export const useGame = create<GameState>((set, get) => ({
           line = CRITIC_ESCALATION[Math.min(tells - 1, CRITIC_ESCALATION.length - 1)].replace("{T}", String(g.table));
           kind = "drama";
           sfx("flash", { pan });
+          if (kidPerforming) {
+            ego -= 2; // every flash tags the pass
+            if (!kidNoticed) {
+              kidNoticed = true;
+              feed = pushFeed(feed, "THE KID found your red eye. They're performing for it now — flashes twice as fast, every photo tags the pass (−2 ego).", "drama");
+            }
+          }
         } else if (g.kind === "press") {
           line = pick(rng, PRESS_TELLS).replace("{T}", String(g.table));
           kind = "drama";
@@ -1542,7 +1563,7 @@ export const useGame = create<GameState>((set, get) => ({
         }
         if (line && !s.criticFlagged) feed = pushFeed(feed, line, kind, who);
         const next =
-          g.kind === "critic" ? 9 + rng() * 7
+          g.kind === "critic" ? (9 + rng() * 7) * (kidPerforming ? 0.55 : 1)
           : g.kind === "press" ? 24 + rng() * 18
           : g.kind === "couple" ? 30 + rng() * 30
           : g.kind === "regulars" ? 70 + rng() * 40
@@ -1688,6 +1709,7 @@ export const useGame = create<GameState>((set, get) => ({
       barkAt, rivalIdx, rivalAt, rivalWarned, lastSteal, criticAnnounced,
       sauce, request, runner, criticLeft, folklore, folkloreDone,
       criticQ: s.criticQ + folkloreQ,
+      kidNoticed,
     });
   },
 
