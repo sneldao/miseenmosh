@@ -85,7 +85,7 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    keep, so spend it or sober up. Lifetime ego gates the LEGEND ending.
 6. **ROLE (stay the chef)** — every verb is a pass verb; a commis mode would need a different keyboard. The rise is the room, not the rank (stall → flagship), and the underdog position is economic (debt, van, stall). N1 briefing: "You're the chef because you're the only one who came back." The receiving end is critic mode (hidden NG+): same systems, reversed lens — not a new game.
 7. **SCOPE GATES (system vs hint)** — a thing becomes a system only if (a) it attaches to an existing key, (b) it resolves within a night or pays off across the arc, (c) the player has agency. Everything else is a hint: bark, feed, feud card, folklore, review tail. Fatigue/joy/communication are already simulated — name their thresholds. Cleanliness, inspections, sickness, vermin, covers, TV: events and textures, never meters. No system punishes curiosity.
-8. **FLYWHEEL (adaptable × adaptive × retained)** — adaptable: loadout (menu, vows, seating, bets) plus cross-night combos the feed acknowledges. Adaptive: the game remembers (grudges, press, BEEFCAKES, truce) and says so every morning (morningPaper line). Retained across runs: legends on the title card, daily shared seed, covers collected per ending, critic mode as NG+ (shipped P0–P4; P5 sketched in [archive/scope-flywheel-plan.md](archive/scope-flywheel-plan.md)).
+8. **FLYWHEEL (adaptable × adaptive × retained)** — adaptable: loadout (menu, vows, seating, bets, one HOUSE RULE per residency: DOUBLE SHIFT / NO BIN / SHORT FUSE, chosen N1) plus cross-night combos the feed acknowledges. Adaptive: the game remembers (grudges, press, BEEFCAKES, truce) and says so every morning (morningPaper line). Retained across runs: legends on the title card, daily shared seed, covers collected per ending, critic mode as NG+ (shipped P0–P4; P5 sketched in [archive/scope-flywheel-plan.md](archive/scope-flywheel-plan.md)).
    Ego wears tiers (COMMIS → LEGEND); the room says the new name out loud.
    Call the board: one wager a night (covers / no walks / clock the
    inspector). A man with a van floats you £100 — he wants £130 back
@@ -115,7 +115,7 @@ game here:
 
 - **Voice Design**: every brigade member, rival chef and critic gets a
   designed voice (8–12 distinct voices).
-- **Text-to-Dialogue**: service barks, feud cutscenes, the review read-out.
+- **Text-to-Dialogue**: service barks, feud cutscenes, the review read-out (first slice shipped: local-synth YES-CHEF chorus + review read-out, VOICE toggle U — ElevenLabs bake replaces it).
 - **Sound Effects**: ticket printer, pan hits, fire, plate smash, dining
   room murmur — the kitchen cacophony is a mechanic (you hear a station
   go quiet before you see it).
@@ -173,6 +173,7 @@ game here:
 - Genre: **Simulation & management**
 - Sponsors: ElevenLabs (flagship), fal, Meshy — all three, earned via
   real usage.
+- Cross-submit: Chroma Awards Experimental / open format as interactive narrative ([chroma-submit.md](chroma-submit.md)) — same bytes, second surface.
 
 ## Build history
 

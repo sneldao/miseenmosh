@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { mulberry32, daySeed } from "./seed";
 import { sfx, unlockAudio, setMasterMuted } from "./sound";
+import { speakChorus, speakReview } from "./voice";
 import { initOg, submitBoard, unlockAch, trackEvent } from "./og";
 import {
   CHEF_BARKS, STATION_BARKS, BRIGADE_RESPONSES, GUEST_HECKLES, RIVAL_LINES, pick,
@@ -188,6 +189,8 @@ export interface Career {
   /** first-time gentling: first sauce gets 7s, first runner warns 10s out */
   sauceGentled?: boolean;
   runnerGentled?: boolean;
+  /** run mutator: one twist per residency, chosen N1 — double runners, no bin, short fuse */
+  mutator?: "double_runners" | "no_bin" | "short_fuse";
   /** covers earned this run (4–5★ reviews name the magazine) */
   covers?: string[];
   /** coaching: night a cook was coached (one session a night) */
@@ -487,6 +490,7 @@ interface GameState {
   feudChoice: (i: number) => void;
   buyLot: (i: number, outbid: boolean) => void;
   chooseVow: (v: "star" | "house" | "brigade") => void;
+  chooseMutator: (m: NonNullable<Career["mutator"]>) => void;
   coach: (id: number, kind: "praise" | "drill" | "rest") => void;
   setMenu: (featured: string, rested: string) => void;
   unlockCriticCam: () => void;
@@ -868,6 +872,16 @@ export const useGame = create<GameState>((set, get) => ({
     nextId = 1;
     feedId = 1;
     const careerNext = { ...career, criticPersona: persona };
+    // N1 cold open: doors open mid-rush — three tickets already hanging, staggered like a bad night
+    const coldOpen = career.night === 1;
+    const criticTableForOpen = 10 + criticId;
+    const opening: Ticket[] = coldOpen
+      ? [
+          { ...spawnTicket(rng, criticTableForOpen, career.restedDish), age: 26 },
+          { ...spawnTicket(rng, criticTableForOpen, career.restedDish), age: 15 },
+          { ...spawnTicket(rng, criticTableForOpen, career.restedDish), age: 5 },
+        ]
+      : [];
     saveCareer(careerNext, s.cooks);
     set({
       phase: "service",
@@ -878,15 +892,23 @@ export const useGame = create<GameState>((set, get) => ({
       tellMul: v.tellMul,
       // cooks persist across nights — they rest a little, they don't forget
       cooks: s.cooks.map((c) => withFreshNight({ ...c, morale: Math.min(85, c.morale + 20) })),
-      tickets: [],
+      tickets: opening,
       feed: [
         { id: feedId++, text: `Night ${career.night} — ${v.name}. ${v.sub}.`, kind: "drama" },
+        ...(coldOpen
+          ? [{ id: feedId++, text: "You're the chef because you're the only one who came back.", kind: "drama" as const }]
+          : []),
         { id: feedId++, text: CRITIC_DREAD[persona], kind: "drama" },
         ...(career.vow ? [{ id: feedId++, text: VOW_LINES[career.vow], kind: "drama" as const }] : []),
+        ...(career.mutator === "double_runners" ? [{ id: feedId++, text: "HOUSE RULE: DOUBLE SHIFT — his runners come doubled.", kind: "drama" as const }] : []),
+        ...(career.mutator === "no_bin" ? [{ id: feedId++, text: "HOUSE RULE: NO BIN — everything gets cooked.", kind: "info" as const }] : []),
+        ...(career.mutator === "short_fuse" ? [{ id: feedId++, text: "HOUSE RULE: SHORT FUSE — tables walk faster. Move.", kind: "drama" as const }] : []),
         ...(seat101 ? [{ id: feedId++, text: TABLE101_SEAT[Math.min(2, career.venue)], kind: "info" as const }] : []),
         ...(career.regularsPermanent ? [{ id: feedId++, text: PERMANENT_101, kind: "good" as const }] : []),
         ...(career.beefcakesTruce ? [{ id: feedId++, text: "Across the street, BEEFCAKES plates quietly. The truce holds.", kind: "info" as const }] : []),
-        { id: feedId++, text: "Doors open. Somewhere out there is the inspector.", kind: "info" },
+        ...(coldOpen
+          ? [{ id: feedId++, text: "Doors open mid-rush — three tickets already hanging. Fire something.", kind: "drama" as const }]
+          : [{ id: feedId++, text: "Doors open. Somewhere out there is the inspector.", kind: "info" as const }]),
         ...((s.career.debt ?? 0) > 0
           ? [{ id: feedId++, text: pick(rng, VAN_REMINDER), kind: "drama" as const }]
           : []),
@@ -894,7 +916,7 @@ export const useGame = create<GameState>((set, get) => ({
           ? [{ id: feedId++, text: "The press remembers last night: nobody raised their voice. They're listening for it.", kind: "info" as const, who: "THE PRESS" }]
           : []),
       ],
-      nextTicketIn: 1.5,
+      nextTicketIn: coldOpen ? 0.5 : 1.5,
       serviceTime: 0,
       served: 0,
       sentBack: 0,
@@ -931,7 +953,7 @@ export const useGame = create<GameState>((set, get) => ({
       rivalAt: -10,
       rivalWarned: -1,
       lastSteal: null,
-      barkAt: 16 + rng() * 10,
+      barkAt: coldOpen ? 8 + rng() * 6 : 16 + rng() * 10,
       criticAnnounced: false,
       criticServed: 0,
       criticQ: 0,
@@ -1220,6 +1242,20 @@ export const useGame = create<GameState>((set, get) => ({
     set({ career, feed: pushFeed(s.feed, VOW_LINES[v], "drama") });
   },
 
+  chooseMutator: (m) => {
+    const s = get();
+    if (s.phase !== "briefing" || s.career.night !== 1 || s.career.mutator) return;
+    const career = { ...s.career, mutator: m };
+    saveCareer(career, s.cooks);
+    const line =
+      m === "double_runners"
+        ? "HOUSE RULE: DOUBLE SHIFT — BEEFCAKES doubles his runners all residency. Bring a broom."
+        : m === "no_bin"
+          ? "HOUSE RULE: NO BIN — 86 is off all residency. Cook everything."
+          : "HOUSE RULE: SHORT FUSE — tickets walk 20% faster all residency. Streaks still pay.";
+    set({ career, feed: pushFeed(s.feed, line, "drama") });
+  },
+
   unlockCriticCam: () => {
     const s = get();
     if (s.career.criticCam) return;
@@ -1401,7 +1437,8 @@ export const useGame = create<GameState>((set, get) => ({
       // 101 — wherever they've migrated — walks faster from N7 unless moved mid-rush
       const harsh101 = s.career.night >= 7;
       const t101ttl = oneOhOneTable(s.career);
-      const ttl = t101ttl >= 0 && t.table === t101ttl && harsh101 ? (s.moved101 ? TICKET_TTL : 45) : TICKET_TTL;
+      const baseTtl = t101ttl >= 0 && t.table === t101ttl && harsh101 ? (s.moved101 ? TICKET_TTL : 45) : TICKET_TTL;
+      const ttl = s.career.mutator === "short_fuse" ? baseTtl * 0.8 : baseTtl;
       if (age > ttl) {
         // the regulars forgive — twice on dessert-on-the-house nights
         const regular = s.guests.find((gg) => gg.table === t.table && gg.kind === "regulars" && gg.mercy > 0);
@@ -1598,7 +1635,7 @@ export const useGame = create<GameState>((set, get) => ({
     }
 
     // --- BEEFCAKES does something unforgivable — and this time he sends a body ---
-    const rivalTimes = s.career.beefcakesWar ? [35, 55, 75, 95, 118] : [35, 75, 118];
+    const rivalTimes = s.career.mutator === "double_runners" ? [30, 50, 70, 90, 110, 128] : s.career.beefcakesWar ? [35, 55, 75, 95, 118] : [35, 75, 118];
     let rivalAt = s.rivalAt;
     let rivalWarned = s.rivalWarned;
     let lastSteal = s.lastSteal;
@@ -1854,6 +1891,7 @@ export const useGame = create<GameState>((set, get) => ({
       else if (vow === "house") vowLine = s.table101Turns >= 2 ? "HOUSE VOW HELD: 101 turned twice. The regulars are permanent." : "HOUSE VOW BROKEN: 101 wobbled away.";
       else if (vow === "brigade") vowLine = walkouts === 0 ? "BRIGADE VOW HELD: nobody walked. Trauma −1 all." : "BRIGADE VOW BROKEN: aprons on the tiles.";
       sfx("review");
+      speakReview(stars, quote);
       set({
         phase: "review",
         tickets,
@@ -2026,6 +2064,10 @@ export const useGame = create<GameState>((set, get) => ({
   eightySix: () => {
     const s = get();
     if (s.phase !== "service" || s.paused || s.career.night < 5) return;
+    if (s.career.mutator === "no_bin") {
+      set({ feed: pushFeed(s.feed, "No bin tonight — house rule. Cook everything.", "info") });
+      return;
+    }
     const rail = s.tickets.filter((t) => t.state === "rail");
     if (rail.length === 0) return;
     // the oldest docket names the dish. The dish dies.
@@ -2410,6 +2452,8 @@ export const useGame = create<GameState>((set, get) => ({
     const liveTickets = s.tickets.filter((t) => t.state !== "done").length;
     const emptyPass = liveTickets === 0;
     sfx(over ? "gasp" : "chorus");
+    const chorusLine = over ? `"..." — nobody answers.` : pick(s.rng, BRIGADE_RESPONSES);
+    speakChorus(chorusLine, over);
     if (over) {
       setTimeout(() => sfx("gasp"), 140);
       // held too long: the whole brigade takes it personally
@@ -2417,9 +2461,7 @@ export const useGame = create<GameState>((set, get) => ({
     }
     set({
       screamAt: performance.now(),
-      chorusText: over
-        ? `"..." — nobody answers.`
-        : pick(s.rng, BRIGADE_RESPONSES),
+      chorusText: chorusLine,
       screams: s.screams + 1,
       adrenalineTil: s.serviceTime + 2 + 5 * Math.min(p, 1.05),
       cooks,

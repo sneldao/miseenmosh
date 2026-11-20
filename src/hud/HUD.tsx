@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useGame, tierOf, tierName, BOARD, Ticket, PlateTier, VENUES, loadLegends } from "../game/state";
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
+import { speakReview, voiceEnabled, setVoiceEnabled } from "../game/voice";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
 import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
 import stampSmash from "../../assets/recraft/vector/stamp-smash.svg";
@@ -399,6 +400,9 @@ function ReviewCard() {
           >
             {copied ? "COPIED" : "COPY REVIEW"}
           </button>
+          <button className="btn" onClick={() => speakReview(review.stars, review.quote)} title="The critic reads it back">
+            READ IT ALOUD
+          </button>
           <button className="btn serve" onClick={continueNext}>
             NEXT MORNING <span className="kbd">↵</span>
           </button>
@@ -425,6 +429,7 @@ function Briefing() {
   const coach = useGame((s) => s.coach);
   const setMenu = useGame((s) => s.setMenu);
   const chooseVow = useGame((s) => s.chooseVow);
+  const chooseMutator = useGame((s) => s.chooseMutator);
   const chooseSeating = useGame((s) => s.chooseSeating);
   const meal = useGame((s) => s.meal);
   const mealDone = (career.mealNight ?? -1) >= career.night;
@@ -433,7 +438,8 @@ function Briefing() {
   const canSave = useGame((s) => s.canSave);
   const v = VENUES[career.venue];
   const [beat, setBeat] = useState(0);
-  const lastBeat = feud ? 2 : 1;
+  // N1 cold open: one beat (brigade + house rule), then doors. Market N2+, shop N3+, feud N4+.
+  const lastBeat = career.night === 1 ? 0 : feud ? 2 : 1;
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
@@ -444,7 +450,7 @@ function Briefing() {
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
   }, [beat, lastBeat, startService]);
-  const fwdLabel = beat < lastBeat ? (beat === 0 ? "TO THE MARKET →" : "TONIGHT'S PROBLEM →") : "RUN SERVICE ↵";
+  const fwdLabel = beat < lastBeat ? (beat === 0 ? "TO THE MARKET →" : "TONIGHT'S PROBLEM →") : career.night === 1 ? "OPEN THE DOORS ↵" : "RUN SERVICE ↵";
   const go = () => {
     if (beat < lastBeat) {
       setBeat(beat + 1);
@@ -536,6 +542,26 @@ function Briefing() {
                 </>
               )}
             </div>
+            {career.night === 1 && (
+            <div className="market">
+              <div className="mhead">HOUSE RULE — one twist, all residency</div>
+              {career.mutator ? (
+                <div className="ltaken">rule set: {career.mutator === "double_runners" ? "DOUBLE SHIFT" : career.mutator === "no_bin" ? "NO BIN" : "SHORT FUSE"}. no take-backs.</div>
+              ) : (
+                <>
+                  <button className="btn lbtn" onClick={() => chooseMutator("double_runners")}>
+                    DOUBLE SHIFT <span className="cost">BEEFCAKES doubles runners · all 9 nights</span>
+                  </button>
+                  <button className="btn lbtn" onClick={() => chooseMutator("no_bin")}>
+                    NO BIN <span className="cost">86 off · cook everything · all 9 nights</span>
+                  </button>
+                  <button className="btn lbtn dim" onClick={() => chooseMutator("short_fuse")}>
+                    SHORT FUSE <span className="cost">tables walk 20% faster · all 9 nights</span>
+                  </button>
+                </>
+              )}
+            </div>
+            )}
             {career.night >= 2 && (
             <div className="market">
               <div className="mhead">COACHING — one session a night, they adapt or crack</div>
@@ -576,7 +602,7 @@ function Briefing() {
               )}
             </div>
             )}
-            {lots.length > 0 && (
+            {career.night >= 2 && lots.length > 0 && (
           <div className="market">
             <div className="mhead">MORNING MARKET — what the sea surrendered</div>
             {lots.map((l, i) => (
@@ -608,6 +634,7 @@ function Briefing() {
             ))}
           </div>
         )}
+            {career.night >= 3 && (
             <div className="bshop slim">
               <div className="mhead">BACK OFFICE</div>
               <button className="btn shop" disabled={career.cash < 40} onClick={() => briefAction("drinks")}>
@@ -624,6 +651,7 @@ function Briefing() {
                 COMP THE FOOD PRESS <span className="cost">£60 · −heat, +5 morale</span>
               </button>
             </div>
+            )}
             {career.night >= 4 && (
             <div className="bshop slim">
               <div className="mhead">CLOUT — EGO {Math.round(ego)} · doesn&apos;t keep, spend it or sober up</div>
@@ -823,6 +851,10 @@ function useHotkeys() {
         s.toggleFirstPerson();
         return;
       }
+      if (e.key.toLowerCase() === "u") {
+        setVoiceEnabled(!voiceEnabled());
+        return;
+      }
       if (e.key.toLowerCase() === "p" || e.key === "Escape") {
         s.togglePause();
         return;
@@ -867,6 +899,7 @@ function Glossary() {
     ["D", "refuse request · refuse-with-grace (cold plate)"],
     ["R", "fix the folklore (fork/glass/coat)"],
     ["C", "comp the hanging table (champagne)"],
+    ["U", "brigade voices on/off"],
     ["click table", "flag the inspector (before dessert)"],
     ["P / Esc", "pause"],
     ["V", "first-person pass view"],
@@ -932,6 +965,7 @@ export default function HUD() {
 
   const unlockCriticCam = useGame((s) => s.unlockCriticCam);
   const [pokes, setPokes] = useState(0);
+  const [voiceOn, setVoiceOn] = useState(voiceEnabled());
   const pokeBeefcakes = () => {
     if (career.criticCam) return;
     const n = pokes + 1;
@@ -1118,6 +1152,17 @@ export default function HUD() {
           <button className="btn scream" onClick={() => scream(1)}>
             SCREAM <span className="kbd">SPACE</span>{" "}
             <span className="cost">hold to charge · costs morale</span>
+          </button>
+          <button
+            className="btn voice"
+            title="Brigade voices + review read-out (U)"
+            onClick={() => {
+              const next = !voiceOn;
+              setVoiceEnabled(next);
+              setVoiceOn(next);
+            }}
+          >
+            VOICE {voiceOn ? "ON" : "OFF"} <span className="kbd">U</span>
           </button>
           <button className="btn comp" disabled={comped || career.cash < 20} onClick={() => compTable()}>
             COMP A TABLE <span className="kbd">C</span> <span className="cost">£20 · the room exhales</span>

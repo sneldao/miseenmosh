@@ -74,6 +74,7 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       − breakage), office briefing screen, feud cards with choices,
       localStorage save/resume, three endings
 - [x] Morning fish-market bidding (3 seeded lots, contested outbid vs Beefcakes, per-station quality buffs)
+- [x] Run mutators (20 Nov): one HOUSE RULE per residency, chosen N1 — DOUBLE SHIFT (doubled runners) / NO BIN (86 off) / SHORT FUSE (20% faster walks)
 - [ ] Menu setting / station assignment layer on top of bought stock
 - [ ] Dedicated coaching actions (drinks/press exist; named training TBD)
 
@@ -92,26 +93,27 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       dining tables (press / regulars / couple / walk-in), critic
       escalation tells
 - [ ] Phase 3 — prep as a place: office scene, desk objects, one decision
-      each, night-gated disclosure; Night 1 cold open into service
+      each, night-gated disclosure; Night 1 cold open into service (shipped 20 Nov: mid-rush seed + single-beat briefing, market N2+, shop N3+)
       *(family-meal ritual already in: praise / crispy bit / silence,
       clears grudges)*
 - [ ] Phase 4 — venue re-dress (stall → bistro → flagship), lighting tiers
 - [ ] Full cast + props via the pipeline (Idol Max / meshy-t2.5)
 - [ ] Complete audio pass: 8–12 voices, music score *(synth SFX +
-      ambience beds done; voices and score to go)*
+      ambience beds done; first voice slice shipped 20 Nov — local-synth
+      YES-CHEF chorus + review read-out, VOICE toggle (U); ElevenLabs bake to go)*
 - [ ] Feud system + rival chefs (incl. Beefcakes), newspaper clippings
 - [ ] VHS-grain flashbacks, title sequence, review card art
 - [ ] Hidden critic-mode unlock
 
 ## Week 4 — polish, check, ship
 
-- [ ] opengame check --build cycles; resize across the 5 viewports
+- [ ] opengame check --build cycles; resize across the 5 viewports *(CSS pass shipped 20 Nov: 1100/760/480 breakpoints + voice button; verify on preview)*
 - [ ] Performance pass: 45fps @1080p on ordinary laptop, <50MB first frame
 - [ ] Playtest sessions (10/day allowance); fix confirmed findings only
 - [ ] Deploy early, iterate — latest live version at deadline is judged.
       Runbook: [deploy.md](deploy.md) (deploy from the root; `build.output` packages `dist/`)
 - [ ] Publish → Simulation & management + all three sponsor tracks
-- [ ] Cross-submit to Chroma Awards (by Jan 7) — interactive narrative
+- [ ] Cross-submit to Chroma Awards (by Jan 7) — interactive narrative *(checklist: [chroma-submit.md](chroma-submit.md); same bytes as the OpenGame build)*
 
 ## Standing disciplines
 
