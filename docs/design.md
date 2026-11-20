@@ -83,6 +83,9 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    spendable clout in the back office (comp the inspector's champagne,
    dessert on the house, your name above the door for +1★) — it doesn't
    keep, so spend it or sober up. Lifetime ego gates the LEGEND ending.
+6. **ROLE (stay the chef)** — every verb is a pass verb; a commis mode would need a different keyboard. The rise is the room, not the rank (stall → flagship), and the underdog position is economic (debt, van, stall). N1 briefing: "You're the chef because you're the only one who came back." The receiving end is critic mode (hidden NG+): same systems, reversed lens — not a new game.
+7. **SCOPE GATES (system vs hint)** — a thing becomes a system only if (a) it attaches to an existing key, (b) it resolves within a night or pays off across the arc, (c) the player has agency. Everything else is a hint: bark, feed, feud card, folklore, review tail. Fatigue/joy/communication are already simulated — name their thresholds. Cleanliness, inspections, sickness, vermin, covers, TV: events and textures, never meters. No system punishes curiosity.
+8. **FLYWHEEL (adaptable × adaptive × retained)** — adaptable: loadout (menu, vows, seating, bets) plus cross-night combos the feed acknowledges. Adaptive: the game remembers (grudges, press, BEEFCAKES, truce) and says so every morning (morningPaper line). Retained across runs: legends on the title card, daily shared seed, covers collected per ending, critic mode as NG+. Full phase plan: docs/scope-flywheel-plan.md.
    Ego wears tiers (COMMIS → LEGEND); the room says the new name out loud.
    Call the board: one wager a night (covers / no walks / clock the
    inspector). A man with a van floats you £100 — he wants £130 back
@@ -142,12 +145,13 @@ game here:
 
 - **Daily service seed** — same tickets for everyone that day; "Tonight's
   Review" card is the share artifact (stars, covers, walkouts, scream of
-  the night).
+  the night). Legends (best streak, silent fives, covers) persist on the
+  title card across runs; covers are collected per ending tier (§8).
 - **Funny failure is the marketing** — fires, walkouts, the critic
   catching a burnt plate, a brigade member hurling their apron at the
   pass.
 - **Hidden mode** — at 3 stars, flip roles: play as the inspector
-  infiltrating someone else's service.
+  infiltrating someone else's service (the receiving end; NG+ per §6).
 - **Beefcakes** — gym-bro rival chef: protein-only menu, shirtless
   birthday posts mid-feud. (Named for the Ramsay-at-60 thirst-trap cycle.)
 - Screenshot test: a screaming chef silhouette at the pass in a ticket
@@ -158,6 +162,8 @@ game here:
 - ONE core room per venue; camera mostly fixed (ticket rail + pass +
   dining-room window). No open world, no multiplayer, no runtime AI calls.
 - Scripted+baked dialogue trees, not runtime LLM (offline review).
+- Systems attach to keys; everything else ships as a hint (see §7).
+  No simulated meters without verbs.
 - 8–12 voices, ~20–30 generated characters/props max, curated hand-fixes.
 - Complete game = 3 venues, ~15 services, feuds, ending (3rd star or
   flame-out epilogue). Short and polished > long and thin.
