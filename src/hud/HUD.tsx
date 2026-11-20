@@ -235,6 +235,26 @@ function Ticker() {
   );
 }
 
+const MENU_DISHES = ["Scallop, one", "Beef Wellington", "Red mullet, crying", "Risotto (stood up)", "Lamb sauce (missing)", "Pommes purée", "Foie torchon", "Soufflé (weeping)", "Tart of the day"];
+
+function MenuPicker({ onPick }: { featured?: string | null; onPick: (f: string, r: string) => void }) {
+  const [f, setF] = useState(MENU_DISHES[1]);
+  const [r, setR] = useState(MENU_DISHES[4]);
+  return (
+    <div className="lot">
+      <span className="lname">FEATURE</span>
+      <select value={f} onChange={(e) => setF(e.target.value)}>
+        {MENU_DISHES.map((d) => <option key={d} value={d}>{d}</option>)}
+      </select>
+      <span className="lname">REST</span>
+      <select value={r} onChange={(e) => setR(e.target.value)}>
+        {MENU_DISHES.map((d) => <option key={d} value={d}>{d}</option>)}
+      </select>
+      <button className="btn lbtn" disabled={f === r} onClick={() => onPick(f, r)}>SET MENU <span className="cost">feature +6 · rest off rail</span></button>
+    </div>
+  );
+}
+
 function VowRibbon() {
   const vow = useGame((s) => s.career.vow);
   const turns101 = useGame((s) => s.table101Turns);
@@ -370,6 +390,7 @@ function Briefing() {
   const lots = useGame((s) => s.lots);
   const buyLot = useGame((s) => s.buyLot);
   const coach = useGame((s) => s.coach);
+  const setMenu = useGame((s) => s.setMenu);
   const chooseVow = useGame((s) => s.chooseVow);
   const chooseSeating = useGame((s) => s.chooseSeating);
   const meal = useGame((s) => s.meal);
@@ -505,6 +526,16 @@ function Briefing() {
               <img className="fishmonger" src={castFishmonger} alt="The fishmonger — what the sea surrendered" />
               <img className="market-sign" src={marketSign} alt="MORNING MARKET — what the sea surrendered" />
             </div>
+            {career.night >= 3 && (
+            <div className="market">
+              <div className="mhead">MENU — feature one, rest one (deck-building)</div>
+              {(career.menuNight ?? -1) >= career.night ? (
+                <div className="ltaken">feature: {career.featuredDish} · resting: {career.restedDish}</div>
+              ) : (
+                <MenuPicker featured={career.featuredDish} onPick={(f, r) => setMenu(f, r)} />
+              )}
+            </div>
+            )}
             {lots.length > 0 && (
           <div className="market">
             <div className="mhead">MORNING MARKET — what the sea surrendered</div>

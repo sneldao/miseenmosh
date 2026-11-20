@@ -170,6 +170,10 @@ export interface Career {
   criticGrudge?: number;
   /** coaching: night a cook was coached (one session a night) */
   coachNight?: number;
+  /** menu deck: featured dish (+6 tonight), rested dish (off the rail tonight) */
+  featuredDish?: string | null;
+  restedDish?: string | null;
+  menuNight?: number;
   /** maitre-d': who sits at wobbly 101 tonight */
   seating101?: "regulars" | "press" | "walkin" | null;
   /** one vow a night: star / house / brigade */
@@ -446,6 +450,7 @@ interface GameState {
   buyLot: (i: number, outbid: boolean) => void;
   chooseVow: (v: "star" | "house" | "brigade") => void;
   coach: (id: number, kind: "praise" | "drill" | "rest") => void;
+  setMenu: (featured: string, rested: string) => void;
   chooseSeating: (k: "regulars" | "press" | "walkin") => void;
   answerFolklore: (ok: boolean) => void;
   move101: () => void;
@@ -480,8 +485,9 @@ function spottedProvenance(stories: string[], persona: string): boolean {
   return false;
 }
 
-function spawnTicket(rng: () => number, criticTable = -1): Ticket {
-  let d = DISHES[Math.floor(rng() * DISHES.length)];
+function spawnTicket(rng: () => number, criticTable = -1, rested?: string | null): Ticket {
+  const pool = rested ? DISHES.filter((x) => x.name !== rested) : DISHES;
+  let d = pool[Math.floor(rng() * pool.length)];
   let table = 10 + Math.floor(rng() * 5);
   // the inspector always gets the signature dish — the Wellington. Of course.
   if (criticTable >= 0 && rng() < 0.3) {
@@ -858,6 +864,8 @@ export const useGame = create<GameState>((set, get) => ({
       bet: undefined,
       vow: undefined,
       seating101: undefined,
+      featuredDish: undefined,
+      restedDish: undefined,
       stories: [],
       criticGrudge: (c.criticGrudge ?? 0) + (s.review.stars <= 2 ? 1 : 0),
       // the press has a memory: last night's silence follows you into the next briefing
@@ -1071,6 +1079,15 @@ export const useGame = create<GameState>((set, get) => ({
     const career = { ...s.career, vow: v };
     saveCareer(career, s.cooks);
     set({ career, feed: pushFeed(s.feed, VOW_LINES[v], "drama") });
+  },
+
+  setMenu: (featured, rested) => {
+    const s = get();
+    if (s.phase !== "briefing" || (s.career.menuNight ?? -1) >= s.career.night) return;
+    if (s.career.night < 3 || featured === rested) return;
+    const career = { ...s.career, featuredDish: featured, restedDish: rested, menuNight: s.career.night };
+    saveCareer(career, s.cooks);
+    set({ career, feed: pushFeed(pushFeed(s.feed, `Tonight's feature: ${featured}. It sings (+6).`, "good"), `${rested} rests. The rail won't see it tonight.`, "info") });
   },
 
   coach: (id, kind) => {
@@ -1345,13 +1362,13 @@ export const useGame = create<GameState>((set, get) => ({
         "drama"
       );
       sfx("sting");
-      for (let i = 0; i < 3; i++) tickets.push(spawnTicket(rng, criticTable));
+      for (let i = 0; i < 3; i++) tickets.push(spawnTicket(rng, criticTable, s.career.restedDish));
     }
 
     // --- new tickets ---
     const live = tickets.filter((t) => t.state !== "done").length;
     if (nextTicketIn <= 0 && live < 9) {
-      const t = spawnTicket(rng, criticTable);
+      const t = spawnTicket(rng, criticTable, s.career.restedDish);
       tickets.push(t);
       // the printer lives at the right of the pass — hear it land there
       sfx("print", { pan: 0.25 + rng() * 0.25 });
@@ -1986,6 +2003,11 @@ export const useGame = create<GameState>((set, get) => ({
           q -= 8;
           feed = pushFeed(feed, `Table ${plate.table} asked for ${mod}. They noticed you didn't.`, "bad");
         }
+      }
+      // menu feature: tonight's dish sings (+6) wherever it lands
+      if (s.career.featuredDish && plate.dish === s.career.featuredDish) {
+        q += 6;
+        feed = pushFeed(feed, `The feature sings: ${plate.dish} (+6). The room ordered right.`, "good");
       }
       // provenance: Lorna sings for Madame V (+6), layby shrooms charm the Kid (+6)
       const stories = s.career.stories ?? [];

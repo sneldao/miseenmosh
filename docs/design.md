@@ -47,8 +47,9 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    move mid-rush), one vow a night (STAR/HOUSE/BRIGADE, judged first on
    the card), folklore tests (fork R / glass W / coat H / return D-F /
    flash-ignore). Coaching (N2+): one session a night — PRAISE (+10 morale,
-   clears grudge), DRILL (+3 skill, −8 morale, may grudge), REST (−1 trauma).
-   Phasing: N1 plate→judge only, N2 sauce, N3-5 GILLIAM,
+   clears grudge), DRILL (+3 skill, −8 morale, may grudge),   REST (−1 trauma). Menu deck (N3+): feature one dish (+6 tonight),
+   rest one (off the rail tonight), one set a night.
+   Phasing: N1 plate→judge only, N2 sauce + coaching, N3-5 GILLIAM,
    N4 clout, N5 requests+86, N6-8 MADAME V + folklore (R to fix),
    N7 101 harsh + seating (T to move), N8 board+vows, N9 THE KID.
    One interrupt at a time — sauce, request, folklore and runner never
