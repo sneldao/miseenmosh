@@ -135,3 +135,13 @@ first 90 seconds and the cold open changes what it sees.
   (used 5/5, next slot 02:54 UTC) and left a stale `upload_pending` in
   `status` — the release itself is fine, so do not re-deploy to "fix"
   the status; it clears on the next deploy.
+- **20 Nov, ~04:15 UTC** — the six-slice build (audio beds, family meal,
+  cook memory, readable tables, Beefcakes set-piece, heat glow) is
+  committed (`5331c6e`) and pushed but NOT live. `opengame deploy --wait`
+  resumed the *saved* deploy with its *original archive* (deployment
+  `7384f6a5`, pre-slice code) and burned the last of the 5 daily slots —
+  next slot **12:01 UTC**. To ship the new build after the reset, deploy
+  with a **fresh idempotency key** or it will resume the stale archive
+  again: `opengame deploy --wait --idempotency-key "$(uuidgen)"`.
+  Never run a bare second `deploy` to check on the first — the resume
+  looks like progress and costs a slot.
