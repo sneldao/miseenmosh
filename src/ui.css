@@ -106,6 +106,13 @@
 .cook .mbar { width: 5rem; height: 5px; background: #3a2a1c; border-radius: 2px; overflow: hidden; }
 .cook .mfill { height: 100%; transition: width .4s; }
 .cook.out { opacity: .45; }
+/* morale you can see: under 25 the name trembles — no label needed */
+.cook.low .cname { color: #ff9a7a; animation: tremor .35s linear infinite; }
+@keyframes tremor {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-1px); }
+  75% { transform: translateX(1px); }
+}
 .cook .out-tag { color: #f08060; font-size: .6rem; letter-spacing: .1em; }
 
 /* ---- ticker ---- */
@@ -114,7 +121,8 @@
   display: flex; flex-direction: column; gap: .18rem;
   font-size: .72rem; line-height: 1.4; max-width: 21rem;
 }
-.ticker .line { opacity: .8; }
+.ticker .line { opacity: .8; animation: lineIn .3s ease-out; }
+@keyframes lineIn { from { opacity: 0; transform: translateX(-10px); } }
 .ticker .line.good { color: #a8d88a; }
 .ticker .line.bad { color: #f08060; }
 .ticker .line.drama { color: #ffd9a0; font-style: italic; }

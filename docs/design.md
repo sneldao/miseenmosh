@@ -271,4 +271,9 @@ Adopted rules:
   keywords and `(KEY)` hints as keycaps — reaction without re-reading.
 - **The manual is on demand.** `?` opens the full key card anywhere
   outside live service. Briefing beats stay ≤7 and never reshuffle.
+- **Motion carries urgency, words carry verdicts.** In service, state
+  changes animate first (new lines pop, dying tickets pulse, low-morale
+  cooks tremble, sear zones glow); the hint line only speaks for
+  stateful events (runner, request, unflagged inspector). Numbers
+  replace narration in the feed (+6, +10, −8).
   N8+ auto-seats 101 (overridable) instead of adding an eighth decision.

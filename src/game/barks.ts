@@ -144,7 +144,7 @@ export const BEEFCAKES_STEAL_LINES = [
 // --- the dining room, reading back at you ---
 // {T} = table number.
 export const PRESS_TELLS = [
-  "Table {T}'s food writer photographs the pass. And writes. Faster.",
+  "Table {T}'s food writer photographs the pass. Faster.",
   "Table {T} is sketching your plating. Badly. Publishing anyway.",
 ];
 
@@ -159,7 +159,7 @@ export const REGULARS_KIND = [
   "The regulars send back an empty plate and a thumbs-up. Keep it.",
 ];
 
-export const REGULARS_FORGIVE = "The regulars wave it off. Twenty years they've eaten here. Once, they forgive.";
+export const REGULARS_FORGIVE = "The regulars wave it off. Once, they forgive.";
 
 export const CRITIC_ESCALATION = [
   "Table {T} keeps photographing the plate. And writing.",
@@ -167,7 +167,7 @@ export const CRITIC_ESCALATION = [
   "Table {T} is writing. A lot. Underlined, probably.",
 ];
 
-export const SMOKE_WARN = "{N}'s station is smoking. Ease off that side — or it goes up.";
+export const SMOKE_WARN = "{N}'s station is smoking.";
 
 // --- expo language: the pass speaks kitchen, not English ---
 // {D} = dish, {T} = table, {N} = all-day count for that dish.
@@ -195,7 +195,7 @@ export const EMPTY_PASS_SCREAM = [
 ];
 
 export const VAN_REMINDER = [
-  "The van is parked across the street. He waves. He remembers.",
+  "The van is parked across the street. He remembers.",
   "£130 before the residency ends. The man with the van counts your covers from the curb.",
 ];
 
@@ -209,7 +209,7 @@ export const SILENT_LEGEND_TAILS = [
 ];
 
 export const TRUCE_LINES = [
-  "Across the street, BEEFCAKES plates quietly. The truce holds. His playlist is still on repeat.",
+  "Across the street, BEEFCAKES plates quietly. The truce holds.",
   "BEEFCAKES sent over a protein bowl. Peace offering. It tastes like a handshake.",
   "No runners tonight. BEEFCAKES waved from his door. You waved back. Nobody saw.",
 ];
@@ -254,30 +254,30 @@ export const FOLKLORE_FLASH_WARN = "Table {T} lifts a phone. Flash on. Don't rea
 
 export const TABLE101_WARN = "101's wobbling again. Don't put anyone you love there.";
 export const TABLE101_SEAT = [
-  "MARA & JUNE take table 14 — the wobbly corner. Twenty years they've sat there. Don't put anyone you love there.",
-  "MARA & JUNE move up to table 12, the window. Better light, same wobble. Same order.",
-  "MARA & JUNE center stage, table 10. Starched cloth, fixed leg. They've arrived. So have you.",
+  "MARA & JUNE take table 14 — the wobbly corner. Don't put anyone you love there.",
+  "MARA & JUNE move up to table 12, the window. Better light, same wobble.",
+  "MARA & JUNE center stage, table 10. Starched cloth, fixed leg. So have you.",
 ];
 export const PERMANENT_101 = "MARA & JUNE hold the room like a handrail. Regulars forgive twice tonight — everyone's a regular now.";
-export const TABLE101_MOVE = "You move 101 mid-rush. Chairs scrape, runners sprint. Worth it.";
+export const TABLE101_MOVE = "101 moves mid-rush. Chairs scrape. Worth it.";
 export const SEATING_LINES: Record<string, string> = {
-  regulars: "The regulars get 101 for old times' sake. Twenty years they've sat there.",
+  regulars: "The regulars get 101 for old times' sake.",
   press: "The press get the window. They order fast and write faster.",
   walkin: "Walk-ins at 101. Impatient, big spenders, already photographing everything.",
 };
 
 export const VOW_LINES: Record<string, string> = {
-  star: "STAR VOW: no walks, clock the inspector. +2★ tomorrow if you hold it.",
-  house: "HOUSE VOW: 101 turns twice, nobody walks from it. The regulars become permanent.",
-  brigade: "BRIGADE VOW: zero walkouts. The family meal means it. Trauma −1 all if you hold.",
+  star: "STAR VOW: no walks, clocked inspector. +2★ if held.",
+  house: "HOUSE VOW: 101 turns twice. Regulars go permanent.",
+  brigade: "BRIGADE VOW: zero walkouts. Trauma −1 all if held.",
 };
 
 export const HONOR_LINES = [
-  "Twice praised, PETRA stands different. Grill cooks remember who believed them — she'll catch one fumble a night, bare-handed.",
-  "DIMITRI polishes his whisk and says nothing, which for him is a speech. He'll save one split sauce a night before it splits.",
-  "ANWAR folds his apron square and nods once. When the door calls, he'll stay — once a night, for you.",
+  "Twice praised, PETRA stands different — she'll catch one fumble a night, bare-handed.",
+  "DIMITRI polishes his whisk and says nothing. He'll save one split sauce a night.",
+  "ANWAR folds his apron square and nods once. When the door calls, he'll stay.",
 ];
-export const MADAME_CAM_NOD = "MADAME V clocks the red eye. 'Amateur,' she murmurs. 'Charming, but amateur.' (+4 ego)";
+export const MADAME_CAM_NOD = "MADAME V clocks the red eye. 'Amateur. Charming, but amateur.' (+4 ego)";
 export const GILLIAM_CAM_CRAFT = " GILLIAM respects the tradecraft. (+5 ego)";
 export const EPILOGUES: Record<string, string[]> = {
   gilliam0: ["GILLIAM filed 400 words. Four of them were 'good'. He underlined it. Twice."],

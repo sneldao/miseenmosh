@@ -121,8 +121,8 @@ const STATION_COLOR = ["#a8322a", "#b07a2a", "#3a6a9a"];
 const STATION_NAME = ["GRILL", "SAUTÉ", "PASTRY"];
 
 const TIER_LINE: Record<PlateTier, string> = {
-  pristine: "Pristine. The garnish is doing its job.",
-  serviceable: "Serviceable. Nobody will photograph it.",
+  pristine: "Pristine.",
+  serviceable: "Serviceable.",
   criminal: "A war crime on a plate.",
 };
 
@@ -153,7 +153,7 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
       <div className="dish">{t.dish}</div>
       {myReq && (
         <div className="modline">
-          {myReq.mod} — T{myReq.table}{myReq.mod === "FAST" ? " · <30s" : " · fire it golden"}
+          {myReq.mod} T{myReq.table} · {myReq.mod === "FAST" ? "<30s" : "GOLDEN"}
         </div>
       )}
       <div className="trow">
@@ -281,7 +281,7 @@ function CriticCam() {
     <div className="critic-cam" title="A little red eye above the pass. Tell no one.">
       <span className="cam-dot" />
       CAM 3{kidNoticed ? " · NOTICED" : ""} · TABLE {criticFlagged && criticSpotted ? cg.table : "???"} · {cg.tells} PHOTO{cg.tells === 1 ? "" : "S"} ·{" "}
-      {ago < 0 ? "NO FLASH YET" : ago < 5 ? "FLASHING NOW" : `FLASH ${ago}s AGO`} · {status}
+      {ago < 0 ? "QUIET" : ago < 5 ? "FLASH!" : `FLASH ${ago}s`} · {status}
     </div>
   );
 }
@@ -306,7 +306,7 @@ function FolkloreBar() {
   const label = folklore.kind === "return" ? "REFUSE WITH GRACE (D) / RE-FIRE (F)" : folklore.kind === "flash" ? "LET THEM POST — do nothing" : "FIX IT (R)";
   return (
     <div className="folklore-bar">
-      <span>FOLKLORE TEST — table {folklore.table}: {label}</span>
+      <span>TABLE {folklore.table} — {label}</span>
       {folklore.kind !== "flash" && <button className="btn" onClick={() => answer(true)}>ANSWER</button>}
       {!moved101 && <button className="btn ghost" onClick={move101}>MOVE 101 (T)</button>}
     </div>
@@ -318,7 +318,7 @@ function Brigade() {
   return (
     <div className="brigade">
       {cooks.map((c) => (
-        <div key={c.id} className={`cook ${c.walkedOut ? "out" : ""}`}>
+        <div key={c.id} className={`cook ${c.walkedOut ? "out" : ""} ${!c.walkedOut && c.morale < 25 ? "low" : ""}`}>
           <span className="cname">{c.name}</span>
           <div className="mbar">
             <div
@@ -566,7 +566,7 @@ function Briefing() {
             )}
             {career.night >= 2 && (
             <div className="market">
-              <div className="mhead">COACHING — one session a night, they adapt or crack</div>
+              <div className="mhead">COACHING — one session a night</div>
               {(career.coachNight ?? -1) >= career.night ? (
                 <div className="ltaken">session done. let it simmer.</div>
               ) : (
@@ -574,7 +574,7 @@ function Briefing() {
                   {cooks.map((c) => (
                     <div key={c.id} className="lot">
                       <span className="lname">{c.name}</span>
-                      <span className="ldesc">skill {Math.round(c.skill * 100)} · {moodOf(c.morale, c.walkedOut)}{c.grudge ? ` · holding: ${c.grudge}` : ""}{c.honored ? " · ✦ keepsake" : ""}</span>
+                      <span className="ldesc">skill {Math.round(c.skill * 100)}{c.grudge ? ` · holding: ${c.grudge}` : ""}{c.honored ? " · ✦ keepsake" : ""}</span>
                       <span className="lbtns">
                         <button className="btn lbtn" disabled={c.walkedOut} onClick={() => coach(c.id, "praise")}>PRAISE</button>
                         <button className="btn lbtn" disabled={c.walkedOut} onClick={() => coach(c.id, "drill")}>DRILL <span className="cost">+3 skill, −8 morale</span></button>
@@ -596,7 +596,7 @@ function Briefing() {
             </div>
             {career.night >= 3 && (
             <div className="market">
-              <div className="mhead">MENU — feature one, rest one (deck-building)</div>
+              <div className="mhead">MENU — feature one, rest one</div>
               {(career.menuNight ?? -1) >= career.night ? (
                 <div className="ltaken">feature: {career.featuredDish} · resting: {career.restedDish}</div>
               ) : (
@@ -656,7 +656,7 @@ function Briefing() {
             )}
             {career.night >= 4 && (
             <div className="bshop slim">
-              <div className="mhead">CLOUT — EGO {Math.round(ego)} · doesn&apos;t keep, spend it or sober up</div>
+              <div className="mhead">CLOUT — EGO {Math.round(ego)} · spend it tonight</div>
               {(career.champagneNight ?? -1) >= career.night ? (
                 <div className="ltaken">champagne on ice for the inspector</div>
               ) : (
@@ -683,7 +683,7 @@ function Briefing() {
             {career.night >= 8 && (
             <>
             <div className="bshop slim">
-              <div className="mhead">CALL THE BOARD — one wager a night</div>
+              <div className="mhead">CALL THE BOARD — one wager</div>
               {career.bet ? (
                 <div className="ltaken">board called: {BOARD[career.bet.kind].label}</div>
               ) : (
@@ -701,7 +701,7 @@ function Briefing() {
               )}
             </div>
             <div className="bshop slim">
-              <div className="mhead">TONIGHT'S VOW — one a night, judged first on the card</div>
+              <div className="mhead">TONIGHT'S VOW — judged first on the card</div>
               {career.vow ? (
                 <div className="ltaken">vowed: {career.vow.toUpperCase()}</div>
               ) : (
@@ -1022,7 +1022,7 @@ export default function HUD() {
           </div>
           <div className="tag sub">One guest tonight is the inspector.</div>
           <div className="tag sub">BE THE TYRANT. EARN THE STARS.{ogHandle ? ` CHEF ${ogHandle.toUpperCase()} IS ON THE PASS.` : ""}</div>
-          <div className="tag sub">TONIGHT'S SERVICE — {new Date().toDateString()} · same tickets for everyone today.</div>
+          <div className="tag sub">SAME TICKETS FOR EVERYONE TODAY.</div>
           {(() => {
             const l = loadLegends();
             if (!l.residencies && !l.bestStreak) return null;
@@ -1067,30 +1067,30 @@ export default function HUD() {
                 {charge > 1.05 ? "TOO LONG" : charge > 0.75 ? "ROAR" : "INHALE"}
               </span>
             </div>
-          )}          <div className="hint">
-            {runner && !runner.fled
-              ? "Runner on the floor — SHOO HIM (H)!"
-              : request
-                ? `Table ${request.table} wants it ${request.mod} — D to refuse.`
-                : atPass
-                  ? firstPerson
-                    ? "Hold right mouse to look at the plate."
-                    : "Judge the plate."
-                  : live.some((t) => t.state === "plating")
-                    ? "Plating… F fires it early — wait for the gold."
-                    : firstPerson
-                      ? "Look at a docket on the rail and click."
-                      : "Click a ticket to plate it. E 86s the oldest dish."}{" "}
-            {criticFlagged
-              ? criticSpotted
-                ? "Inspector clocked."
+          )}          {firstPerson ? (
+            <div className="hint">
+              {atPass
+                ? "Hold right mouse to look at the plate."
+                : live.some((t) => t.state === "plating")
+                  ? "Plating… wait for the gold."
+                  : "Look at a docket on the rail and click."}{" "}
+              {criticFlagged
+                ? criticSpotted
+                  ? "Inspector clocked."
+                  : serviceTime < 100
+                    ? "Wrong guest flagged."
+                    : "Inspector slipped the net."
                 : serviceTime < 100
-                  ? "Wrong guest flagged."
-                  : "Inspector slipped the net."
-              : serviceTime < 100
-                ? "Spot the inspector — click them before dessert."
-                : "DESSERT COURSE."}
-          </div>
+                  ? "Spot the inspector — click them before dessert."
+                  : "DESSERT COURSE."}
+            </div>
+          ) : runner && !runner.fled ? (
+            <div className="hint">Runner on the floor — SHOO HIM (H)!</div>
+          ) : request ? (
+            <div className="hint">Table {request.table} wants it {request.mod} — D to refuse.</div>
+          ) : !criticFlagged && serviceTime < 100 ? (
+            <div className="hint">Spot the inspector — click them.</div>
+          ) : null}
           {/* In first person the dockets hang on the steel; the DOM rail
               is the fallback camera's (and the keyboard's) rail. */}
           {!firstPerson && (

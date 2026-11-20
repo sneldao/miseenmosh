@@ -307,8 +307,8 @@ export function tierName(ego: number): string {
 }
 
 const MILESTONES: Record<number, string> = {
-  10: "STREAK ×10 — the room leans in. Somewhere, the guide is watching.",
-  15: "STREAK ×15 — the dining room applauds without being asked.",
+  10: "STREAK ×10 — the room leans in.",
+  15: "STREAK ×15 — applause, unprompted.",
   20: "STREAK ×20 — they will talk about this service for years.",
 };
 
@@ -2000,7 +2000,7 @@ export const useGame = create<GameState>((set, get) => ({
           : x
       ),
       feed: walkedOut
-        ? pushFeed(pushFeed(s.feed, `Nobody on ${cook?.name}'s station — you're plating it yourself.`, "info"), fireCall, "info", "THE PASS")
+        ? pushFeed(pushFeed(s.feed, `${cook?.name} is gone — plating it yourself.`, "info"), fireCall, "info", "THE PASS")
         : pushFeed(s.feed, fireCall, "info", "THE PASS"),
     });
   },
@@ -2137,7 +2137,7 @@ export const useGame = create<GameState>((set, get) => ({
     sfx("whisk", { pan: STATION_PAN[t.station] ?? 0 });
     set({
       sauce: null,
-      feed: pushFeed(s.feed, `You catch the ${t.dish} mid-split and whisk it back from the edge.`, "good", cook?.name),
+      feed: pushFeed(s.feed, `Whisked back from the edge.`, "good", cook?.name),
       tickets: s.tickets.map((x) => (x.id === t.id ? { ...x, sauce: "saved" } : x)),
     });
   },
@@ -2153,7 +2153,7 @@ export const useGame = create<GameState>((set, get) => ({
       runner: { ...r, shooed: true, fled: true },
       ego: s.ego + 2,
       feed: tiered(
-        pushFeed(s.feed, "You catch his wrist over the rail. 'Wrong kitchen, sunshine.' He leaves with the wrist.", "good"),
+        pushFeed(s.feed, "'Wrong kitchen, sunshine.' He leaves with the wrist.", "good"),
         s.ego,
         s.ego + 2
       ),
@@ -2172,7 +2172,7 @@ export const useGame = create<GameState>((set, get) => ({
       guests: s.guests.map((g) =>
         g.kind === "press" ? { ...g, tellClock: Math.max(0, g.tellClock - 15) } : g
       ),
-      feed: pushFeed(s.feed, `Not tonight — table ${req.table}'s ${req.mod} can wait. The press writes it down.`, "info"),
+      feed: pushFeed(s.feed, `Refused. The press writes it down.`, "info"),
     });
     sfx("gasp");
   },
@@ -2198,7 +2198,7 @@ export const useGame = create<GameState>((set, get) => ({
       comped: true,
       guests,
       career: { ...s.career, cash: s.career.cash - 20 },
-      feed: pushFeed(s.feed, `Champagne for table ${target} — on the house. The room exhales.`, "good", "THE REGULARS"),
+      feed: pushFeed(s.feed, `Champagne on the house. The room exhales.`, "good", "THE REGULARS"),
       tickets: s.tickets.map((t) =>
         t.state === "rail" && t.table === target ? { ...t, age: Math.max(0, t.age - 10) } : t
       ),
@@ -2213,7 +2213,7 @@ export const useGame = create<GameState>((set, get) => ({
     set({
       career: { ...s.career, cash: s.career.cash - b.stake, bet: { kind, stake: b.stake, stakeEgo: b.stakeEgo } },
       ego: s.ego - b.stakeEgo,
-      feed: pushFeed(s.feed, `Called the board: ${b.label}. ${b.blurb}. No take-backs.`, "drama"),
+      feed: pushFeed(s.feed, `Board called: ${b.label}. No take-backs.`, "drama"),
     });
   },
 
@@ -2224,7 +2224,7 @@ export const useGame = create<GameState>((set, get) => ({
     saveCareer(career, s.cooks);
     set({
       career,
-      feed: pushFeed(s.feed, "A man with a van floats you £100. He'll want £130 before the residency ends. He always gets it.", "drama"),
+      feed: pushFeed(s.feed, "The van floats you £100. £130 before the residency ends.", "drama"),
     });
   },
 
@@ -2251,7 +2251,7 @@ export const useGame = create<GameState>((set, get) => ({
       set({
         ego: s.ego - 15,
         career,
-        feed: pushFeed(s.feed, "Comped champagne for the inspector's table. +10 on anything they eat tonight.", "good"),
+        feed: pushFeed(s.feed, "Inspector's table comped. +10 their plates.", "good"),
       });
     } else if (id === "dessert" && s.ego >= 20 && (s.career.dessertNight ?? -1) < s.career.night) {
       const career = { ...s.career, dessertNight: s.career.night };
@@ -2267,7 +2267,7 @@ export const useGame = create<GameState>((set, get) => ({
       set({
         ego: s.ego - 30,
         career,
-        feed: pushFeed(s.feed, "YOUR NAME ABOVE THE DOOR. +1 star, banked forever. Act like it.", "drama"),
+        feed: pushFeed(s.feed, "YOUR NAME ABOVE THE DOOR. +1★.", "drama"),
       });
     }
   },
@@ -2297,7 +2297,7 @@ export const useGame = create<GameState>((set, get) => ({
       let tableServeAt = s.tableServeAt;
       if (q >= 45 && s.serviceTime - (s.tableServeAt[plate.table] ?? -99) <= 20) {
         q += 6;
-        feed = pushFeed(feed, `Table ${plate.table} eats together. The room approves.`, "good");
+        feed = pushFeed(feed, `Table ${plate.table} eats together (+6).`, "good");
       }
       // table requests: FAST (under 30s old) or EXTRA CHAR (fired golden) — nailed it or noticed
       if (req && req.ticketId === plate.id) {
@@ -2306,23 +2306,23 @@ export const useGame = create<GameState>((set, get) => ({
         const nailed = mod === "FAST" ? plate.age < 30 : plate.sear === "golden";
         if (nailed) {
           q += 10;
-          feed = pushFeed(feed, `Table ${plate.table} wanted ${mod} — nailed it. The room saw.`, "good");
+          feed = pushFeed(feed, `Table ${plate.table} wanted ${mod} — nailed it (+10).`, "good");
         } else {
           q -= 8;
-          feed = pushFeed(feed, `Table ${plate.table} asked for ${mod}. They noticed you didn't.`, "bad");
+          feed = pushFeed(feed, `Table ${plate.table} asked for ${mod}. Noticed (−8).`, "bad");
         }
       }
       // menu feature: tonight's dish sings (+6) wherever it lands
       if (s.career.featuredDish && plate.dish === s.career.featuredDish) {
         q += 6;
-        feed = pushFeed(feed, `The feature sings: ${plate.dish} (+6). The room ordered right.`, "good");
+        feed = pushFeed(feed, `The feature sings (+6).`, "good");
       }
       // provenance: Lorna sings for Madame V (+6), layby shrooms charm the Kid (+6)
       const stories = s.career.stories ?? [];
       const persona = s.career.criticPersona ?? "madameV";
       if (plate.table === criticTable && spottedProvenance(stories, persona)) {
         q += 6;
-        feed = pushFeed(feed, `Provenance lands: ${stories.includes("lorna") ? "Lorna's scallops" : "layby shrooms"} — ${persona === "kid" ? "the Kid is already filming" : "they knew by the first bite"}.`, "good");
+        feed = pushFeed(feed, `${stories.includes("lorna") ? "Lorna's scallops — known by the first bite" : "Layby shrooms — the Kid is already filming"} (+6).`, "good");
       }
       qualitySum += q;
       sfx("slam");
@@ -2334,7 +2334,7 @@ export const useGame = create<GameState>((set, get) => ({
       let table101Turns = s.table101Turns;
       if (plate.table === 14 && plate.quality >= 45) {
         table101Turns += 1;
-        if (table101Turns === 2) feed = pushFeed(feed, `101 turns twice. The wobble holds. The room can't believe it.`, "good");
+        if (table101Turns === 2) feed = pushFeed(feed, `101 turns twice. The wobble holds.`, "good");
       }
       if (plate.quality >= 45) {
         tableServeAt = { ...tableServeAt, [plate.table]: s.serviceTime };
@@ -2360,10 +2360,10 @@ export const useGame = create<GameState>((set, get) => ({
             wellingtonRun = 0;
           }
         } else {
-          feed = pushFeed(feed, `Table ${plate.table} eats in silence. Acceptable.`, "info");
+          feed = pushFeed(feed, `Table ${plate.table} eats in silence.`, "info");
         }
         if (streak > 0 && streak % 5 === 0) {
-          feed = pushFeed(feed, `The kitchen is humming — streak ×${streak}.`, "drama");
+          feed = pushFeed(feed, `The kitchen hums — ×${streak}.`, "drama");
           ego += 2;
           for (const c of cooks) if (!c.walkedOut) c.morale = Math.min(100, c.morale + 2);
         }
@@ -2376,7 +2376,6 @@ export const useGame = create<GameState>((set, get) => ({
       } else {
         complaints += 1;
         streak = 0;
-        feed = pushFeed(feed, `Table ${plate.table} sends it back. Loudly.`, "bad");
         feed = pushFeed(feed, pick(s.rng, GUEST_HECKLES).replace("{T}", String(plate.table)), "bad");
         if (cook) cook.morale = Math.max(0, cook.morale - 5);
       }
