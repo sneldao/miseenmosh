@@ -1,4 +1,5 @@
 # Scope vs hint + the flywheel — implementation plan
+> **SHIPPED 20 Nov 2026** — every workstream done, tsc + build clean, deployed. Kept as build history; the living spec is [design.md](../design.md).
 
 Role decision: **stay the chef.** Every verb is a pass verb; a commis mode needs a different keyboard. The rise is the room (stall → flagship), the underdog position is economic (debt, van, stall). The receiving end is critic mode (hidden NG+): same systems, reversed lens.
 

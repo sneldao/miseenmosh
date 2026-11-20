@@ -1,4 +1,4 @@
-# MISE EN MOSH — Design Doc (v0, Nov 18 2026)
+# MISE EN MOSH — Design Doc (living spec, updated 20 Nov 2026)
 
 ## Fantasy
 
@@ -85,7 +85,7 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    keep, so spend it or sober up. Lifetime ego gates the LEGEND ending.
 6. **ROLE (stay the chef)** — every verb is a pass verb; a commis mode would need a different keyboard. The rise is the room, not the rank (stall → flagship), and the underdog position is economic (debt, van, stall). N1 briefing: "You're the chef because you're the only one who came back." The receiving end is critic mode (hidden NG+): same systems, reversed lens — not a new game.
 7. **SCOPE GATES (system vs hint)** — a thing becomes a system only if (a) it attaches to an existing key, (b) it resolves within a night or pays off across the arc, (c) the player has agency. Everything else is a hint: bark, feed, feud card, folklore, review tail. Fatigue/joy/communication are already simulated — name their thresholds. Cleanliness, inspections, sickness, vermin, covers, TV: events and textures, never meters. No system punishes curiosity.
-8. **FLYWHEEL (adaptable × adaptive × retained)** — adaptable: loadout (menu, vows, seating, bets) plus cross-night combos the feed acknowledges. Adaptive: the game remembers (grudges, press, BEEFCAKES, truce) and says so every morning (morningPaper line). Retained across runs: legends on the title card, daily shared seed, covers collected per ending, critic mode as NG+. Full phase plan: docs/scope-flywheel-plan.md.
+8. **FLYWHEEL (adaptable × adaptive × retained)** — adaptable: loadout (menu, vows, seating, bets) plus cross-night combos the feed acknowledges. Adaptive: the game remembers (grudges, press, BEEFCAKES, truce) and says so every morning (morningPaper line). Retained across runs: legends on the title card, daily shared seed, covers collected per ending, critic mode as NG+ (shipped P0–P4; P5 sketched in [archive/scope-flywheel-plan.md](archive/scope-flywheel-plan.md)).
    Ego wears tiers (COMMIS → LEGEND); the room says the new name out loud.
    Call the board: one wager a night (covers / no walks / clock the
    inspector). A man with a van floats you £100 — he wants £130 back
@@ -174,56 +174,10 @@ game here:
 - Sponsors: ElevenLabs (flagship), fal, Meshy — all three, earned via
   real usage.
 
-## Implemented (as of Nov 18, night 1 build)
+## Build history
 
-Single-night vertical slice, browser-verified end to end:
-
-- **Service loop**: seeded ticket rail → plate (skill-timed delay) →
-  quality-tiered plate slides to the pass → SERVE / SEND BACK / SMASH
-  with branching consequences and rubber-stamp verdicts.
-- **Brigade**: three named cooks; morale drains under load, recovers
-  idle, bottoms out into animated walkouts; chef covers dead stations
-  at 1.8×. SCREAM buys a 6s adrenaline window at rising cost; the
-  brigade answers with rotating chorus lines.
-- **The room talks**: ambient chef barks, guest heckles on send-back,
-  BEEFCAKES rival drama at 35s/75s/118s (the middle one steals a ticket
-  off your rail).
-- **Inspector**: faster tell clock (phone raise + screen flash),
-  civilian decoys, flag-before-dessert deadline, always orders the
-  signature Wellington; critic verdict lands on the review card.
-- **Escalation**: dessert-course stampede at 100s + printer speed-up.
-- **Scoring**: streaks (heal brigade every 5), ego, stars formula with
-  theatre bonus for smashing without misses.
-- **Feel**: full keyboard play, pause, WebAudio synth SFX placeholder
-  bus (replaced by baked ElevenLabs later), smash shrapnel, camera
-  shake, plate slide-in.
-- **Share artifact**: receipt-style review card + COPY REVIEW block;
-  SAME SERVICE, AGAIN replays the identical seeded night.
-
-### Career layer (Nov 18, night 2)
-
-The game is a residency now, not a night:
-
-- **9-night arc**: title → office briefing → service → review →
-  briefing → … → ending. Three endings: bankruptcy flame-out
-  (cash < −£60), three-star win (≥10★ total), or "footnote in the guide."
-- **The office**: ledger header (night, venue, cash, stars, services
-  left), last-night take (covers × venue price − wages − breakage;
-  walked-out cooks still draw half pay), brigade panel showing morale,
-  skill and trauma scars (✕ per past walkout — they drain faster
-  forever), a shop (drinks £40 / better pans £80 ×3 / comp the press
-  £60), and the night's BEEFCAKES feud card.
-- **Feud cards**: one per night from a 4-event deck — poach attempt on
-  the weakest cook (match £90 or lose them to the protein people; a
-  NEW_BLOOD replacement joins), press quote (trash-talk = +heat vs
-  classy = +morale), stolen fish delivery, food-truck blockade. Heat
-  (aggro) makes his runner steal a second ticket mid-service.
-- **Persistence**: localStorage career save (career + brigade incl.
-  trauma and feud resolution), title offers CONTINUE/NEW RESIDENCY,
-  save-blocked browsers get told.
-- **Venues**: STALL 86 → LE MOSH (≥5★) → MOSH & SON (≥10★), each
-  repricing covers and raising pressure (faster printer, faster critic
-  tells).
+Nov 18–19 nightly build notes live in [archive/build-history.md](archive/build-history.md).
+Shipped plans live in [archive/](archive/) (9/10 missions, scope-vs-hint flywheel).
 
 ## Reused DNA (ideas only — legal per rules §06)
 
@@ -236,47 +190,6 @@ The game is a residency now, not a night:
 | agnej / pinball — physics chaos | service-floor physics |
 | enigmagift / writersarcade — gen pipelines | asset pipeline patterns |
 | Beef Cakes (unused name) | rival chef character |
-
-### Chaos & personality (Nov 18, night 3)
-
-- **Station fires**: a station holding 3+ live tickets for 8s ignites —
-  flickering cones + orange light, morale drains ×2, plates carry −8
-  quality, brigade panel shows FIRE. Click the station: "You smother
-  the fire with a hotel pan." Physics chaos v2 done: fires + falling
-  pans (shelf pans clatter, bounce, spin and fade when a cook storms
-  off) + fumbles (a cook under 30 morale bins 15% of plates — ticket
-  back on the rail at 60% age).
-- **BEEFCAKES has a body**: a hulking silhouette shoulder-checks into
-  the pass window for ~4s at every rival event, red rim light,
-  absurd delts, backward cap.
-- **Scream heat-pulse**: the whole kitchen floods red for ~1.2s.
-- **Vocabulary expanded**: 14 chef barks, station-directed insults
-  ("PETRA — charred is a flavour. Cremated is not."), more heckles
-  and rival lines.
-- **First sponsor asset landed**: Meshy meshy-t2.5 cloche (5 credits,
-  untextured preview → tinted tarnished silver in-scene) sits on the
-  pass and hops/spins when a fresh plate lands. GLB pipeline proven:
-  generation → download → `public/models/` → `useGLTF` → in-scene.
-
-### Generated art pass (Nov 18, night 3, cont.)
-
-First wave of baked art (Recraft, custom "band-biopic grain" style —
-see assets/recraft/manifest.json for provenance):
-
-- **Verdict stamps**: real rubber-stamp SVGs (SERVE / SENT BACK /
-  SMASHED) replace the text stamps — still slam mid-screen.
-- **Dish sprites**: generated plated-dish art on the pass plate by
-  dish name (wellington / sea-bass / quenelle families); criminal
-  plates keep the sad lump. Serviceable plates dim.
-- **Title**: cover-art chef-in-ticket-storm backdrop + SVG lockup
-  replaces the text H1.
-- **Wall**: Chef Pistols gig poster replaces the procedural poster.
-- `src/vite-env.d.ts` added for asset imports.
-
-Provenance note for the judges: every raster/vector asset under
-`assets/recraft/` was generated during the jam window via the Recraft
-MCP (manifest holds style id + date) and is baked into the bundle.
-
 
 ## Art direction — locked (19 Nov)
 
@@ -305,8 +218,7 @@ hands + plate in hand, RMB to inspect, center-screen reticle with world
 raycasts, charge-and-release scream, `V` fallback to the cinematic
 camera.
 
-**Phase 2 (in progress, live in release `15a15a8b`):** the room answers.
-Built so far: the dining
+**Phase 2 (built, release `15a15a8b`):** the room answers. The dining
 room reads as a room (seated diners in eveningwear, tables and candles,
 timber architrave round the pass opening, far wall with prints and
 sconces), the reticle reports what it is on (counter / guest / fire,
@@ -337,3 +249,25 @@ five daily slots.
 
 **Rule:** never delete a readable DOM surface without a physical
 replacement in the room.
+
+## Reading load — verbosity budget (20 Nov)
+
+How much the game says, when it says it. Full research + audit:
+[research/verbosity-progressive-disclosure.md](research/verbosity-progressive-disclosure.md).
+Adopted rules:
+
+- **Phasing is the tutorial.** Max two verbs in any service; never a new
+  verb on a persona's debut night (peak is N5: requests + 86).
+- **One interrupt at a time.** Sauce, request, folklore and runner never
+  overlap; dread always precedes a stranger mechanic by a full night.
+- **Establish, then test.** First sauce gets a 7s whisk window, first
+  runner warns 10s out; the standard timings apply after.
+- **The finale stays loud, never spammy.** In the last 40s only the
+  critic, the press and first-kindness get feed lines.
+- **The card has a reading order.** Review: stars → quote → voices →
+  numbers, biggest to smallest. Share text unchanged.
+- **Verbs look like verbs.** Feed lines style FIRE/WHISK/SHOO/86 as
+  keywords and `(KEY)` hints as keycaps — reaction without re-reading.
+- **The manual is on demand.** `?` opens the full key card anywhere
+  outside live service. Briefing beats stay ≤7 and never reshuffle.
+  N8+ auto-seats 101 (overridable) instead of adding an eighth decision.

@@ -2,9 +2,8 @@
 
 *Same game. New camera. Delete the seam between world and UI.*
 
-**Status:** Phase 1 built and deployed (19 Nov, release `de6d1a82`);
-Phase 2 slice 2 (dining room, aim reticle, rail cap, physical ticket
-rail) deployed 19 Nov 23:50 UTC as release `47b6bc21`. Verified locally
+**Status (20 Nov):** Phases 1–2 built and deployed (releases `de6d1a82`,
+`15a15a8b`). Phases 3–4 pending — see the roadmap. Verified locally
 in the built preview: service boots, dockets hang and age, aiming one
 reads PLATE IT, a centre click sends it to plating, `V` restores the DOM
 rail with its `+N` chip, and the console is clean apart from two

@@ -1,4 +1,5 @@
 # Missions 9/10 — implementation plan (expensive, high-impact)
+> **SHIPPED 20 Nov 2026** — every workstream done, tsc + build clean, deployed. Kept as build history; the living spec is [design.md](../design.md).
 
 Goal: from "cook well, get stars" (5/10 extent, 6/10 drama) to "tonight, *this* person must leave changed" (9/10).
 Constraints: static build, desktop keyboard only, repo-root deploys, `V` fallback playable. Drama via data + feed + office choices + timed interrupts. No new 3D, no backend.
