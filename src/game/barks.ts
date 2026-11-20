@@ -196,16 +196,16 @@ export const CRITIC_DREAD: Record<string, string> = {
 
 export const CRITIC_VERDICTS: Record<string, string[]> = {
   gilliam: [
-    "GILLIAM: 'Discipline on the pass. The brigade held. I noticed the quiet.'",
-    "GILLIAM: 'No theatrics. Just cooking. Rare, these days.'",
+    "GILLIAM: 'Discipline on the pass. Clean iron, burnt sugar, no shouting. I noticed the quiet.'",
+    "GILLIAM: 'No theatrics. Just cooking. Salt where it should be. Rare, these days.'",
   ],
   madameV: [
-    "MADAME V: 'The fork was back before it stopped ringing. Lorna's scallops sang.'",
-    "MADAME V: 'Coursing like a metronome. The window table glowed. 101 survived. Impressive.'",
+    "MADAME V: 'The fork was back before it stopped ringing. Lorna's scallops sang — sweet, briny, singing.'",
+    "MADAME V: 'Coursing like a metronome. Burnt sugar on the edge, iron underneath. 101 survived. Impressive.'",
   ],
   kid: [
-    "THE KID: 'POSTED. That edge-char close-up did 400k before dessert. No cap.'",
-    "THE KID: 'Chat says the smoky kiss is elite. 101 is literally me though.'",
+    "THE KID: 'POSTED. That edge-char close-up did 400k before dessert. Tastes like smoke and sugar. No cap.'",
+    "THE KID: 'Chat says the smoky kiss is elite — sour snap, sweet middle. 101 is literally me though.'",
   ],
 };
 

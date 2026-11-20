@@ -68,7 +68,9 @@ export type Sfx =
   | "applause"
   | "hiss"
   | "sear"
-  | "whisk";
+  | "whisk"
+  | "hush"
+  | "rattle";
 
 export interface SfxOpts {
   /** -1 (far left, grill) .. +1 (far right, pastry) */
@@ -146,6 +148,22 @@ export function sfx(kind: Sfx, opts: SfxOpts = {}) {
       // three fast stirs and a save: wire whisk on steel
       for (let i = 0; i < 3; i++) noise(t + i * 0.06, 0.05, 0.4, 3200, bus);
       osc("sine", 2400, 3200, t + 0.18, 0.12, 0.12, bus);
+      break;
+    case "hush":
+      // wonder needs no urgency: dip the master for half a second, then let it back
+      if (master) {
+        const m = master.gain;
+        m.cancelScheduledValues(t);
+        m.setValueAtTime(Math.max(0.02, m.value), t);
+        m.linearRampToValueAtTime(0.04, t + 0.08);
+        m.linearRampToValueAtTime(0.22, t + 0.6);
+      }
+      break;
+    case "rattle":
+      // 101's wobble: low ceramic chatter, twice
+      noise(t, 0.06, 0.4, 900, bus);
+      noise(t + 0.09, 0.05, 0.32, 800, bus);
+      osc("sine", 220, 180, t, 0.08, 0.12, bus);
       break;
   }
 }

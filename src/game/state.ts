@@ -1282,8 +1282,27 @@ export const useGame = create<GameState>((set, get) => ({
           : kind === "return" ? FOLKLORE_RETURN_WARN.replace("{T}", String(table))
           : FOLKLORE_FLASH_WARN.replace("{T}", String(table));
         feed = pushFeed(feed, warn, "drama");
-        sfx("gasp", { pan: tablePan(table), vol: 0.5 });
+        sfx("hush");
+        setTimeout(() => sfx("gasp", { pan: tablePan(table), vol: 0.5 }), 120);
       }
+    }
+
+    // 101 rattle: wobbly table chatters past 30s — you hear the bad table before it walks
+    if (s.career.night >= 7 && rng() < dt / 6) {
+      const old101 = tickets.find((t) => t.table === 14 && t.state === "rail" && t.age > 30);
+      if (old101) sfx("rattle", { pan: tablePan(14), vol: 0.5 });
+    }
+    // sizzle tells truth: plating near the gold sings a little brighter
+    const platingCue = tickets.find((t) => t.state === "plating" && t.plateDur > 0);
+    if (platingCue) {
+      const frac = 1 - (platingCue.plateAt - serviceTime) / platingCue.plateDur;
+      if (frac > 0.55 && frac < 0.8 && rng() < dt / 1.2) {
+        sfx("sear", { pan: STATION_PAN[platingCue.station] ?? 0, vol: 0.18 });
+      }
+    }
+    // N9 graduation: second folklore — the room gets its crescendo (flash → return)
+    if (s.career.night >= 9 && folkloreDone && !folklore && serviceTime > 70 && serviceTime < 72) {
+      folkloreDone = false;
     }
 
     // --- dessert course: one-time stampede, then faster printer ---
@@ -1537,10 +1556,10 @@ export const useGame = create<GameState>((set, get) => ({
           : criticAvg < 0
             ? "You clocked them, then never fed them."
             : criticAvg >= 72
-              ? "The inspector wrote home about the Wellington."
+              ? "The inspector wrote home about the Wellington — burnt sugar outside, sweet iron within."
               : criticAvg >= 45
-                ? "The inspector nodded, once."
-                : "The inspector photographed it. For evidence.";
+                ? "The inspector nodded, once. Sour snap, sweet middle. Noted."
+                : "The inspector photographed it. For evidence. It tasted of noise.";
       // persona names the night; provenance + folklore get name-checked
       const personaVerdict = !spotted ? undefined : pick(rng, CRITIC_VERDICTS[persona]);
       const folkloreLine = s.folkloreDone ? (persona === "madameV" ? "The fork test: answered." : persona === "kid" ? "The flash test: you let them post." : "The coat test: answered.") : undefined;
