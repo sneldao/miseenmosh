@@ -339,6 +339,7 @@ function ReviewCard() {
     `${"★".repeat(review.stars)}${"☆".repeat(5 - review.stars)}\n` +
     (review.vowLine ? `${review.vowLine}\n` : "") +
     (review.personaVerdict ? `${review.personaVerdict}\n` : "") +
+    (review.epilogue ? `${review.epilogue}\n` : "") +
     `"${review.quote}"\n` +
     `${review.covers} covers · ${review.misses} walks · ` +
     `${review.smashed} plates smashed · inspector ${review.spotted ? "CLOCKED" : "missed"}`;
@@ -362,8 +363,8 @@ function ReviewCard() {
         <img className="press-clip" src={reviewClip} alt="Press clipping" />
         <div className="quote">“{review.quote}”</div>
         {review.vowLine && <div className="board-line">{review.vowLine}</div>}
-        {review.personaVerdict && <div className="critic-line">{review.personaVerdict}</div>}
-        {review.folkloreLine && <div className="critic-line">{review.folkloreLine}</div>}
+        {review.personaVerdict && <div className="critic-line">{review.personaVerdict}</div>}          {review.folkloreLine && <div className="critic-line">{review.folkloreLine}</div>}
+          {review.epilogue && <div className="critic-line epi">{review.epilogue}</div>}
         <div className="critic-line">{review.criticVerdict}</div>
         <div className="rstats">
           <span>{review.covers} covers</span>
@@ -534,7 +535,7 @@ function Briefing() {
                   {cooks.map((c) => (
                     <div key={c.id} className="lot">
                       <span className="lname">{c.name}</span>
-                      <span className="ldesc">skill {Math.round(c.skill * 100)} · {moodOf(c.morale, c.walkedOut)}{c.grudge ? ` · holding: ${c.grudge}` : ""}</span>
+                      <span className="ldesc">skill {Math.round(c.skill * 100)} · {moodOf(c.morale, c.walkedOut)}{c.grudge ? ` · holding: ${c.grudge}` : ""}{c.honored ? " · ✦ keepsake" : ""}</span>
                       <span className="lbtns">
                         <button className="btn lbtn" disabled={c.walkedOut} onClick={() => coach(c.id, "praise")}>PRAISE</button>
                         <button className="btn lbtn" disabled={c.walkedOut} onClick={() => coach(c.id, "drill")}>DRILL <span className="cost">+3 skill, −8 morale</span></button>

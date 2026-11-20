@@ -54,9 +54,15 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    poke the BEEFCAKES wanted poster 3× on the title card to wire CRITIC CAM —
    live telemetry (photos, last flash, fed/gone) but never the table number.
    101 migrates up with the room (14 wobbly corner → 12 window → 10 center
-   stage); T-move and wedge/cloth follow the table. Cam counterplay: on the
-   Kid's night a wired cam gets NOTICED — flashes come ~2× faster (easier to
-   spot) but every photo tags the pass (−2 ego).
+   stage); T-move and wedge/cloth follow the table. Cam counterplay: on the    Kid's night a wired cam gets NOTICED — flashes come ~2× faster (easier to
+    spot) but every photo tags the pass (−2 ego). GILLIAM goes still (tells
+    1.6× slower, but clocking him pays +5 — tradecraft respected); MADAME V
+    nods once (+4 ego, warmth for curiosity). 101 are MARA & JUNE (twenty
+    years); house-vow-held makes them permanent (regulars forgive twice
+    nightly). Twice-praised cooks earn a once-a-night keepsake (PETRA catches,
+    DIMITRI pre-whisks, ANWAR stays). N5 is BEEFCAKES night: price-war feud —
+    détente (−£70, runners stand down for good) or rivalry (+heat, doubled
+    runners tonight). Reviews close with the critic's own epilogue (persona × tier).
    Phasing: N1 plate→judge only, N2 sauce + coaching, N3-5 GILLIAM,
    N4 clout, N5 requests+86, N6-8 MADAME V + folklore (R to fix),
    N7 101 harsh + seating (T to move), N8 board+vows, N9 THE KID.

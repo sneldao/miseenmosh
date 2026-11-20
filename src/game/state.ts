@@ -11,7 +11,8 @@ import {
   FOLKLORE_FORK_WARN, FOLKLORE_FORK_SAVED, FOLKLORE_FORK_IGNORED,
   FOLKLORE_GLASS_WARN, FOLKLORE_GLASS_SAVED, FOLKLORE_COAT_WARN,
   FOLKLORE_COAT_SAVED, FOLKLORE_RETURN_WARN, FOLKLORE_FLASH_WARN,
-  TABLE101_WARN, TABLE101_SEAT, TABLE101_MOVE, SEATING_LINES, VOW_LINES,
+  TABLE101_WARN, TABLE101_SEAT, TABLE101_MOVE, SEATING_LINES, VOW_LINES, PERMANENT_101,
+  TRUCE_LINES, BEEFCAKES_PRICEWAR, HONOR_LINES, MADAME_CAM_NOD, GILLIAM_CAM_CRAFT, EPILOGUES,
 } from "./barks";
 
 export type Verdict = "serve" | "sendback" | "smash";
@@ -51,6 +52,8 @@ export interface Cook {
   walkoutAt: number; // serviceTime of the apron throw, for physics
   fave: string; // the dish they nail when it matters
   grudge: string | null; // what they haven't forgiven — fumbles more, cooks bitter
+  honored?: boolean; // twice-praised: a name moment, and a once-a-night keepsake save
+  honoredUsed?: boolean; // keepsake spent tonight
   smoked: boolean; // the smoke warning already fired tonight
 }
 
@@ -100,6 +103,8 @@ export interface Review {
   vowLine?: string;
   personaVerdict?: string;
   folkloreLine?: string;
+  /** the critic gets the last word: persona × stars tier */
+  epilogue?: string;
 }
 
 const DISHES: { name: string; station: number }[] = [
@@ -168,6 +173,14 @@ export interface Career {
   /** 9/10 missions: named critic rotation + grudges */
   criticPersona?: "gilliam" | "madameV" | "kid";
   criticGrudge?: number;
+  /** cooks remember: praise sessions per cook id (twice praised earns a keepsake) */
+  praiseCount?: Record<number, number>;
+  /** house vow held: MARA & JUNE are permanent — regulars forgive twice, every night */
+  regularsPermanent?: boolean;
+  /** BEEFCAKES night (N5): family-meal detente ends the runner war for good */
+  beefcakesTruce?: boolean;
+  /** BEEFCAKES night (N5): rivalry doubles his runners tonight */
+  beefcakesWar?: boolean;
   /** coaching: night a cook was coached (one session a night) */
   coachNight?: number;
   /** menu deck: featured dish (+6 tonight), rested dish (off the rail tonight) */
@@ -405,6 +418,8 @@ interface GameState {
   comped: boolean;
   /** the Kid noticed the red eye (critic cam counterplay, N9) */
   kidNoticed: boolean;
+  /** MADAME V nodded at the red eye (cam warmth, once) */
+  madameNodded: boolean;
   /** the critic's exit: head high (fed, spotted) or coat on (slipped away) */
   criticLeft: boolean;
   criticServeAt: number;
@@ -579,6 +594,7 @@ function withFreshNight(c: Omit<Cook, NightFields> & Partial<Pick<Cook, NightFie
     burning: false,
     walkoutAt: -1,
     smoked: false,
+    honoredUsed: false,
     // memory persists across nights — grudges and favourites survive;
     // fresh blood arrives with the station default and nothing to forgive
     fave: c.fave ?? STATION_FAVE[c.station] ?? "Beef Wellington",
@@ -597,6 +613,17 @@ function withMemory(c: Cook): Cook {
 
 function makeFeud(career: Career, cooks: Cook[]): Feud | null {
   if (career.night <= 1) return null;
+  // BEEFCAKES night: the price war across the street — one night, one choice, permanent fallout
+  if (career.night === 5 && !career.beefcakesTruce) {
+    const resolved = career.feudDone === career.night;
+    return {
+      text: BEEFCAKES_PRICEWAR,
+      options: ["Détente: family meal for two kitchens (−£70, his runners stand down for good)", "Rivalry: undercut the undercutter (+heat, his runners double tonight)"],
+      resolved,
+      actor: "beefcakes",
+      outcome: resolved ? career.feudOutcome : undefined,
+    };
+  }
   const def = FEUD_DECK[(career.night - 2) % FEUD_DECK.length];
   const weakest = cooks.reduce((a, b) => (a.skill < b.skill ? a : b), cooks[0]);
   const resolved = career.feudDone === career.night;
@@ -652,6 +679,7 @@ export const useGame = create<GameState>((set, get) => ({
   sauce: null,
   comped: false,
   kidNoticed: false,
+  madameNodded: false,
   criticLeft: false,
   criticServeAt: -1,
   screamAt: 0,
@@ -774,7 +802,7 @@ export const useGame = create<GameState>((set, get) => ({
         kind,
         tellClock: base * v.tellMul,
         tells: 0,
-        mercy: kind === "regulars" ? (sweetNight ? 2 : 1) : 0,
+        mercy: kind === "regulars" ? (sweetNight || (career.regularsPermanent ?? false) ? 2 : 1) : 0,
         tellAt: -1,
       });
     }
@@ -797,6 +825,8 @@ export const useGame = create<GameState>((set, get) => ({
         { id: feedId++, text: CRITIC_DREAD[persona], kind: "drama" },
         ...(career.vow ? [{ id: feedId++, text: VOW_LINES[career.vow], kind: "drama" as const }] : []),
         ...(seat101 ? [{ id: feedId++, text: TABLE101_SEAT[Math.min(2, career.venue)], kind: "info" as const }] : []),
+        ...(career.regularsPermanent ? [{ id: feedId++, text: PERMANENT_101, kind: "good" as const }] : []),
+        ...(career.beefcakesTruce ? [{ id: feedId++, text: "Across the street, BEEFCAKES plates quietly. The truce holds.", kind: "info" as const }] : []),
         { id: feedId++, text: "Doors open. Somewhere out there is the inspector.", kind: "info" },
         ...((s.career.debt ?? 0) > 0
           ? [{ id: feedId++, text: pick(rng, VAN_REMINDER), kind: "drama" as const }]
@@ -829,6 +859,7 @@ export const useGame = create<GameState>((set, get) => ({
       sauce: null,
       comped: false,
       kidNoticed: false,
+      madameNodded: false,
       criticLeft: false,
       criticServeAt: -1,
       chorusText: `"YES, CHEF!"`,
@@ -883,6 +914,8 @@ export const useGame = create<GameState>((set, get) => ({
       featuredDish: undefined,
       restedDish: undefined,
       stories: [],
+      regularsPermanent: (c.regularsPermanent ?? false) || (c.vow === "house" && (s.review.vowLine?.includes("HELD") ?? false)),
+      beefcakesWar: undefined,
       criticGrudge: (c.criticGrudge ?? 0) + (s.review.stars <= 2 ? 1 : 0),
       // the press has a memory: last night's silence follows you into the next briefing
       silentLast: s.review.silent,
@@ -987,7 +1020,19 @@ export const useGame = create<GameState>((set, get) => ({
     const c = { ...s.career };
     let cooks = s.cooks.map((k) => ({ ...k }));
     let outcome: string;
-    if (idx === 0) {
+    if (s.career.night === 5) {
+      // BEEFCAKES night: détente ends the war, rivalry doubles tonight's runners
+      if (i === 0) {
+        if (c.cash < 70) return;
+        c.cash -= 70;
+        c.beefcakesTruce = true;
+        outcome = "Family meal for two kitchens. His runners stand down — for good. The truce holds.";
+      } else {
+        c.aggro += 2;
+        c.beefcakesWar = true;
+        outcome = "You undercut the undercutter. Tonight his runners come doubled. Bring a broom.";
+      }
+    } else if (idx === 0) {
       // poach attempt on the weakest cook
       if (i === 0) {
         if (c.cash < 90) return;
@@ -1124,10 +1169,19 @@ export const useGame = create<GameState>((set, get) => ({
     const c = cooks.find((k) => k.id === id);
     if (!c || c.walkedOut) return;
     let line: string;
+    let pc: Record<number, number> | undefined;
     if (kind === "praise") {
       c.morale = Math.min(100, c.morale + 10);
       c.grudge = null;
-      line = `You pull ${c.name} aside: that ${c.fave} last night — cook like that every night. They stand taller.`;
+      // cooks remember: twice praised earns a name moment and a keepsake
+      pc = { ...(s.career.praiseCount ?? {}) };
+      pc[c.id] = (pc[c.id] ?? 0) + 1;
+      if (pc[c.id] >= 2 && !c.honored) {
+        c.honored = true;
+        line = HONOR_LINES[Math.min(2, c.station)] + ` (${c.name} will remember this.)`;
+      } else {
+        line = `You pull ${c.name} aside: that ${c.fave} last night — cook like that every night. They stand taller.`;
+      }
     } else if (kind === "drill") {
       c.skill = Math.min(0.95, c.skill + 0.03);
       c.morale = Math.max(0, c.morale - 8);
@@ -1139,7 +1193,7 @@ export const useGame = create<GameState>((set, get) => ({
       c.skill = Math.max(0.3, c.skill - 0.005);
       line = `${c.name} sits out prep, ices their wrists. Old scars fade a little. The knife stays sharp enough.`;
     }
-    const career = { ...s.career, coachNight: s.career.night };
+    const career = { ...s.career, coachNight: s.career.night, ...(pc ? { praiseCount: pc } : null) };
     saveCareer(career, cooks);
     set({ career, cooks, feed: pushFeed(s.feed, line, kind === "drill" ? "drama" : "good", c.name) });
   },
@@ -1236,6 +1290,14 @@ export const useGame = create<GameState>((set, get) => ({
         });
         if (sauce?.ticketId === t.id) sauce = null; // plated out from under it
         if (res.fumble && cook) {
+          if (cook.honored && !cook.honoredUsed && cook.station === 0) {
+            // PETRA's keepsake: caught mid-air, bare hands
+            cook.honoredUsed = true;
+            feed = pushFeed(feed, `${cook.name} catches the ${t.dish} mid-air. Bare hands. The pass applauds. (keepsake spent)`, "good", cook.name);
+            sfx("bell");
+            tickets.push({ ...t, age, state: "pass", quality: Math.max(res.quality, 45) });
+            continue;
+          }
           feed = pushFeed(feed, `${cook.name} fumbles the ${t.dish} — straight in the bin.`, "bad", cook.name);
           sfx("shatter");
           cook.morale = Math.max(0, cook.morale - 3);
@@ -1255,9 +1317,10 @@ export const useGame = create<GameState>((set, get) => ({
         }
         continue;
       }
-      // Table 14 is 101 from N7: wobbles, draughty, walks faster unless moved mid-rush (ambient before that)
+      // 101 — wherever they've migrated — walks faster from N7 unless moved mid-rush
       const harsh101 = s.career.night >= 7;
-      const ttl = t.table === 14 && harsh101 ? (s.moved101 ? TICKET_TTL : 45) : TICKET_TTL;
+      const t101ttl = oneOhOneTable(s.career);
+      const ttl = t101ttl >= 0 && t.table === t101ttl && harsh101 ? (s.moved101 ? TICKET_TTL : 45) : TICKET_TTL;
       if (age > ttl) {
         // the regulars forgive — twice on dessert-on-the-house nights
         const regular = s.guests.find((gg) => gg.table === t.table && gg.kind === "regulars" && gg.mercy > 0);
@@ -1280,10 +1343,20 @@ export const useGame = create<GameState>((set, get) => ({
       const st = tickets.find((t) => t.id === sauce!.ticketId);
       if (!st || st.state !== "plating") sauce = null; // plated, fired or binned — drama over
       else if (serviceTime >= sauce.until) {
-        sauce = null;
-        st.sauce = "split";
-        feed = pushFeed(feed, `The ${st.dish} split. It goes out broken.`, "bad");
-        sfx("hiss", { pan: STATION_PAN[st.station] ?? 0, vol: 0.6 });
+        const dimi = s.cooks.find((dd) => dd.station === st.station);
+        if (dimi && !dimi.walkedOut && dimi.honored && !dimi.honoredUsed && dimi.station === 1) {
+          // DIMITRI's keepsake: already there, whisk in hand
+          dimi.honoredUsed = true;
+          sauce = null;
+          st.sauce = "saved";
+          feed = pushFeed(feed, `${dimi.name} is already there, whisk in hand. He saw it split before it split. (keepsake spent)`, "good", dimi.name);
+          sfx("whisk", { pan: STATION_PAN[st.station] ?? 0 });
+        } else {
+          sauce = null;
+          st.sauce = "split";
+          feed = pushFeed(feed, `The ${st.dish} split. It goes out broken.`, "bad");
+          sfx("hiss", { pan: STATION_PAN[st.station] ?? 0, vol: 0.6 });
+        }
       }
     }
     // one interrupt at a time: sauce waits if folklore is live; unlocks N2+
@@ -1425,11 +1498,11 @@ export const useGame = create<GameState>((set, get) => ({
     }
 
     // --- BEEFCAKES does something unforgivable — and this time he sends a body ---
-    const rivalTimes = [35, 75, 118];
+    const rivalTimes = s.career.beefcakesWar ? [35, 55, 75, 95, 118] : [35, 75, 118];
     let rivalAt = s.rivalAt;
     let rivalWarned = s.rivalWarned;
     let lastSteal = s.lastSteal;
-    const willSteal = rivalIdx === 1 || (rivalIdx === 2 && s.career.aggro > 0);
+    const willSteal = !s.career.beefcakesTruce && (rivalIdx === 1 || (rivalIdx === 2 && s.career.aggro > 0) || !!s.career.beefcakesWar);
     // six seconds out, the runner stretches by your bins. You were warned.
     // SHOO him (H) before he reaches the rail — it costs you a second. Waits if folklore holds the room.
     if (rivalWarned < rivalIdx && rivalIdx < rivalTimes.length && serviceTime >= rivalTimes[rivalIdx] - 6 && !folklore) {
@@ -1457,14 +1530,14 @@ export const useGame = create<GameState>((set, get) => ({
           );
           sfx("rip", { pan: 0.8 });
         } else {
-          feed = pushFeed(feed, pick(rng, RIVAL_LINES), "drama", "BEEFCAKES");
+          feed = pushFeed(feed, pick(rng, s.career.beefcakesTruce ? TRUCE_LINES : RIVAL_LINES), "drama", "BEEFCAKES");
         }
       } else if (willSteal) {
         // shooed: he points at you from the door instead
         feed = pushFeed(feed, "BEEFCAKES points at you from the door. Noted. The ticket stays.", "good", "BEEFCAKES");
         sfx("gasp", { pan: 0.8, vol: 0.5 });
       } else {
-        feed = pushFeed(feed, pick(rng, RIVAL_LINES), "drama", "BEEFCAKES");
+        feed = pushFeed(feed, pick(rng, s.career.beefcakesTruce ? TRUCE_LINES : RIVAL_LINES), "drama", "BEEFCAKES");
         // he remembers the market: outbid him in the morning and the noon post is about you
         if (s.career.outbidBeefcakes && rng() < 0.5) {
           feed = pushFeed(feed, pick(rng, OUTBID_BEEFCAKES), "drama", "BEEFCAKES");
@@ -1505,6 +1578,12 @@ export const useGame = create<GameState>((set, get) => ({
       const drain = load === 0 ? -1.4 : (0.22 + load * 0.15) * (1 + c.trauma * 0.35);
       const morale = Math.min(100, Math.max(0, c.morale - dt * drain * (burning ? 2 : 1)));
       if (morale <= WALKOUT_AT) {
+        if (c.station === 2 && c.honored && !c.honoredUsed) {
+          // ANWAR's keepsake: looks at the door, looks at the soufflé, stays
+          feed = pushFeed(feed, `${c.name} looks at the door, looks at the soufflé, stays. For you. (keepsake spent)`, "good", c.name);
+          sfx("bell");
+          return { ...c, morale: 15, overloadT, burning, smoked, honoredUsed: true };
+        }
         feed = pushFeed(feed, `${c.name} throws their apron. WALKOUT.`, "drama", c.name);
         sfx("sting");
         const egoBeforeWalk = ego;
@@ -1528,7 +1607,10 @@ export const useGame = create<GameState>((set, get) => ({
     // cam counterplay: on the Kid's night a wired cam gets noticed — they perform for it
     const personaTick = s.career.criticPersona ?? (s.career.night >= 9 ? "kid" : s.career.night >= 6 ? "madameV" : "gilliam");
     const kidPerforming = !!s.career.criticCam && personaTick === "kid";
+    const camGilliam = !!s.career.criticCam && personaTick === "gilliam";
+    const camMadame = !!s.career.criticCam && personaTick === "madameV";
     let kidNoticed = s.kidNoticed;
+    let madameNodded = s.madameNodded;
     const guests = s.guests.map((g) => {
       const tickClock = g.tellClock - dt;
       if (tickClock <= 0) {
@@ -1548,6 +1630,11 @@ export const useGame = create<GameState>((set, get) => ({
               feed = pushFeed(feed, "THE KID found your red eye. They're performing for it now — flashes twice as fast, every photo tags the pass (−2 ego).", "drama");
             }
           }
+          if (camMadame && !madameNodded) {
+            madameNodded = true;
+            ego += 4;
+            feed = pushFeed(feed, MADAME_CAM_NOD, "good");
+          }
         } else if (g.kind === "press") {
           line = pick(rng, PRESS_TELLS).replace("{T}", String(g.table));
           kind = "drama";
@@ -1563,7 +1650,7 @@ export const useGame = create<GameState>((set, get) => ({
         }
         if (line && !s.criticFlagged) feed = pushFeed(feed, line, kind, who);
         const next =
-          g.kind === "critic" ? (9 + rng() * 7) * (kidPerforming ? 0.55 : 1)
+          g.kind === "critic" ? (9 + rng() * 7) * (kidPerforming ? 0.55 : camGilliam ? 1.6 : 1)
           : g.kind === "press" ? 24 + rng() * 18
           : g.kind === "couple" ? 30 + rng() * 30
           : g.kind === "regulars" ? 70 + rng() * 40
@@ -1646,6 +1733,9 @@ export const useGame = create<GameState>((set, get) => ({
                 : "The inspector photographed it. For evidence. It tasted of noise.";
       // persona names the night; provenance + folklore get name-checked
       const personaVerdict = !spotted ? undefined : pick(rng, CRITIC_VERDICTS[persona]);
+      // the critic gets the last word: persona × stars tier (only if clocked)
+      const epiTier = stars >= 4 ? 0 : stars === 3 ? 1 : 2;
+      const epilogue = spotted ? pick(rng, EPILOGUES[`${persona}${epiTier}`]) : undefined;
       const folkloreLine = s.folkloreDone ? (persona === "madameV" ? "The fork test: answered." : persona === "kid" ? "The flash test: you let them post." : "The coat test: answered.") : undefined;
       // vow judged first, before stars
       let vowLine: string | undefined;
@@ -1681,6 +1771,7 @@ export const useGame = create<GameState>((set, get) => ({
           vowLine,
           personaVerdict,
           folkloreLine,
+          epilogue,
         },
       });
       return;
@@ -1710,6 +1801,7 @@ export const useGame = create<GameState>((set, get) => ({
       sauce, request, runner, criticLeft, folklore, folkloreDone,
       criticQ: s.criticQ + folkloreQ,
       kidNoticed,
+      madameNodded,
     });
   },
 
@@ -2243,7 +2335,8 @@ export const useGame = create<GameState>((set, get) => ({
     const g = s.guests.find((g) => g.id === id);
     if (!g) return;
     sfx(g.isCritic ? "bell" : "gasp");
-    const egoAfterFlag = s.ego + (g.isCritic ? 15 : -10);
+    const gilliamCraft = g.isCritic && s.career.criticPersona === "gilliam" && s.career.criticCam;
+    const egoAfterFlag = s.ego + (g.isCritic ? 15 : -10) + (gilliamCraft ? 5 : 0);
     set({
       criticFlagged: true,
       criticSpotted: g.isCritic,
@@ -2252,7 +2345,7 @@ export const useGame = create<GameState>((set, get) => ({
         pushFeed(
           s.feed,
           g.isCritic
-            ? `You clock the inspector at table ${g.table}. Comped before they asked.`
+            ? `You clock the inspector at table ${g.table}. Comped before they asked.${gilliamCraft ? GILLIAM_CAM_CRAFT : ""}`
             : `You accuse table ${g.table}. Wrong guest. They heard.`,
           g.isCritic ? "good" : "bad"
         ),
