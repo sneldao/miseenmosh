@@ -181,6 +181,10 @@ export interface Career {
   vowDone?: boolean;
   /** provenance: story tags of bought lots, carried into service */
   stories?: string[];
+  /** hidden unlock: poked BEEFCAKES 3× on the title card — critic telemetry in service */
+  criticCam?: boolean;
+  /** venue dressing: night the room moved up (briefing banner) */
+  venueUpNight?: number;
 }
 
 export interface Feud {
@@ -451,6 +455,7 @@ interface GameState {
   chooseVow: (v: "star" | "house" | "brigade") => void;
   coach: (id: number, kind: "praise" | "drill" | "rest") => void;
   setMenu: (featured: string, rested: string) => void;
+  unlockCriticCam: () => void;
   chooseSeating: (k: "regulars" | "press" | "walkin") => void;
   answerFolklore: (ok: boolean) => void;
   move101: () => void;
@@ -871,7 +876,9 @@ export const useGame = create<GameState>((set, get) => ({
       // the press has a memory: last night's silence follows you into the next briefing
       silentLast: s.review.silent,
     };
+    const oldVenue = c.venue;
     career.venue = venueFor(career.stars);
+    if (career.venue > oldVenue) career.venueUpNight = career.night;
     const brigadeHeld = c.vow === "brigade" && s.review.vowLine?.includes("HELD");
     const cooks = s.cooks.map((k) => ({
       ...k,
@@ -1079,6 +1086,14 @@ export const useGame = create<GameState>((set, get) => ({
     const career = { ...s.career, vow: v };
     saveCareer(career, s.cooks);
     set({ career, feed: pushFeed(s.feed, VOW_LINES[v], "drama") });
+  },
+
+  unlockCriticCam: () => {
+    const s = get();
+    if (s.career.criticCam) return;
+    const career = { ...s.career, criticCam: true };
+    saveCareer(career, s.cooks);
+    set({ career });
   },
 
   setMenu: (featured, rested) => {

@@ -48,7 +48,11 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    the card), folklore tests (fork R / glass W / coat H / return D-F /
    flash-ignore). Coaching (N2+): one session a night — PRAISE (+10 morale,
    clears grudge), DRILL (+3 skill, −8 morale, may grudge),   REST (−1 trauma). Menu deck (N3+): feature one dish (+6 tonight),
-   rest one (off the rail tonight), one set a night.
+   rest one (off the rail tonight), one set a night. Venue dressing: the room
+   moves up with stars (STALL 86 → LE MOSH → MOSH & SON) — wash warms to gold,
+   101's cloth goes starched white and the wobble finally gets fixed. Hidden:
+   poke the BEEFCAKES wanted poster 3× on the title card to wire CRITIC CAM —
+   live telemetry (photos, last flash, fed/gone) but never the table number.
    Phasing: N1 plate→judge only, N2 sauce + coaching, N3-5 GILLIAM,
    N4 clout, N5 requests+86, N6-8 MADAME V + folklore (R to fix),
    N7 101 harsh + seating (T to move), N8 board+vows, N9 THE KID.

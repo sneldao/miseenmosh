@@ -255,6 +255,26 @@ function MenuPicker({ onPick }: { featured?: string | null; onPick: (f: string, 
   );
 }
 
+function CriticCam() {
+  const guests = useGame((s) => s.guests);
+  const serviceTime = useGame((s) => s.serviceTime);
+  const criticFlagged = useGame((s) => s.criticFlagged);
+  const criticSpotted = useGame((s) => s.criticSpotted);
+  const criticServed = useGame((s) => s.criticServed);
+  const criticLeft = useGame((s) => s.criticLeft);
+  const cg = guests.find((g) => g.isCritic);
+  if (!cg) return null;
+  const ago = cg.tellAt >= 0 ? Math.max(0, Math.round(serviceTime - cg.tellAt)) : -1;
+  const status = criticLeft ? "GONE" : criticServed > 0 ? "FED" : "EATING";
+  return (
+    <div className="critic-cam" title="A little red eye above the pass. Tell no one.">
+      <span className="cam-dot" />
+      CAM 3 · TABLE {criticFlagged && criticSpotted ? cg.table : "???"} · {cg.tells} PHOTO{cg.tells === 1 ? "" : "S"} ·{" "}
+      {ago < 0 ? "NO FLASH YET" : ago < 5 ? "FLASHING NOW" : `FLASH ${ago}s AGO`} · {status}
+    </div>
+  );
+}
+
 function VowRibbon() {
   const vow = useGame((s) => s.career.vow);
   const turns101 = useGame((s) => s.table101Turns);
@@ -452,6 +472,13 @@ function Briefing() {
             <b className={nightTake.net >= 0 ? "up" : "down"}>
               {nightTake.net >= 0 ? "+" : ""}£{nightTake.net}
             </b>
+          </div>
+        )}
+        {career.venueUpNight === career.night && (
+          <div className="venue-up">
+            {career.venue >= 2
+              ? "MOSH & SON — the flagship. They fixed 14's wobble. Behave."
+              : "LE MOSH — white paint, same rats. Tablecloths (mostly clean)."}
           </div>
         )}
         {beat === 0 && (
@@ -841,6 +868,17 @@ export default function HUD() {
     }
   }, [phase, paused]);
 
+  const unlockCriticCam = useGame((s) => s.unlockCriticCam);
+  const [pokes, setPokes] = useState(0);
+  const pokeBeefcakes = () => {
+    if (career.criticCam) return;
+    const n = pokes + 1;
+    setPokes(n);
+    if (n >= 3) {
+      unlockCriticCam();
+      setPokes(0);
+    }
+  };
   const [splashIdx, setSplashIdx] = useState(() => Math.floor(Math.random() * SPLASH.length));
   useEffect(() => {
     const t = setInterval(() => setSplashIdx((i) => (i + 1) % SPLASH.length), 3800);
@@ -875,9 +913,12 @@ export default function HUD() {
               <img src={castAnwar} alt="ANWAR" />
               <span>ANWAR — pastry.<br />Fragile. Handle with care.</span>
             </div>
-            <div className="ccard wanted">
+            <div className={`ccard wanted${pokes > 0 && !career.criticCam ? " poked" : ""}`} onClick={pokeBeefcakes} title="WANTED for ticket theft.">
               <img src={castBeefcakes} alt="BEEFCAKES" />
               <span>BEEFCAKES<br />WANTED for ticket theft.</span>
+              {pokes === 1 && !career.criticCam && <span className="poke">BEEFCAKES eyes your tickets.</span>}
+              {pokes >= 2 && !career.criticCam && <span className="poke">BEEFCAKES mouths: “nice pass. shame if—”</span>}
+              {career.criticCam && <span className="poke wired">CRITIC CAM WIRED — a red eye blinks above the pass. Tell no one.</span>}
             </div>
           </div>
           <div className="tag sub">One guest tonight is the inspector.</div>
@@ -894,6 +935,7 @@ export default function HUD() {
       {phase === "briefing" && <Briefing />}
       {phase === "service" && (
         <>
+          {career.criticCam && <CriticCam />}
           {firstPerson && (
             <div className={`reticle${aim ? ` aim-${aim}` : ""}`} aria-hidden />
           )}

@@ -14,11 +14,13 @@ function Guest({
   x,
   z,
   scale = 1,
+  venue = 0,
 }: {
   id: number;
   x: number;
   z: number;
   scale?: number;
+  venue?: number;
 }) {
   const guests = useGame((s) => s.guests);
   const flagGuest = useGame((s) => s.flagGuest);
@@ -124,7 +126,8 @@ function Guest({
       </mesh>
       <mesh position={[0, 0.62, 0.62]}>
         <cylinderGeometry args={[0.5, 0.5, 0.34, 18, 1, true]} />
-        <meshStandardMaterial color="#efe6d2" roughness={1} side={2} />
+        {/* the flagship starches 101's cloth — white, pressed, no excuses */}
+        <meshStandardMaterial color={g?.table === 14 && venue >= 2 ? "#f7f2e6" : "#efe6d2"} roughness={1} side={2} />
       </mesh>
       {/* candle = visibility anchor */}
       <mesh position={[0.2, 0.86, 0.62]}>
@@ -136,8 +139,8 @@ function Guest({
         <meshStandardMaterial color="#ffd9a0" emissive="#ffb04a" emissiveIntensity={3} />
       </mesh>
       <pointLight position={[0.2, 0.99, 0.62]} color="#ff9a4a" intensity={6} distance={3} />
-      {/* 101 wobbles: table 14 sits a degree off — the trade knows */}
-      {g?.table === 14 && (
+      {/* 101 wobbles: table 14 sits a degree off — until the flagship fixes it */}
+      {g?.table === 14 && venue < 2 && (
         <mesh position={[0, 0.44, 0.62]} rotation={[0, 0, 0.06]}>
           <boxGeometry args={[0.1, 0.02, 0.1]} />
           <meshStandardMaterial color="#7a2a1a" roughness={0.9} />
@@ -157,12 +160,19 @@ function Guest({
 }
 
 /** Something on the far wall, so the window has depth rather than a void. */
-function FarWall() {
+const VENUE_DRESS = [
+  { wall: "#4a3548", floor: "#221a22", wash: "#6a7ab8" as const, washI: 34, sconce: 9, sconceC: "#ffab5e" as const },
+  { wall: "#54404a", floor: "#2a2024", wash: "#b08a5a" as const, washI: 40, sconce: 13, sconceC: "#ffab5e" as const },
+  { wall: "#5f4a3a", floor: "#33262a", wash: "#ffd9a0" as const, washI: 46, sconce: 17, sconceC: "#ffd9a0" as const },
+];
+
+function FarWall({ venue = 0 }: { venue?: number }) {
+  const d = VENUE_DRESS[Math.min(2, venue)];
   return (
     <group position={[0, 0, -9.6]}>
       <mesh position={[0, 2.4, 0]} receiveShadow>
         <boxGeometry args={[17, 5, 0.3]} />
-        <meshStandardMaterial color="#4a3548" roughness={0.92} />
+        <meshStandardMaterial color={d.wall} roughness={0.92} />
       </mesh>
       {/* a dado rail and a few framed prints */}
       <mesh position={[0, 1.05, 0.18]}>
@@ -192,7 +202,7 @@ function FarWall() {
             <sphereGeometry args={[0.07, 10, 10]} />
             <meshStandardMaterial color="#ffd9a0" emissive="#ffb04a" emissiveIntensity={2.4} />
           </mesh>
-          <pointLight position={[0, 0.2, 0.3]} color="#ffab5e" intensity={9} distance={5} />
+          <pointLight position={[0, 0.2, 0.3]} color={d.sconceC} intensity={d.sconce} distance={5} />
         </group>
       ))}
     </group>
@@ -200,23 +210,25 @@ function FarWall() {
 }
 
 export default function DiningRoom() {
+  const venue = useGame((s) => s.career.venue);
+  const d = VENUE_DRESS[Math.min(2, venue)];
   return (
     <group position={[0, 0.26, 0]}>
-      {/* dining room floor: cooler, dimmer */}
+      {/* dining room floor: the stars repaint it — stall concrete to flagship boards */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -8.4]} receiveShadow>
         <planeGeometry args={[16, 9]} />
-        <meshStandardMaterial color="#221a22" roughness={0.95} />
+        <meshStandardMaterial color={d.floor} roughness={0.95} />
       </mesh>
-      <FarWall />
-      {/* cool ceiling wash so the far wall is not a black hole */}
-      <pointLight position={[0, 4.2, -8.2]} color="#6a7ab8" intensity={34} distance={14} />
+      <FarWall venue={venue} />
+      {/* ceiling wash warms as the room moves up — gold by the flagship */}
+      <pointLight position={[0, 4.2, -8.2]} color={d.wash} intensity={d.washI} distance={14} />
       {/* window-side wash: the pass needs faces to read at 10m */}
       <pointLight position={[0, 2.4, -6.2]} color="#ffc08a" intensity={18} distance={6} />
-      <Guest id={0} x={-4.0} z={-6.7} />
-      <Guest id={1} x={-2.0} z={-7.3} />
-      <Guest id={2} x={0} z={-6.6} />
-      <Guest id={3} x={2.0} z={-7.3} />
-      <Guest id={4} x={4.0} z={-6.7} />
+      <Guest id={0} x={-4.0} z={-6.7} venue={venue} />
+      <Guest id={1} x={-2.0} z={-7.3} venue={venue} />
+      <Guest id={2} x={0} z={-6.6} venue={venue} />
+      <Guest id={3} x={2.0} z={-7.3} venue={venue} />
+      <Guest id={4} x={4.0} z={-6.7} venue={venue} />
     </group>
   );
 }
