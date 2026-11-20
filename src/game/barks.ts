@@ -264,6 +264,46 @@ export const EPILOGUES: Record<string, string[]> = {
   kid1: ["The KID: 'mid but make it fashion. the flash test? passed. barely. ily'."],
   kid2: ["The KID posted the walkout. Slow-mo. With a sound effect. You have been memed."],
 };
+export const FATIGUE_BARKS: string[][] = [
+  ["{N} is flipping with their eyes closed. Somebody say something.", "{N}'s hands are shaking. Not the fun kind.", "The grill smells like {N}'s bad decisions. Dial it back."],
+  ["{N} just seasoned the same pan twice. They're gone. Bring them back.", "{N} is stirring like they're asleep standing up. Because they are.", "Somebody get {N} a stool and a reason."],
+  ["{N} sugared the salt pig. Tired hands, tired sugar.", "{N} is piping sideways. Beautiful. Wrong. Sideways.", "The soufflés can smell {N}'s exhaustion. So can everyone."],
+];
+export const FLYING_BARKS: string[][] = [
+  ["{N} is plating like the pan owes them money. Gorgeous.", "The grill hasn't missed in an hour. {N} is inevitable.", "{N} just seasoned by smell. Correctly. Show-off."],
+  ["{N} is dancing between burners. The sauté course is a parade.", "{N} calls 'oui' before you finish the fire. They're ahead of you.", "The risotto is singing. That's {N}. That's what that sound is."],
+  ["{N}'s sugar work belongs in a window. It IS in a window. The pass window.", "The soufflés are rising like they heard the room. {N} told them.", "{N} quenelled that with one hand. One. Hand."],
+];
+export const PAPER_SILENT = [
+  "Morning paper: the press noticed you never raised your voice. Suspicious. Admirable. Noted.",
+  "The trades are whispering: a whole service, no screams. Somebody check the chef's pulse.",
+];
+export const PAPER_WALKOUT = [
+  "Morning paper: somebody walked mid-service and the whole street saw the apron fly. The guide loves a villain.",
+  "The press counted the empty station. They always count the empty station.",
+];
+export const PAPER_SMASH = [
+  "Morning paper: crockery budget exceeded. The tiles have a new archaeology.",
+  "The review mentions the smashing twice. The food once. Priorities.",
+];
+export const PAPER_SPOTTED = [
+  "Morning paper: you clocked the inspector and comped before they asked. The trade respects tradecraft.",
+  "Word travels: the inspector was spotted, fed, and sent home happy. Bookings just moved.",
+];
+export const PAPER_STARS = [
+  "Morning paper: {S} stars. The van man read it twice.",
+  "The guide gave you {S}. MARA & JUNE cut it out and stuck it to the till.",
+];
+export const COVERS_5 = [
+  "Front page of GRIDDLE: you, mid-shout, holding a Wellington like a baby.",
+  "SAUCE PANORAMA wants the pass on the cover. The pass said yes before you did.",
+  "THE MIDNIGHT MENU, full bleed: the brigade, arms crossed, aprons clean for once.",
+];
+export const COVERS_4 = [
+  "HOT PASS WEEKLY, page three: 'the loudest four stars in town'.",
+  "STREET FEED cover: the stall that outgrew the street. BEEFCAKES is furious.",
+  "GRILL & GRIT: '{N}' — wait, that's PETRA's tongs on the cover. Close enough.",
+];
 export const PROVENANCE_BONUS = [
   "{O} — and {P} knew it by the first bite.",
   "Lorna's scallops sang. The window table heard it.",

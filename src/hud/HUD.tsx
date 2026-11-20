@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useGame, tierOf, tierName, BOARD, Ticket, PlateTier, VENUES } from "../game/state";
+import { useGame, tierOf, tierName, BOARD, Ticket, PlateTier, VENUES, loadLegends } from "../game/state";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
 import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
 import stampSmash from "../../assets/recraft/vector/stamp-smash.svg";
@@ -335,11 +335,12 @@ function ReviewCard() {
   const [copied, setCopied] = useState(false);
   if (!review) return null;
   const card =
-    `MISE EN MOSH — night ${career.night} review\n` +
+    `MISE EN MOSH — night ${career.night} review (${new Date().toDateString()})\n` +
     `${"★".repeat(review.stars)}${"☆".repeat(5 - review.stars)}\n` +
     (review.vowLine ? `${review.vowLine}\n` : "") +
     (review.personaVerdict ? `${review.personaVerdict}\n` : "") +
     (review.epilogue ? `${review.epilogue}\n` : "") +
+    (review.cover ? `${review.cover}\n` : "") +
     `"${review.quote}"\n` +
     `${review.covers} covers · ${review.misses} walks · ` +
     `${review.smashed} plates smashed · inspector ${review.spotted ? "CLOCKED" : "missed"}`;
@@ -365,6 +366,7 @@ function ReviewCard() {
         {review.vowLine && <div className="board-line">{review.vowLine}</div>}
         {review.personaVerdict && <div className="critic-line">{review.personaVerdict}</div>}          {review.folkloreLine && <div className="critic-line">{review.folkloreLine}</div>}
           {review.epilogue && <div className="critic-line epi">{review.epilogue}</div>}
+          {review.cover && <div className="cover-line">{review.cover}</div>}
         <div className="critic-line">{review.criticVerdict}</div>
         <div className="rstats">
           <span>{review.covers} covers</span>
@@ -763,6 +765,7 @@ function Ending() {
           <span>£{career.cash} in the till</span>
           <span>{career.defections} defections</span>
           <span>{Math.round(career.totalEgo ?? 0)} lifetime ego</span>
+          {(career.covers ?? []).length > 0 && <span>covers: {(career.covers ?? []).join(" · ")}</span>}
           {(career.debt ?? 0) > 0 && <span>the man takes £{career.debt} off the top</span>}
         </div>
         <div className="rbtns">
@@ -924,6 +927,12 @@ export default function HUD() {
             </div>
           </div>
           <div className="tag sub">One guest tonight is the inspector.</div>
+          <div className="tag sub">TONIGHT'S SERVICE — {new Date().toDateString()} · same tickets for everyone today.</div>
+          {(() => {
+            const l = loadLegends();
+            if (!l.residencies && !l.bestStreak) return null;
+            return <div className="legends-line">HOUSE LEGENDS — best streak ×{l.bestStreak} · silent fives {l.silentFives} · covers {l.covers.length} · residencies {l.residencies}</div>;
+          })()}
           <button className="btn" onClick={start}>
             {hasSave ? `CONTINUE RESIDENCY — NIGHT ${career.night}` : "BEGIN RESIDENCY"}
           </button>

@@ -13,6 +13,7 @@ import {
   FOLKLORE_COAT_SAVED, FOLKLORE_RETURN_WARN, FOLKLORE_FLASH_WARN,
   TABLE101_WARN, TABLE101_SEAT, TABLE101_MOVE, SEATING_LINES, VOW_LINES, PERMANENT_101,
   TRUCE_LINES, BEEFCAKES_PRICEWAR, HONOR_LINES, MADAME_CAM_NOD, GILLIAM_CAM_CRAFT, EPILOGUES,
+  FATIGUE_BARKS, FLYING_BARKS, PAPER_SILENT, PAPER_WALKOUT, PAPER_SMASH, PAPER_SPOTTED, PAPER_STARS, COVERS_5, COVERS_4,
 } from "./barks";
 
 export type Verdict = "serve" | "sendback" | "smash";
@@ -105,6 +106,8 @@ export interface Review {
   folkloreLine?: string;
   /** the critic gets the last word: persona × stars tier */
   epilogue?: string;
+  /** 4–5★: the magazine cover line */
+  cover?: string;
 }
 
 const DISHES: { name: string; station: number }[] = [
@@ -181,6 +184,8 @@ export interface Career {
   beefcakesTruce?: boolean;
   /** BEEFCAKES night (N5): rivalry doubles his runners tonight */
   beefcakesWar?: boolean;
+  /** covers earned this run (4–5★ reviews name the magazine) */
+  covers?: string[];
   /** coaching: night a cook was coached (one session a night) */
   coachNight?: number;
   /** menu deck: featured dish (+6 tonight), rested dish (off the rail tonight) */
@@ -324,6 +329,8 @@ interface PlateCtx {
   champagne: boolean;
   /** fired off a smouldering station: kissed by the edge (+4, fire comes sooner) */
   simmer: boolean;
+  /** the brigade is flying: favourites land harder (+2) */
+  flying: boolean;
 }
 
 /** Shared by the auto-complete in tick() and the early fire in firePlate():
@@ -344,7 +351,7 @@ function finishPlating(
   const burnPenalty = cook?.burning ? 8 : 0;
   const marketBonus = ctx.menuBuffs[t.station] ?? 0;
   // favourites get the good hands; grudges get the bitter ones
-  const faveBonus = cook && !cook.walkedOut && cook.fave === t.dish ? 6 : 0;
+  const faveBonus = cook && !cook.walkedOut && cook.fave === t.dish ? 6 + (ctx.flying ? 2 : 0) : 0;
   const grudgePenalty = cook?.grudge ? 4 : 0;
   // fired on the sear: kissed by the pan. rushed off early: raw in the middle.
   const searBonus = t.sear === "golden" ? 8 : t.sear === "rushed" ? -6 : 0;
@@ -420,6 +427,8 @@ interface GameState {
   kidNoticed: boolean;
   /** MADAME V nodded at the red eye (cam warmth, once) */
   madameNodded: boolean;
+  /** the brigade is flying: announced once, favourites land harder */
+  flyingAnnounced: boolean;
   /** the critic's exit: head high (fed, spotted) or coat on (slipped away) */
   criticLeft: boolean;
   criticServeAt: number;
@@ -501,6 +510,40 @@ function pushFeed(feed: FeedItem[], text: string, kind: FeedItem["kind"], who?: 
   return [...feed.slice(-23), { id: feedId++, text, kind, who }];
 }
 
+const LEGENDS_KEY = "mem-legends";
+export interface Legends {
+  bestStreak: number;
+  silentFives: number;
+  covers: string[];
+  residencies: number;
+}
+export function loadLegends(): Legends {
+  try {
+    const raw = localStorage.getItem(LEGENDS_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      return { bestStreak: p.bestStreak ?? 0, silentFives: p.silentFives ?? 0, covers: Array.isArray(p.covers) ? p.covers : [], residencies: p.residencies ?? 0 };
+    }
+  } catch {}
+  return { bestStreak: 0, silentFives: 0, covers: [], residencies: 0 };
+}
+function recordLegends(review: Review): void {
+  try {
+    const l = loadLegends();
+    l.bestStreak = Math.max(l.bestStreak, review.bestStreak);
+    if (review.silent && review.stars >= 5) l.silentFives += 1;
+    if (review.cover && !l.covers.includes(review.cover)) l.covers.push(review.cover);
+    localStorage.setItem(LEGENDS_KEY, JSON.stringify(l));
+  } catch {}
+}
+/** the morning paper: last night's defining stat, named once — the game says it remembered */
+function morningPaperLine(review: Review): string {
+  if (review.silent) return pick(Math.random, PAPER_SILENT);
+  if (review.walkouts > 0) return pick(Math.random, PAPER_WALKOUT);
+  if (review.smashed >= 3) return pick(Math.random, PAPER_SMASH);
+  if (review.spotted) return pick(Math.random, PAPER_SPOTTED);
+  return pick(Math.random, PAPER_STARS).replace("{S}", String(review.stars));
+}
 function spottedProvenance(stories: string[], persona: string): boolean {
   if (persona === "madameV" && stories.includes("lorna")) return true;
   if (persona === "kid" && stories.includes("layby")) return true;
@@ -680,6 +723,7 @@ export const useGame = create<GameState>((set, get) => ({
   comped: false,
   kidNoticed: false,
   madameNodded: false,
+  flyingAnnounced: false,
   criticLeft: false,
   criticServeAt: -1,
   screamAt: 0,
@@ -752,7 +796,7 @@ export const useGame = create<GameState>((set, get) => ({
       hasSave: false,
       ego: 10,
       screams: 0,
-      feed: [{ id: feedId++, text: `Night 1 — ${VENUES[0].name}. ${VENUES[0].sub}.`, kind: "info" }],
+      feed: [{ id: feedId++, text: `Night 1 — ${VENUES[0].name}. ${VENUES[0].sub}.`, kind: "info" }, { id: feedId++, text: "You're the chef because you're the only one who came back.", kind: "drama" as const }],
       review: null,
       nightTake: null,
       lots: makeLots(1),
@@ -860,6 +904,7 @@ export const useGame = create<GameState>((set, get) => ({
       comped: false,
       kidNoticed: false,
       madameNodded: false,
+      flyingAnnounced: false,
       criticLeft: false,
       criticServeAt: -1,
       chorusText: `"YES, CHEF!"`,
@@ -895,6 +940,7 @@ export const useGame = create<GameState>((set, get) => ({
     const breakage = s.smashed * 12;
     const net = covers - wages - breakage;
     const c = s.career;
+    recordLegends(s.review);
     const betCash = s.review.betCash ?? 0;
     // the man with the van collects when the residency ends — off the top, no arguments
     const lastNight = c.night + 1 > MAX_NIGHTS;
@@ -915,6 +961,7 @@ export const useGame = create<GameState>((set, get) => ({
       restedDish: undefined,
       stories: [],
       regularsPermanent: (c.regularsPermanent ?? false) || (c.vow === "house" && (s.review.vowLine?.includes("HELD") ?? false)),
+      covers: [...(c.covers ?? []), ...(s.review.cover && !(c.covers ?? []).includes(s.review.cover) ? [s.review.cover] : [])],
       beefcakesWar: undefined,
       criticGrudge: (c.criticGrudge ?? 0) + (s.review.stars <= 2 ? 1 : 0),
       // the press has a memory: last night's silence follows you into the next briefing
@@ -932,6 +979,12 @@ export const useGame = create<GameState>((set, get) => ({
     const nightTake = { covers, wages, breakage, net };
     saveCareer(career, cooks);
     const done = career.night > MAX_NIGHTS || career.cash < -60;
+    if (done) {
+      try {
+        const l = loadLegends();
+        localStorage.setItem(LEGENDS_KEY, JSON.stringify({ ...l, residencies: l.residencies + 1 }));
+      } catch {}
+    }
     set({
       phase: done ? "ending" : "briefing",
       career,
@@ -940,8 +993,7 @@ export const useGame = create<GameState>((set, get) => ({
       feud: done ? null : makeFeud(career, cooks),
       lots: done ? [] : makeLots(career.night),
       menuBuffs: [0, 0, 0],
-      feed: [],
-      hasSave: true,
+      feed: pushFeed(s.feed, morningPaperLine(s.review), "info"),
     });
   },
 
@@ -1267,6 +1319,9 @@ export const useGame = create<GameState>((set, get) => ({
       feed, ego, complaints, misses, served, qualitySum, streak, bestStreak,
       barkAt, rivalIdx, criticAnnounced,
     } = s;
+    let flyingAnnounced = s.flyingAnnounced;
+    const liveEarly = s.cooks.filter((c) => !c.walkedOut);
+    const flying = liveEarly.length > 0 && liveEarly.reduce((t, c) => t + c.morale, 0) / liveEarly.length > 80 && streak >= 5;
     let nextTicketIn = s.nextTicketIn - dt;
     let dessertDone = s.dessertDone;
     let sauce = s.sauce;
@@ -1287,6 +1342,7 @@ export const useGame = create<GameState>((set, get) => ({
           criticTable,
           champagne: (s.career.champagneNight ?? -1) === s.career.night,
           simmer: !!cook && !cook.walkedOut && !cook.burning && cook.overloadT > 5,
+          flying,
         });
         if (sauce?.ticketId === t.id) sauce = null; // plated out from under it
         if (res.fumble && cook) {
@@ -1481,19 +1537,36 @@ export const useGame = create<GameState>((set, get) => ({
 
     // --- ambient bark: general rage, a station-directed insult, or a
     // personal one — cooks with grudges get barked AT, specifically ---
+    // fatigue and flight read straight off morale — no new meters, just names for the states
+    const liveBrigade = s.cooks.filter((c) => !c.walkedOut);
+    const weakest = liveBrigade.length ? liveBrigade.reduce((a, b) => (a.morale < b.morale ? a : b)) : undefined;
+    if (flying && !flyingAnnounced) {
+      flyingAnnounced = true;
+      feed = pushFeed(feed, "THE BRIGADE IS FLYING — favourites land harder (+2). Don't mention it. You'll jinx it.", "good");
+    }
     if (serviceTime >= barkAt) {
       const target = s.cooks.find((c) => !c.walkedOut && rng() < 0.4);
       const grudged = target?.grudge && rng() < 0.5;
-      feed = pushFeed(
-        feed,
-        target
-          ? grudged
-            ? pick(rng, GRUDGE_BARKS[target.station]).replace("{N}", target.name)
-            : pick(rng, STATION_BARKS[target.station]).replace("{N}", target.name)
-          : pick(rng, CHEF_BARKS),
-        "drama",
-        target ? target.name : "THE PASS"
-      );
+      let bark: string;
+      let who: string | undefined;
+      if (target && grudged) {
+        bark = pick(rng, GRUDGE_BARKS[target.station]).replace("{N}", target.name);
+        who = target.name;
+      } else if (weakest && weakest.morale < 25 && rng() < 0.6) {
+        bark = pick(rng, FATIGUE_BARKS[Math.min(2, weakest.station)]).replace("{N}", weakest.name);
+        who = weakest.name;
+      } else if (flying && rng() < 0.6) {
+        const f = liveBrigade[Math.floor(rng() * liveBrigade.length)];
+        bark = pick(rng, FLYING_BARKS[Math.min(2, f.station)]).replace("{N}", f.name);
+        who = f.name;
+      } else if (target) {
+        bark = pick(rng, STATION_BARKS[target.station]).replace("{N}", target.name);
+        who = target.name;
+      } else {
+        bark = pick(rng, CHEF_BARKS);
+        who = "THE PASS";
+      }
+      feed = pushFeed(feed, bark, "drama", who);
       barkAt = serviceTime + 16 + rng() * 14;
     }
 
@@ -1736,6 +1809,9 @@ export const useGame = create<GameState>((set, get) => ({
       // the critic gets the last word: persona × stars tier (only if clocked)
       const epiTier = stars >= 4 ? 0 : stars === 3 ? 1 : 2;
       const epilogue = spotted ? pick(rng, EPILOGUES[`${persona}${epiTier}`]) : undefined;
+      // covers: 4–5★ names the magazine — fame, filed as texture
+      const coverRaw = stars >= 5 ? pick(rng, COVERS_5) : stars === 4 ? pick(rng, COVERS_4) : undefined;
+      const cover = coverRaw?.replace("{N}", s.cooks[Math.floor(rng() * s.cooks.length)].name);
       const folkloreLine = s.folkloreDone ? (persona === "madameV" ? "The fork test: answered." : persona === "kid" ? "The flash test: you let them post." : "The coat test: answered.") : undefined;
       // vow judged first, before stars
       let vowLine: string | undefined;
@@ -1772,6 +1848,7 @@ export const useGame = create<GameState>((set, get) => ({
           personaVerdict,
           folkloreLine,
           epilogue,
+          cover,
         },
       });
       return;
@@ -1802,6 +1879,7 @@ export const useGame = create<GameState>((set, get) => ({
       criticQ: s.criticQ + folkloreQ,
       kidNoticed,
       madameNodded,
+      flyingAnnounced,
     });
   },
 
@@ -1854,6 +1932,7 @@ export const useGame = create<GameState>((set, get) => ({
         criticTable,
         champagne: (s.career.champagneNight ?? -1) === s.career.night,
         simmer: !!cook && !cook.walkedOut && !cook.burning && cook.overloadT > 5,
+        flying: s.cooks.length > 0 && s.cooks.reduce((t, c) => t + (c.walkedOut ? 0 : c.morale), 0) / Math.max(1, s.cooks.filter((c) => !c.walkedOut).length) > 80 && s.streak >= 5,
       }
     );
     const cooks = s.cooks.map((c) => ({ ...c }));

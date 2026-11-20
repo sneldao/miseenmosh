@@ -153,6 +153,8 @@
 .review .rbtns { display: flex; gap: .8rem; justify-content: center; }
 .review .btn { background: #2a1608; font-size: .85rem; padding: .6rem 1.2rem; }
 .review .critic-line.epi { border-left: 2px solid #d0735a; padding-left: .5rem; font-style: italic; }
+.cover-line { margin-top: .5rem; padding: .45rem .6rem; border: 1px dashed #8a6230; font-style: italic; opacity: .95; }
+.legends-line { margin-top: .5rem; font-size: .8rem; letter-spacing: .04em; opacity: .85; }
 .critic-line { font-size: .75rem; letter-spacing: .05em; margin: -0.6rem 0 1.2rem; color: #6a4a2a; }
 
 /* ---- verdict stamp (Papers, Please energy) ---- */
