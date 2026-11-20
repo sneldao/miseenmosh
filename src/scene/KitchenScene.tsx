@@ -12,6 +12,7 @@ import chefPoster from "../../assets/recraft/raster/chef-pistols-poster.webp";
 import DishSprite, { DISH_SPRITE } from "./DishSprite";
 import FirstPerson from "./FirstPerson";
 import RailDockets from "./RailDockets";
+import SpeechBubble from "./SpeechBubble";
 const STEEL = "#8a8d91";
 const STEEL_DARK = "#4a4d52";
 const WARM = "#ffb066";
@@ -92,18 +93,19 @@ function PassCounter() {
         <boxGeometry args={[11, 0.08, 0.3]} />
         <meshStandardMaterial color={STEEL_DARK} metalness={0.7} roughness={0.4} />
       </mesh>
-      {/* heat lamps */}
+      {/* heat lamps — hung high and behind the rail so they warm the plates
+          without standing in the chef's eyeline */}
       {[-3.2, 0, 3.2].map((x) => (
-        <group key={x} position={[x, 2.46, 0]}>
-          <mesh>
-            <cylinderGeometry args={[0.02, 0.02, 0.5]} />
+        <group key={x} position={[x, 3.02, -0.45]}>
+          <mesh position={[0, 1.1, 0]}>
+            <cylinderGeometry args={[0.02, 0.02, 2.2]} />
             <meshStandardMaterial color={STEEL_DARK} />
           </mesh>
           <mesh position={[0, -0.3, 0]}>
             <coneGeometry args={[0.2, 0.24, 16, 1, true]} />
             <meshStandardMaterial color="#241310" emissive={WARM} emissiveIntensity={0.35} side={2} />
           </mesh>
-          <pointLight position={[0, -0.5, 0.2]} color={WARM} intensity={2.2} distance={4} />
+          <pointLight position={[0, -0.42, 0.15]} color={WARM} intensity={2.2} distance={4} />
         </group>
       ))}
     </group>
@@ -520,6 +522,7 @@ export default function KitchenScene() {
       <Stations />
       <PassCounter />
       <RailDockets />
+      <SpeechBubble />
       <DiningRoom />
       {/* brigade: one figure per station, color-coded */}
       <BrigadeFigure cookId={0} x={-3.6} stationHue="#a8322a" />

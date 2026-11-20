@@ -129,7 +129,7 @@
 }
 .review .rhead { font-size: .7rem; letter-spacing: .3em; opacity: .6; margin-bottom: .8rem; }
 .review .stars { font-size: 2.4rem; color: #b06a2a; letter-spacing: .1em; }
-.review .stars .dim { color: #cbb99a; }
+.review .stars .dim { color: #9a7e52; }
 .review .quote { font-style: italic; margin: 1rem 0 1.4rem; font-size: 1rem; line-height: 1.5; }
 .review .rstats {
   display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem 1rem;

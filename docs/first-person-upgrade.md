@@ -141,6 +141,18 @@ reads PLATE IT, click, and it goes to plating. The tag only offers
 holds during service the DOM `.rail` is hidden (the fallback camera and
 hotkeys 1–9 keep it).
 
+**Built (slice 3):** the room talks. The newest feed line is shouted
+into the room as a torn-paper speech-bubble card over the pass — same
+ticket type as the dockets, speaker stamped in ink (cook names in their
+station colour, `THE PASS` / `THE ROOM` otherwise), leaning toward the
+speaker's station, tail pointing down at the pass. One transient line
+maximum: it pops in, holds 4.6 s, fades, and the DOM ticker is hidden
+while `firstPerson` holds during service (the `V` camera keeps the full
+ticker, so no readable surface is lost). Feed items carry an optional
+`who` (fumble, bark, fire, walkout, sendback, scream, smother). The pass
+heat lamps moved up and behind the rail so they warm the plates without
+standing in the chef's eyeline or covering the dockets and the bubble.
+
 ### Phase 3 — prep as a place
 
 - The office scene: desk, ledger, ringing phone, market crate.

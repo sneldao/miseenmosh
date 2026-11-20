@@ -240,7 +240,7 @@ function ReviewCard() {
         </div>
         <div className="stars">
           {"★".repeat(review.stars)}
-          <span className="dim">{"★".repeat(5 - review.stars)}</span>
+          <span className="dim">{"☆".repeat(5 - review.stars)}</span>
         </div>
         <img className="press-clip" src={reviewClip} alt="Press clipping" />
         <div className="quote">“{review.quote}”</div>
@@ -310,9 +310,14 @@ function Briefing() {
     if (useGame.getState().firstPerson) {
       const c = document.querySelector("canvas") as HTMLCanvasElement | null;
       try {
-        c?.requestPointerLock?.();
+        const lock = c?.requestPointerLock?.() as unknown as Promise<void> | undefined;
+        lock?.catch?.(() => {
+          // pointer lock blocked (e.g. sandboxed iframe) — stay playable
+          const g = useGame.getState();
+          if (g.firstPerson) g.toggleFirstPerson();
+        });
       } catch {
-        // pointer lock unavailable — V still switches to the cinematic camera
+        useGame.getState().toggleFirstPerson();
       }
     }
   };
@@ -463,7 +468,7 @@ function Ending() {
         <div className="rhead">THE RESIDENCY ENDS</div>
         <div className="stars">
           {"★".repeat(Math.min(5, Math.ceil(career.stars / 3)))}
-          <span className="dim">{"★".repeat(5 - Math.min(5, Math.ceil(career.stars / 3)))}</span>
+          <span className="dim">{"☆".repeat(5 - Math.min(5, Math.ceil(career.stars / 3)))}</span>
         </div>
         <div className="quote">
           {broke
@@ -718,7 +723,8 @@ export default function HUD() {
             {streak >= 3 && <span className="amped"> · STREAK ×{streak}</span>}
           </div>
           <Brigade />
-          <Ticker />
+          {/* first person shouts the newest line into the room instead */}
+          {!firstPerson && <Ticker />}
           <button className="btn scream" onClick={() => scream(1)}>
             SCREAM <span className="kbd">SPACE</span>{" "}
             <span className="cost">hold to charge · costs morale</span>

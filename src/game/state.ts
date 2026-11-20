@@ -49,6 +49,8 @@ export interface FeedItem {
   id: number;
   text: string;
   kind: "info" | "good" | "bad" | "drama";
+  /** who said it, when the room knows — a cook's name for the speech bubble */
+  who?: string;
 }
 
 export interface Review {
@@ -247,8 +249,8 @@ interface GameState {
   smotherFire: (station: number) => void;
 }
 
-function pushFeed(feed: FeedItem[], text: string, kind: FeedItem["kind"]) {
-  return [...feed.slice(-23), { id: feedId++, text, kind }];
+function pushFeed(feed: FeedItem[], text: string, kind: FeedItem["kind"], who?: string) {
+  return [...feed.slice(-23), { id: feedId++, text, kind, who }];
 }
 
 function spawnTicket(rng: () => number, criticTable = -1): Ticket {
@@ -540,6 +542,7 @@ export const useGame = create<GameState>((set, get) => ({
       feud: done ? null : makeFeud(career, cooks),
       lots: done ? [] : makeLots(career.night),
       menuBuffs: [0, 0, 0],
+      feed: [],
       hasSave: true,
     });
   },
@@ -685,7 +688,7 @@ export const useGame = create<GameState>((set, get) => ({
         const cook = s.cooks.find((c) => c.station === t.station);
         // a broken cook fumbles — plate in the bin, ticket back on the rail
         if (cook && !cook.walkedOut && cook.morale < 30 && rng() < 0.15) {
-          feed = pushFeed(feed, `${cook.name} fumbles the ${t.dish} — straight in the bin.`, "bad");
+          feed = pushFeed(feed, `${cook.name} fumbles the ${t.dish} — straight in the bin.`, "bad", cook.name);
           sfx("shatter");
           cook.morale = Math.max(0, cook.morale - 3);
           tickets.push({ ...t, state: "rail", age: age * 0.6, quality: -1 });
@@ -757,7 +760,8 @@ export const useGame = create<GameState>((set, get) => ({
         target
           ? pick(rng, STATION_BARKS[target.station]).replace("{N}", target.name)
           : pick(rng, CHEF_BARKS),
-        "drama"
+        "drama",
+        target ? target.name : "THE PASS"
       );
       barkAt = serviceTime + 16 + rng() * 14;
     }
@@ -800,7 +804,8 @@ export const useGame = create<GameState>((set, get) => ({
         feed = pushFeed(
           feed,
           `FLAMBÉ NOBODY ORDERED — ${c.name}'s station is ON FIRE. Click it. Smother it.`,
-          "drama"
+          "drama",
+          c.name
         );
         sfx("sting");
       }
@@ -809,7 +814,7 @@ export const useGame = create<GameState>((set, get) => ({
       const drain = load === 0 ? -1.4 : (0.22 + load * 0.15) * (1 + c.trauma * 0.35);
       const morale = Math.min(100, Math.max(0, c.morale - dt * drain * (burning ? 2 : 1)));
       if (morale <= WALKOUT_AT) {
-        feed = pushFeed(feed, `${c.name} throws their apron. WALKOUT.`, "drama");
+        feed = pushFeed(feed, `${c.name} throws their apron. WALKOUT.`, "drama", c.name);
         sfx("sting");
         ego += 4; // the room watches
         return { ...c, morale, overloadT, burning, walkedOut: true, walkoutAt: serviceTime };
@@ -993,7 +998,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (v === "sendback") {
       sentBack += 1;
       sfx("rip");
-      feed = pushFeed(feed, `Back to ${cook?.name ?? "the pass"}: "${plate.dish}. Again."`, "info");
+      feed = pushFeed(feed, `Back to ${cook?.name ?? "the pass"}: "${plate.dish}. Again."`, "info", cook?.name);
       if (cook) cook.morale = Math.max(0, cook.morale - 3);
       set({
         tickets: s.tickets.map((t) =>
@@ -1056,7 +1061,8 @@ export const useGame = create<GameState>((set, get) => ({
           : s.screams === 0
             ? "You scream. The kitchen moves faster. Everyone hates you."
             : `Scream #${s.screams + 1}. It's working less.`,
-        over ? "bad" : "drama"
+        over ? "bad" : "drama",
+        "THE PASS"
       ),
     });
   },
@@ -1115,7 +1121,8 @@ export const useGame = create<GameState>((set, get) => ({
       feed: pushFeed(
         s.feed,
         `You smother the fire on ${cook.name}'s station with a hotel pan. Sizzling applause.`,
-        "good"
+        "good",
+        cook.name
       ),
     });
   },

@@ -60,8 +60,8 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       shimmy, hands + plate, RMB inspect, center reticle, charge scream,
       `V` fallback (dates to Week 3)
 - [ ] Phase 2 — the room answers: look-to-aim fires/guests/rail *(aim
-      reticle, dining room, rail cap and the physical ticket rail done
-      and live in `47b6bc21`; bubbles and audio to go)*
+      reticle, dining room, rail cap, the physical ticket rail and the
+      3D speech bubble done; spatial audio to go)*
 - [ ] Phase 3 — prep as a place: office scene, desk objects, one decision
       each, night-gated disclosure; Night 1 cold open into service
 - [ ] Phase 4 — venue re-dress (stall → bistro → flagship), lighting tiers

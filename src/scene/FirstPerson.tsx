@@ -124,7 +124,16 @@ export default function FirstPerson() {
       const g = useGame.getState();
       if (g.phase !== "service" || g.paused || !g.firstPerson) return;
       if (document.pointerLockElement !== canvas) {
-        canvas.requestPointerLock?.();
+        try {
+          const lock = canvas.requestPointerLock?.() as unknown as Promise<void> | undefined;
+          lock?.catch?.(() => {
+            const g = useGame.getState();
+            if (g.firstPerson) g.toggleFirstPerson();
+          });
+        } catch {
+          const g = useGame.getState();
+          if (g.firstPerson) g.toggleFirstPerson();
+        }
         return;
       }
       fireAtCentre();
