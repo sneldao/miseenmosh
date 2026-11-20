@@ -7,6 +7,16 @@
   "kind": "game",
   "controls": "auto",
   "players": "single",
+  "leaderboards": [
+    { "key": "service_stars", "label": "Best single-night stars", "order": "desc", "min": 0, "max": 5, "scoreLabel": "Stars", "format": "integer" },
+    { "key": "streaks", "label": "Best streak", "order": "desc", "min": 0, "max": 200, "scoreLabel": "Plates", "format": "integer" },
+    { "key": "run_stars", "label": "Best residency stars", "order": "desc", "min": 0, "max": 60, "scoreLabel": "Stars", "format": "integer" }
+  ],
+  "achievements": [
+    { "id": "silent_service", "title": "Silent Service", "description": "Zero screams across 8+ covers. The food shouted instead." },
+    { "id": "wellington_trilogy", "title": "The Wellington Trilogy", "description": "Three pristine Wellingtons in a row." },
+    { "id": "house_legend", "title": "House Legend", "description": "Win the residency with 200+ lifetime ego." }
+  ],
   "build": {
     "command": "npm run build",
     "output": "dist"

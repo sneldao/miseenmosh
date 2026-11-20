@@ -23,6 +23,8 @@ Everything else supports one of those two.
 - [character-personality.md](research/character-personality.md) — systems into people.
 - [verbosity-progressive-disclosure.md](research/verbosity-progressive-disclosure.md) — reading load; adopted rules are design.md §9.
 - [virality.md](research/virality.md) — share patterns, judge-eye view.
+- [platform-winners.md](research/platform-winners.md) — what the platform's hits do differently; 7 ranked moves.
+- [platform-sdk.md](research/platform-sdk.md) — SDK facts + what we wired (boards, achievements, events, frame rules).
 - [sponsors.md](research/sponsors.md) — ElevenLabs / fal / Meshy constraints.
 - [z-axis.md](research/z-axis.md) — awards candidacy.
 - [zeitgeist.md](research/zeitgeist.md) — why chef, why now (Nov 18 snapshot).

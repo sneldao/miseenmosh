@@ -4,6 +4,11 @@
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 
+/** Host mute (OpenGame page): silence the master bus, keep the graph. */
+export function setMasterMuted(muted: boolean) {
+  if (master && ctx) master.gain.setTargetAtTime(muted ? 0 : 0.22, ctx.currentTime, 0.02);
+}
+
 export function unlockAudio() {
   if (!ctx) {
     ctx = new AudioContext();

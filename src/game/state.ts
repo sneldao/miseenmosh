@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { mulberry32, daySeed } from "./seed";
-import { sfx, unlockAudio } from "./sound";
+import { sfx, unlockAudio, setMasterMuted } from "./sound";
+import { initOg, submitBoard, unlockAch, trackEvent } from "./og";
 import {
   CHEF_BARKS, STATION_BARKS, BRIGADE_RESPONSES, GUEST_HECKLES, RIVAL_LINES, pick,
   MEALS, FAMILY_LINES, GRUDGE_BARKS, BEEFCAKES_WARN, BEEFCAKES_STEAL_LINES,
@@ -458,6 +459,8 @@ interface GameState {
   criticQ: number;
   /** cohesion: consecutive pristine Wellingtons — the trilogy the trade whispers about */
   wellingtonRun: number;
+  /** platform: the trilogy fired tonight (achievement unlock at review) */
+  trilogyTonight: boolean;
   /** folklore: one timed test at a time — fork, glass, coat, return, flash */
   folklore: { kind: "fork" | "glass" | "coat" | "return" | "flash"; table: number; until: number } | null;
   folkloreDone: boolean;
@@ -507,6 +510,8 @@ interface GameState {
   flagGuest: (id: number) => void;
   togglePause: () => void;
   toggleGlossary: () => void;
+  /** platform: handshake, host pause/mute — safe anywhere, game never waits */
+  initPlatform: () => void;
   toggleFirstPerson: () => void;
   setAim: (aim: "fire" | "guest" | "ticket" | "station" | null) => void;
   smotherFire: (station: number) => void;
@@ -752,6 +757,7 @@ export const useGame = create<GameState>((set, get) => ({
   criticServed: 0,
   criticQ: 0,
   wellingtonRun: 0,
+  trilogyTonight: false,
   folklore: null,
   folkloreDone: false,
   table101Turns: 0,
@@ -930,6 +936,7 @@ export const useGame = create<GameState>((set, get) => ({
       criticServed: 0,
       criticQ: 0,
       wellingtonRun: 0,
+      trilogyTonight: false,
       folklore: null,
       folkloreDone: false,
       table101Turns: 0,
@@ -989,6 +996,13 @@ export const useGame = create<GameState>((set, get) => ({
     const nightTake = { covers, wages, breakage, net };
     saveCareer(career, cooks);
     const done = career.night > MAX_NIGHTS || career.cash < -60;
+    if (done) {
+      // platform: the residency's line in the books — best totals, legend, event
+      const won = career.stars >= 10;
+      submitBoard("run_stars", career.stars);
+      trackEvent("run_completed", { score: career.stars, result: won ? "stars" : "broke" });
+      if (won && (career.totalEgo ?? 0) >= 200) unlockAch("house_legend");
+    }
     if (done) {
       try {
         const l = loadLegends();
@@ -1870,6 +1884,12 @@ export const useGame = create<GameState>((set, get) => ({
           cover,
         },
       });
+      // platform: nightly boards, achievements, events — fire and forget
+      trackEvent("night_completed", { level: String(s.career.night), score: stars });
+      submitBoard("service_stars", stars, String(s.career.night));
+      submitBoard("streaks", bestStreak);
+      if (silent && stars >= 5) unlockAch("silent_service");
+      if (s.trilogyTonight) unlockAch("wellington_trilogy");
       return;
     }
 
@@ -2199,6 +2219,7 @@ export const useGame = create<GameState>((set, get) => ({
     let { feed, ego, served, sentBack, smashed, complaints, qualitySum, streak, bestStreak } = s;
     let { criticServed, criticQ } = s;
     let wellingtonRun = s.wellingtonRun;
+    let trilogyTonight = s.trilogyTonight;
     let criticServeAt = s.criticServeAt;
     const cooks = s.cooks.map((c) => ({ ...c }));
     const cook = cooks[plate.station];
@@ -2273,6 +2294,7 @@ export const useGame = create<GameState>((set, get) => ({
               feed = pushFeed(feed, TRILOGY_WELLY, "drama", "THE REGULARS");
               sfx("applause", { vol: 0.7 });
               wellingtonRun = 0;
+              trilogyTonight = true;
             }
           } else {
             wellingtonRun = 0;
@@ -2318,6 +2340,7 @@ export const useGame = create<GameState>((set, get) => ({
         table101Turns,
         request: req,
         wellingtonRun,
+        trilogyTonight,
         milestoneAt: ms?.at ?? s.milestoneAt,
         milestoneText: ms?.text ?? s.milestoneText,
         ...stamp("SERVED"),
@@ -2461,6 +2484,16 @@ export const useGame = create<GameState>((set, get) => ({
 
   toggleGlossary: () => {
     set({ glossary: !get().glossary });
+  },
+
+  initPlatform: () => {
+    initOg(
+      () => {
+        const s = get();
+        if (s.phase === "service" && !s.paused) s.togglePause();
+      },
+      (muted) => setMasterMuted(muted)
+    );
   },
 
   toggleFirstPerson: () => {

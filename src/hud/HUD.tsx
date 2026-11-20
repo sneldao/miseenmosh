@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useGame, tierOf, tierName, BOARD, Ticket, PlateTier, VENUES, loadLegends } from "../game/state";
+import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
 import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
 import stampSmash from "../../assets/recraft/vector/stamp-smash.svg";
@@ -888,6 +889,13 @@ export default function HUD() {
   useHotkeys();
   const phase = useGame((s) => s.phase);
   const glossary = useGame((s) => s.glossary);
+  const initPlatform = useGame((s) => s.initPlatform);
+  const [ogHandle, setOgHandle] = useState<string | null>(() => ogHandleNow());
+  useEffect(() => {
+    initPlatform();
+    readyOg(); // first frame the player can act in — the title card
+    return onOgHandle(setOgHandle);
+  }, [initPlatform]);
   const start = useGame((s) => s.start);
   const resetCareer = useGame((s) => s.resetCareer);
   const hasSave = useGame((s) => s.hasSave);
@@ -977,6 +985,7 @@ export default function HUD() {
             </div>
           </div>
           <div className="tag sub">One guest tonight is the inspector.</div>
+          <div className="tag sub">BE THE TYRANT. EARN THE STARS.{ogHandle ? ` CHEF ${ogHandle.toUpperCase()} IS ON THE PASS.` : ""}</div>
           <div className="tag sub">TONIGHT'S SERVICE — {new Date().toDateString()} · same tickets for everyone today.</div>
           {(() => {
             const l = loadLegends();
