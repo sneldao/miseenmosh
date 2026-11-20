@@ -24,6 +24,13 @@ const CARD_Y = 2.02;
 const CARD_Z = 1.02;
 const STATION_COLOR = ["#a8322a", "#b07a2a", "#3a6a9a"];
 const RAIL_COLOR = "#5a3a1c";
+/** named speakers who aren't on a station stamp their own ink */
+const WHO_COLOR: Record<string, string> = {
+  BEEFCAKES: "#6a2a5a",
+  "THE PRESS": "#2c2c34",
+  "THE REGULARS": "#3d5a2c",
+  "THE TABLE": "#7a4a1a",
+};
 
 function wrap(g: CanvasRenderingContext2D, text: string, max: number, limit: number) {
   const words = text.split(" ");
@@ -124,7 +131,9 @@ export default function SpeechBubble() {
   }, [cooks]);
 
   const station = item?.who ? stationOf.get(item.who) : undefined;
-  const accent = station !== undefined ? STATION_COLOR[station] : RAIL_COLOR;
+  const accent = station !== undefined
+    ? STATION_COLOR[station]
+    : (item?.who && WHO_COLOR[item.who]) ?? RAIL_COLOR;
   const who = item?.who ?? "THE ROOM";
 
   const tex = useMemo(

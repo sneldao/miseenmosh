@@ -235,10 +235,87 @@ function Docket({ t, hotkey }: { t: Ticket; hotkey: number }) {
   );
 }
 
+/** What Beefcakes leaves behind: half a docket, still swinging. */
+function stubTexture(table: number, dish: string) {
+  const c = document.createElement("canvas");
+  c.width = 240;
+  c.height = 160;
+  const g = c.getContext("2d")!;
+  g.fillStyle = "#efe0c2";
+  g.fillRect(0, 0, 240, 160);
+  g.fillStyle = "rgba(96, 72, 44, 0.14)";
+  for (let i = 0; i < 90; i++) g.fillRect((i * 97.3) % 240, (i * 61.7) % 160, 1.3, 1.3);
+  g.fillStyle = "#22160c";
+  g.textBaseline = "top";
+  g.font = "600 17px 'Courier New', monospace";
+  g.fillText("TABLE", 18, 46);
+  g.font = "700 44px 'Courier New', monospace";
+  g.fillText(String(table), 17, 64);
+  g.font = "700 22px 'Courier New', monospace";
+  g.fillStyle = "#6a1a1a";
+  g.fillText("RIPPED", 150, 66);
+  g.font = "700 20px 'Courier New', monospace";
+  g.fillStyle = "#22160c";
+  const words = wrap(g, dish, 202);
+  words.slice(0, 2).forEach((w, i) => g.fillText(w, 18, 112 + i * 24));
+  // the tear across the top — the other half is across the street
+  g.fillStyle = "#0d0b09";
+  for (let x = 0; x < 240; x += 16) {
+    g.beginPath();
+    g.moveTo(x, 0);
+    g.lineTo(x + 8, 18 + ((x / 16) % 3) * 6);
+    g.lineTo(x + 16, 0);
+    g.fill();
+  }
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  return tex;
+}
+
+const STUB_LIFE = 25;
+
+function TornStub({ table, dish, slot, at }: { table: number; dish: string; slot: number; at: number }) {
+  const swing = useRef<Group>(null);
+  const fade = useRef<Mesh>(null);
+  const tex = useMemo(() => stubTexture(table, dish), [table, dish]);
+  useEffect(() => () => tex.dispose(), [tex]);
+  useFrame(({ clock }) => {
+    const age = useGame.getState().serviceTime - at;
+    if (swing.current) {
+      // ripped paper swings wilder, then settles into shame
+      const wild = Math.max(0, 1 - age / 2);
+      swing.current.rotation.z = Math.sin(clock.elapsedTime * 6 + slot) * 0.16 * wild
+        + Math.sin(clock.elapsedTime * 1.5 + slot) * 0.022;
+    }
+    if (fade.current) {
+      const m = fade.current.material as MeshBasicMaterial;
+      m.opacity = Math.min(1, (STUB_LIFE - age) / 0.6);
+    }
+  });
+  return (
+    // hangs slightly forward of the rail — the live dockets close ranks
+    // over the victim's slot, so the stub must sit proud to be seen
+    <group position={[(slot - 2.5) * SLOT, HANG_Y, HANG_Z + 0.06]}>
+      <group ref={swing}>
+        <mesh position={[0, -0.012, 0]}>
+          <boxGeometry args={[0.038, 0.03, 0.016]} />
+          <meshStandardMaterial color="#b9bec4" metalness={0.5} roughness={0.35} />
+        </mesh>
+        <mesh ref={fade} position={[0, -0.019 - 0.08, 0]}>
+          <planeGeometry args={[CARD_W, 0.16]} />
+          <meshBasicMaterial map={tex} toneMapped={false} side={DoubleSide} transparent />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
 export default function RailDockets() {
   const firstPerson = useGame((s) => s.firstPerson);
   const phase = useGame((s) => s.phase);
   const tickets = useGame((s) => s.tickets);
+  const lastSteal = useGame((s) => s.lastSteal);
+  const serviceTime = useGame((s) => s.serviceTime);
 
   const rail = tickets.filter((t) => t.state === "rail").slice(0, 6);
   if (!firstPerson || phase !== "service") return null;
@@ -261,6 +338,9 @@ export default function RailDockets() {
           <Docket t={t} hotkey={i + 1} />
         </group>
       ))}
+      {lastSteal && serviceTime - lastSteal.at < STUB_LIFE && (
+        <TornStub table={lastSteal.table} dish={lastSteal.dish} slot={lastSteal.slot} at={lastSteal.at} />
+      )}
     </group>
   );
 }

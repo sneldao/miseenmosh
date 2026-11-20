@@ -257,7 +257,16 @@ swing, and PLATE IT on the reticle takes one — the DOM rail is now only
 the `V` fallback camera's rail. The ticker's newest line is now a 3D
 speech-bubble card over the pass (speaker in ink, leaning toward their
 station, one line maximum, gone in under five seconds) — the DOM ticker
-is likewise `V`-only now. Still to do: spatial audio tells.
+is likewise `V`-only now. The room has ears: per-station sizzle beds,
+a dining murmur that sours when tables walk, a rail drone, and panned
+one-shots (printer right, fires and flashes where they happen). The
+steel shows the science — stations glow as they drown, with one smoke
+warning before the grease goes up. Tables read back: the press
+flashes, the couple fights and makes up, the regulars forgive once,
+and the critic escalates photo → soufflé question → underlined notes.
+Cooks remember: favourite dishes get the good hands, sendbacks and
+held screams earn grudges (and personal barks) until the family meal
+clears the table.
 **Phase 3:** prep becomes a place — the office, desk objects, one
 decision per object, night-gated disclosure. **Phase 4:** venue
 re-dress, performance, playtest, deploy.

@@ -113,15 +113,20 @@ shoulders and arms so they read as people from eye level. The dining
 room was put on a low step and given a front wash so guests clear the
 station counters and the pass sill.
 
-### Phase 2 — the room answers (in progress)
+### Phase 2 — the room answers (built, 20 Nov)
 
 - Look-to-aim interactions: smother fires, flag guests, read tickets on
   the rail.
 - 3D speech bubbles replace the ticker; one transient line maximum.
 - Spatial audio cues for station distress, the printer, the dining room.
-- Physical ticket rail: tickets visibly hang, age, and tear. (Hanging,
-  aging and click-to-plate are in; the tear/rip on BEEFCAKES theft is
-  still to come.)
+- Physical ticket rail: tickets visibly hang, age, and tear — the
+  BEEFCAKES steal leaves a torn stub swinging forward of the rail.
+- Readable dining room: press / regulars / couple / walk-in tables with
+  their own tells; the critic escalates across the night.
+- Kitchen physics made visible: stations glow as they drown, one smoke
+  warning before the fire.
+- Cook memory: favourites and grudges (cleared by the family meal).
+  Family meal: praise / crispy bit / silence, eaten standing up.
 
 **Built so far (19 Nov):** the dining room reads as a room — seated
 diners in eveningwear over candles and table settings, a timber

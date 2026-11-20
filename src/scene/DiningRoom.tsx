@@ -45,8 +45,11 @@ function Guest({
       phone.current.position.y += (target - phone.current.position.y) * 0.15;
     }
     if (flash.current) {
-      const on = telling && g.isCritic && t % 0.8 < 0.1;
-      (flash.current.material as MeshStandardMaterial).emissiveIntensity = on ? 8 : 0;
+      // the critic strobes; the press flashes too, dimmer, twice as guilty
+      const snapping = telling && (g.isCritic || g.kind === "press") && t % 0.8 < 0.1;
+      (flash.current.material as MeshStandardMaterial).emissiveIntensity = snapping
+        ? g.isCritic ? 8 : 4
+        : telling ? 0.9 : 0;
     }
   });
   if (!g) return null;

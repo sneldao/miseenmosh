@@ -13,6 +13,7 @@ import DishSprite, { DISH_SPRITE } from "./DishSprite";
 import FirstPerson from "./FirstPerson";
 import RailDockets from "./RailDockets";
 import SpeechBubble from "./SpeechBubble";
+import Ambience from "./Ambience";
 const STEEL = "#8a8d91";
 const STEEL_DARK = "#4a4d52";
 const WARM = "#ffb066";
@@ -523,6 +524,7 @@ export default function KitchenScene() {
       <PassCounter />
       <RailDockets />
       <SpeechBubble />
+      <Ambience />
       <DiningRoom />
       {/* brigade: one figure per station, color-coded */}
       <BrigadeFigure cookId={0} x={-3.6} stationHue="#a8322a" />

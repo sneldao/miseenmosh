@@ -207,6 +207,7 @@ function Brigade() {
           </div>
           {c.walkedOut && <span className="out-tag">WALKED</span>}
           {c.burning && <span className="out-tag fire">FIRE</span>}
+          {!c.walkedOut && c.grudge && <span className="out-tag grudge" title={c.grudge}>HOLDING ONE</span>}
         </div>
       ))}
     </div>
@@ -283,6 +284,8 @@ function Briefing() {
   const feudChoice = useGame((s) => s.feudChoice);
   const lots = useGame((s) => s.lots);
   const buyLot = useGame((s) => s.buyLot);
+  const meal = useGame((s) => s.meal);
+  const mealDone = (career.mealNight ?? -1) >= career.night;
   const feed = useGame((s) => s.feed);
   const startService = useGame((s) => s.startService);
   const canSave = useGame((s) => s.canSave);
@@ -364,6 +367,25 @@ function Briefing() {
                   )}
                 </div>
               ))}
+            </div>
+            {/* family meal: eaten standing up, before doors — the heart before the shouting */}
+            <div className="market">
+              <div className="mhead">FAMILY MEAL — eaten standing up</div>
+              {mealDone ? (
+                <div className="ltaken">bowls licked. yesterday stays yesterday.</div>
+              ) : (
+                <>
+                  <button className="btn lbtn" onClick={() => meal(0)}>
+                    PRAISE THEM <span className="cost">+12 morale all · clears grudges</span>
+                  </button>
+                  <button className="btn lbtn" onClick={() => meal(1)}>
+                    THE CRISPY BIT GOES TO THE LOWEST <span className="cost">+25 them, +6 rest · clears grudges</span>
+                  </button>
+                  <button className="btn lbtn dim" onClick={() => meal(2)}>
+                    EAT IN SILENCE <span className="cost">−1 trauma where it hurts · clears grudges</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

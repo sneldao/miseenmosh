@@ -36,12 +36,15 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       civilian decoys, flag via raycast click, dessert deadline slams shut,
       signature-dish ordering (always the Wellington), critic verdict on card
 - [x] Service pressure: 55s ticket TTL + table walks, streak system,
-      dessert-course stampede, BEEFCAKES rival events (incl. ticket theft)
+      dessert-course stampede, BEEFCAKES rival set-pieces (loiter warn,
+      bespoke steal line, torn rail stub), regulars forgive once
 - [x] Feel layer: full keyboard play (1-9/S/B/X/space/P), pause,
       ambient chef barks, guest heckles, verdict stamps, synth SFX
 - [x] Brigade sim depth: trauma scars on walkouts (persist, drain
       faster), defections via feud (NEW_BLOOD replacements), morale
-      carries overnight with partial rest
+      carries overnight with partial rest, cook memory (favourite dish
+      bonus, sendback/overscream grudges with personal barks, cleared
+      by the family meal)
 - [x] Progression skeleton: 3 venues star-gated (5★→LE MOSH,
       10★→MOSH & SON), per-venue price/spawn/critic-tell multipliers
 - [x] Multi-night residency: 9-night arc, cash ledger (covers − wages
@@ -59,14 +62,20 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
 - [x] Phase 1 — first-person pass: pointer-lock camera, constrained look,
       shimmy, hands + plate, RMB inspect, center reticle, charge scream,
       `V` fallback (dates to Week 3)
-- [ ] Phase 2 — the room answers: look-to-aim fires/guests/rail *(aim
-      reticle, dining room, rail cap, the physical ticket rail and the
-      3D speech bubble done; spatial audio to go)*
+- [x] Phase 2 — the room answers: look-to-aim fires/guests/rail,
+      dining room, rail cap, physical ticket rail, 3D speech bubble,
+      spatial audio beds (per-station sizzle, murmur, rail drone) +
+      panned one-shots, station heat glow with smoke warning, readable
+      dining tables (press / regulars / couple / walk-in), critic
+      escalation tells
 - [ ] Phase 3 — prep as a place: office scene, desk objects, one decision
       each, night-gated disclosure; Night 1 cold open into service
+      *(family-meal ritual already in: praise / crispy bit / silence,
+      clears grudges)*
 - [ ] Phase 4 — venue re-dress (stall → bistro → flagship), lighting tiers
 - [ ] Full cast + props via the pipeline (Idol Max / meshy-t2.5)
-- [ ] Complete audio pass: 8–12 voices, SFX bus, music score
+- [ ] Complete audio pass: 8–12 voices, music score *(synth SFX +
+      ambience beds done; voices and score to go)*
 - [ ] Feud system + rival chefs (incl. Beefcakes), newspaper clippings
 - [ ] VHS-grain flashbacks, title sequence, review card art
 - [ ] Hidden critic-mode unlock

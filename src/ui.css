@@ -324,6 +324,7 @@
 .review.ending { border-top: 4px solid #6a4a2a; }
 
 .out-tag.fire { background: #7a1f12; color: #ffb08a; }
+.out-tag.grudge { background: #3a2c4a; color: #c9a4e0; }
 
 /* ---- generated art pass ---- */
 .stamp { border: none; background: transparent; }

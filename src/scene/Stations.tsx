@@ -97,6 +97,19 @@ function Station({
 }) {
   const cook = useGame((s) => s.cooks[index]);
   const smotherFire = useGame((s) => s.smotherFire);
+  const heat = useRef<Mesh>(null);
+  useFrame(() => {
+    // the physics of the rush, made visible: the steel starts to glow
+    // as a station drowns, long before the grease actually goes up
+    if (heat.current) {
+      const c = useGame.getState().cooks[index];
+      const h = c && !c.walkedOut ? Math.min(1, c.overloadT / 8) : 0;
+      const m = heat.current.material as MeshStandardMaterial;
+      m.opacity = h * 0.34;
+      m.emissiveIntensity = 0.4 + h * 2.2;
+      heat.current.visible = h > 0.02;
+    }
+  });
   return (
     <group position={[x, 0, -3.2]}>
       {/* counter */}
@@ -112,6 +125,18 @@ function Station({
       <mesh position={[0, 0.9, 0.62]}>
         <boxGeometry args={[3.2, 0.16, 0.02]} />
         <meshStandardMaterial color={color} />
+      </mesh>
+      {/* heat bloom on the steel — the science before the fire */}
+      <mesh ref={heat} position={[0, 1.16, 0]} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
+        <planeGeometry args={[3.0, 1.0]} />
+        <meshStandardMaterial
+          color="#ff5a1a"
+          emissive="#ff4a0a"
+          emissiveIntensity={0.4}
+          transparent
+          opacity={0}
+          depthWrite={false}
+        />
       </mesh>
       {/* pans / flame */}
       {flame && (

@@ -68,3 +68,77 @@ export const RIVAL_LINES = [
 export function pick(rng: () => number, arr: string[]): string {
   return arr[Math.floor(rng() * arr.length)];
 }
+
+// --- family meal: one shared dish, eaten standing up, before doors ---
+// {M} = the meal, {N} = a cook's name.
+export const MEALS = [
+  "yesterday's fish, made excellent by spite",
+  "staff pasta with too much garlic and no regrets",
+  "the Wellington trimmings, eaten over the bin like animals",
+  "burnt ends nobody can sell, everybody wants",
+  "a single perfect omelette, cut into three unfair pieces",
+  "cold pommes purée, eaten with thumbs",
+];
+
+export const FAMILY_LINES = [
+  "{N} eats like it's their last meal. It might be.",
+  "{N} guards the crispy bit with a paring knife.",
+  "{N} says grace. It's mostly swearing.",
+  "{N} feeds the pass a bite first. Respect, or fear.",
+];
+
+// --- grudges: {N} holds one, and the room knows ---
+export const GRUDGE_BARKS: string[][] = [
+  [
+    "{N} — still thinking about that sendback. Aren't you.",
+    "{N} seasons everything twice now. Trust issues, salted.",
+  ],
+  [
+    "{N} stirs like the pan personally wronged them. It did.",
+    "{N} — the shallots heard what you did. They all heard.",
+  ],
+  [
+    "{N} pipes the tart with unnecessary violence. Beautiful. Hurt. Tart.",
+    "{N} — precision is revenge you can eat.",
+  ],
+];
+
+// --- Beefcakes, up close and unforgivable ---
+export const BEEFCAKES_WARN = [
+  "A runner in a BEEFCAKES vest loiters by your bins. He's stretching.",
+  "BEEFCAKES' runner is doing lunges by the back door. This means something.",
+];
+
+export const BEEFCAKES_STEAL_LINES = [
+  `BEEFCAKES' runner takes table {T}'s {D} like he pre-ordered it. BEFORE YOU, DARLING.`,
+  `Table {T}'s {D}, gone. The runner blows a kiss to the pass. A kiss.`,
+  `BEEFCAKES just plated YOUR table {T} order across the street. The {D} looks happy there.`,
+];
+
+// --- the dining room, reading back at you ---
+// {T} = table number.
+export const PRESS_TELLS = [
+  "Table {T}'s food writer photographs the pass. And writes. Faster.",
+  "Table {T} is sketching your plating. Badly. Publishing anyway.",
+];
+
+export const COUPLE_FIGHT = [
+  "Table {T} is fighting. About the scallops. About everything.",
+  "Table {T} made up. The scallops helped. The scallops always help.",
+  "Table {T} is crying into the napkins. Good napkins, to be fair.",
+];
+
+export const REGULARS_KIND = [
+  "The regulars nod at the pass. They've seen worse. They've BEEN worse.",
+  "The regulars send back an empty plate and a thumbs-up. Keep it.",
+];
+
+export const REGULARS_FORGIVE = "The regulars wave it off. Twenty years they've eaten here. Once, they forgive.";
+
+export const CRITIC_ESCALATION = [
+  "Table {T} keeps photographing the plate. And writing.",
+  "Table {T} asks when the soufflé lands. They know about the soufflé.",
+  "Table {T} is writing. A lot. Underlined, probably.",
+];
+
+export const SMOKE_WARN = "{N}'s station is smoking. Ease off that side — or it goes up.";
