@@ -236,6 +236,22 @@
 .ticket.sauced { box-shadow: 0 3px 14px rgba(90, 160, 220, .8); }
 .ticket.sauced .tstate { color: #2a6a9a; font-weight: bold; }
 
+/* ---- vow ribbon + folklore test ---- */
+.vow-ribbon {
+  position: absolute; top: 3.2rem; left: 50%; transform: translateX(-50%);
+  font-size: .68rem; letter-spacing: .12em; color: #ffd76a;
+  background: rgba(20, 12, 6, .72); border: 1px solid rgba(255, 215, 106, .5);
+  padding: .25rem .7rem; border-radius: 999px; pointer-events: none;
+}
+.folklore-bar {
+  position: absolute; top: 5.1rem; left: 50%; transform: translateX(-50%);
+  display: flex; gap: .6rem; align-items: center;
+  font-size: .72rem; letter-spacing: .06em; color: #ffe9b0;
+  background: rgba(60, 10, 10, .82); border: 1px solid #c0392b;
+  padding: .35rem .6rem; border-radius: 6px;
+}
+.folklore-bar .btn { font-size: .65rem; padding: .2rem .5rem; }
+
 /* ---- call the board result ---- */
 .board-line {
   font-size: .8rem; letter-spacing: .04em; color: #8a6a10;

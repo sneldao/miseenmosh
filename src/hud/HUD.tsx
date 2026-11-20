@@ -235,6 +235,33 @@ function Ticker() {
   );
 }
 
+function VowRibbon() {
+  const vow = useGame((s) => s.career.vow);
+  const turns101 = useGame((s) => s.table101Turns);
+  if (!vow) return null;
+  return (
+    <div className="vow-ribbon">
+      {vow === "star" ? "STAR VOW — no walks, clock them" : vow === "house" ? `HOUSE VOW — 101 turns ${turns101}/2` : "BRIGADE VOW — nobody walks"}
+    </div>
+  );
+}
+
+function FolkloreBar() {
+  const folklore = useGame((s) => s.folklore);
+  const answer = useGame((s) => s.answerFolklore);
+  const move101 = useGame((s) => s.move101);
+  const moved101 = useGame((s) => s.moved101);
+  if (!folklore) return null;
+  const label = folklore.kind === "fork" ? "REPLACE IT (R)" : folklore.kind === "glass" ? "REFILL (W)" : folklore.kind === "coat" ? "HANG IT (H)" : folklore.kind === "return" ? "REFUSE WITH GRACE (D) / RE-FIRE (F)" : "LET THEM POST — do nothing";
+  return (
+    <div className="folklore-bar">
+      <span>FOLKLORE TEST — table {folklore.table}: {label}</span>
+      {folklore.kind !== "flash" && <button className="btn" onClick={() => answer(true)}>ANSWER</button>}
+      {!moved101 && <button className="btn ghost" onClick={move101}>MOVE 101 (T)</button>}
+    </div>
+  );
+}
+
 function Brigade() {
   const cooks = useGame((s) => s.cooks);
   return (
@@ -269,6 +296,8 @@ function ReviewCard() {
   const card =
     `MISE EN MOSH — night ${career.night} review\n` +
     `${"★".repeat(review.stars)}${"☆".repeat(5 - review.stars)}\n` +
+    (review.vowLine ? `${review.vowLine}\n` : "") +
+    (review.personaVerdict ? `${review.personaVerdict}\n` : "") +
     `"${review.quote}"\n` +
     `${review.covers} covers · ${review.misses} walks · ` +
     `${review.smashed} plates smashed · inspector ${review.spotted ? "CLOCKED" : "missed"}`;
@@ -291,6 +320,9 @@ function ReviewCard() {
         </div>
         <img className="press-clip" src={reviewClip} alt="Press clipping" />
         <div className="quote">“{review.quote}”</div>
+        {review.vowLine && <div className="board-line">{review.vowLine}</div>}
+        {review.personaVerdict && <div className="critic-line">{review.personaVerdict}</div>}
+        {review.folkloreLine && <div className="critic-line">{review.folkloreLine}</div>}
         <div className="critic-line">{review.criticVerdict}</div>
         <div className="rstats">
           <span>{review.covers} covers</span>
@@ -337,6 +369,8 @@ function Briefing() {
   const feudChoice = useGame((s) => s.feudChoice);
   const lots = useGame((s) => s.lots);
   const buyLot = useGame((s) => s.buyLot);
+  const chooseVow = useGame((s) => s.chooseVow);
+  const chooseSeating = useGame((s) => s.chooseSeating);
   const meal = useGame((s) => s.meal);
   const mealDone = (career.mealNight ?? -1) >= career.night;
   const feed = useGame((s) => s.feed);
@@ -539,6 +573,30 @@ function Briefing() {
               )}
             </div>
             <div className="bshop slim">
+              <div className="mhead">TONIGHT'S VOW — one a night, judged first on the card</div>
+              {career.vow ? (
+                <div className="ltaken">vowed: {career.vow.toUpperCase()}</div>
+              ) : (
+                <>
+                  <button className="btn shop" onClick={() => chooseVow("star")}>STAR VOW <span className="cost">no walks + clocked = +1★</span></button>
+                  <button className="btn shop" onClick={() => chooseVow("house")}>HOUSE VOW <span className="cost">101 turns twice</span></button>
+                  <button className="btn shop" onClick={() => chooseVow("brigade")}>BRIGADE VOW <span className="cost">zero walkouts, trauma −1</span></button>
+                </>
+              )}
+            </div>
+            <div className="bshop slim">
+              <div className="mhead">MAITRE-D' — who gets wobbly 101 (table 14)?</div>
+              {career.seating101 ? (
+                <div className="ltaken">101: {career.seating101.toUpperCase()} · window +patience for the rest</div>
+              ) : (
+                <>
+                  <button className="btn shop" onClick={() => chooseSeating("regulars")}>REGULARS TO 101 <span className="cost">they love it · +ego if honoured</span></button>
+                  <button className="btn shop" onClick={() => chooseSeating("press")}>PRESS TO WINDOW <span className="cost">fast, writes fast</span></button>
+                  <button className="btn shop" onClick={() => chooseSeating("walkin")}>WALK-INS TO 101 <span className="cost">impatient, big spend</span></button>
+                </>
+              )}
+            </div>
+            <div className="bshop slim">
               <div className="mhead">A MAN WITH A VAN</div>
               {(career.debt ?? 0) > 0 ? (
                 <button className="btn shop" disabled={career.cash < (career.debt ?? 0) + 30} onClick={repay}>
@@ -665,6 +723,12 @@ function useHotkeys() {
       if (k === "f") return s.firePlate();
       if (k === "e") return s.eightySix();
       if (k === "m") return s.whisk();
+      if (k === "t") return s.move101();
+      if (k === "r" && s.folklore?.kind === "fork") return s.answerFolklore(true);
+      if (k === "w" && s.folklore?.kind === "glass") return s.answerFolklore(true);
+      if (k === "h" && s.folklore?.kind === "coat") return s.answerFolklore(true);
+      if (k === "d" && s.folklore?.kind === "return") return s.answerFolklore(true);
+      if (k === "f" && s.folklore?.kind === "return") return s.answerFolklore(false);
       if (k === "h") return s.shooRunner();
       if (k === "d") return s.declineRequest();
       if (k === "c") return s.compTable();
@@ -886,6 +950,8 @@ export default function HUD() {
           <button className="btn comp" disabled={comped || career.cash < 20} onClick={() => compTable()}>
             COMP A TABLE <span className="kbd">C</span> <span className="cost">£20 · the room exhales</span>
           </button>
+          <VowRibbon />
+          <FolkloreBar />
           <Chorus />
           <Stamp />
           <Milestone />

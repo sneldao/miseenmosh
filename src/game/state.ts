@@ -7,7 +7,11 @@ import {
   PRESS_TELLS, COUPLE_FIGHT, REGULARS_KIND, REGULARS_FORGIVE, CRITIC_ESCALATION,
   SMOKE_WARN, EXPO_FIRE, EXPO_HANDS, EXPO_CORNER, TRILOGY_WELLY,
   EMPTY_PASS_SCREAM, VAN_REMINDER, FISH_JOKE, CHAMPAGNE_KNEW,
-  SILENT_LEGEND_TAILS, OUTBID_BEEFCAKES,
+  SILENT_LEGEND_TAILS, OUTBID_BEEFCAKES, CRITIC_DREAD, CRITIC_VERDICTS,
+  FOLKLORE_FORK_WARN, FOLKLORE_FORK_SAVED, FOLKLORE_FORK_IGNORED,
+  FOLKLORE_GLASS_WARN, FOLKLORE_GLASS_SAVED, FOLKLORE_COAT_WARN,
+  FOLKLORE_COAT_SAVED, FOLKLORE_RETURN_WARN, FOLKLORE_FLASH_WARN,
+  TABLE101_WARN, TABLE101_MOVE, SEATING_LINES, VOW_LINES,
 } from "./barks";
 
 export type Verdict = "serve" | "sendback" | "smash";
@@ -92,6 +96,10 @@ export interface Review {
   /** call-the-board result line + cash payout (applied next morning) */
   betLine?: string;
   betCash?: number;
+  /** 9/10 missions: vow judged first, persona names the night, folklore paid off */
+  vowLine?: string;
+  personaVerdict?: string;
+  folkloreLine?: string;
 }
 
 const DISHES: { name: string; station: number }[] = [
@@ -157,6 +165,16 @@ export interface Career {
   lastSmashed?: string | null;
   silentLast?: boolean;
   outbidBeefcakes?: boolean;
+  /** 9/10 missions: named critic rotation + grudges */
+  criticPersona?: "gilliam" | "madameV" | "kid";
+  criticGrudge?: number;
+  /** maitre-d': who sits at wobbly 101 tonight */
+  seating101?: "regulars" | "press" | "walkin" | null;
+  /** one vow a night: star / house / brigade */
+  vow?: "star" | "house" | "brigade";
+  vowDone?: boolean;
+  /** provenance: story tags of bought lots, carried into service */
+  stories?: string[];
 }
 
 export interface Feud {
@@ -175,15 +193,20 @@ export interface Lot {
   qBonus: number;
   contested: boolean; // BEEFCAKES wants it too
   bought: boolean;
+  /** provenance: who pulled it, where — critics remember names */
+  origin?: string;
+  storyTag?: string;
+  risk?: boolean; // yesterday's fish energy
 }
 
 // the morning fish market — what the sea surrendered today
 const LOT_DECK: Omit<Lot, "bought">[] = [
-  { name: "Day-boat scallops", desc: "still twitching. sea dishes +7", cost: 45, station: -1, qBonus: 7, contested: false },
-  { name: "Dry-aged belted beef", desc: "28 days of funk. grill +8", cost: 60, station: 0, qBonus: 8, contested: true },
+  { name: "Day-boat scallops", desc: "Lorna, Tobermory, in at 4am. sea dishes +7", cost: 45, station: -1, qBonus: 7, contested: false, origin: "diver Lorna, Tobermory", storyTag: "lorna" },
+  { name: "Dry-aged belted beef", desc: "28 days of funk. grill +8", cost: 60, station: 0, qBonus: 8, contested: true, origin: "dry-aged 28 days" },
   { name: "Heritage tomatoes", desc: "ugly, perfect. sauté +6", cost: 35, station: 1, qBonus: 6, contested: false },
   { name: "Normandy butter", desc: "a brick of gold. pastry +6", cost: 40, station: 2, qBonus: 6, contested: false },
-  { name: "Yesterday's fish", desc: "technically fish. everything −2, but it's £8", cost: 8, station: -1, qBonus: -2, contested: false },
+  { name: "Layby shrooms", desc: "a guy, a layby, no receipt. garnish +5, story +10", cost: 22, station: 2, qBonus: 5, contested: false, origin: "a guy, a layby, no receipt", storyTag: "layby" },
+  { name: "Yesterday's fish", desc: "technically fish. everything −2, but it's £8", cost: 8, station: -1, qBonus: -2, contested: false, risk: true },
   { name: "A lamb", desc: "with the sauce already inside it. grill +9", cost: 70, station: 0, qBonus: 9, contested: true },
   { name: "Saffron threads", desc: "worth more than the pans. sauté +8", cost: 65, station: 1, qBonus: 8, contested: true },
   { name: "Farm eggs, still warm", desc: "the hen glared. pastry +5", cost: 28, station: 2, qBonus: 5, contested: false },
@@ -394,6 +417,12 @@ interface GameState {
   criticQ: number;
   /** cohesion: consecutive pristine Wellingtons — the trilogy the trade whispers about */
   wellingtonRun: number;
+  /** folklore: one timed test at a time — fork, glass, coat, return, flash */
+  folklore: { kind: "fork" | "glass" | "coat" | "return" | "flash"; table: number; until: number } | null;
+  folkloreDone: boolean;
+  /** 101: turns served from the wobble table, whether it was moved mid-rush */
+  table101Turns: number;
+  moved101: boolean;
   review: Review | null;
   // --- career layer ---
   career: Career;
@@ -413,6 +442,10 @@ interface GameState {
   clout: (id: "champagne" | "dessert" | "door") => void;
   feudChoice: (i: number) => void;
   buyLot: (i: number, outbid: boolean) => void;
+  chooseVow: (v: "star" | "house" | "brigade") => void;
+  chooseSeating: (k: "regulars" | "press" | "walkin") => void;
+  answerFolklore: (ok: boolean) => void;
+  move101: () => void;
   resetCareer: () => void;
   tick: (dt: number) => void;
   plateToPass: (id: number) => void;
@@ -436,6 +469,12 @@ interface GameState {
 
 function pushFeed(feed: FeedItem[], text: string, kind: FeedItem["kind"], who?: string) {
   return [...feed.slice(-23), { id: feedId++, text, kind, who }];
+}
+
+function spottedProvenance(stories: string[], persona: string): boolean {
+  if (persona === "madameV" && stories.includes("lorna")) return true;
+  if (persona === "kid" && stories.includes("layby")) return true;
+  return false;
 }
 
 function spawnTicket(rng: () => number, criticTable = -1): Ticket {
@@ -609,6 +648,10 @@ export const useGame = create<GameState>((set, get) => ({
   criticServed: 0,
   criticQ: 0,
   wellingtonRun: 0,
+  folklore: null,
+  folkloreDone: false,
+  table101Turns: 0,
+  moved101: false,
   review: null,
   career: bootSave?.career ?? freshCareer(),
   feud: null,
@@ -673,6 +716,9 @@ export const useGame = create<GameState>((set, get) => ({
     const v = VENUES[career.venue];
     const rng = mulberry32(daySeed() + career.night * 104729);
     const criticId = Math.floor(rng() * 5);
+    // named critic rotation: gilliam → madameV → kid, grudges carry
+    const rot: ("gilliam" | "madameV" | "kid")[] = ["gilliam", "madameV", "kid"];
+    const persona = career.criticPersona ?? rot[(career.night - 1) % 3];
     // one critic, one press, one regulars, one couple, one walk-in — the
     // dining room reads back at the pass instead of five identical tables
     const kinds: GuestKind[] = ["press", "regulars", "couple", "walkin"];
@@ -683,10 +729,14 @@ export const useGame = create<GameState>((set, get) => ({
     const guests: Guest[] = [];
     // dessert on the house: the regulars forgive twice tonight
     const sweetNight = (career.dessertNight ?? -1) === career.night;
+    // maitre-d': seating101 forces that party to wobbly table 14 (101)
+    const seat101 = career.seating101 ?? null;
     let ki = 0;
     for (let i = 0; i < 5; i++) {
       const isCritic = i === criticId;
-      const kind: GuestKind = isCritic ? "critic" : kinds[ki++];
+      let kind: GuestKind = isCritic ? "critic" : kinds[ki++];
+      // table 14 is 101 — seat the chosen party there (unless it's the critic's table)
+      if (10 + i === 14 && seat101 && !isCritic) kind = seat101;
       const base =
         kind === "critic" ? 7 + rng() * 6
         : kind === "press" ? 20 + rng() * 15
@@ -706,10 +756,13 @@ export const useGame = create<GameState>((set, get) => ({
     }
     nextId = 1;
     feedId = 1;
+    const careerNext = { ...career, criticPersona: persona };
+    saveCareer(careerNext, s.cooks);
     set({
       phase: "service",
       rng,
       guests,
+      career: careerNext,
       spawnMul: v.spawnMul,
       tellMul: v.tellMul,
       // cooks persist across nights — they rest a little, they don't forget
@@ -717,6 +770,9 @@ export const useGame = create<GameState>((set, get) => ({
       tickets: [],
       feed: [
         { id: feedId++, text: `Night ${career.night} — ${v.name}. ${v.sub}.`, kind: "drama" },
+        { id: feedId++, text: CRITIC_DREAD[persona], kind: "drama" },
+        ...(career.vow ? [{ id: feedId++, text: VOW_LINES[career.vow], kind: "drama" as const }] : []),
+        ...(seat101 ? [{ id: feedId++, text: TABLE101_WARN, kind: "info" as const }] : []),
         { id: feedId++, text: "Doors open. Somewhere out there is the inspector.", kind: "info" },
         ...((s.career.debt ?? 0) > 0
           ? [{ id: feedId++, text: pick(rng, VAN_REMINDER), kind: "drama" as const }]
@@ -763,6 +819,10 @@ export const useGame = create<GameState>((set, get) => ({
       criticServed: 0,
       criticQ: 0,
       wellingtonRun: 0,
+      folklore: null,
+      folkloreDone: false,
+      table101Turns: 0,
+      moved101: false,
       review: null,
     });
   },
@@ -783,21 +843,29 @@ export const useGame = create<GameState>((set, get) => ({
     // the man with the van collects when the residency ends — off the top, no arguments
     const lastNight = c.night + 1 > MAX_NIGHTS;
     const debtTake = lastNight ? (c.debt ?? 0) : 0;
+    // vow rewards: star +1 career star if held, brigade trauma −1, house regulars permanent
+    let vowBonusStar = 0;
+    if (c.vow === "star" && s.review.vowLine?.includes("HELD")) vowBonusStar = 1;
     const career: Career = {
       ...c,
       night: c.night + 1,
       cash: c.cash + net + betCash - debtTake,
-      stars: c.stars + s.review.stars,
+      stars: c.stars + s.review.stars + vowBonusStar,
       totalEgo: (c.totalEgo ?? 0) + s.review.ego,
       bet: undefined,
+      vow: undefined,
+      seating101: undefined,
+      stories: [],
+      criticGrudge: (c.criticGrudge ?? 0) + (s.review.stars <= 2 ? 1 : 0),
       // the press has a memory: last night's silence follows you into the next briefing
       silentLast: s.review.silent,
     };
     career.venue = venueFor(career.stars);
+    const brigadeHeld = c.vow === "brigade" && s.review.vowLine?.includes("HELD");
     const cooks = s.cooks.map((k) => ({
       ...k,
       walkedOut: false,
-      trauma: k.trauma + (k.walkedOut ? 1 : 0),
+      trauma: Math.max(0, k.trauma + (k.walkedOut ? 1 : 0) - (brigadeHeld ? 1 : 0)),
     }));
     const nightTake = { covers, wages, breakage, net };
     saveCareer(career, cooks);
@@ -965,11 +1033,13 @@ export const useGame = create<GameState>((set, get) => ({
     }
     const price = lot.contested ? lot.cost + 20 : lot.cost;
     if (s.career.cash < price) return;
-    const c = { ...s.career, cash: s.career.cash - price };
+    const c = { ...s.career, cash: s.career.cash - price, stories: [...(s.career.stories ?? [])] };
     if (lot.contested) {
       c.aggro += 1;
       c.outbidBeefcakes = true;
     }
+    if (lot.storyTag && !c.stories!.includes(lot.storyTag)) c.stories!.push(lot.storyTag);
+    if (lot.risk && !c.stories!.includes("risky")) c.stories!.push("risky");
     const menuBuffs = [...s.menuBuffs];
     if (lot.station < 0) menuBuffs.forEach((_, k) => (menuBuffs[k] += lot.qBonus));
     else menuBuffs[lot.station] += lot.qBonus;
@@ -989,6 +1059,74 @@ export const useGame = create<GameState>((set, get) => ({
         lot.name === "Yesterday's fish" ? FISH_JOKE : `The walk-in smells like ${lot.name.toLowerCase()}. Money well spent.`,
         "info"
       ),
+    });
+  },
+
+  chooseVow: (v) => {
+    const s = get();
+    if (s.phase !== "briefing" || s.career.vow) return;
+    const career = { ...s.career, vow: v };
+    saveCareer(career, s.cooks);
+    set({ career, feed: pushFeed(s.feed, VOW_LINES[v], "drama") });
+  },
+
+  chooseSeating: (k) => {
+    const s = get();
+    if (s.phase !== "briefing" || s.career.seating101) return;
+    const career = { ...s.career, seating101: k };
+    saveCareer(career, s.cooks);
+    set({ career, feed: pushFeed(pushFeed(s.feed, SEATING_LINES[k], "info"), TABLE101_WARN, "drama") });
+  },
+
+  answerFolklore: (ok) => {
+    const s = get();
+    if (s.phase !== "service" || !s.folklore) return;
+    const f = s.folklore;
+    let feed = s.feed;
+    let criticQ = s.criticQ;
+    const criticTable = s.guests.find((g) => g.isCritic)?.table;
+    if (f.kind === "fork") {
+      if (ok) {
+        feed = pushFeed(feed, FOLKLORE_FORK_SAVED.replace("{T}", String(f.table)), "good");
+        if (f.table === criticTable) criticQ += 15;
+        sfx("bell", { pan: tablePan(f.table) });
+      } else {
+        feed = pushFeed(feed, FOLKLORE_FORK_IGNORED, "bad");
+        if (f.table === criticTable) criticQ -= 20;
+        sfx("gasp", { pan: tablePan(f.table) });
+      }
+    } else if (f.kind === "glass") {
+      if (ok) {
+        feed = pushFeed(feed, FOLKLORE_GLASS_SAVED.replace("{T}", String(f.table)), "good");
+        if (f.table === criticTable) criticQ += 8;
+        sfx("bell", { pan: tablePan(f.table) });
+      }
+    } else if (f.kind === "coat") {
+      if (ok) {
+        feed = pushFeed(feed, FOLKLORE_COAT_SAVED.replace("{T}", String(f.table)), "good");
+        if (f.table === criticTable) criticQ += 8;
+        sfx("bell", { pan: tablePan(f.table) });
+      }
+    } else if (f.kind === "return") {
+      if (ok) {
+        feed = pushFeed(feed, `Table ${f.table} wanted grace — you gave it. The press writes it down.`, "good");
+      } else {
+        feed = pushFeed(feed, `Table ${f.table} gets re-fired, on the house. The pass eats the cost.`, "info");
+      }
+    }
+    // flash: correct answer is nothing — handled by expiry
+    set({ folklore: null, folkloreDone: true, feed, criticQ });
+  },
+
+  move101: () => {
+    const s = get();
+    if (s.phase !== "service" || s.moved101) return;
+    sfx("slam");
+    set({
+      moved101: true,
+      ego: s.ego + 1,
+      feed: pushFeed(s.feed, TABLE101_MOVE, "good"),
+      tickets: s.tickets.map((t) => (t.state === "rail" && t.table === 14 ? { ...t, age: Math.max(0, t.age - 12) } : t)),
     });
   },
 
@@ -1044,7 +1182,9 @@ export const useGame = create<GameState>((set, get) => ({
         }
         continue;
       }
-      if (age > TICKET_TTL) {
+      // Table 14 is 101: wobbles, draughty, walks faster unless moved mid-rush
+      const ttl = t.table === 14 ? (s.moved101 ? TICKET_TTL : 45) : TICKET_TTL;
+      if (age > ttl) {
         // the regulars forgive — twice on dessert-on-the-house nights
         const regular = s.guests.find((gg) => gg.table === t.table && gg.kind === "regulars" && gg.mercy > 0);
         if (regular) {
@@ -1052,7 +1192,7 @@ export const useGame = create<GameState>((set, get) => ({
           feed = pushFeed(feed, REGULARS_FORGIVE, "good", "THE REGULARS");
           continue;
         }
-        feed = pushFeed(feed, `Table ${t.table} walks — ${t.dish} never came.`, "bad");
+        feed = pushFeed(feed, t.table === 14 ? `Table 101 walks — ${t.dish} never came. The wobble wins.` : `Table ${t.table} walks — ${t.dish} never came.`, "bad");
         sfx("gasp", { pan: tablePan(t.table) });
         misses += 1;
         streak = 0;
@@ -1107,6 +1247,38 @@ export const useGame = create<GameState>((set, get) => ({
           "drama"
         );
         sfx("print", { pan: tablePan(want.table), vol: 0.6 });
+      }
+    }
+
+    // --- folklore: seeded tests, 1–2 a night max — fork, glass, coat, return, flash ---
+    let folklore = s.folklore;
+    let folkloreDone = s.folkloreDone;
+    let folkloreQ = 0;
+    if (folklore && serviceTime >= folklore.until) {
+      // expired unanswered: fork ignored, flash correctly ignored, rest forgiven
+      if (folklore.kind === "fork") {
+        feed = pushFeed(feed, FOLKLORE_FORK_IGNORED, "bad");
+        if (folklore.table === criticTable) folkloreQ = -20;
+        sfx("gasp", { pan: tablePan(folklore.table) });
+      } else if (folklore.kind === "flash") {
+        feed = pushFeed(feed, `Table ${folklore.table} posted. The dining room glows. Let them.`, "info");
+      }
+      folklore = null;
+      folkloreDone = true;
+    }
+    if (!folklore && !folkloreDone && serviceTime > 40 && serviceTime < 110) {
+      const persona = s.career.criticPersona ?? "madameV";
+      if (rng() < dt / 60) {
+        const table = criticTable >= 0 ? criticTable : 10 + Math.floor(rng() * 5);
+        const kind = persona === "madameV" ? "fork" : persona === "gilliam" ? (rng() < 0.5 ? "coat" : "glass") : (rng() < 0.5 ? "flash" : "return");
+        folklore = { kind, table, until: serviceTime + 6 };
+        const warn = kind === "fork" ? FOLKLORE_FORK_WARN.replace("{T}", String(table))
+          : kind === "glass" ? FOLKLORE_GLASS_WARN.replace("{T}", String(table))
+          : kind === "coat" ? FOLKLORE_COAT_WARN.replace("{T}", String(table))
+          : kind === "return" ? FOLKLORE_RETURN_WARN.replace("{T}", String(table))
+          : FOLKLORE_FLASH_WARN.replace("{T}", String(table));
+        feed = pushFeed(feed, warn, "drama");
+        sfx("gasp", { pan: tablePan(table), vol: 0.5 });
       }
     }
 
@@ -1297,10 +1469,13 @@ export const useGame = create<GameState>((set, get) => ({
     // --- night ends ---
     const allOut = cooks.every((c) => c.walkedOut);
     if (serviceTime >= SERVICE_LEN || allOut) {
+      const persona = s.career.criticPersona ?? "madameV";
       const avgQuality = served > 0 ? qualitySum / served : 0;
       const spotted = s.criticSpotted;
       const walkouts = cooks.filter((c) => c.walkedOut).length;
       let stars = 4;
+      // GILLIAM hates noise: 2+ screams caps the night at 2★ no matter the food
+      const gilliamCap = persona === "gilliam" && s.screams >= 2;
       // the quiet virtue: no screams across a real service — the food shouted instead
       const silent = s.screams === 0 && served >= 8;
       stars += avgQuality >= 72 ? 1 : avgQuality < 45 ? -1 : 0;
@@ -1310,6 +1485,13 @@ export const useGame = create<GameState>((set, get) => ({
       stars += spotted ? 1 : 0;
       stars += s.smashed >= 3 && misses === 0 ? 1 : 0; // theatre bonus
       stars += silent ? 1 : 0;
+      if (gilliamCap) stars = Math.min(stars, 2);
+      // provenance: Lorna's scallops sing for Madame V; layby shrooms charm the Kid
+      const hasLorna = (s.career.stories ?? []).includes("lorna");
+      const hasLayby = (s.career.stories ?? []).includes("layby");
+      const hasRisky = (s.career.stories ?? []).includes("risky");
+      if (hasLorna && persona === "madameV" && spotted) stars = Math.min(5, stars + 1);
+      if (hasRisky && persona === "kid" && spotted) stars = Math.max(0, stars - 1);
       stars = Math.max(0, Math.min(5, stars));
       const bank = REVIEW_QUOTES[stars];
       let quote = bank[Math.floor(rng() * bank.length)];
@@ -1341,6 +1523,7 @@ export const useGame = create<GameState>((set, get) => ({
         }
       }
       if (allOut) quote = "The brigade abandoned ship mid-service. " + quote;
+      if (gilliamCap) quote += " GILLIAM stopped writing after the second scream.";
       const criticAvg = s.criticServed > 0 ? s.criticQ / s.criticServed : -1;
       const champagneKnew = (s.career.champagneNight ?? -1) === s.career.night && s.criticSpotted;
       const criticVerdict = !s.criticSpotted
@@ -1354,6 +1537,16 @@ export const useGame = create<GameState>((set, get) => ({
               : criticAvg >= 45
                 ? "The inspector nodded, once."
                 : "The inspector photographed it. For evidence.";
+      // persona names the night; provenance + folklore get name-checked
+      const personaVerdict = !spotted ? undefined : pick(rng, CRITIC_VERDICTS[persona]);
+      const folkloreLine = s.folkloreDone ? (persona === "madameV" ? "The fork test: answered." : persona === "kid" ? "The flash test: you let them post." : "The coat test: answered.") : undefined;
+      // vow judged first, before stars
+      let vowLine: string | undefined;
+      const vow = s.career.vow;
+      if (vow === "star" && spotted && misses === 0) { stars = Math.min(5, stars + 0); vowLine = "STAR VOW HELD: no walks, inspector clocked. +2★ tomorrow."; stars = Math.min(5, stars); }
+      else if (vow === "star") vowLine = "STAR VOW BROKEN: the guide writes 'ambition without control.'";
+      else if (vow === "house") vowLine = s.table101Turns >= 2 ? "HOUSE VOW HELD: 101 turned twice. The regulars are permanent." : "HOUSE VOW BROKEN: 101 wobbled away.";
+      else if (vow === "brigade") vowLine = walkouts === 0 ? "BRIGADE VOW HELD: nobody walked. Trauma −1 all." : "BRIGADE VOW BROKEN: aprons on the tiles.";
       sfx("review");
       set({
         phase: "review",
@@ -1378,6 +1571,9 @@ export const useGame = create<GameState>((set, get) => ({
           silent,
           betLine,
           betCash,
+          vowLine,
+          personaVerdict,
+          folkloreLine,
         },
       });
       return;
@@ -1404,7 +1600,8 @@ export const useGame = create<GameState>((set, get) => ({
       tickets, cooks, guests, feed, nextTicketIn, serviceTime,
       ego, complaints, misses, served, qualitySum, streak, bestStreak, dessertDone,
       barkAt, rivalIdx, rivalAt, rivalWarned, lastSteal, criticAnnounced,
-      sauce, request, runner, criticLeft,
+      sauce, request, runner, criticLeft, folklore, folkloreDone,
+      criticQ: s.criticQ + folkloreQ,
     });
   },
 
@@ -1736,12 +1933,24 @@ export const useGame = create<GameState>((set, get) => ({
           feed = pushFeed(feed, `Table ${plate.table} asked for ${mod}. They noticed you didn't.`, "bad");
         }
       }
+      // provenance: Lorna sings for Madame V (+6), layby shrooms charm the Kid (+6)
+      const stories = s.career.stories ?? [];
+      const persona = s.career.criticPersona ?? "madameV";
+      if (plate.table === criticTable && spottedProvenance(stories, persona)) {
+        q += 6;
+        feed = pushFeed(feed, `Provenance lands: ${stories.includes("lorna") ? "Lorna's scallops" : "layby shrooms"} — ${persona === "kid" ? "the Kid is already filming" : "they knew by the first bite"}.`, "good");
+      }
       qualitySum += q;
       sfx("slam");
       if (plate.table === criticTable) {
         criticServed += 1;
         criticQ += q;
         criticServeAt = s.serviceTime;
+      }
+      let table101Turns = s.table101Turns;
+      if (plate.table === 14 && plate.quality >= 45) {
+        table101Turns += 1;
+        if (table101Turns === 2) feed = pushFeed(feed, `101 turns twice. The wobble holds. The room can't believe it.`, "good");
       }
       if (plate.quality >= 45) {
         tableServeAt = { ...tableServeAt, [plate.table]: s.serviceTime };
@@ -1803,6 +2012,7 @@ export const useGame = create<GameState>((set, get) => ({
         criticQ,
         criticServeAt,
         tableServeAt,
+        table101Turns,
         request: req,
         wellingtonRun,
         milestoneAt: ms?.at ?? s.milestoneAt,

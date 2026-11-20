@@ -186,3 +186,54 @@ export const OUTBID_BEEFCAKES = [
   "BEEFCAKES is still thinking about the market. His protein bowls taste of loss.",
   "BEEFCAKES tells the press your outbid was 'a fluke with a wallet'.",
 ];
+
+// --- 9/10 missions: named critics, provenance, 101, vows, folklore ---
+export const CRITIC_DREAD: Record<string, string> = {
+  gilliam: "GILLIAM is in town. Ex-sous, hates noise. Notebook early, never photos. Two screams and he's gone.",
+  madameV: "MADAME V is in town. Booked as 'M. Vane', table for one. She will drop a fork.",
+  kid: "THE KID is in town. 2M followers, films everything, orders the trap dish. Don't 86 anything. Let him post.",
+};
+
+export const CRITIC_VERDICTS: Record<string, string[]> = {
+  gilliam: [
+    "GILLIAM: 'Discipline on the pass. The brigade held. I noticed the quiet.'",
+    "GILLIAM: 'No theatrics. Just cooking. Rare, these days.'",
+  ],
+  madameV: [
+    "MADAME V: 'The fork was back before it stopped ringing. Lorna's scallops sang.'",
+    "MADAME V: 'Coursing like a metronome. The window table glowed. 101 survived. Impressive.'",
+  ],
+  kid: [
+    "THE KID: 'POSTED. That edge-char close-up did 400k before dessert. No cap.'",
+    "THE KID: 'Chat says the smoky kiss is elite. 101 is literally me though.'",
+  ],
+};
+
+export const FOLKLORE_FORK_WARN = "Something small hits the floor by Table {T}. A fork. Nobody moves. (R to replace)";
+export const FOLKLORE_FORK_SAVED = "The fork was back before it stopped ringing. {T} noticed. They always notice.";
+export const FOLKLORE_FORK_IGNORED = "They waited. Nobody came. The notebook opens.";
+export const FOLKLORE_GLASS_WARN = "Table {T}'s water glass is empty. They haven't asked. They're timing you. (W to refill)";
+export const FOLKLORE_GLASS_SAVED = "Water appears like it never left. Table {T} almost smiles.";
+export const FOLKLORE_COAT_WARN = "Table {T}'s coat slides to the floor. Nobody's hung it. (H to hang it)";
+export const FOLKLORE_COAT_SAVED = "Coat hung, collar smoothed. Table {T} sits taller.";
+export const FOLKLORE_RETURN_WARN = "Table {T} sends it back: 'too cold'. It's a test. (D to refuse with grace, F to re-fire)";
+export const FOLKLORE_FLASH_WARN = "Table {T} lifts a phone. Flash on. Don't react. Let them post.";
+
+export const TABLE101_WARN = "101's wobbling again. Don't put anyone you love there.";
+export const TABLE101_MOVE = "You move 101 mid-rush. Chairs scrape, runners sprint. Worth it.";
+export const SEATING_LINES: Record<string, string> = {
+  regulars: "The regulars get 101 for old times' sake. Twenty years they've sat there.",
+  press: "The press get the window. They order fast and write faster.",
+  walkin: "Walk-ins at 101. Impatient, big spenders, already photographing the wobble.",
+};
+
+export const VOW_LINES: Record<string, string> = {
+  star: "STAR VOW: no walks, clock the inspector. +2★ tomorrow if you hold it.",
+  house: "HOUSE VOW: 101 turns twice, nobody walks from it. The regulars become permanent.",
+  brigade: "BRIGADE VOW: zero walkouts. The family meal means it. Trauma −1 all if you hold.",
+};
+
+export const PROVENANCE_BONUS = [
+  "{O} — and {P} knew it by the first bite.",
+  "Lorna's scallops sang. The window table heard it.",
+];

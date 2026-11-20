@@ -136,6 +136,13 @@ function Guest({
         <meshStandardMaterial color="#ffd9a0" emissive="#ffb04a" emissiveIntensity={3} />
       </mesh>
       <pointLight position={[0.2, 0.99, 0.62]} color="#ff9a4a" intensity={6} distance={3} />
+      {/* 101 wobbles: table 14 sits a degree off — the trade knows */}
+      {g?.table === 14 && (
+        <mesh position={[0, 0.44, 0.62]} rotation={[0, 0, 0.06]}>
+          <boxGeometry args={[0.1, 0.02, 0.1]} />
+          <meshStandardMaterial color="#7a2a1a" roughness={0.9} />
+        </mesh>
+      )}
       {/* plate + glass, read as table setting at a glance */}
       <mesh position={[-0.14, 0.828, 0.66]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.1, 16]} />

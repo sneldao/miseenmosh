@@ -40,7 +40,13 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    remembers a silent night, BEEFCAKES remembers the market, the van
    watches from across the street when you owe him. Hidden: the
    Wellington trilogy, screaming at an empty pass, champagne that
-   arrives before the inspector asks.
+   arrives before the inspector asks. Missions 9/10: named critics
+   (GILLIAM hates noise, MADAME V drops forks, THE KID films everything),
+   provenance lots (Lorna's scallops, layby shrooms, yesterday's risk-fish),
+   Table 101 (table 14 wobbles, walks faster, morning seating choice, T to
+   move mid-rush), one vow a night (STAR/HOUSE/BRIGADE, judged first on
+   the card), folklore tests (fork R / glass W / coat H / return D-F /
+   flash-ignore).
 3. **CRITIC DETECTION (the deduction layer)** — one guest tonight is a
    mystery inspector. Watch the dining room between tickets: tells across
    three channels — visual (photographing dishes, notebook, measuring a
