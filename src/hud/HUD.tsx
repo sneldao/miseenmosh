@@ -350,6 +350,7 @@ function ReviewCard() {
     (review.vowLine ? `${review.vowLine}\n` : "") +
     (review.personaVerdict ? `${review.personaVerdict}\n` : "") +
     (review.epilogue ? `${review.epilogue}\n` : "") +
+    (review.headline ? `${review.headline}\n` : "") +
     (review.cover ? `${review.cover}\n` : "") +
     `"${review.quote}"\n` +
     `${review.covers} covers · ${review.misses} walks · ` +
@@ -376,6 +377,7 @@ function ReviewCard() {
         {review.vowLine && <div className="board-line">{review.vowLine}</div>}
         {review.personaVerdict && <div className="critic-line">{review.personaVerdict}</div>}          {review.folkloreLine && <div className="critic-line">{review.folkloreLine}</div>}
           {review.epilogue && <div className="critic-line epi">{review.epilogue}</div>}
+          {review.headline && <div className="cover-head">{review.headline}</div>}
           {review.cover && <div className="cover-line">{review.cover}</div>}
         <div className="critic-line">{review.criticVerdict}</div>
         <div className="rstats">
@@ -608,7 +610,7 @@ function Briefing() {
             {lots.map((l, i) => (
               <div key={i} className={`lot ${l.bought ? "gone" : ""}`}>
                 <span className="lname">{l.name}</span>
-                <span className="ldesc">{l.desc}</span>
+                <span className="ldesc">{l.desc}{l.note && <em className="lnote">{l.note} — {l.voice}</em>}</span>
                 {l.bought ? (
                   <span className="ltaken">in the walk-in</span>
                 ) : l.contested ? (

@@ -69,6 +69,32 @@ export function pick(rng: () => number, arr: string[]): string {
   return arr[Math.floor(rng() * arr.length)];
 }
 
+// --- market voices: one true clause per lot, gossip not lessons ---
+// THE FISHMONGER (sea), THE BUTCHER (meat), THE FARM (everything that grew).
+export const LOT_VOICES = ["THE FISHMONGER", "THE BUTCHER", "THE FARM"] as const;
+
+// --- family meal craft: the technique inside the joke, one line a night ---
+export const FAMILY_CRAFT = [
+  "Old fish gets heat, not trust — cooked through, flaked over yesterday's rice.",
+  "Finished off-heat with pasta water. The emulsion broke twice; DIMITRI won't say why.",
+  "Salt at the end — the pastry was seasoned already.",
+  "The blackened bits go in the beans. Bitterness needs somewhere to live.",
+  "One pan, ninety seconds, still trembling. Cut unfairly on purpose.",
+  "Eaten cold on purpose — the butter re-firms and you taste what service stole.",
+];
+
+// --- press headlines: 4–5★ names the magazine, the headline names the night ---
+export const HEADLINE_5 = [
+  "THE SEAR HEARD ROUND THE STREET",
+  "SILENT PASS, DEAFENING PLATES",
+  "FIVE STARS, ZERO SURVIVORS",
+];
+export const HEADLINE_4 = [
+  "WORTH THE SHOUTING",
+  "CHAOS, BUT THE KIND YOU PAY FOR",
+  "LOUD KITCHEN, QUIET GENIUS",
+];
+
 // --- family meal: one shared dish, eaten standing up, before doors ---
 // {M} = the meal, {N} = a cook's name.
 export const MEALS = [

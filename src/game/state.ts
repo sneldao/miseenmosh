@@ -5,7 +5,7 @@ import { speakChorus, speakReview } from "./voice";
 import { initOg, submitBoard, unlockAch, trackEvent } from "./og";
 import {
   CHEF_BARKS, STATION_BARKS, BRIGADE_RESPONSES, GUEST_HECKLES, RIVAL_LINES, pick,
-  MEALS, FAMILY_LINES, GRUDGE_BARKS, BEEFCAKES_WARN, BEEFCAKES_STEAL_LINES,
+  MEALS, FAMILY_LINES, FAMILY_CRAFT, HEADLINE_5, HEADLINE_4, GRUDGE_BARKS, BEEFCAKES_WARN, BEEFCAKES_STEAL_LINES,
   PRESS_TELLS, COUPLE_FIGHT, REGULARS_KIND, REGULARS_FORGIVE, CRITIC_ESCALATION,
   SMOKE_WARN, EXPO_FIRE, EXPO_HANDS, EXPO_CORNER, TRILOGY_WELLY,
   EMPTY_PASS_SCREAM, VAN_REMINDER, FISH_JOKE, CHAMPAGNE_KNEW,
@@ -110,6 +110,8 @@ export interface Review {
   epilogue?: string;
   /** 4–5★: the magazine cover line */
   cover?: string;
+  /** 4–5★: the press headline — names the night, not the numbers */
+  headline?: string;
 }
 
 const DISHES: { name: string; station: number }[] = [
@@ -223,6 +225,9 @@ export interface Feud {
 export interface Lot {
   name: string;
   desc: string;
+  /** one true clause from its voice — gossip, not lessons */
+  note?: string;
+  voice?: string;
   cost: number;
   station: number; // -1 = whole kitchen
   qBonus: number;
@@ -236,15 +241,15 @@ export interface Lot {
 
 // the morning fish market — what the sea surrendered today
 const LOT_DECK: Omit<Lot, "bought">[] = [
-  { name: "Day-boat scallops", desc: "Lorna, Tobermory, in at 4am. sea dishes +7", cost: 45, station: -1, qBonus: 7, contested: false, origin: "diver Lorna, Tobermory", storyTag: "lorna" },
-  { name: "Dry-aged belted beef", desc: "28 days of funk. grill +8", cost: 60, station: 0, qBonus: 8, contested: true, origin: "dry-aged 28 days" },
-  { name: "Heritage tomatoes", desc: "ugly, perfect. sauté +6", cost: 35, station: 1, qBonus: 6, contested: false },
-  { name: "Normandy butter", desc: "a brick of gold. pastry +6", cost: 40, station: 2, qBonus: 6, contested: false },
-  { name: "Layby shrooms", desc: "a guy, a layby, no receipt. garnish +5, story +10", cost: 22, station: 2, qBonus: 5, contested: false, origin: "a guy, a layby, no receipt", storyTag: "layby" },
-  { name: "Yesterday's fish", desc: "technically fish. everything −2, but it's £8", cost: 8, station: -1, qBonus: -2, contested: false, risk: true },
-  { name: "A lamb", desc: "with the sauce already inside it. grill +9", cost: 70, station: 0, qBonus: 9, contested: true },
-  { name: "Saffron threads", desc: "worth more than the pans. sauté +8", cost: 65, station: 1, qBonus: 8, contested: true },
-  { name: "Farm eggs, still warm", desc: "the hen glared. pastry +5", cost: 28, station: 2, qBonus: 5, contested: false },
+  { name: "Day-boat scallops", desc: "Lorna, Tobermory, in at 4am. sea dishes +7", note: "Diver-caught, abductors intact — dry flesh sears instead of weeping.", voice: "THE FISHMONGER", cost: 45, station: -1, qBonus: 7, contested: false, origin: "diver Lorna, Tobermory", storyTag: "lorna" },
+  { name: "Dry-aged belted beef", desc: "28 days of funk. grill +8", note: "Hung 28 days — the enzymes did the tenderizing, you just don't ruin it.", voice: "THE BUTCHER", cost: 60, station: 0, qBonus: 8, contested: true, origin: "dry-aged 28 days" },
+  { name: "Heritage tomatoes", desc: "ugly, perfect. sauté +6", note: "Never refrigerated — cold kills the aromatics dead.", voice: "THE FARM", cost: 35, station: 1, qBonus: 6, contested: false },
+  { name: "Normandy butter", desc: "a brick of gold. pastry +6", note: "82% fat, cultured — it laminates instead of tearing.", voice: "THE FARM", cost: 40, station: 2, qBonus: 6, contested: false },
+  { name: "Layby shrooms", desc: "a guy, a layby, no receipt. garnish +5, story +10", note: "Brush, never wash — they drink water like a sponge and fry like one.", voice: "THE FARM", cost: 22, station: 2, qBonus: 5, contested: false, origin: "a guy, a layby, no receipt", storyTag: "layby" },
+  { name: "Yesterday's fish", desc: "technically fish. everything −2, but it's £8", note: "On ice since Tuesday. It gets cooked through or it gets binned.", voice: "THE FISHMONGER", cost: 8, station: -1, qBonus: -2, contested: false, risk: true },
+  { name: "A lamb", desc: "with the sauce already inside it. grill +9", note: "Rest it half its cook or the juices run across the board.", voice: "THE BUTCHER", cost: 70, station: 0, qBonus: 9, contested: true },
+  { name: "Saffron threads", desc: "worth more than the pans. sauté +8", note: "Bloom it in warm stock first — dry threads in the pan are confetti.", voice: "THE FARM", cost: 65, station: 1, qBonus: 8, contested: true },
+  { name: "Farm eggs, still warm", desc: "the hen glared. pastry +5", note: "Room-temp whites whip; cold ones sulk.", voice: "THE FARM", cost: 28, station: 2, qBonus: 5, contested: false },
 ];
 
 const FEUD_DECK: { actor: Feud["actor"]; text: (cook: string) => string; options: string[] }[] = [
@@ -1098,13 +1103,20 @@ export const useGame = create<GameState>((set, get) => ({
       line = `Family meal — ${dish}. Eaten standing up, in silence. Yesterday stays yesterday.`;
     }
     const witness = cooks[Math.floor(rng() * cooks.length)];
+    // the technique inside the joke: one true clause, in a cook's voice
+    const craft = FAMILY_CRAFT[(s.career.night - 1) % FAMILY_CRAFT.length];
     sfx("applause", { vol: 0.5 });
     set({
       career: { ...s.career, mealNight: s.career.night },
       cooks,
       feed: pushFeed(
-        pushFeed(s.feed, line, "good", "THE TABLE"),
-        pick(rng, FAMILY_LINES).replace("{N}", witness?.name ?? "The commis"),
+        pushFeed(
+          pushFeed(s.feed, line, "good", "THE TABLE"),
+          pick(rng, FAMILY_LINES).replace("{N}", witness?.name ?? "The commis"),
+          "info",
+          witness?.name
+        ),
+        craft,
         "info",
         witness?.name
       ),
@@ -1863,7 +1875,7 @@ export const useGame = create<GameState>((set, get) => ({
       if (gilliamCap) quote += " GILLIAM stopped writing after the second scream.";
       const criticAvg = s.criticServed > 0 ? s.criticQ / s.criticServed : -1;
       const champagneKnew = (s.career.champagneNight ?? -1) === s.career.night && s.criticSpotted;
-      const criticVerdict = !s.criticSpotted
+      let criticVerdict = !s.criticSpotted
         ? "The inspector left unidentified."
         : champagneKnew && criticAvg >= 45
           ? CHAMPAGNE_KNEW
@@ -1882,6 +1894,11 @@ export const useGame = create<GameState>((set, get) => ({
       // covers: 4–5★ names the magazine — fame, filed as texture
       const coverRaw = stars >= 5 ? pick(rng, COVERS_5) : stars === 4 ? pick(rng, COVERS_4) : undefined;
       const cover = coverRaw?.replace("{N}", s.cooks[Math.floor(rng() * s.cooks.length)].name);
+      // provenance pays off in words: the critic tastes what you bought, and says so
+      if (spotted && hasLorna && persona === "madameV") criticVerdict += " The scallops had the deep sear only dry flesh takes.";
+      if (spotted && hasLayby && persona === "kid") criticVerdict += " The mushrooms tasted like somewhere you're not supposed to park.";
+      // the press headline: names the night, shares like a clipping
+      const headline = stars >= 5 ? pick(rng, HEADLINE_5) : stars === 4 ? pick(rng, HEADLINE_4) : undefined;
       const folkloreLine = s.folkloreDone ? (persona === "madameV" ? "The fork test: answered." : persona === "kid" ? "The flash test: you let them post." : "The coat test: answered.") : undefined;
       // vow judged first, before stars
       let vowLine: string | undefined;
@@ -1920,6 +1937,7 @@ export const useGame = create<GameState>((set, get) => ({
           folkloreLine,
           epilogue,
           cover,
+          headline,
         },
       });
       // platform: nightly boards, achievements, events — fire and forget

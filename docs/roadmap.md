@@ -75,6 +75,7 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       localStorage save/resume, three endings
 - [x] Morning fish-market bidding (3 seeded lots, contested outbid vs Beefcakes, per-station quality buffs)
 - [x] Run mutators (20 Nov): one HOUSE RULE per residency, chosen N1 — DOUBLE SHIFT (doubled runners) / NO BIN (86 off) / SHORT FUSE (20% faster walks)
+- [x] Provenance texture (20 Nov): one true clause per market lot in three voices (fishmonger/butcher/farm), craft line in the family meal, sensory payoff in the verdict, press headline on 4–5★ cards — gossip, never lessons
 - [ ] Menu setting / station assignment layer on top of bought stock
 - [ ] Dedicated coaching actions (drinks/press exist; named training TBD)
 

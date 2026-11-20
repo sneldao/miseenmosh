@@ -13,7 +13,7 @@ roar when the third star lands — and the pan-throwing cost of getting there.
 
 ## Core loop — one night
 
-1. **PREP (morning)** — the MORNING MARKET offers 3 seeded lots per night
+1. **PREP (morning)** — the MORNING MARKET offers 3 seeded lots per night (each with one true clause from its voice: fishmonger, butcher, farm — gossip, never lessons)
    (day-boat scallops, dry-aged beef, "yesterday's fish"...). One lot is
    contested: BEEFCAKES wants it too — outbid him (+£20, +1 heat) or let him
    have it. Bought lots buff a station's plate quality tonight; walk-ins are

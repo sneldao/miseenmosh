@@ -158,6 +158,8 @@
 .review .btn { background: #2a1608; font-size: .85rem; padding: .6rem 1.2rem; }
 .review .critic-line.epi { border-left: 2px solid #d0735a; padding-left: .5rem; font-style: italic; }
 .cover-line { margin-top: .5rem; padding: .45rem .6rem; border: 1px dashed #8a6230; font-style: italic; opacity: .95; }
+.cover-head { font-size: 1.05rem; font-weight: 700; letter-spacing: .06em; color: #5a3510; margin: .2rem 0 .1rem; }
+.lnote { display: block; font-size: .68rem; color: #7a6438; margin-top: .15rem; }
 .legends-line { margin-top: .5rem; font-size: .8rem; letter-spacing: .04em; opacity: .85; }
 .glossary { position: absolute; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(13,11,9,.72); }
 .gcard { background: #f4ead2; color: #221408; padding: 1.2rem 1.6rem; max-width: 26rem; max-height: 82vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.7); }
