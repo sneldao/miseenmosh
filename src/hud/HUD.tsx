@@ -252,7 +252,7 @@ function FolkloreBar() {
   const move101 = useGame((s) => s.move101);
   const moved101 = useGame((s) => s.moved101);
   if (!folklore) return null;
-  const label = folklore.kind === "fork" ? "REPLACE IT (R)" : folklore.kind === "glass" ? "REFILL (W)" : folklore.kind === "coat" ? "HANG IT (H)" : folklore.kind === "return" ? "REFUSE WITH GRACE (D) / RE-FIRE (F)" : "LET THEM POST — do nothing";
+  const label = folklore.kind === "return" ? "REFUSE WITH GRACE (D) / RE-FIRE (F)" : folklore.kind === "flash" ? "LET THEM POST — do nothing" : "FIX IT (R)";
   return (
     <div className="folklore-bar">
       <span>FOLKLORE TEST — table {folklore.table}: {label}</span>
@@ -530,6 +530,7 @@ function Briefing() {
                 COMP THE FOOD PRESS <span className="cost">£60 · −heat, +5 morale</span>
               </button>
             </div>
+            {career.night >= 4 && (
             <div className="bshop slim">
               <div className="mhead">CLOUT — EGO {Math.round(ego)} · doesn&apos;t keep, spend it or sober up</div>
               {(career.champagneNight ?? -1) >= career.night ? (
@@ -554,6 +555,9 @@ function Briefing() {
                 </button>
               )}
             </div>
+            )}
+            {career.night >= 8 && (
+            <>
             <div className="bshop slim">
               <div className="mhead">CALL THE BOARD — one wager a night</div>
               {career.bet ? (
@@ -584,6 +588,9 @@ function Briefing() {
                 </>
               )}
             </div>
+            </>
+            )}
+            {career.night >= 7 && (
             <div className="bshop slim">
               <div className="mhead">MAITRE-D' — who gets wobbly 101 (table 14)?</div>
               {career.seating101 ? (
@@ -596,6 +603,7 @@ function Briefing() {
                 </>
               )}
             </div>
+            )}
             <div className="bshop slim">
               <div className="mhead">A MAN WITH A VAN</div>
               {(career.debt ?? 0) > 0 ? (
@@ -724,9 +732,7 @@ function useHotkeys() {
       if (k === "e") return s.eightySix();
       if (k === "m") return s.whisk();
       if (k === "t") return s.move101();
-      if (k === "r" && s.folklore?.kind === "fork") return s.answerFolklore(true);
-      if (k === "w" && s.folklore?.kind === "glass") return s.answerFolklore(true);
-      if (k === "h" && s.folklore?.kind === "coat") return s.answerFolklore(true);
+      if (k === "r" && s.folklore && s.folklore.kind !== "flash" && s.folklore.kind !== "return") return s.answerFolklore(true);
       if (k === "d" && s.folklore?.kind === "return") return s.answerFolklore(true);
       if (k === "f" && s.folklore?.kind === "return") return s.answerFolklore(false);
       if (k === "h") return s.shooRunner();

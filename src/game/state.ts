@@ -716,9 +716,9 @@ export const useGame = create<GameState>((set, get) => ({
     const v = VENUES[career.venue];
     const rng = mulberry32(daySeed() + career.night * 104729);
     const criticId = Math.floor(rng() * 5);
-    // named critic rotation: gilliam → madameV → kid, grudges carry
-    const rot: ("gilliam" | "madameV" | "kid")[] = ["gilliam", "madameV", "kid"];
-    const persona = career.criticPersona ?? rot[(career.night - 1) % 3];
+    // teaching order, not rotation: GILLIAM N1–5 (noise), MADAME V N6–8 (fork), KID N9 (graduation)
+    const taught = career.night >= 9 ? "kid" : career.night >= 6 ? "madameV" : "gilliam";
+    const persona = career.criticPersona ?? taught;
     // one critic, one press, one regulars, one couple, one walk-in — the
     // dining room reads back at the pass instead of five identical tables
     const kinds: GuestKind[] = ["press", "regulars", "couple", "walkin"];
@@ -1064,7 +1064,7 @@ export const useGame = create<GameState>((set, get) => ({
 
   chooseVow: (v) => {
     const s = get();
-    if (s.phase !== "briefing" || s.career.vow) return;
+    if (s.phase !== "briefing" || s.career.vow || s.career.night < 8) return;
     const career = { ...s.career, vow: v };
     saveCareer(career, s.cooks);
     set({ career, feed: pushFeed(s.feed, VOW_LINES[v], "drama") });
@@ -1072,7 +1072,7 @@ export const useGame = create<GameState>((set, get) => ({
 
   chooseSeating: (k) => {
     const s = get();
-    if (s.phase !== "briefing" || s.career.seating101) return;
+    if (s.phase !== "briefing" || s.career.seating101 || s.career.night < 7) return;
     const career = { ...s.career, seating101: k };
     saveCareer(career, s.cooks);
     set({ career, feed: pushFeed(pushFeed(s.feed, SEATING_LINES[k], "info"), TABLE101_WARN, "drama") });
@@ -1120,7 +1120,7 @@ export const useGame = create<GameState>((set, get) => ({
 
   move101: () => {
     const s = get();
-    if (s.phase !== "service" || s.moved101) return;
+    if (s.phase !== "service" || s.moved101 || s.career.night < 7) return;
     sfx("slam");
     set({
       moved101: true,
@@ -1182,8 +1182,9 @@ export const useGame = create<GameState>((set, get) => ({
         }
         continue;
       }
-      // Table 14 is 101: wobbles, draughty, walks faster unless moved mid-rush
-      const ttl = t.table === 14 ? (s.moved101 ? TICKET_TTL : 45) : TICKET_TTL;
+      // Table 14 is 101 from N7: wobbles, draughty, walks faster unless moved mid-rush (ambient before that)
+      const harsh101 = s.career.night >= 7;
+      const ttl = t.table === 14 && harsh101 ? (s.moved101 ? TICKET_TTL : 45) : TICKET_TTL;
       if (age > ttl) {
         // the regulars forgive — twice on dessert-on-the-house nights
         const regular = s.guests.find((gg) => gg.table === t.table && gg.kind === "regulars" && gg.mercy > 0);
@@ -1212,7 +1213,8 @@ export const useGame = create<GameState>((set, get) => ({
         sfx("hiss", { pan: STATION_PAN[st.station] ?? 0, vol: 0.6 });
       }
     }
-    if (!sauce && serviceTime > 20) {
+    // one interrupt at a time: sauce waits if folklore is live; unlocks N2+
+    if (!sauce && !s.folklore && serviceTime > 20 && s.career.night >= 2) {
       const plating = tickets.find((t) => t.state === "plating");
       if (plating && rng() < dt / 45) {
         sauce = { ticketId: plating.id, until: serviceTime + 4 };
@@ -1233,7 +1235,8 @@ export const useGame = create<GameState>((set, get) => ({
       }
       // plating/pass keeps the craving pinned — FAST and EXTRA CHAR are judged at the pass
     }
-    if (!request && serviceTime > 30) {
+    // requests unlock N5; never while sauce or folklore holds the room
+    if (!request && !sauce && !s.folklore && serviceTime > 30 && s.career.night >= 5) {
       const rail = tickets.filter((t) => t.state === "rail");
       if (rail.length > 0 && rng() < dt / 50) {
         const want = rail[Math.floor(rng() * rail.length)];
@@ -1266,7 +1269,8 @@ export const useGame = create<GameState>((set, get) => ({
       folklore = null;
       folkloreDone = true;
     }
-    if (!folklore && !folkloreDone && serviceTime > 40 && serviceTime < 110) {
+    // folklore tests unlock N6; never while sauce or request holds the room
+    if (!folklore && !folkloreDone && !sauce && !request && serviceTime > 40 && serviceTime < 110 && s.career.night >= 6) {
       const persona = s.career.criticPersona ?? "madameV";
       if (rng() < dt / 60) {
         const table = criticTable >= 0 ? criticTable : 10 + Math.floor(rng() * 5);
@@ -1335,8 +1339,8 @@ export const useGame = create<GameState>((set, get) => ({
     let lastSteal = s.lastSteal;
     const willSteal = rivalIdx === 1 || (rivalIdx === 2 && s.career.aggro > 0);
     // six seconds out, the runner stretches by your bins. You were warned.
-    // SHOO him (H) before he reaches the rail — it costs you a second.
-    if (rivalWarned < rivalIdx && rivalIdx < rivalTimes.length && serviceTime >= rivalTimes[rivalIdx] - 6) {
+    // SHOO him (H) before he reaches the rail — it costs you a second. Waits if folklore holds the room.
+    if (rivalWarned < rivalIdx && rivalIdx < rivalTimes.length && serviceTime >= rivalTimes[rivalIdx] - 6 && !folklore) {
       rivalWarned = rivalIdx;
       runner = { at: rivalTimes[rivalIdx], steal: willSteal, shooed: false, fled: false };
       feed = pushFeed(feed, pick(rng, BEEFCAKES_WARN), "drama", "BEEFCAKES");
@@ -1707,7 +1711,7 @@ export const useGame = create<GameState>((set, get) => ({
 
   eightySix: () => {
     const s = get();
-    if (s.phase !== "service" || s.paused) return;
+    if (s.phase !== "service" || s.paused || s.career.night < 5) return;
     const rail = s.tickets.filter((t) => t.state === "rail");
     if (rail.length === 0) return;
     // the oldest docket names the dish. The dish dies.
@@ -1829,7 +1833,7 @@ export const useGame = create<GameState>((set, get) => ({
 
   bet: (kind) => {
     const s = get();
-    if (s.phase !== "briefing" || s.career.bet) return;
+    if (s.phase !== "briefing" || s.career.bet || s.career.night < 8) return;
     const b = BOARD[kind];
     if (s.career.cash < b.stake || s.ego < b.stakeEgo) return;
     set({

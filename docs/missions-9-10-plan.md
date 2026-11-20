@@ -5,6 +5,16 @@ Constraints: static build, desktop keyboard only, repo-root deploys, `V` fallbac
 
 Overall: 6/6 workstreams done (expensive pass in, tsc + build clean).
 
+## Phasing — one new verb a night (intuition pass)
+- N1: plate → judge only. No requests, folklore, 101 harshness, vows.
+- N2: sauce splits (M) unlock. Screams + adrenaline.
+- N3–5: GILLIAM (noise). Requests + 86 unlock N5.
+- N4: clout (champagne/dessert/door) unlock. Provenance ambient.
+- N6–8: MADAME V + folklore tests (R to fix, D/F for cold-plate, flash ignored). One interrupt at a time (sauce/request/folklore/runner lock).
+- N7: 101 harsh (45s TTL) + seating choice + T to move.
+- N8: board + vows. Judged first on card.
+- N9: THE KID graduation, everything on.
+
 ## 1. Named critics with memory — done (3/3 personas)
 - [ ] `criticPersona: 'gilliam' | 'madameV' | 'kid'` + `criticGrudge` persisted in `career`
 - [ ] GILLIAM (press, ex-sous, hates noise): notebook-early tells, 2+ screams = review capped 2★

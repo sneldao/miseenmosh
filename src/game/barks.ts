@@ -209,12 +209,12 @@ export const CRITIC_VERDICTS: Record<string, string[]> = {
   ],
 };
 
-export const FOLKLORE_FORK_WARN = "Something small hits the floor by Table {T}. A fork. Nobody moves. (R to replace)";
+export const FOLKLORE_FORK_WARN = "Something small hits the floor by Table {T}. A fork. Nobody moves. (R to fix)";
 export const FOLKLORE_FORK_SAVED = "The fork was back before it stopped ringing. {T} noticed. They always notice.";
 export const FOLKLORE_FORK_IGNORED = "They waited. Nobody came. The notebook opens.";
-export const FOLKLORE_GLASS_WARN = "Table {T}'s water glass is empty. They haven't asked. They're timing you. (W to refill)";
+export const FOLKLORE_GLASS_WARN = "Table {T}'s water glass is empty. They haven't asked. They're timing you. (R to fix)";
 export const FOLKLORE_GLASS_SAVED = "Water appears like it never left. Table {T} almost smiles.";
-export const FOLKLORE_COAT_WARN = "Table {T}'s coat slides to the floor. Nobody's hung it. (H to hang it)";
+export const FOLKLORE_COAT_WARN = "Table {T}'s coat slides to the floor. Nobody's hung it. (R to fix)";
 export const FOLKLORE_COAT_SAVED = "Coat hung, collar smoothed. Table {T} sits taller.";
 export const FOLKLORE_RETURN_WARN = "Table {T} sends it back: 'too cold'. It's a test. (D to refuse with grace, F to re-fire)";
 export const FOLKLORE_FLASH_WARN = "Table {T} lifts a phone. Flash on. Don't react. Let them post.";

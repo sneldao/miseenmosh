@@ -46,7 +46,11 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    Table 101 (table 14 wobbles, walks faster, morning seating choice, T to
    move mid-rush), one vow a night (STAR/HOUSE/BRIGADE, judged first on
    the card), folklore tests (fork R / glass W / coat H / return D-F /
-   flash-ignore).
+   flash-ignore). Phasing: N1 plate→judge only, N2 sauce, N3-5 GILLIAM,
+   N4 clout, N5 requests+86, N6-8 MADAME V + folklore (R to fix),
+   N7 101 harsh + seating (T to move), N8 board+vows, N9 THE KID.
+   One interrupt at a time — sauce, request, folklore and runner never
+   overlap.
 3. **CRITIC DETECTION (the deduction layer)** — one guest tonight is a
    mystery inspector. Watch the dining room between tickets: tells across
    three channels — visual (photographing dishes, notebook, measuring a
