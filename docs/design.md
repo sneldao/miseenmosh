@@ -245,7 +245,7 @@ hands + plate in hand, RMB to inspect, center-screen reticle with world
 raycasts, charge-and-release scream, `V` fallback to the cinematic
 camera.
 
-**Phase 2 (in progress, live in release `47b6bc21`):** the room answers.
+**Phase 2 (in progress, live in release `15a15a8b`):** the room answers.
 Built so far: the dining
 room reads as a room (seated diners in eveningwear, tables and candles,
 timber architrave round the pass opening, far wall with prints and

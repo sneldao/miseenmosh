@@ -123,3 +123,15 @@ first 90 seconds and the cold open changes what it sees.
   planning a last-minute deploy. Preview links need the owner's sign-in;
   the game origin refuses a bare visit, so live checks happen inside the
   OpenGame page or a hosted playtest.
+- **20 Nov, 01:54 UTC** — release `15a15a8b` (3D speech bubble replaces
+  the ticker in first person, heat lamps moved behind the rail,
+  pointer-lock refusal falls back to the `V` camera instead of stranding
+  the player) is Ready; deployment `6216e7ae`; preview
+  `https://opengame.io/g/9i7mjkmdx4?preview=15a15a8b-fc33-47e9-acd8-288190f9288e`.
+  Verified on the local build through a tunnel (the sandbox browser
+  cannot reach localhost): bubble pops for scream / bark / walkout with
+  a legible speaker stamp, dockets unobstructed, ticker present again
+  after `V`. A second `deploy` in the same session hit the 5/24 h cap
+  (used 5/5, next slot 02:54 UTC) and left a stale `upload_pending` in
+  `status` — the release itself is fine, so do not re-deploy to "fix"
+  the status; it clears on the next deploy.

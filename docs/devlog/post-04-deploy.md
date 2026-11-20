@@ -7,15 +7,15 @@ from the repo root — see [deploy.md](../deploy.md)).
 
 ## X version
 
-LIVE at: https://opengame.io/g/9i7mjkmdx4?preview=47b6bc21-d837-49ed-b661-6f5f7d002b0e
-(physical ticket rail build, release `47b6bc21`. The `preview=` id changes
+LIVE at: https://opengame.io/g/9i7mjkmdx4?preview=15a15a8b-fc33-47e9-acd8-288190f9288e
+(speech-bubble build, release `15a15a8b`. The `preview=` id changes
 with every release, so re-copy it from `opengame status` before posting.)
 
 MISE EN MOSH is playable. You stand at the pass now: judge plates, spot
 the inspector in the dining room, scream at your brigade, get a
 receipt-shaped review.
 
-https://opengame.io/g/9i7mjkmdx4?preview=47b6bc21-d837-49ed-b661-6f5f7d002b0e
+https://opengame.io/g/9i7mjkmdx4?preview=15a15a8b-fc33-47e9-acd8-288190f9288e
 
 Night 1 tip: the SCREAM button is not a strategy. #ZAxisAwards
 
