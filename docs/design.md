@@ -21,8 +21,12 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    shop (drinks / pans / press) and the night's feud card.
 2. **SERVICE (the action layer)** — tickets fly in on a rail; brigade works
    stations (physics chaos: pans, flames, dropped plates); finished plates
-   hit the pass and YOU judge: SERVE / SEND BACK / SMASH. Escalating
-   disasters: fires, equipment failure, walk-in shortages, staff tilting.
+   hit the pass and YOU judge: SERVE / SEND BACK / SMASH. While a dish
+   plates, the last 30% of the cook is the sear: FIRE it inside the window
+   (F) for +8 quality, or fire early to free the slot at −6 — waiting is
+   playing. Escalating disasters: fires, equipment failure, walk-in
+   shortages, staff tilting. Zero screams across a real service (8+ covers)
+   earns the SILENT SERVICE star — the food shouted instead.
 3. **CRITIC DETECTION (the deduction layer)** — one guest tonight is a
    mystery inspector. Watch the dining room between tickets: tells across
    three channels — visual (photographing dishes, notebook, measuring a
@@ -34,7 +38,10 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    Deterministically shareable (daily-seed service).
 5. **FEUD (between nights)** — rival chefs act: poach your sous chef, tip
    off a critic, steal your reservation book, talk trash in the food press.
-   You answer with choices that cost ego, money or favors.
+   You answer with choices that cost ego, money or favors. Ego itself is
+   spendable clout in the back office (comp the inspector's champagne,
+   dessert on the house, your name above the door for +1★) — it doesn't
+   keep, so spend it or sober up. Lifetime ego gates the LEGEND ending.
 
 ## Progression
 

@@ -126,12 +126,19 @@ const TIER_LINE: Record<PlateTier, string> = {
 
 function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
   const plateToPass = useGame((s) => s.plateToPass);
+  const firePlate = useGame((s) => s.firePlate);
+  const serviceTime = useGame((s) => s.serviceTime);
   const frac = Math.min(1, t.age / 55);
   const plating = t.state === "plating";
+  // the sear: the last 30% of the cook glows gold — fire inside it (F or click)
+  const searFrac = plating && t.plateDur > 0
+    ? Math.max(0, Math.min(1, 1 - (t.plateAt - serviceTime) / t.plateDur))
+    : 0;
+  const golden = searFrac >= 0.7;
   return (
     <div
-      className={`ticket ${frac > 0.45 ? "aging" : ""} ${frac > 0.72 ? "dying" : ""} ${plating ? "plating" : ""}`}
-      onClick={() => !plating && plateToPass(t.id)}
+      className={`ticket ${frac > 0.45 ? "aging" : ""} ${frac > 0.72 ? "dying" : ""} ${plating ? "plating" : ""} ${golden ? "golden" : ""}`}
+      onClick={() => (plating ? firePlate() : plateToPass(t.id))}
     >
       <div className="tno">
         TABLE {t.table} · #{t.id}
@@ -142,9 +149,18 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
         <span className="chip" style={{ background: STATION_COLOR[t.station] }}>
           {STATION_NAME[t.station]}
         </span>
-        <span className="tstate">{plating ? "PLATING…" : `${Math.floor(t.age)}s`}</span>
+        <span className="tstate">
+          {plating ? (golden ? "SEAR — FIRE IT" : "PLATING…") : `${Math.floor(t.age)}s`}
+        </span>
       </div>
-      <div className="agebar" style={{ width: `${frac * 100}%` }} />
+      {plating ? (
+        <div className="searbar">
+          <div className="sear-goldzone" />
+          <div className={`searfill${golden ? " gold" : ""}`} style={{ width: `${searFrac * 100}%` }} />
+        </div>
+      ) : (
+        <div className="agebar" style={{ width: `${frac * 100}%` }} />
+      )}
     </div>
   );
 }
@@ -253,6 +269,7 @@ function ReviewCard() {
           <span>{review.smashed} smashed</span>
           <span>{review.walkouts} walkouts</span>
           <span>streak ×{review.bestStreak}</span>
+          {review.silent && <span>SILENT SERVICE ★</span>}
           <span>inspector {review.spotted ? "CLOCKED" : "missed"}</span>
         </div>
         <div className="rfoot">EGO {Math.round(review.ego)}</div>
@@ -281,6 +298,8 @@ function Briefing() {
   const feud = useGame((s) => s.feud);
   const nightTake = useGame((s) => s.nightTake);
   const briefAction = useGame((s) => s.briefAction);
+  const clout = useGame((s) => s.clout);
+  const ego = useGame((s) => s.ego);
   const feudChoice = useGame((s) => s.feudChoice);
   const lots = useGame((s) => s.lots);
   const buyLot = useGame((s) => s.buyLot);
@@ -443,6 +462,30 @@ function Briefing() {
                 COMP THE FOOD PRESS <span className="cost">£60 · −heat, +5 morale</span>
               </button>
             </div>
+            <div className="bshop slim">
+              <div className="mhead">CLOUT — EGO {Math.round(ego)} · doesn&apos;t keep, spend it or sober up</div>
+              {(career.champagneNight ?? -1) >= career.night ? (
+                <div className="ltaken">champagne on ice for the inspector</div>
+              ) : (
+                <button className="btn shop" disabled={ego < 15} onClick={() => clout("champagne")}>
+                  COMP CHAMPAGNE FOR THE INSPECTOR <span className="cost">15 ego · +10 on their plates</span>
+                </button>
+              )}
+              {(career.dessertNight ?? -1) >= career.night ? (
+                <div className="ltaken">dessert on the house for the regulars</div>
+              ) : (
+                <button className="btn shop" disabled={ego < 20} onClick={() => clout("dessert")}>
+                  DESSERT ON THE HOUSE <span className="cost">20 ego · regulars forgive twice</span>
+                </button>
+              )}
+              {career.doorNamed ? (
+                <div className="ltaken">your name is above the door</div>
+              ) : (
+                <button className="btn shop" disabled={ego < 30} onClick={() => clout("door")}>
+                  NAME ABOVE THE DOOR <span className="cost">30 ego · +1★, once ever</span>
+                </button>
+              )}
+            </div>
           </div>
         )}
         {beat === 2 && feud && (
@@ -484,6 +527,7 @@ function Ending() {
   const resetCareer = useGame((s) => s.resetCareer);
   const broke = career.cash < -60;
   const won = career.stars >= 10;
+  const legend = !broke && won && (career.totalEgo ?? 0) >= 200;
   return (
     <div className="review-wrap">
       <div className="review ending">
@@ -495,14 +539,17 @@ function Ending() {
         <div className="quote">
           {broke
             ? "The suppliers stopped answering. The lights stayed on out of pity. It's over."
-            : won
-              ? "Three stars. The room says YES, CHEF to itself. You are the venue now."
-              : "Nine nights of sweat and shouting. A footnote in the guide — but your brigade still calls you chef."}
+            : legend
+              ? "Three stars, a name above the door, and the alley chanting it. They'll name a heat after you — the one where the fat catches and nobody flinches."
+              : won
+                ? "Three stars. The room says YES, CHEF to itself. You are the venue now."
+                : "Nine nights of sweat and shouting. A footnote in the guide — but your brigade still calls you chef."}
         </div>
         <div className="rstats">
           <span>{career.stars}★ earned</span>
           <span>£{career.cash} in the till</span>
           <span>{career.defections} defections</span>
+          <span>{Math.round(career.totalEgo ?? 0)} lifetime ego</span>
         </div>
         <div className="rbtns">
           <button className="btn serve" onClick={resetCareer}>
@@ -550,6 +597,7 @@ function useHotkeys() {
       if (k === "s") return s.judge("serve");
       if (k === "b") return s.judge("sendback");
       if (k === "x") return s.judge("smash");
+      if (k === "f") return s.firePlate();
       const n = Number(e.key);
       if (n >= 1 && n <= 9) {
         const rail = s.tickets.filter((t) => t.state === "rail");
@@ -575,6 +623,7 @@ export default function HUD() {
   const served = useGame((s) => s.served);
   const sentBack = useGame((s) => s.sentBack);
   const smashed = useGame((s) => s.smashed);
+  const screams = useGame((s) => s.screams);
   const misses = useGame((s) => s.misses);
   const ego = useGame((s) => s.ego);
   const serviceTime = useGame((s) => s.serviceTime);
@@ -678,7 +727,7 @@ export default function HUD() {
               ? firstPerson
                 ? "Hold right mouse to look at the plate."
                 : "Judge the plate."                : live.some((t) => t.state === "plating")
-                  ? "Plating…"
+                  ? "Plating… F fires it early — wait for the gold."
                   : firstPerson
                     ? "Look at a docket on the rail and click."
                     : "Click a ticket to plate it."}{" "}
@@ -743,6 +792,11 @@ export default function HUD() {
             <br />
             EGO <b>{Math.round(ego)}</b>
             {streak >= 3 && <span className="amped"> · STREAK ×{streak}</span>}
+            {screams === 0 ? (
+              <span className="silent"> · SILENT — hold it for a ★</span>
+            ) : (
+              <> · SCREAMS <b>{screams}</b></>
+            )}
           </div>
           <Brigade />
           {/* first person shouts the newest line into the room instead */}

@@ -272,8 +272,15 @@ function Plates() {
   const tickets = useGame((s) => s.tickets);
   const phase = useGame((s) => s.phase);
   const firstPerson = useGame((s) => s.firstPerson);
+  const serviceTime = useGame((s) => s.serviceTime);
   const atPass = tickets.find((t) => t.state === "pass");
   const plating = tickets.find((t) => t.state === "plating");
+  // the sear reads in 3D too: the ring under the plating dish runs
+  // white-hot and turns gold in the fire window — both cameras see it
+  const searFrac = plating && plating.plateDur > 0
+    ? Math.max(0, Math.min(1, 1 - (plating.plateAt - serviceTime) / plating.plateDur))
+    : 0;
+  const golden = searFrac >= 0.7;
   // in first person the pass plate lives in your hands (see FirstPerson)
   const inHand = phase === "service" && firstPerson;
   return (
@@ -293,6 +300,19 @@ function Plates() {
           position={[[-3.6, 0, 3.6][plating.station], 1.2, -3.0]}
           dish={plating.dish}
         />
+      )}
+      {plating && (
+        <mesh
+          position={[[ -3.6, 0, 3.6][plating.station], 1.13, -3.0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
+          <ringGeometry args={[0.26, 0.32, 24]} />
+          <meshBasicMaterial
+            color={golden ? "#ffd76a" : "#ff5a2a"}
+            transparent
+            opacity={golden ? 0.95 : 0.25 + searFrac * 0.3}
+          />
+        </mesh>
       )}
     </group>
   );

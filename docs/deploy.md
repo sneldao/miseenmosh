@@ -145,3 +145,9 @@ first 90 seconds and the cold open changes what it sees.
   again: `opengame deploy --wait --idempotency-key "$(uuidgen)"`.
   Never run a bare second `deploy` to check on the first — the resume
   looks like progress and costs a slot.
+- **20 Nov, ~05:30 UTC** — the 9/10 patch (sear window, clout spends,
+  silent-service star) is committed but NOT live: still no deploy slots
+  until **12:01 UTC**. Verified each slice in-browser on the local build
+  through a tunnel (25 golden fires, rushed-fire line, champagne bought
+  for 15 ego, SILENT SERVICE ★ + tail quote on the review card). After
+  the reset: `opengame deploy --wait --idempotency-key "$(uuidgen)"`.

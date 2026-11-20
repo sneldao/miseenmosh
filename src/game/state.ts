@@ -26,6 +26,8 @@ export interface Ticket {
   byChef: boolean;
   quality: number;
   verdict: Verdict | null;
+  /** fire-early call: golden = kissed by the pan, rushed = raw but free */
+  sear: "golden" | "rushed" | null;
 }
 
 export interface Cook {
@@ -54,8 +56,8 @@ export interface Guest {
   tellClock: number;
   /** how many tells this table has given — the critic escalates */
   tells: number;
-  /** the regulars forgive exactly once */
-  used: boolean;
+  /** the regulars' mercy: walkouts forgiven before they walk (2 on dessert nights) */
+  mercy: number;
   /** serviceTime of last tell burst; drives the phone flash */
   tellAt: number;
 }
@@ -81,6 +83,8 @@ export interface Review {
   ego: number;
   bestStreak: number;
   criticVerdict: string;
+  /** nobody screamed across a real service — the food shouted instead */
+  silent: boolean;
 }
 
 const DISHES: { name: string; station: number }[] = [
@@ -134,6 +138,10 @@ export interface Career {
   feudDone?: number; // night the feud card was answered
   feudOutcome?: string;
   mealNight?: number; // night the family meal was eaten
+  champagneNight?: number; // clout: inspector's table comped tonight
+  dessertNight?: number; // clout: regulars forgive twice tonight
+  doorNamed?: boolean; // clout: name above the door, +1 star banked
+  totalEgo?: number; // lifetime ego banked at reviews — legends need 200
 }
 
 export interface Feud {
@@ -202,6 +210,64 @@ const REVIEW_QUOTES: Record<number, string[]> = {
   0: ["The chef has been asked to leave his own restaurant.", "A crime scene with a wine list."],
 };
 
+const SILENT_TAILS = [
+  "The pass never raised its voice — the food shouted instead.",
+  "Not one raised voice all night. The plates arrived like apologies that meant it.",
+];
+
+interface PlateCtx {
+  rng: () => number;
+  menuBuffs: number[];
+  gear: number;
+  criticTable: number;
+  champagne: boolean;
+}
+
+/** Shared by the auto-complete in tick() and the early fire in firePlate():
+ * fumbles first, then the full quality arithmetic including sear + champagne. */
+function finishPlating(
+  t: Ticket,
+  age: number,
+  cook: Cook | undefined,
+  ctx: PlateCtx
+): { fumble: boolean; quality: number } {
+  const { rng } = ctx;
+  // a broken cook fumbles — plate in the bin, ticket back on the rail.
+  // one holding a grudge fumbles half as often again.
+  if (cook && !cook.walkedOut && cook.morale < 30 && rng() < (cook.grudge ? 0.25 : 0.15)) {
+    return { fumble: true, quality: -1 };
+  }
+  const chefPenalty = t.byChef ? 12 : 0;
+  const burnPenalty = cook?.burning ? 8 : 0;
+  const marketBonus = ctx.menuBuffs[t.station] ?? 0;
+  // favourites get the good hands; grudges get the bitter ones
+  const faveBonus = cook && !cook.walkedOut && cook.fave === t.dish ? 6 : 0;
+  const grudgePenalty = cook?.grudge ? 4 : 0;
+  // fired on the sear: kissed by the pan. rushed off early: raw in the middle.
+  const searBonus = t.sear === "golden" ? 8 : t.sear === "rushed" ? -6 : 0;
+  // comped champagne for the inspector's table smooths everything
+  const champagneBonus = ctx.champagne && t.table === ctx.criticTable ? 10 : 0;
+  const quality = Math.max(
+    5 + ctx.gear * 3,
+    Math.min(
+      100,
+      38 +
+        (cook?.skill ?? 0.5) * 30 +
+        ((cook?.morale ?? 50) - 50) * 0.35 -
+        age * 0.5 -
+        chefPenalty -
+        burnPenalty -
+        grudgePenalty +
+        faveBonus +
+        marketBonus +
+        searBonus +
+        champagneBonus +
+        (rng() - 0.5) * 30
+    )
+  );
+  return { fumble: false, quality };
+}
+
 let nextId = 1;
 let feedId = 1;
 
@@ -263,11 +329,13 @@ interface GameState {
   continueNext: () => void;
   briefAction: (id: "drinks" | "gear" | "press") => void;
   meal: (i: number) => void;
+  clout: (id: "champagne" | "dessert" | "door") => void;
   feudChoice: (i: number) => void;
   buyLot: (i: number, outbid: boolean) => void;
   resetCareer: () => void;
   tick: (dt: number) => void;
   plateToPass: (id: number) => void;
+  firePlate: () => void;
   judge: (v: Verdict) => void;
   scream: (power?: number) => void;
   flagGuest: (id: number) => void;
@@ -298,6 +366,7 @@ function spawnTicket(rng: () => number, criticTable = -1): Ticket {
     state: "rail",
     plateAt: 0,
     plateDur: 0,
+    sear: null,
     byChef: false,
     quality: -1,
     verdict: null,
@@ -487,6 +556,8 @@ export const useGame = create<GameState>((set, get) => ({
       cooks,
       feud: null,
       hasSave: false,
+      ego: 10,
+      screams: 0,
       feed: [{ id: feedId++, text: `Night 1 — ${VENUES[0].name}. ${VENUES[0].sub}.`, kind: "info" }],
       review: null,
       nightTake: null,
@@ -510,6 +581,8 @@ export const useGame = create<GameState>((set, get) => ({
       [kinds[i], kinds[j]] = [kinds[j], kinds[i]];
     }
     const guests: Guest[] = [];
+    // dessert on the house: the regulars forgive twice tonight
+    const sweetNight = (career.dessertNight ?? -1) === career.night;
     let ki = 0;
     for (let i = 0; i < 5; i++) {
       const isCritic = i === criticId;
@@ -527,7 +600,7 @@ export const useGame = create<GameState>((set, get) => ({
         kind,
         tellClock: base * v.tellMul,
         tells: 0,
-        used: false,
+        mercy: kind === "regulars" ? (sweetNight ? 2 : 1) : 0,
         tellAt: -1,
       });
     }
@@ -595,6 +668,7 @@ export const useGame = create<GameState>((set, get) => ({
       night: c.night + 1,
       cash: c.cash + net,
       stars: c.stars + s.review.stars,
+      totalEgo: (c.totalEgo ?? 0) + s.review.ego,
     };
     career.venue = venueFor(career.stars);
     const cooks = s.cooks.map((k) => ({
@@ -805,46 +879,29 @@ export const useGame = create<GameState>((set, get) => ({
       const age = t.age + dt;
       if (t.state === "plating" && serviceTime >= t.plateAt) {
         const cook = s.cooks.find((c) => c.station === t.station);
-        // a broken cook fumbles — plate in the bin, ticket back on the rail.
-        // one holding a grudge fumbles half as often again.
-        if (cook && !cook.walkedOut && cook.morale < 30 && rng() < (cook.grudge ? 0.25 : 0.15)) {
+        const res = finishPlating(t, age, cook, {
+          rng,
+          menuBuffs: s.menuBuffs,
+          gear: s.career.gear,
+          criticTable,
+          champagne: (s.career.champagneNight ?? -1) === s.career.night,
+        });
+        if (res.fumble && cook) {
           feed = pushFeed(feed, `${cook.name} fumbles the ${t.dish} — straight in the bin.`, "bad", cook.name);
           sfx("shatter");
           cook.morale = Math.max(0, cook.morale - 3);
-          tickets.push({ ...t, state: "rail", age: age * 0.6, quality: -1 });
+          tickets.push({ ...t, state: "rail", age: age * 0.6, quality: -1, sear: null });
           continue;
         }
-        const chefPenalty = t.byChef ? 12 : 0;
-        const burnPenalty = cook?.burning ? 8 : 0;
-        const marketBonus = s.menuBuffs[t.station] ?? 0;
-        // favourites get the good hands; grudges get the bitter ones
-        const faveBonus = cook && !cook.walkedOut && cook.fave === t.dish ? 6 : 0;
-        const grudgePenalty = cook?.grudge ? 4 : 0;
-        const quality = Math.max(
-          5 + s.career.gear * 3,
-          Math.min(
-            100,
-            38 +
-              (cook?.skill ?? 0.5) * 30 +
-              ((cook?.morale ?? 50) - 50) * 0.35 -
-              age * 0.5 -
-              chefPenalty -
-              burnPenalty -
-              grudgePenalty +
-              faveBonus +
-              marketBonus +
-              (rng() - 0.5) * 30
-          )
-        );
-        tickets.push({ ...t, age, state: "pass", quality });
+        tickets.push({ ...t, age, state: "pass", quality: res.quality });
         sfx("bell");
         continue;
       }
       if (age > TICKET_TTL) {
-        // the regulars forgive exactly once — twenty years buys one walkout
-        const regular = s.guests.find((gg) => gg.table === t.table && gg.kind === "regulars" && !gg.used);
+        // the regulars forgive — twice on dessert-on-the-house nights
+        const regular = s.guests.find((gg) => gg.table === t.table && gg.kind === "regulars" && gg.mercy > 0);
         if (regular) {
-          regular.used = true;
+          regular.mercy -= 1;
           feed = pushFeed(feed, REGULARS_FORGIVE, "good", "THE REGULARS");
           continue;
         }
@@ -1034,16 +1091,22 @@ export const useGame = create<GameState>((set, get) => ({
       const spotted = s.criticSpotted;
       const walkouts = cooks.filter((c) => c.walkedOut).length;
       let stars = 4;
+      // the quiet virtue: no screams across a real service — the food shouted instead
+      const silent = s.screams === 0 && served >= 8;
       stars += avgQuality >= 72 ? 1 : avgQuality < 45 ? -1 : 0;
       stars -= Math.min(2, complaints);
       stars -= Math.min(2, misses);
       stars -= walkouts;
       stars += spotted ? 1 : 0;
       stars += s.smashed >= 3 && misses === 0 ? 1 : 0; // theatre bonus
+      stars += silent ? 1 : 0;
       stars = Math.max(0, Math.min(5, stars));
       const bank = REVIEW_QUOTES[stars];
       let quote = bank[Math.floor(rng() * bank.length)];
       if (s.smashed >= 3) quote += " — crockery budget: exceeded.";
+      if (silent) quote += " " + pick(rng, SILENT_TAILS);
+      if (ego >= 40) quote += " They chant your name in the alley.";
+      else if (ego <= 0 && served > 0) quote += " Nobody remembers your name. Possibly for the best.";
       if (allOut) quote = "The brigade abandoned ship mid-service. " + quote;
       const criticAvg = s.criticServed > 0 ? s.criticQ / s.criticServed : -1;
       const criticVerdict = !s.criticSpotted
@@ -1076,6 +1139,7 @@ export const useGame = create<GameState>((set, get) => ({
           ego,
           bestStreak,
           criticVerdict,
+          silent,
         },
       });
       return;
@@ -1103,13 +1167,108 @@ export const useGame = create<GameState>((set, get) => ({
     set({
       tickets: s.tickets.map((x) =>
         x.id === id
-          ? { ...x, state: "plating", plateAt: s.serviceTime + dur, plateDur: dur, byChef: walkedOut }
+          ? { ...x, state: "plating", plateAt: s.serviceTime + dur, plateDur: dur, byChef: walkedOut, sear: null }
           : x
       ),
       feed: walkedOut
         ? pushFeed(s.feed, `Nobody on ${cook?.name}'s station — you're plating it yourself.`, "info")
         : s.feed,
     });
+  },
+
+  firePlate: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused) return;
+    const t = s.tickets.find((t) => t.state === "plating");
+    if (!t) return;
+    // the last 30% of the cook is the sear: fire inside it for the kiss
+    // of the pan, fire earlier to free the slot at a cost
+    const frac = t.plateDur > 0 ? 1 - (t.plateAt - s.serviceTime) / t.plateDur : 1;
+    const golden = frac >= 0.7;
+    const cook = s.cooks.find((c) => c.station === t.station);
+    const criticTable = s.guests.find((g) => g.isCritic)?.table ?? -1;
+    const res = finishPlating(
+      { ...t, sear: golden ? "golden" : "rushed" },
+      t.age,
+      cook,
+      {
+        rng: s.rng,
+        menuBuffs: s.menuBuffs,
+        gear: s.career.gear,
+        criticTable,
+        champagne: (s.career.champagneNight ?? -1) === s.career.night,
+      }
+    );
+    const cooks = s.cooks.map((c) => ({ ...c }));
+    const liveCook = cooks.find((c) => c.station === t.station);
+    let feed = s.feed;
+    if (res.fumble && liveCook) {
+      liveCook.morale = Math.max(0, liveCook.morale - 3);
+      feed = pushFeed(feed, `${liveCook.name} fumbles the ${t.dish} — straight in the bin.`, "bad", liveCook.name);
+      sfx("shatter", { pan: STATION_PAN[t.station] ?? 0 });
+      set({
+        cooks,
+        feed,
+        tickets: s.tickets.map((x) =>
+          x.id === t.id ? { ...x, state: "rail", age: x.age * 0.6, quality: -1, sear: null } : x
+        ),
+      });
+      return;
+    }
+    if (golden) {
+      feed = pushFeed(
+        feed,
+        `You fire the ${t.dish} right on the sear. ${cook?.name ?? "The kitchen"} almost smiles.`,
+        "good",
+        cook?.name
+      );
+      sfx("sear", { pan: STATION_PAN[t.station] ?? 0 });
+    } else {
+      feed = pushFeed(
+        feed,
+        `You rush the ${t.dish} off early — raw in the middle, but the slot's free.`,
+        "info"
+      );
+      sfx("slam", { pan: STATION_PAN[t.station] ?? 0 });
+    }
+    set({
+      cooks,
+      feed,
+      tickets: s.tickets.map((x) =>
+        x.id === t.id ? { ...x, state: "pass", quality: res.quality } : x
+      ),
+    });
+  },
+
+  clout: (id) => {
+    const s = get();
+    if (s.phase !== "briefing") return;
+    // ego doesn't keep — spend it in the morning or sober up by doors
+    if (id === "champagne" && s.ego >= 15 && (s.career.champagneNight ?? -1) < s.career.night) {
+      const career = { ...s.career, champagneNight: s.career.night };
+      saveCareer(career, s.cooks);
+      set({
+        ego: s.ego - 15,
+        career,
+        feed: pushFeed(s.feed, "Comped champagne for the inspector's table. +10 on anything they eat tonight.", "good"),
+      });
+    } else if (id === "dessert" && s.ego >= 20 && (s.career.dessertNight ?? -1) < s.career.night) {
+      const career = { ...s.career, dessertNight: s.career.night };
+      saveCareer(career, s.cooks);
+      set({
+        ego: s.ego - 20,
+        career,
+        feed: pushFeed(s.feed, "Dessert on the house for the regulars. Twenty years buys two walkouts tonight.", "good", "THE REGULARS"),
+      });
+    } else if (id === "door" && s.ego >= 30 && !s.career.doorNamed) {
+      const career = { ...s.career, doorNamed: true, stars: s.career.stars + 1 };
+      saveCareer(career, s.cooks);
+      set({
+        ego: s.ego - 30,
+        career,
+        feed: pushFeed(s.feed, "YOUR NAME ABOVE THE DOOR. +1 star, banked forever. Act like it.", "drama"),
+      });
+    }
   },
 
   judge: (v) => {
@@ -1178,7 +1337,7 @@ export const useGame = create<GameState>((set, get) => ({
       if (cook) cook.morale = Math.max(0, cook.morale - 3);
       set({
         tickets: s.tickets.map((t) =>
-          t.id === plate.id ? { ...t, state: "rail", age: t.age * 0.4, quality: -1 } : t
+          t.id === plate.id ? { ...t, state: "rail", age: t.age * 0.4, quality: -1, sear: null } : t
         ),
         sentBack,
         cooks,

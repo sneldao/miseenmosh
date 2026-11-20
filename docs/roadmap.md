@@ -38,8 +38,16 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
 - [x] Service pressure: 55s ticket TTL + table walks, streak system,
       dessert-course stampede, BEEFCAKES rival set-pieces (loiter warn,
       bespoke steal line, torn rail stub), regulars forgive once
-- [x] Feel layer: full keyboard play (1-9/S/B/X/space/P), pause,
+- [x] Feel layer: full keyboard play (1-9/S/B/X/F/space/P), pause,
       ambient chef barks, guest heckles, verdict stamps, synth SFX
+- [x] Plating decisions (20 Nov, the 9/10 patch): every plate has a sear
+      window — FIRE (F) inside the gold for +8, or fire early to free the
+      slot at −6. Waiting is playing.
+- [x] Ego with a job (20 Nov): spendable clout in the back office
+      (inspector's champagne, dessert on the house, name above the door
+      +1★), ego-gated review lines, lifetime-ego LEGEND ending
+- [x] The quiet virtue (20 Nov): zero screams over 8+ covers earns the
+      SILENT SERVICE star + review line — restraint is a strategy now
 - [x] Brigade sim depth: trauma scars on walkouts (persist, drain
       faster), defections via feud (NEW_BLOOD replacements), morale
       carries overnight with partial rest, cook memory (favourite dish

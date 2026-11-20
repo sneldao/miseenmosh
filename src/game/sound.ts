@@ -66,7 +66,8 @@ export type Sfx =
   | "review"
   | "flash"
   | "applause"
-  | "hiss";
+  | "hiss"
+  | "sear";
 
 export interface SfxOpts {
   /** -1 (far left, grill) .. +1 (far right, pastry) */
@@ -134,6 +135,11 @@ export function sfx(kind: Sfx, opts: SfxOpts = {}) {
     case "hiss":
       // steam escaping before the grease goes up
       noise(t, 0.7, 0.4, 5000, bus);
+      break;
+    case "sear":
+      // the kiss of the pan: a sizzle pop with a high singing edge
+      noise(t, 0.25, 0.5, 4500, bus);
+      osc("sine", 1900, 2600, t, 0.18, 0.15, bus);
       break;
   }
 }
