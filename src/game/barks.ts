@@ -142,3 +142,47 @@ export const CRITIC_ESCALATION = [
 ];
 
 export const SMOKE_WARN = "{N}'s station is smoking. Ease off that side — or it goes up.";
+
+// --- expo language: the pass speaks kitchen, not English ---
+// {D} = dish, {T} = table, {N} = all-day count for that dish.
+export const EXPO_FIRE = [
+  "Fire {D} — table {T}! All day {N}.",
+  "{D}, table {T} — fire! That's {N} all day.",
+];
+
+export const EXPO_HANDS = [
+  "Hands! Table {T} — {D}, looking beautiful.",
+  "Hands across! {D} for {T}. Don't drop it.",
+];
+
+export const EXPO_CORNER = [
+  "Corner! Coming through with the {D}.",
+  "Behind! Sharp! {D} walking to {T}.",
+];
+
+// --- callbacks the trade will recognise ---
+export const TRILOGY_WELLY = "Three pristine Wellingtons. Someone call Escoffier — then deny everything.";
+
+export const EMPTY_PASS_SCREAM = [
+  "You scream at an empty pass. Even the extractor fan is scared.",
+  "Nobody there to hear it. The tickets flutter. The fridge hums back.",
+];
+
+export const VAN_REMINDER = [
+  "The van is parked across the street. He waves. He remembers.",
+  "£130 before the residency ends. The man with the van counts your covers from the curb.",
+];
+
+export const FISH_JOKE = "Technically fish. Legally, let's not ask.";
+
+export const CHAMPAGNE_KNEW = "You knew. The champagne arrived before they asked.";
+
+export const SILENT_LEGEND_TAILS = [
+  "Escoffier would have asked for the recipe. Then denied it.",
+  "The guide retires a star. Yours keeps working.",
+];
+
+export const OUTBID_BEEFCAKES = [
+  "BEEFCAKES is still thinking about the market. His protein bowls taste of loss.",
+  "BEEFCAKES tells the press your outbid was 'a fluke with a wallet'.",
+];

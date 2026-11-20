@@ -57,6 +57,12 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       edge-char from smouldering stations (+4, fire sooner), mid-service
       table comp (C, £20). Verification caught a real bug: requests were
       cleared on pull — cravings now survive to the pass.
+- [x] Cohesion pass (20 Nov): expo language (FIRE/HANDS/CORNER with
+      all-day counts), kitchen memory (smashed dish haunts family meal,
+      press remembers silent nights, BEEFCAKES remembers outbids, van
+      reminder on debt nights), hidden nuggets (Wellington trilogy,
+      empty-pass scream, champagne-knew verdict, silent-legend tail,
+      fish joke).
 - [x] Brigade sim depth: trauma scars on walkouts (persist, drain
       faster), defections via feud (NEW_BLOOD replacements), morale
       carries overnight with partial rest, cook memory (favourite dish

@@ -34,7 +34,13 @@ roar when the third star lands — and the pan-throwing cost of getting there.
    the press writes it down. Split sauces can be whisked back (M). A
    smouldering station kisses plates with smoke (+4, fire comes sooner).
    Champagne can be comped mid-service (C, £20): the room exhales, the
-   regulars remember.
+   regulars remember. The pass speaks kitchen: FIRE calls with all-day
+   counts, HANDS and CORNER on the walk, clean-plate clubs. The kitchen
+   remembers: smashed dishes haunt the next family meal, the press
+   remembers a silent night, BEEFCAKES remembers the market, the van
+   watches from across the street when you owe him. Hidden: the
+   Wellington trilogy, screaming at an empty pass, champagne that
+   arrives before the inspector asks.
 3. **CRITIC DETECTION (the deduction layer)** — one guest tonight is a
    mystery inspector. Watch the dining room between tickets: tells across
    three channels — visual (photographing dishes, notebook, measuring a

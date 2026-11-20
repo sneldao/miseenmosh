@@ -5,7 +5,9 @@ import {
   CHEF_BARKS, STATION_BARKS, BRIGADE_RESPONSES, GUEST_HECKLES, RIVAL_LINES, pick,
   MEALS, FAMILY_LINES, GRUDGE_BARKS, BEEFCAKES_WARN, BEEFCAKES_STEAL_LINES,
   PRESS_TELLS, COUPLE_FIGHT, REGULARS_KIND, REGULARS_FORGIVE, CRITIC_ESCALATION,
-  SMOKE_WARN,
+  SMOKE_WARN, EXPO_FIRE, EXPO_HANDS, EXPO_CORNER, TRILOGY_WELLY,
+  EMPTY_PASS_SCREAM, VAN_REMINDER, FISH_JOKE, CHAMPAGNE_KNEW,
+  SILENT_LEGEND_TAILS, OUTBID_BEEFCAKES,
 } from "./barks";
 
 export type Verdict = "serve" | "sendback" | "smash";
@@ -151,6 +153,10 @@ export interface Career {
   bet?: { kind: "covers" | "walks" | "spot"; stake: number; stakeEgo: number };
   /** the man with the van: £100 now, £130 before the residency ends */
   debt?: number;
+  /** cohesion memory: what the kitchen carries between nights */
+  lastSmashed?: string | null;
+  silentLast?: boolean;
+  outbidBeefcakes?: boolean;
 }
 
 export interface Feud {
@@ -386,6 +392,8 @@ interface GameState {
   criticAnnounced: boolean;
   criticServed: number;
   criticQ: number;
+  /** cohesion: consecutive pristine Wellingtons — the trilogy the trade whispers about */
+  wellingtonRun: number;
   review: Review | null;
   // --- career layer ---
   career: Career;
@@ -600,6 +608,7 @@ export const useGame = create<GameState>((set, get) => ({
   criticAnnounced: false,
   criticServed: 0,
   criticQ: 0,
+  wellingtonRun: 0,
   review: null,
   career: bootSave?.career ?? freshCareer(),
   feud: null,
@@ -709,6 +718,12 @@ export const useGame = create<GameState>((set, get) => ({
       feed: [
         { id: feedId++, text: `Night ${career.night} — ${v.name}. ${v.sub}.`, kind: "drama" },
         { id: feedId++, text: "Doors open. Somewhere out there is the inspector.", kind: "info" },
+        ...((s.career.debt ?? 0) > 0
+          ? [{ id: feedId++, text: pick(rng, VAN_REMINDER), kind: "drama" as const }]
+          : []),
+        ...(s.career.silentLast
+          ? [{ id: feedId++, text: "The press remembers last night: nobody raised their voice. They're listening for it.", kind: "info" as const, who: "THE PRESS" }]
+          : []),
       ],
       nextTicketIn: 1.5,
       serviceTime: 0,
@@ -747,6 +762,7 @@ export const useGame = create<GameState>((set, get) => ({
       criticAnnounced: false,
       criticServed: 0,
       criticQ: 0,
+      wellingtonRun: 0,
       review: null,
     });
   },
@@ -774,6 +790,8 @@ export const useGame = create<GameState>((set, get) => ({
       stars: c.stars + s.review.stars,
       totalEgo: (c.totalEgo ?? 0) + s.review.ego,
       bet: undefined,
+      // the press has a memory: last night's silence follows you into the next briefing
+      silentLast: s.review.silent,
     };
     career.venue = venueFor(career.stars);
     const cooks = s.cooks.map((k) => ({
@@ -821,7 +839,10 @@ export const useGame = create<GameState>((set, get) => ({
     if (s.phase !== "briefing") return;
     if ((s.career.mealNight ?? -1) >= s.career.night) return; // one meal a night
     unlockAudio();
-    const dish = MEALS[(s.career.night - 1) % MEALS.length];
+    // the family meal remembers: last night's smashed dish comes back as hash, eaten over the bin
+    const base = MEALS[(s.career.night - 1) % MEALS.length];
+    const haunted = s.career.lastSmashed;
+    const dish = haunted ? `${base} — mostly ${haunted}, reborn` : base;
     const rng = s.rng;
     let cooks = s.cooks.map((k) => ({ ...k }));
     let line: string;
@@ -945,7 +966,10 @@ export const useGame = create<GameState>((set, get) => ({
     const price = lot.contested ? lot.cost + 20 : lot.cost;
     if (s.career.cash < price) return;
     const c = { ...s.career, cash: s.career.cash - price };
-    if (lot.contested) c.aggro += 1;
+    if (lot.contested) {
+      c.aggro += 1;
+      c.outbidBeefcakes = true;
+    }
     const menuBuffs = [...s.menuBuffs];
     if (lot.station < 0) menuBuffs.forEach((_, k) => (menuBuffs[k] += lot.qBonus));
     else menuBuffs[lot.station] += lot.qBonus;
@@ -955,11 +979,15 @@ export const useGame = create<GameState>((set, get) => ({
       menuBuffs,
       lots: s.lots.map((l, j) => (j === i ? { ...l, bought: true } : l)),
       feed: pushFeed(
-        s.feed,
-        lot.contested
-          ? `You outbid BEEFCAKES for the ${lot.name}. He watched you take it home.`
-          : `Bought the ${lot.name}. Tonight eats better.`,
-        "good"
+        pushFeed(
+          s.feed,
+          lot.contested
+            ? `You outbid BEEFCAKES for the ${lot.name}. He watched you take it home.`
+            : `Bought the ${lot.name}. Tonight eats better.`,
+          "good"
+        ),
+        lot.name === "Yesterday's fish" ? FISH_JOKE : `The walk-in smells like ${lot.name.toLowerCase()}. Money well spent.`,
+        "info"
       ),
     });
   },
@@ -1010,6 +1038,10 @@ export const useGame = create<GameState>((set, get) => ({
         }
         tickets.push({ ...t, age, state: "pass", quality: res.quality });
         sfx("bell");
+        // corner! the kitchen calls the walk so nobody wears the plate
+        if (rng() < 0.35) {
+          feed = pushFeed(feed, pick(rng, EXPO_CORNER).replace("{D}", t.dish).replace("{T}", String(t.table)), "info", cook?.name);
+        }
         continue;
       }
       if (age > TICKET_TTL) {
@@ -1083,7 +1115,7 @@ export const useGame = create<GameState>((set, get) => ({
       dessertDone = true;
       feed = pushFeed(
         feed,
-        "DESSERT COURSE. If the inspector's out there, they're on the soufflé now.",
+        "Hands! DESSERT COURSE — fire soufflés, all day. If the inspector's out there, they're on the soufflé now.",
         "drama"
       );
       sfx("sting");
@@ -1165,6 +1197,10 @@ export const useGame = create<GameState>((set, get) => ({
         sfx("gasp", { pan: 0.8, vol: 0.5 });
       } else {
         feed = pushFeed(feed, pick(rng, RIVAL_LINES), "drama", "BEEFCAKES");
+        // he remembers the market: outbid him in the morning and the noon post is about you
+        if (s.career.outbidBeefcakes && rng() < 0.5) {
+          feed = pushFeed(feed, pick(rng, OUTBID_BEEFCAKES), "drama", "BEEFCAKES");
+        }
       }
       if (runner) runner = { ...runner, fled: true };
       rivalIdx += 1;
@@ -1279,6 +1315,8 @@ export const useGame = create<GameState>((set, get) => ({
       let quote = bank[Math.floor(rng() * bank.length)];
       if (s.smashed >= 3) quote += " — crockery budget: exceeded.";
       if (silent) quote += " " + pick(rng, SILENT_TAILS);
+      // the silent legend: a quiet five gets the trade's highest whisper
+      if (silent && stars >= 5) quote += " " + pick(rng, SILENT_LEGEND_TAILS);
       if (ego >= 40) quote += " They chant your name in the alley.";
       else if (ego <= 0 && served > 0) quote += " Nobody remembers your name. Possibly for the best.";
       // --- call the board: the wager resolves ---
@@ -1304,15 +1342,18 @@ export const useGame = create<GameState>((set, get) => ({
       }
       if (allOut) quote = "The brigade abandoned ship mid-service. " + quote;
       const criticAvg = s.criticServed > 0 ? s.criticQ / s.criticServed : -1;
+      const champagneKnew = (s.career.champagneNight ?? -1) === s.career.night && s.criticSpotted;
       const criticVerdict = !s.criticSpotted
         ? "The inspector left unidentified."
-        : criticAvg < 0
-          ? "You clocked them, then never fed them."
-          : criticAvg >= 72
-            ? "The inspector wrote home about the Wellington."
-            : criticAvg >= 45
-              ? "The inspector nodded, once."
-              : "The inspector photographed it. For evidence.";
+        : champagneKnew && criticAvg >= 45
+          ? CHAMPAGNE_KNEW
+          : criticAvg < 0
+            ? "You clocked them, then never fed them."
+            : criticAvg >= 72
+              ? "The inspector wrote home about the Wellington."
+              : criticAvg >= 45
+                ? "The inspector nodded, once."
+                : "The inspector photographed it. For evidence.";
       sfx("review");
       set({
         phase: "review",
@@ -1379,6 +1420,9 @@ export const useGame = create<GameState>((set, get) => ({
     let dur = 2.0 + (1 - (cook?.skill ?? 0.5)) * 2.5 + s.rng() * 1.2;
     if (walkedOut) dur *= 1.8;
     if (adrenaline) dur /= 1.7;
+    // expo: the pass calls the fire, with the all-day count the trade counts on
+    const allDay = s.tickets.filter((x) => x.dish === t.dish && x.state !== "done").length;
+    const fireCall = pick(s.rng, EXPO_FIRE).replace("{D}", t.dish).replace("{T}", String(t.table)).replace("{N}", String(Math.max(1, allDay)));
     set({
       tickets: s.tickets.map((x) =>
         x.id === id
@@ -1386,8 +1430,8 @@ export const useGame = create<GameState>((set, get) => ({
           : x
       ),
       feed: walkedOut
-        ? pushFeed(s.feed, `Nobody on ${cook?.name}'s station — you're plating it yourself.`, "info")
-        : s.feed,
+        ? pushFeed(pushFeed(s.feed, `Nobody on ${cook?.name}'s station — you're plating it yourself.`, "info"), fireCall, "info", "THE PASS")
+        : pushFeed(s.feed, fireCall, "info", "THE PASS"),
     });
   },
 
@@ -1659,6 +1703,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (!plate) return;
     let { feed, ego, served, sentBack, smashed, complaints, qualitySum, streak, bestStreak } = s;
     let { criticServed, criticQ } = s;
+    let wellingtonRun = s.wellingtonRun;
     let criticServeAt = s.criticServeAt;
     const cooks = s.cooks.map((c) => ({ ...c }));
     const cook = cooks[plate.station];
@@ -1704,7 +1749,22 @@ export const useGame = create<GameState>((set, get) => ({
         bestStreak = Math.max(bestStreak, streak);
         if (plate.quality >= 72) {
           feed = pushFeed(feed, `Table ${plate.table}: clean plate club.`, "good");
+          // hands! the trade calls the walk, every time it matters
+          if (s.rng() < 0.6) {
+            feed = pushFeed(feed, pick(s.rng, EXPO_HANDS).replace("{T}", String(plate.table)).replace("{D}", plate.dish), "info", "THE PASS");
+          }
           if (cook) cook.morale = Math.min(100, cook.morale + 3);
+          // the Wellington trilogy: three pristine in a row and the room mythologises it
+          if (plate.dish === "Beef Wellington") {
+            wellingtonRun += 1;
+            if (wellingtonRun === 3) {
+              feed = pushFeed(feed, TRILOGY_WELLY, "drama", "THE REGULARS");
+              sfx("applause", { vol: 0.7 });
+              wellingtonRun = 0;
+            }
+          } else {
+            wellingtonRun = 0;
+          }
         } else {
           feed = pushFeed(feed, `Table ${plate.table} eats in silence. Acceptable.`, "info");
         }
@@ -1727,6 +1787,8 @@ export const useGame = create<GameState>((set, get) => ({
         if (cook) cook.morale = Math.max(0, cook.morale - 5);
       }
       feed = tiered(feed, egoBefore, ego);
+      // a bad plate breaks the trilogy — the myth dies hungry
+      if (plate.quality < 72) wellingtonRun = 0;
       set({
         tickets: s.tickets.map((t) => (t.id === plate.id ? { ...t, state: "done", verdict: v } : t)),
         served,
@@ -1742,6 +1804,7 @@ export const useGame = create<GameState>((set, get) => ({
         criticServeAt,
         tableServeAt,
         request: req,
+        wellingtonRun,
         milestoneAt: ms?.at ?? s.milestoneAt,
         milestoneText: ms?.text ?? s.milestoneText,
         ...stamp("SERVED"),
@@ -1778,6 +1841,9 @@ export const useGame = create<GameState>((set, get) => ({
     feed = pushFeed(feed, `You launch the ${plate.dish} into the tiles. The room stares.`, "drama");
     feed = tiered(feed, egoBeforeSmash, ego);
     if (cook && !cook.walkedOut) cook.morale = Math.max(0, cook.morale - 6);
+    // the kitchen remembers what you smashed — tomorrow's family meal is haunted by it
+    const career = { ...s.career, lastSmashed: plate.dish };
+    saveCareer(career, cooks);
     set({
       tickets: s.tickets.map((t) => (t.id === plate.id ? { ...t, state: "done", verdict: v } : t)),
       smashed,
@@ -1785,6 +1851,8 @@ export const useGame = create<GameState>((set, get) => ({
       cooks,
       feed,
       streak,
+      career,
+      wellingtonRun: 0,
       request: s.request?.ticketId === plate.id ? null : s.request,
       smashAt: performance.now(),
       ...stamp("SMASHED"),
@@ -1802,6 +1870,9 @@ export const useGame = create<GameState>((set, get) => ({
     const cooks = s.cooks.map((c) =>
       c.walkedOut ? c : { ...c, morale: Math.max(0, c.morale - cost) }
     );
+    // easter egg: screaming at an empty pass — nobody to hear it but the fridge
+    const liveTickets = s.tickets.filter((t) => t.state !== "done").length;
+    const emptyPass = liveTickets === 0;
     sfx(over ? "gasp" : "chorus");
     if (over) {
       setTimeout(() => sfx("gasp"), 140);
@@ -1820,12 +1891,14 @@ export const useGame = create<GameState>((set, get) => ({
       feed: tiered(
         pushFeed(
           s.feed,
-          over
-            ? "You held it too long. The kitchen flinches — and stops."
-            : s.screams === 0
-              ? "You scream. The kitchen moves faster. Everyone hates you."
-              : `Scream #${s.screams + 1}. It's working less.`,
-          over ? "bad" : "drama",
+          emptyPass && !over
+            ? pick(s.rng, EMPTY_PASS_SCREAM)
+            : over
+              ? "You held it too long. The kitchen flinches — and stops."
+              : s.screams === 0
+                ? "You scream. The kitchen moves faster. Everyone hates you."
+                : `Scream #${s.screams + 1}. It's working less.`,
+          emptyPass && !over ? "info" : over ? "bad" : "drama",
           "THE PASS"
         ),
         s.ego,
