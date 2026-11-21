@@ -21,6 +21,12 @@ Written up for the Z-Axis Awards ("best use of Meshy") and future batches.
      prop matches the kitchen's grade
    - animate via `useFrame` against game state — the cloche hops and spins
      when a plate lands for judging; props are *alive*, not set dressing
+4. **Boot** — props mount only after the title commits (`phase !==
+   "title"`, preloaded on the BEGIN click via `preloadKitchenModels()`),
+   each behind `PropBoundary` + `Suspense`. URLs go through
+   `modelUrl()` (base-relative) so the hosted sub-path resolves. One
+   failed GLB skips its prop instead of black-screening the kitchen;
+   `?debug=props` lists skips.
 
 ## Why previews only
 

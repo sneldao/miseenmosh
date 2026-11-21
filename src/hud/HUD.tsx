@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useGame, tierOf, tierName, BOARD, Ticket, PlateTier, VENUES, loadLegends } from "../game/state";
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
 import { speakReview, voiceEnabled, setVoiceEnabled } from "../game/voice";
+import { preloadKitchenModels } from "../scene/preloadModels";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
 import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
 import stampSmash from "../../assets/recraft/vector/stamp-smash.svg";
@@ -997,7 +998,7 @@ export default function HUD() {
       {glossary && <Glossary />}
       {phase === "title" && (
         <div className="title-card">
-          <img className="hero-lineup" src={lineupArt} alt="MISE EN MOSH — the brigade at the pass" />
+          <img className="hero-lineup" src={lineupArt} alt="MISE EN MOSH — the brigade at the pass" fetchPriority="high" loading="eager" decoding="async" />
           <div className="splash">{splash}</div>
           <div className="cast">
             <div className="ccard">
@@ -1028,11 +1029,14 @@ export default function HUD() {
             if (!l.residencies && !l.bestStreak) return null;
             return <div className="legends-line">HOUSE LEGENDS — best streak ×{l.bestStreak} · silent fives {l.silentFives} · covers {l.covers.length} · residencies {l.residencies}</div>;
           })()}
-          <button className="btn" onClick={start}>
+          <div className="controls-hint">
+            CLICK takes the pass · <b>V</b> drops to the cinematic cam if mouse-lock is blocked in the embed · <b>?</b> house manual · sound on, chef
+          </div>
+          <button className="btn" autoFocus onClick={() => { preloadKitchenModels(); start(); }}>
             {hasSave ? `CONTINUE RESIDENCY — NIGHT ${career.night}` : "BEGIN RESIDENCY"}
           </button>
           {hasSave && (
-            <button className="btn ghost" onClick={resetCareer}>
+            <button className="btn ghost" onClick={() => { preloadKitchenModels(); resetCareer(); }}>
               NEW RESIDENCY
             </button>
           )}

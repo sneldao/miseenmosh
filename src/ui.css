@@ -13,6 +13,46 @@
 }
 .hud > * { pointer-events: auto; }
 
+/* ---- first-load progress (BootOverlay) ---- */
+.boot-overlay {
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  width: min(22rem, 80vw); z-index: 50; pointer-events: none;
+  padding: .6rem .8rem .7rem;
+  background: rgba(13, 11, 9, .82); border: 1px solid rgba(176, 106, 42, .5);
+  border-top: none; border-radius: 0 0 4px 4px;
+  font-size: .68rem; letter-spacing: .1em; color: #ffd9a0;
+}
+.boot-track { height: 4px; background: #3a2a1c; border-radius: 2px; overflow: hidden; }
+.boot-fill { height: 100%; background: linear-gradient(90deg, #e08a2a, #ffe6b0); transition: width .25s ease; }
+.boot-line { margin-top: .35rem; opacity: .85; }
+
+/* ---- title controls hint: the first click does three jobs ---- */
+.controls-hint {
+  margin: .5rem 0 .8rem; max-width: 34rem;
+  font-size: .68rem; line-height: 1.6; letter-spacing: .04em;
+  color: #c9b48a;
+}
+.controls-hint b { color: #ffd9a0; border: 1px solid rgba(255, 217, 160, .5); border-radius: 3px; padding: 0 .3em; }
+
+/* ---- frame failure: words + retry, never black ---- */
+.frame-fallback {
+  position: fixed; inset: 0; z-index: 90;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 35%, #2a1a10 0%, #0d0b09 65%);
+  font-family: "ticket", "Courier New", monospace; color: #ffd9a0;
+  padding: 2rem; text-align: center;
+}
+.ff-card { max-width: 26rem; display: flex; flex-direction: column; gap: 1rem; align-items: center; }
+.ff-head { font-size: 1.4rem; letter-spacing: .18em; }
+.ff-body { font-size: .85rem; line-height: 1.6; opacity: .85; }
+
+/* ---- prop debug (?debug=props) ---- */
+.prop-debug {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 80;
+  background: rgba(60, 10, 10, .92); color: #ffb08a;
+  font-size: .62rem; letter-spacing: .04em; padding: .3rem .6rem;
+}
+
 /* ---- title card ---- */
 .title-card {
   position: absolute; inset: 0;

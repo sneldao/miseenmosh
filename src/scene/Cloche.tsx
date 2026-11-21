@@ -3,11 +3,12 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { Box3, Group, Vector3, Mesh, MeshStandardMaterial } from "three";
 import { useGame } from "../game/state";
+import { modelUrl } from "./modelUrl";
 
 /** The ceremonial cloche on the pass — Meshy meshy-t2.5, baked GLB.
  *  Hops and spins when a fresh plate lands for judging. */
 export default function Cloche() {
-  const { scene } = useGLTF("/models/cloche.glb");
+  const { scene } = useGLTF(modelUrl("cloche.glb"));
   const g = useRef<Group>(null);
   const lastPlate = useRef(-1);
   const born = useRef(0);
@@ -60,4 +61,5 @@ export default function Cloche() {
   );
 }
 
-useGLTF.preload("/models/cloche.glb");
+// NOTE: no module-level preload — props stream in after the title commits
+// via preloadKitchenModels() (BEGIN RESIDENCY) so first paint never waits.

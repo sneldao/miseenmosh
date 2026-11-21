@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useGame } from "../game/state";
 import Stations from "./Stations";
@@ -14,9 +14,30 @@ import FirstPerson from "./FirstPerson";
 import RailDockets from "./RailDockets";
 import SpeechBubble from "./SpeechBubble";
 import Ambience from "./Ambience";
+import PropBoundary from "./PropBoundary";
+import { modelUrl } from "./modelUrl";
 const STEEL = "#8a8d91";
 const STEEL_DARK = "#4a4d52";
 const WARM = "#ffb066";
+
+/** The 1MB gig poster loads on its own so the room shell paints first
+ *  and the title card never waits on wall art. */
+function PosterMesh() {
+  const poster = useTexture(chefPoster);
+  return (
+    <group>
+      <mesh position={[-8.82, 2.9, 1.2]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[1.35, 1.8]} />
+        <meshStandardMaterial map={poster} roughness={0.85} />
+      </mesh>
+      {/* frame shadow lip */}
+      <mesh position={[-8.86, 2.9, 1.2]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[1.5, 1.95]} />
+        <meshStandardMaterial color="#100c08" roughness={0.95} />
+      </mesh>
+    </group>
+  );
+}
 
 function PassCounter() {
   const bell = useRef<Group>(null);
@@ -394,7 +415,6 @@ function Room() {
     t.repeat.set(5, 4);
     return t;
   }, []);
-  const poster = useTexture(chefPoster);
   return (
     <group>
       {/* floor: worn dark squares */}
@@ -443,16 +463,11 @@ function Room() {
         <boxGeometry args={[14, 6, 0.3]} />
         <meshStandardMaterial map={tile} roughness={0.9} />
       </mesh>
-      {/* the gig poster — the game is the band */}
-      <mesh position={[-8.82, 2.9, 1.2]} rotation={[0, Math.PI / 2, 0]}>
-        <planeGeometry args={[1.35, 1.8]} />
-        <meshStandardMaterial map={poster} roughness={0.85} />
-      </mesh>
-      {/* frame shadow lip */}
-      <mesh position={[-8.86, 2.9, 1.2]} rotation={[0, Math.PI / 2, 0]}>
-        <planeGeometry args={[1.5, 1.95]} />
-        <meshStandardMaterial color="#100c08" roughness={0.95} />
-      </mesh>
+      {/* the gig poster — streams in behind its own boundary so the
+          room shell (and title card) never waits on wall art */}
+      <Suspense fallback={null}>
+        <PosterMesh />
+      </Suspense>
     </group>
   );
 }
@@ -584,6 +599,9 @@ const FOG_SVC = new Color("#0d0b09");
 
 export default function KitchenScene() {
   const tick = useGame((s) => s.tick);
+  // Title-first boot: the title card is DOM and must never wait on GLBs.
+  // Props stream in once the player commits (briefing+), during the beats.
+  const booted = useGame((s) => s.phase !== "title");
   const amb = useRef<AmbientLight>(null);
   const dir = useRef<DirectionalLight>(null);
   const spot = useRef<SpotLight>(null);
@@ -637,13 +655,25 @@ export default function KitchenScene() {
       <BrigadeFigure cookId={1} x={0} stationHue="#b07a2a" />
       <BrigadeFigure cookId={2} x={3.6} stationHue="#3a6a9a" />
       <Plates />
-      <Cloche />
-      {/* Meshy prop batch — sill + pass (see docs/meshy-pipeline.md) */}
-      <MeshyProp url="/models/platestack.glb" height={0.42} position={[-2.7, 1.16, 2.15]} tint={{ color: "#e8e4dc", metalness: 0.05, roughness: 0.55 }} wobble="scream" />
-      <MeshyProp url="/models/panstack.glb" height={0.45} position={[-3.8, 1.07, -4.85]} tint={{ color: "#b87333", metalness: 0.85, roughness: 0.4 }} />
-      <MeshyProp url="/models/seabass.glb" height={0.3} position={[-1.9, 1.07, -4.85]} rotation={0.5} tint={{ color: "#c8ccd4", metalness: 0.55, roughness: 0.4 }} />
-      <MeshyProp url="/models/lamb.glb" height={0.5} position={[1.8, 1.07, -4.85]} tint={{ color: "#c96a5a", metalness: 0.05, roughness: 0.7 }} />
-      <MeshyProp url="/models/shaker.glb" height={0.5} position={[3.8, 1.07, -4.85]} rotation={-0.4} tint={{ color: "#9fe060", metalness: 0.4, roughness: 0.5 }} />
+      {booted && (
+        <>
+          <PropBoundary>
+            <Suspense fallback={null}>
+              <Cloche />
+            </Suspense>
+          </PropBoundary>
+          {/* Meshy prop batch — sill + pass (see docs/meshy-pipeline.md) */}
+          <PropBoundary>
+            <Suspense fallback={null}>
+              <MeshyProp url={modelUrl("platestack.glb")} height={0.42} position={[-2.7, 1.16, 2.15]} tint={{ color: "#e8e4dc", metalness: 0.05, roughness: 0.55 }} wobble="scream" />
+          <MeshyProp url={modelUrl("panstack.glb")} height={0.45} position={[-3.8, 1.07, -4.85]} tint={{ color: "#b87333", metalness: 0.85, roughness: 0.4 }} />
+          <MeshyProp url={modelUrl("seabass.glb")} height={0.3} position={[-1.9, 1.07, -4.85]} rotation={0.5} tint={{ color: "#c8ccd4", metalness: 0.55, roughness: 0.4 }} />
+          <MeshyProp url={modelUrl("lamb.glb")} height={0.5} position={[1.8, 1.07, -4.85]} tint={{ color: "#c96a5a", metalness: 0.05, roughness: 0.7 }} />
+              <MeshyProp url={modelUrl("shaker.glb")} height={0.5} position={[3.8, 1.07, -4.85]} rotation={-0.4} tint={{ color: "#9fe060", metalness: 0.4, roughness: 0.5 }} />
+            </Suspense>
+          </PropBoundary>
+        </>
+      )}
       <SmashBurst />
       <RivalSilhouette />
       <Runner />
