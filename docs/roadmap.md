@@ -94,6 +94,11 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       panned one-shots, station heat glow with smoke warning, readable
       dining tables (press / regulars / couple / walk-in), critic
       escalation tells
+- [x] Ambient life (21 Nov): guests sip + weight-shift on their own
+      clocks, sconces dip with candle-grade flicker, service bell dings
+      on every serve, cooks idle between plates, bad ticker lines
+      tremble once, title card drifts — small + slow, so the urgent
+      channel (fire, dying tickets, phone flash) keeps the frame
 - [ ] Phase 3 — prep as a place: office scene, desk objects, one decision
       each, night-gated disclosure; Night 1 cold open into service (shipped 20 Nov: mid-rush seed + single-beat briefing, market N2+, shop N3+)
       *(family-meal ritual already in: praise / crispy bit / silence,
@@ -114,7 +119,10 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
 - [ ] Playtest sessions (10/day allowance); fix confirmed findings only
 - [ ] Deploy early, iterate — latest live version at deadline is judged.
       Runbook: [deploy.md](deploy.md) (deploy from the root; `build.output` packages `dist/`)
-- [ ] Publish → Simulation & management + all three sponsor tracks
+- [x] Publish → Simulation & management + all three sponsor tracks
+      (21 Nov — FIRST publish, release `b21576f9` / version 8 / SUB-1885
+      live at https://opengame.io/g/9i7mjkmdx4. Jam answers go on
+      `opengame publish`, evidence text on the deploy page)
 - [ ] Cross-submit to Chroma Awards (by Jan 7) — interactive narrative *(checklist: [chroma-submit.md](chroma-submit.md); same bytes as the OpenGame build)*
 
 ## Standing disciplines

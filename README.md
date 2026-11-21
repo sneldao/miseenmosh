@@ -1,5 +1,9 @@
 # MISE EN MOSH
 
+**Play it: https://opengame.io/g/9i7mjkmdx4** — live on OpenGame,
+Game Jam #1 entry (Simulation & management + ElevenLabs / fal / Meshy
+sponsor tracks). No sign-in, no install.
+
 *Everything in its place. Until the tickets start flying.*
 
 You're the enfant-terrible chef. Run the pass, break your brigade or build
