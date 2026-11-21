@@ -163,6 +163,16 @@ first 90 seconds and the cold open changes what it sees.
   `missing-ref` heuristic fired again — false positive, all six GLBs are
   uncompressed. Share: https://opengame.io/g/9i7mjkmdx4 — sponsor
   `--evidence-*` text can be added later via the deploy page.
+- **21 Nov, evening UTC** — release `5e4dd584` (first-land overhaul:
+  prod black screen fixed via base-relative `modelUrl()` + per-prop
+  `PropBoundary`, zero-JS boot shell, real `useProgress` bar, GLBs
+  deferred until after the title and preloaded on BEGIN, WebGL/failure
+  cards, `?debug=props`) is Ready; preview
+  `https://opengame.io/g/9i7mjkmdx4?preview=5e4dd584-268d-4270-ba15-8d826fae4c60`.
+  No `missing-ref` heuristic this time — the base-relative paths fixed
+  it. Deployed from the root with a fresh `--idempotency-key`;
+  4 daily slots remain. Still to verify inside the real iframe:
+  boot shell → title + % bar → briefing with props fading in.
 - **20 Nov, ~06:40 UTC** — the all-eleven build (coursing, 86, requests,
   milestones, runner, critic exit, ego tiers, board, loan, sauce, edge,
   comp) committed but NOT live: still no deploy slots until **12:01
