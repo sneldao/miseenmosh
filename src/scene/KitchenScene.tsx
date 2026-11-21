@@ -19,6 +19,24 @@ const STEEL_DARK = "#4a4d52";
 const WARM = "#ffb066";
 
 function PassCounter() {
+  const bell = useRef<Group>(null);
+  const lastServed = useRef(0);
+  const rungAt = useRef(-10);
+  useFrame(({ clock }) => {
+    const s = useGame.getState();
+    if (s.served !== lastServed.current) {
+      lastServed.current = s.served;
+      rungAt.current = clock.elapsedTime;
+    }
+    if (bell.current) {
+      const t = clock.elapsedTime;
+      const since = t - rungAt.current;
+      // idle: barely-there sway; rung: one quick ding-swing that decays.
+      // small angles only — the smash/scream keep the urgent channel.
+      const rung = since < 1.2 ? Math.sin(since * 18) * 0.3 * (1 - since / 1.2) : 0;
+      bell.current.rotation.z = Math.sin(t * 0.9) * 0.02 + rung;
+    }
+  });
   return (
     <group position={[0, 0, 2.2]}>
       {/* counter body */}
@@ -72,8 +90,8 @@ function PassCounter() {
           <meshStandardMaterial color="#8a3a2a" roughness={1} />
         </mesh>
       </group>
-      {/* service bell */}
-      <group position={[-0.72, 1.16, 0.24]}>
+      {/* service bell — sways on every serve, idles otherwise */}
+      <group position={[-0.72, 1.16, 0.24]} ref={bell}>
         <mesh position={[0, 0.006, 0]}>
           <cylinderGeometry args={[0.055, 0.062, 0.012, 16]} />
           <meshStandardMaterial color={STEEL_DARK} metalness={0.5} roughness={0.35} />
@@ -137,6 +155,15 @@ function BrigadeFigure({ cookId, x, stationHue }: { cookId: number; x: number; s
     const speed = plating ? 9 : amped ? 5.5 : 3;
     g.position.y = Math.abs(Math.sin(t * speed + x)) * (plating ? 0.06 : 0.03);
     g.rotation.y = Math.sin(t * 0.7 + x) * 0.15;
+    // idle life: weight-shift between feet when not plating — small, slow,
+    // so the fire/plating bounce keeps the urgent channel.
+    if (!plating) {
+      g.position.x = x + Math.sin(t * 0.55 + x * 1.3) * 0.05;
+      g.rotation.z = Math.sin(t * 0.42 + x) * 0.028;
+    } else {
+      g.position.x = x;
+      g.rotation.z = 0;
+    }
   });
   return (
     <group ref={ref} position={[x, 0, -2.4]}>

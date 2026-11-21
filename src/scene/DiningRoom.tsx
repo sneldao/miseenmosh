@@ -35,7 +35,16 @@ function Guest({
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
     const st = useGame.getState();
-    if (body.current) body.current.rotation.y = Math.sin(t * 0.5 + id) * 0.12;
+    if (body.current) {
+      // idle life: breathe, weight-shift, and a slow sip-cycle per guest.
+      // small + slow on purpose — the phone flash keeps the urgent channel.
+      body.current.rotation.y = Math.sin(t * 0.5 + id) * 0.12;
+      const sipCycle = (t * 0.07 + id * 0.37) % 1;
+      const sip = sipCycle > 0.88 ? Math.sin((sipCycle - 0.88) / 0.12 * Math.PI) : 0;
+      body.current.rotation.x = sip * 0.14;
+      body.current.rotation.z = Math.sin(t * 0.34 + id * 2.1) * 0.045;
+      body.current.position.y = Math.sin(t * 1.1 + id * 1.7) * 0.012 + sip * 0.02;
+    }
     if (flame.current) {
       const f = 0.8 + Math.sin(t * 7.3 + id * 2.1) * 0.22;
       flame.current.scale.set(1, f, 1);
@@ -170,6 +179,19 @@ const VENUE_DRESS = [
 
 function FarWall({ venue = 0 }: { venue?: number }) {
   const d = VENUE_DRESS[Math.min(2, venue)];
+  const sconces = useRef<(Group | null)[]>([]);
+  useFrame(({ clock }) => {
+    // ambient scheduler: each sconce breathes on its own slow timer with an
+    // occasional dip — candle-grade flicker, never strobe. Urgent channel
+    // (phone flash, fire, dying tickets) stays fast + bright by contrast.
+    const t = clock.elapsedTime;
+    sconces.current.forEach((g, i) => {
+      if (!g) return;
+      const dipCycle = (t * 0.05 + i * 0.61) % 1;
+      const dip = dipCycle > 0.92 ? Math.sin((dipCycle - 0.92) / 0.08 * Math.PI) * 0.25 : 0;
+      g.scale.setScalar(1 + Math.sin(t * 1.3 + i * 2.4) * 0.02 - dip * 0.06);
+    });
+  });
   return (
     <group position={[0, 0, -9.6]}>
       <mesh position={[0, 2.4, 0]} receiveShadow>
@@ -194,8 +216,8 @@ function FarWall({ venue = 0 }: { venue?: number }) {
         </group>
       ))}
       {/* sconces: warm points that tell you the room continues */}
-      {[-4.2, 4.2].map((x) => (
-        <group key={x} position={[x, 2.5, 0.25]}>
+      {[-4.2, 4.2].map((x, i) => (
+        <group key={x} position={[x, 2.5, 0.25]} ref={(g) => { sconces.current[i] = g; }}> 
           <mesh>
             <cylinderGeometry args={[0.04, 0.05, 0.24, 8]} />
             <meshStandardMaterial color="#c9a24a" metalness={0.5} roughness={0.35} />

@@ -20,7 +20,14 @@
   background: radial-gradient(ellipse at center, rgba(24,16,9,.22), rgba(30,20,11,.82));
   text-align: center;
 }
+/* ambient life: entry screens breathe slow + small; urgent (dying,
+   fire, scream) owns fast + large. One rule, both channels. */
+@keyframes cardDrift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
 .title-card h1 {
+  animation: cardDrift 7s ease-in-out infinite;
   font-size: clamp(2.4rem, 7vw, 5.2rem);
   letter-spacing: .06em; margin: 0;
   color: #ffd9a0; text-shadow: 0 0 30px rgba(255,140,40,.35);
@@ -122,6 +129,8 @@
   font-size: .72rem; line-height: 1.4; max-width: 21rem;
 }
 .ticker .line { opacity: .8; animation: lineIn .3s ease-out; }
+/* urgent channel: bad lines tremble once, everything else stays still */
+.ticker .line.bad { animation: lineIn .3s ease-out, tremor .35s linear 2; }
 @keyframes lineIn { from { opacity: 0; transform: translateX(-10px); } }
 .ticker .line.good { color: #a8d88a; }
 .ticker .line.bad { color: #f08060; }
@@ -374,6 +383,7 @@
   pointer-events: auto;
 }
 .brief {
+  animation: cardDrift 9s ease-in-out infinite;
   width: 34rem; max-width: 92vw; max-height: 92vh; overflow-y: auto;
   background: linear-gradient(165deg, #efe3cb, #e2d0ac);
   border: 1px solid #a8874f; border-radius: 4px;
