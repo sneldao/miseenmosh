@@ -151,6 +151,18 @@ first 90 seconds and the cold open changes what it sees.
   through a tunnel (25 golden fires, rushed-fire line, champagne bought
   for 15 ego, SILENT SERVICE ★ + tail quote on the review card). After
   the reset: `opengame deploy --wait --idempotency-key "$(uuidgen)"`.
+- **21 Nov, ~15:25 UTC** — FIRST PUBLISH. Release `b21576f9` (ambient-life
+  build: guest sip/shift, sconce dips, bell ding on serve, cook idle,
+  bad-line tremor + everything since `5331c6e`) is **live** as SUB-1885,
+  version 8. Entered Game Jam #1 on `simulation-management` + all three
+  sponsor tracks (elevenlabs, fal, meshy), sponsor email on file. The game
+  had never actually been published before — every prior deploy was
+  preview-only, so this was a first publish (`awaiting_details`) that
+  needed the jam answers on `opengame publish`, not `submit`. Fresh
+  `--idempotency-key` dodged the stale `upload_pending`. Draco
+  `missing-ref` heuristic fired again — false positive, all six GLBs are
+  uncompressed. Share: https://opengame.io/g/9i7mjkmdx4 — sponsor
+  `--evidence-*` text can be added later via the deploy page.
 - **20 Nov, ~06:40 UTC** — the all-eleven build (coursing, 86, requests,
   milestones, runner, critic exit, ego tiers, board, loan, sauce, edge,
   comp) committed but NOT live: still no deploy slots until **12:01
