@@ -180,3 +180,15 @@ first 90 seconds and the cold open changes what it sees.
   tunnel (5★ silent review, both request verdicts, both shoo outcomes,
   board payout, loan + repay, whisk saves, coursing, 86, milestones).
   After the reset: `opengame deploy --wait --idempotency-key "$(uuidgen)"`.
+- **22 Nov, ~22:45 UTC** — release `15b856f8` (flagship overhaul:
+  culinary authorship + service review, real rigged bodies for Petra,
+  Dimitri and Anwar with station work clips, portrait sockets and
+  bone-local tools, cream-and-colour room, first-person opening
+  close-up, real cooker/skillet/tongs) is **published and live** —
+  SUB-2015 review outcome `publish`, live at
+  https://opengame.io/g/9i7mjkmdx4 serving `index-DOdAbBGz.js`
+  (verified against local dist hash). Draco `missing-ref` heuristic
+  fired again — still a false positive, all eleven GLBs uncompressed.
+  Jam entry retained: Game Jam #1, all four tracks incl. meshy + fal.
+  Push needed `gh auth switch --user sneldao` first — the active gh
+  account had defaulted to `thisyearnofear` which lacks write access.
