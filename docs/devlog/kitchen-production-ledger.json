@@ -408,6 +408,21 @@
       "status": "generated_applied_embedded",
       "output": "clip Anwar___bowl_whisk_and_check inside assets/meshy/anwar-pilot/rigged-anwar.glb",
       "review": "Mannequin preview showed plausible cradle-and-whisk posture; full deformation review pending in Blender studio."
+    },
+    {
+      "id": "commis-body-reference-01",
+      "provider": "recraft",
+      "model": "recraftv4_1_pro_raster",
+      "method": "generate_image",
+      "prompt": "commis maquette: slight junior build, oversized cream jacket with rolled sleeves, petrol waist apron with ochre trim + tan pockets, turned-up trousers, tan lace-up boots, neutral rigging head",
+      "image_size": "3:4",
+      "n": 1,
+      "quoted_credits": 10,
+      "actual_credits": 10,
+      "provider_image_id": "e664db72-4ae9-4130-a27f-5624a071f880",
+      "output": "docs/devlog/media/kitchen-production/commis-body-reference-01.webp",
+      "status": "completed_accepted_for_body_pilot",
+      "review": "Slight silhouette distinct from all three cooks; waist apron and turned cuffs read clearly; clean separated limbs, complete neutral head. A-pose arms \u2014 Meshy pose_mode t-pose requests rig-ready pose; approved commis.webp portrait replaces guide head in game."
     }
   ]
 }

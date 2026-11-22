@@ -63,6 +63,46 @@
   thigh-weighting is unchanged from source — re-check during walkouts;
   smother click relies on the same hit targets as illustrated stations.
 
+## Deployed — release `15b856f8` live (22 Nov)
+
+- Commit `135e777` pushed to `main` (needed `gh auth switch --user
+  sneldao` — active account had defaulted to `thisyearnofear`), deployed
+  via `opengame deploy . --wait --json`, review SUB-2015 outcome
+  `publish`, **live at https://opengame.io/g/9i7mjkmdx4** serving
+  `index-DOdAbBGz.js` (hash verified against local dist). Draco
+  `missing-ref` heuristic again a false positive — no GLB is compressed.
+  Jam entry retained (Game Jam #1, all four tracks). Log in
+  `docs/deploy.md`.
+
+## Commis body — IN FLIGHT (resume here)
+
+- **Role:** our plate runner — replaces `DeliveryTray`'s floating
+  mittens in `KitchenScene.tsx` and will carry served plates to the
+  dining room + return empties (porter duty in one body).
+- **Portrait:** `assets/recraft/cast-gilliam/commis.webp` exists; a
+  masked head crop still needs making into
+  `assets/recraft/playable/commis.webp` (same process as the cooks').
+- **Body reference ACCEPTED:**
+  `docs/devlog/media/kitchen-production/commis-body-reference-01.webp`
+  (Recraft V4.1 Pro, 10cr, ledger id `commis-body-reference-01`) —
+  slight build, oversized cream jacket, petrol waist apron, turned
+  cuffs, tan lace-up boots.
+- **Meshy web route (Ego space2/p2):** mesh task created from that ref —
+  Smart Topology / Meshy T2.5 / 8,000 / Texture on / 15cr charged
+  (running total **100/150**, account 1,450 left). Mesh finished and
+  sits in the library as the newest card (cream jacket, petrol waist
+  apron).
+- **Resume:** confirm the texture stage (N1, 2K — dialog appears on
+  selecting the card, same as Dimitri/Anwar), then Animate → Humanoid
+  rig → markers check → download rigged GLB (Rigged Character +
+  All Added, GLB). Then ONE Motion Prime clip (10cr): tray-carry walk —
+  suggested prompt: "carries a tray held at chest height in both hands,
+  walks briskly, glances down at the plates". Download GLB to
+  `assets/meshy/commis-pilot/rigged-commis.glb`, audit clips with
+  `audit-rig.mjs` pattern, studio-review with `review-brigade.py`,
+  prep with `prepare-brigade.mjs` (add commis entry), then integrate —
+  DeliveryTray becomes a full walking body on the pass→door route.
+
 ## Live-test continuation — latest state to resume
 
 - **Pilot verified on `index-CQUx-pdA.js` (CSS `index-BiScvYfR.css`).**
