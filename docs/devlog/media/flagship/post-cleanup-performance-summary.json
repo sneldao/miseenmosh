@@ -1,0 +1,75 @@
+{
+  "profile": {
+    "renderer": "WebGLRenderer",
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "width": 1450,
+    "height": 736,
+    "drawingWidth": 2175,
+    "drawingHeight": 1104,
+    "pixelRatio": 1.5,
+    "shadows": true,
+    "visibility": "visible",
+    "timeSource": "performance.now around real WebGLRenderer.render",
+    "intervalMeaning": "interval between renderer submissions; not a GPU completion or display-presentation measurement",
+    "cpuMeaning": "synchronous renderer submission, including shadow pass; excludes game/React work before render",
+    "countMeaning": "renderer.info after render, including shadow draws in this Three.js version",
+    "diagnostics": true,
+    "buildScript": "http://127.0.0.1:5174/assets/index-Cow3bbDI.js"
+  },
+  "sampleFrames": 600,
+  "sampleIntervalSeconds": 20.631,
+  "rendererIntervalsMs": {
+    "median": 33.3,
+    "p95": 35.3,
+    "p99": 68,
+    "max": 84
+  },
+  "rendererSubmissionCpuMs": {
+    "median": 3.5,
+    "p95": 5.4,
+    "p99": 13.9,
+    "max": 16.9
+  },
+  "meanSubmissionCadenceHz": 29.08,
+  "slowestOnePercentCadenceHz": 14.01,
+  "framesOver16_7msPercent": 100.0,
+  "framesOverTwiceMedian": 13,
+  "worstOverMedian": 2.52,
+  "drawCalls": {
+    "median": 425.0,
+    "p95": 472,
+    "p99": 475,
+    "max": 475
+  },
+  "triangles": {
+    "median": 59630.0,
+    "p95": 66426,
+    "p99": 66990,
+    "max": 66990
+  },
+  "geometryCountRange": [
+    355,
+    427
+  ],
+  "textureCountRange": [
+    15,
+    15
+  ],
+  "longTaskCount": 0,
+  "longTaskTotalMs": 0,
+  "serviceTimeRange": [
+    3.3256425997279586,
+    23.924442599724944
+  ],
+  "scenarioEvidence": {
+    "maximumCooking": 3,
+    "maximumReady": 2,
+    "maximumQueued": 3,
+    "framesWithMultipleCooking": 102,
+    "framesWithMultipleReady": 47,
+    "framesHoldingPlate": 99,
+    "firstPersonFrames": 0
+  },
+  "limitations": "Renderer submission cadence, not measured physical display presentation. CPU metric excludes game/React work and asynchronous GPU cost. Machine contention must be reported separately."
+}

@@ -1,0 +1,33 @@
+{
+  "tolerance_m": 0.000003,
+  "tolerance_normal_uv": 0.000003,
+  "assets": {
+    "tongs": {
+      "source_sha256": "bd1c9e3bb407c2e25a9fcb8692670e447db9b11e0a2421642725abdd240c99e3",
+      "prepared_sha256": "184accb3b5b7f4c479b75db3674e585ad1ae39c15c0e8a8299cc0dca9462a2e1",
+      "triangles": 6440,
+      "draw_primitives": 6,
+      "max_position_error": 1.4901161193847656e-8,
+      "max_normal_error": 3.6553764681812595e-8,
+      "max_uv_error": 0
+    },
+    "skillet": {
+      "source_sha256": "0c80d63493e236bcfd63f4fb147ab57c5b4294124a4e9ed621236288a9a71a34",
+      "prepared_sha256": "3fdaa13e32c3e6135516c6f6cc74d6eee8d25f21b3cbbdccc250092f1606d83c",
+      "triangles": 6870,
+      "draw_primitives": 1,
+      "max_position_error": 7.450580596923828e-9,
+      "max_normal_error": 3.749052435164657e-8,
+      "max_uv_error": 0
+    },
+    "cooker": {
+      "source_sha256": "80fed45092ac0625bebb430d3942ef58551118d907a1601431a285dc6efef58e",
+      "prepared_sha256": "14130c890c0add093b08ddfba299917296698795061157654ece527942cff0be",
+      "triangles": 8512,
+      "draw_primitives": 18,
+      "max_position_error": 2.9802322387695312e-8,
+      "max_normal_error": 3.202926956991092e-8,
+      "max_uv_error": 0
+    }
+  }
+}

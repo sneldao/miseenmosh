@@ -1,8 +1,13 @@
-import { Component, Suspense, useEffect, useState, type ReactNode } from "react";
+import { Component, Suspense, lazy, useEffect, useState, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
 import KitchenScene from "./scene/KitchenScene";
+import { LOOK } from "./scene/artDirection";
 import HUD from "./hud/HUD";
 import BootOverlay from "./hud/BootOverlay";
+
+const Telemetry = import.meta.env.DEV || import.meta.env.VITE_DIAGNOSTICS === "1"
+  ? lazy(() => import("./scene/Telemetry"))
+  : null;
 
 function dismissBootShell() {
   try {
@@ -98,13 +103,14 @@ export default function App() {
     <FrameBoundary>
       <Canvas
         shadows
-        dpr={[1, 2]}
-        camera={{ position: [0, 4.6, 7.2], fov: 46, near: 0.1, far: 60 }}
+        dpr={[1, LOOK.maxDpr]}
+        camera={{ position: [0, 3.6, 7.3], fov: 40, near: 0.1, far: 60 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
       >
         <Suspense fallback={null}>
           <KitchenScene />
         </Suspense>
+        {Telemetry && <Suspense fallback={null}><Telemetry /></Suspense>}
       </Canvas>
       <HUD />
       <BootOverlay />

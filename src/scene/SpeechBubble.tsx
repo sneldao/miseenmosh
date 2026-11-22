@@ -117,6 +117,7 @@ export default function SpeechBubble() {
   const cooks = useGame((s) => s.cooks);
   const firstPerson = useGame((s) => s.firstPerson);
   const phase = useGame((s) => s.phase);
+  const openingStep = useGame((s) => s.openingStep);
 
   const item = feed[feed.length - 1];
   const card = useRef<Group>(null);
@@ -172,7 +173,7 @@ export default function SpeechBubble() {
     g.lookAt(camera.position.x, g.position.y, camera.position.z);
   });
 
-  if (!firstPerson || phase !== "service" || !item || !tex) return null;
+  if (!firstPerson || phase !== "service" || !item || !tex || openingStep) return null;
 
   return (
     <group ref={card} position={[0, CARD_Y, CARD_Z]} visible={false}>

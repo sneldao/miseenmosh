@@ -25,7 +25,8 @@ const STATION_NAME = ["GRILL", "SAUTÉ", "PASTRY"];
 const CARD_W = 0.2;
 const CARD_H = 0.27;
 const SLOT = 0.47;
-const HANG_Y = 2.34;
+const HANG_Y = 1.70;
+const RAIL_X = -2.6; // compact rail, left of the held plate
 const HANG_Z = 2.22;
 
 /** One soft stain texture, shared by every docket. */
@@ -295,7 +296,7 @@ function TornStub({ table, dish, slot, at }: { table: number; dish: string; slot
   return (
     // hangs slightly forward of the rail — the live dockets close ranks
     // over the victim's slot, so the stub must sit proud to be seen
-    <group position={[(slot - 2.5) * SLOT, HANG_Y, HANG_Z + 0.06]}>
+    <group position={[(slot - 2.5) * SLOT + RAIL_X, HANG_Y, HANG_Z + 0.06]}>
       <group ref={swing}>
         <mesh position={[0, -0.012, 0]}>
           <boxGeometry args={[0.038, 0.03, 0.016]} />
@@ -322,19 +323,20 @@ export default function RailDockets() {
 
   return (
     <group>
-      {/* the rail the dockets actually hang on, dropped from the dark above */}
-      <mesh position={[0, HANG_Y + 0.022, HANG_Z]} castShadow>
-        <boxGeometry args={[3.5, 0.042, 0.052]} />
+      {/* the rail the dockets actually hang on — a short bar left of the
+          plate, supported from the pass top instead of dropped from the dark */}
+      <mesh position={[RAIL_X, HANG_Y + 0.022, HANG_Z]} castShadow>
+        <boxGeometry args={[3.0, 0.025, 0.025]} />
         <meshStandardMaterial color="#4a4d52" metalness={0.7} roughness={0.42} />
       </mesh>
-      {[-1.68, 1.68].map((x) => (
-        <mesh key={x} position={[x, HANG_Y + 1.0, HANG_Z]}>
-          <cylinderGeometry args={[0.011, 0.011, 1.96, 6]} />
+      {[-4.1, -1.1].map((x) => (
+        <mesh key={x} position={[x, (HANG_Y + 1.15) / 2, HANG_Z]}>
+          <cylinderGeometry args={[0.011, 0.011, HANG_Y - 1.15, 6]} />
           <meshStandardMaterial color="#3c3f44" metalness={0.6} roughness={0.5} />
         </mesh>
       ))}
       {rail.map((t, i) => (
-        <group key={t.id} position={[(i - 2.5) * SLOT, 0, 0]}>
+        <group key={t.id} position={[(i - 2.5) * SLOT + RAIL_X, 0, 0]}>
           <Docket t={t} hotkey={i + 1} />
         </group>
       ))}

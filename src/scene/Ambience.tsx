@@ -23,7 +23,12 @@ export default function Ambience() {
       const c = s.cooks[st];
       if (!c || c.walkedOut) return 0;
       if (c.burning) return 1.3;
-      return Math.min(1, c.overloadT / 8) * 0.9 + (c.morale < 30 ? 0.08 : 0);
+      const working = s.tickets.some((t) => t.station === st && t.state === "plating");
+      return (
+        Math.min(1, c.overloadT / 8) * 0.9 +
+        (working ? 0.3 : 0) +
+        (c.morale < 30 ? 0.08 : 0)
+      );
     });
     const live = s.tickets.filter((t) => t.state !== "done").length;
     const murmur = Math.min(1, s.served / 24) - Math.min(0.5, s.misses * 0.12);

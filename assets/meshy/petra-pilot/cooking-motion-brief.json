@@ -1,0 +1,19 @@
+{
+  "status": "generated_applied_downloaded_under_review",
+  "output": "service-source.glb",
+  "clip": "Petra___sear_and_turn",
+  "approval": "Owner selected Prime kitchen — 150 cap. This first six-second Prime action is quoted at 10 credits.",
+  "channel": "Owner's Meshy Pro website through Ego",
+  "name": "Petra - sear and turn",
+  "ai_model": "Motion Prime",
+  "duration_s": 6,
+  "quoted_credits": 10,
+  "quote_source": "Text to Motion dialog: Motion Prime, slider 6, Generate button 10",
+  "alternative": {
+    "ai_model": "Motion Swift",
+    "quoted_credits": 3,
+    "quote_duration_s": 3
+  },
+  "prompt": "An upright chef stands still at a waist-high stove. Feet stay planted. Left hand steadies a pan handle. Right hand holds cooking tongs: reach gently forward, close them on a piece of meat, lift slightly, turn the wrist to roll the meat, lower it into the pan, release, return to a relaxed ready pose. Small controlled movements. No walking, crouching, dancing or talking. Full body.",
+  "acceptance": "Inspect the result on Petra's own rig. Feet planted, natural shoulders/elbows/wrists, clear reach-turn-return performance, no apron stretch, continuous transitions, and real tongs/pan contact in the kitchen. No other body jobs until Petra's route is proven."
+}

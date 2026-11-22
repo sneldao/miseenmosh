@@ -1,0 +1,233 @@
+{
+ "config": {
+  "version": 1,
+  "coordinate_system": "metres, glTF Y up; bake complete source node world transforms before regrouping (positions by world matrix, normals by inverse transpose)",
+  "output": "prepared.glb",
+  "normal_resize": "Lanczos in vector-component space, then renormalize RGB vectors",
+  "base_color_resize": "linear-light RGB, encode back to sRGB",
+  "packed_maps": "preserve every RGB channel; roughness is G, metallic is B",
+  "tongs": {
+   "source_sha256": "bd1c9e3bb407c2e25a9fcb8692670e447db9b11e0a2421642725abdd240c99e3",
+   "texture_max_side": 512,
+   "grip_source": [
+    -0.105,
+    0.024,
+    0
+   ],
+   "root_rotation_y": -1.5707963267948966,
+   "hinge_source": [
+    -0.1372816413640976,
+    0.027976924553513527,
+    0
+   ],
+   "jaw_contact_source": [
+    0.155,
+    0.009,
+    0
+   ],
+   "upper_parts": [
+    "Silicone head, upper, black",
+    "Tong arm, upper, stainless steel"
+   ],
+   "lower_parts": [
+    "Silicone head, lower, black",
+    "Tong arm, lower, stainless steel"
+   ],
+   "pivot_names": [
+    "TongsUpper",
+    "TongsLower"
+   ],
+   "pivot_axis": "local Z (source frame), +angle upper / -angle lower",
+   "max_half_open_radians": 0.14,
+   "materials": {
+    "Brushed stainless steel": {
+     "metalness": 0.85,
+     "roughness_source_g": [
+      44,
+      68
+     ],
+     "roughness_target": [
+      0.55,
+      0.67
+     ],
+     "normal_scale": 0.35
+    },
+    "Polished stainless steel": {
+     "metalness": 0.9,
+     "roughness_source_g": [
+      21,
+      39
+     ],
+     "roughness_target": [
+      0.45,
+      0.55
+     ]
+    },
+    "Black food-grade silicone": {
+     "metalness": 0,
+     "roughness_source_g": [
+      96,
+      133
+     ],
+     "roughness_target": [
+      0.75,
+      0.9
+     ],
+     "normal_scale": 0.25
+    }
+   }
+  },
+  "skillet": {
+   "source_sha256": "0c80d63493e236bcfd63f4fb147ab57c5b4294124a4e9ed621236288a9a71a34",
+   "texture_max_side": 512,
+   "bowl_center_source": [
+    -0.02852371335029602,
+    0,
+    0
+   ],
+   "grip_source": [
+    0.16,
+    0.047,
+    0
+   ],
+   "merge_by_material": true,
+   "materials": {
+    "Seasoned cast iron": {
+     "metalness": 0.15,
+     "roughness_source_g": [
+      82,
+      132
+     ],
+     "roughness_target": [
+      0.65,
+      0.8
+     ],
+     "normal_scale": 0.35
+    }
+   }
+  },
+  "cooker": {
+   "source_sha256": "80fed45092ac0625bebb430d3942ef58551118d907a1601431a285dc6efef58e",
+   "texture_max_side": 256,
+   "merge_by_material_within_functional_group": true,
+   "functional_groups": {
+    "OvenDoor": [
+     "Finite smoked oven glazing",
+     "Handle mounting boss",
+     "Lower oven door trim",
+     "Oven door cross frame",
+     "Oven door vertical frame",
+     "Tubular door handle"
+    ],
+    "ControlKnob0to4": [
+     "Turned control knob",
+     "Knob raised index"
+    ],
+    "Static": "all remaining parts"
+   },
+   "group_matching": "exact base names plus Blender numeric .001 etc suffixes; pair knobs by suffix",
+   "door_pivot_source": [
+    0,
+    0.15299999713897705,
+    0.2529999911785126
+   ],
+   "door_axis": "local X; positive angle opens top toward +Z",
+   "knob_pivots_source": [
+    [
+     -0.24,
+     0.795,
+     0.284
+    ],
+    [
+     -0.12,
+     0.795,
+     0.284
+    ],
+    [
+     0,
+     0.795,
+     0.284
+    ],
+    [
+     0.12,
+     0.795,
+     0.284
+    ],
+    [
+     0.24,
+     0.795,
+     0.284
+    ]
+   ],
+   "knob_axis": "local Z",
+   "materials": {
+    "gasket": {
+     "metalness": 0,
+     "roughness": 0.82
+    },
+    "iron": {
+     "metalness": 0.15,
+     "roughness": 0.72
+    },
+    "inox": {
+     "metalness": 0.78,
+     "roughness": 0.55
+    },
+    "enamel": {
+     "metalness": 0,
+     "roughness": 0.58,
+     "srgb_tint": "#286e70"
+    },
+    "dark": {
+     "metalness": 0,
+     "roughness": 0.6
+    },
+    "optical": {
+     "metalness": 0,
+     "roughness": 0.32,
+     "opaque_srgb_color": "#182b2d",
+     "remove_transmission_and_ior": true
+    }
+   }
+  }
+ },
+ "tools": {
+  "tongs": {
+   "source_sha256": "bd1c9e3bb407c2e25a9fcb8692670e447db9b11e0a2421642725abdd240c99e3",
+   "prepared_sha256": "184accb3b5b7f4c479b75db3674e585ad1ae39c15c0e8a8299cc0dca9462a2e1",
+   "bytes": 1378052,
+   "ops": [
+    "bake world transforms",
+    "Ry(-pi/2)*T(-grip) root",
+    "merge by material within fixed/upper/lower",
+    "pivots at hinge, verts hinge-relative",
+    "sockets grip/tip",
+    "texture resize+MR G remap+normal renormalize"
+   ]
+  },
+  "skillet": {
+   "source_sha256": "0c80d63493e236bcfd63f4fb147ab57c5b4294124a4e9ed621236288a9a71a34",
+   "prepared_sha256": "3fdaa13e32c3e6135516c6f6cc74d6eee8d25f21b3cbbdccc250092f1606d83c",
+   "bytes": 850372,
+   "ops": [
+    "T(-bowl_center)",
+    "merge five meshes by material",
+    "sockets grip/bowl",
+    "texture resize+MR G remap+normal renormalize"
+   ]
+  },
+  "cooker": {
+   "source_sha256": "80fed45092ac0625bebb430d3942ef58551118d907a1601431a285dc6efef58e",
+   "prepared_sha256": "14130c890c0add093b08ddfba299917296698795061157654ece527942cff0be",
+   "bytes": 549788,
+   "ops": [
+    "bake node translations",
+    "merge by material within door/knobs/static",
+    "door pivot + knob pivots",
+    "enamel linear tint, optical opaque + drop transmission/ior",
+    "texture resize to 256"
+   ]
+  }
+ },
+ "config_sha256": "47a96679ad2b46ba3517c2ea38812c4852d22a3ea39bcd110fd896b30ab32d3a"
+}

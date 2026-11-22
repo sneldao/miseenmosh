@@ -1,0 +1,8 @@
+*.glb -text -diff
+*.blend -text -diff
+*.png -text -diff
+*.jpg -text -diff
+*.jpeg -text -diff
+*.webp -text -diff
+*.wav -text -diff
+*.ogg -text -diff

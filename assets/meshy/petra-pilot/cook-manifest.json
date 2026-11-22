@@ -1,0 +1,30 @@
+{
+  "status": "derivative_requires_pose_review",
+  "source_sha256": "f7cda6effa11e2549d94345ddbb64a83e67d04d4fffd509ed4df27e88ddf6148",
+  "mask_sha256": "2aff13a305b6c9b6bfed122e5b51452173175053080315d28149fe8d1efea79a",
+  "output_sha256": "ea91a8ac246953cc482d112e8dc86d3d2f51df4278562d4195c7af77edf6fdaf",
+  "selected_vertices": 644,
+  "joint_count": 67,
+  "geometry_uv_material_preserved": true,
+  "hinge_bind_world_m": [
+    0,
+    1.04,
+    0.15
+  ],
+  "upper_blend_y_m": [
+    0.94,
+    1.04
+  ],
+  "cloth_swing": {
+    "sample_hz": 60,
+    "max_radians": 1.45,
+    "leg_angle_factor": 1.1,
+    "smoothing": [
+      1,
+      4,
+      6,
+      4,
+      1
+    ]
+  }
+}

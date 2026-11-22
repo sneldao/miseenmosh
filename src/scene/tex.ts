@@ -7,47 +7,66 @@ function canvas(w: number, h: number) {
   return c;
 }
 
-/** Dark metro tile with grout lines and per-tile value noise. */
+/** Cream metro tile, staggered bond, muted petrol grout, fine ink
+ *  crosshatch chips. All detail is deterministic — same wall every frame. */
 export function tileTexture() {
   const c = canvas(256, 256);
   const g = c.getContext("2d")!;
   const tw = 64;
   const th = 32;
+  g.fillStyle = "#7d9a96"; // muted petrol grout
+  g.fillRect(0, 0, 256, 256);
   for (let y = 0; y < 8; y++) {
-    for (let x = 0; x < 4; x++) {
-      const v = 26 + ((x * 7 + y * 13) % 12);
-      g.fillStyle = `rgb(${v},${v - 3},${v - 6})`;
-      g.fillRect(x * tw, y * th, tw, th);
-      g.fillStyle = "rgba(255,235,200,0.04)";
-      g.fillRect(x * tw, y * th, tw, 3);
+    const off = (y % 2) * (tw / 2);
+    for (let x = -1; x < 5; x++) {
+      const px = x * tw + off;
+      const py = y * th;
+      const warm = (x * 7 + y * 13) % 3;
+      g.fillStyle = warm === 0 ? "#f8ecd2" : warm === 1 ? "#f4e6c6" : "#fbf0d8";
+      g.fillRect(px + 1.5, py + 1.5, tw - 3, th - 3);
+      // glazed top-edge light
+      g.fillStyle = "rgba(255,255,255,0.25)";
+      g.fillRect(px + 1.5, py + 1.5, tw - 3, 3);
+      // fine crosshatch chips, fixed pattern
+      const chip = (x * 5 + y * 11) % 7;
+      if (chip === 0) {
+        g.strokeStyle = "rgba(48,44,43,0.35)";
+        g.lineWidth = 0.8;
+        g.beginPath();
+        g.moveTo(px + 12, py + 22); g.lineTo(px + 20, py + 26);
+        g.moveTo(px + 14, py + 26); g.lineTo(px + 18, py + 22);
+        g.moveTo(px + 44, py + 8); g.lineTo(px + 50, py + 12);
+        g.stroke();
+      }
     }
   }
-  g.fillStyle = "#151210";
-  for (let x = 0; x <= 4; x++) g.fillRect(x * tw - 1, 0, 2, 256);
-  for (let y = 0; y <= 8; y++) g.fillRect(0, y * th - 1, 256, 2);
   const t = new CanvasTexture(c);
   t.wrapS = t.wrapT = RepeatWrapping;
   t.colorSpace = SRGBColorSpace;
   return t;
 }
 
-/** Scuffed dark kitchen floor: big worn squares. */
+/** Muted cream/petrol checker floor — worn illustrated tiles. */
 export function floorTexture() {
   const c = canvas(256, 256);
   const g = c.getContext("2d")!;
   for (let y = 0; y < 4; y++) {
     for (let x = 0; x < 4; x++) {
       const even = (x + y) % 2 === 0;
-      const v = even ? 24 : 30;
-      g.fillStyle = `rgb(${v},${v - 3},${v - 5})`;
+      g.fillStyle = even ? "#e9dcc0" : "#9db8b2";
       g.fillRect(x * 64, y * 64, 64, 64);
+      // scuff + wear, deterministic
       if ((x * 5 + y * 3) % 4 === 0) {
-        g.fillStyle = "rgba(0,0,0,0.18)";
-        g.fillRect(x * 64 + 8, y * 64 + 20, 30, 12);
+        g.fillStyle = "rgba(60,50,40,0.12)";
+        g.fillRect(x * 64 + 10, y * 64 + 22, 28, 10);
+      }
+      if ((x * 3 + y * 7) % 5 === 0) {
+        g.fillStyle = "rgba(255,255,255,0.10)";
+        g.fillRect(x * 64 + 30, y * 64 + 12, 18, 8);
       }
     }
   }
-  g.fillStyle = "#0e0c0a";
+  g.fillStyle = "#6f8a84";
   for (let x = 0; x <= 4; x++) g.fillRect(x * 64 - 1, 0, 2, 256);
   for (let y = 0; y <= 4; y++) g.fillRect(0, y * 64 - 1, 256, 2);
   const t = new CanvasTexture(c);

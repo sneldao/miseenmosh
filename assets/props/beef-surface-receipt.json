@@ -1,0 +1,25 @@
+{
+  "status": "candidate_requires_in_scene_review",
+  "source": "docs/devlog/media/kitchen-production/seared-beef-surface-01.webp",
+  "source_sha256": "d566639170011b88e6ddf6c3afd593c4f3a2ecdde1474e090f661d675f779a30",
+  "output": "assets/recraft/food-lino/seared-beef-surface.webp",
+  "sha256": "4a912fbd3f431872d1b34d422e3c2cf50b6a6220aaf1eb305dacc05f24f669c0",
+  "size": [
+    512,
+    512
+  ],
+  "palette_srgb_hex": [
+    "3c2119",
+    "744027",
+    "a5663b",
+    "bd8a56"
+  ],
+  "perceptual_luma_knots": [
+    0,
+    0.25,
+    0.6,
+    1
+  ],
+  "resampling": "linear-light float-channel Lanczos",
+  "pillow_version": "12.2.0"
+}

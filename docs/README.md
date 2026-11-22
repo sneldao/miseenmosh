@@ -8,8 +8,11 @@ Everything else supports one of those two.
 
 | Doc | Role |
 |---|---|
-| [design.md](design.md) | The game, as specified. Living spec. |
+| [design.md](design.md) | Game specification: baseline behaviour, flagship direction and art/performance contract. |
 | [roadmap.md](roadmap.md) | 30-day build plan with checkboxes. Decisions tracked here. |
+| [player-attachment-plan.md](player-attachment-plan.md) | Current execution tracker: flagship M0–M3, six workstreams, acceptance and evidence. |
+| [Flagship local proof](devlog/flagship-local-proof.md) | Verified connected route, renderer/resource observations and remaining acceptance gates. |
+| [Kitchen production plan](kitchen-production-plan.md) | Next whole-room asset, animation and sound milestone; preserves the owner-approved faces. |
 | [first-person-upgrade.md](first-person-upgrade.md) | Form plan, Phases 1–4. Phases 1–2 shipped; 3–4 pending. |
 | [deploy.md](deploy.md) | Deploy runbook: repo root, `dist/`, five slots a day. |
 | [meshy-pipeline.md](meshy-pipeline.md) | Prop pipeline prompt → GLB → pass (Z-Axis evidence). |
@@ -22,6 +25,7 @@ Everything else supports one of those two.
 - [surprise-senses-9-10.md](research/surprise-senses-9-10.md) — suspense, senses, missions 9/10.
 - [character-personality.md](research/character-personality.md) — systems into people.
 - [verbosity-progressive-disclosure.md](research/verbosity-progressive-disclosure.md) — reading load; adopted rules are design.md §9.
+- [codrops-kitchen-experience.md](research/codrops-kitchen-experience.md) — Ego-browser study of both Codrops collections; source-backed direction for a brighter, expressive kitchen.
 - [virality.md](research/virality.md) — share patterns, judge-eye view.
 - [platform-winners.md](research/platform-winners.md) — what the platform's hits do differently; 7 ranked moves.
 - [platform-sdk.md](research/platform-sdk.md) — SDK facts + what we wired (boards, achievements, events, frame rules).

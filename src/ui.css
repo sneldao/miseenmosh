@@ -82,9 +82,10 @@
 .btn:hover { background: #3d2010; }
 
 /* ---- ticket rail ---- */
-.rail {
-  position: absolute; top: 1rem; left: 50%; transform: translateX(-50%);
-  display: flex; gap: .5rem; max-width: 92vw; overflow: hidden;
+.order-rail {
+  position: absolute; top: 1rem; bottom: auto; left: 50%; transform: translateX(-50%);
+  display: flex; gap: .45rem; width: max-content;
+  max-width: calc(100vw - 11rem); overflow-x: auto; overflow-y: hidden; z-index: 20;
 }
 .rail-more {
   align-self: flex-start; min-width: 2.4rem; padding: .45rem .5rem;
@@ -94,13 +95,14 @@
 }
 .ticket {
   background: #f4ead2; color: #221408;
-  padding: .45rem .6rem; min-width: 7.2rem;
+  padding: .45rem .6rem;
   font-size: .72rem; line-height: 1.25;
   border-radius: 0 0 3px 3px;
   box-shadow: 0 3px 8px rgba(0,0,0,.5);
   cursor: pointer; transform-origin: top center;
   animation: ticketIn .25s ease-out;
 }
+button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 9rem; min-width: 9rem; text-align: left; cursor: pointer; }
 .ticket:hover { transform: rotate(1.5deg) translateY(2px); }
 .ticket .tno { font-weight: bold; opacity: .55; }
 .ticket .dish { margin: .15rem 0 .3rem; }
@@ -214,6 +216,47 @@
 .review .rbtns { display: flex; gap: .8rem; justify-content: center; }
 .review .btn { background: #2a1608; font-size: .85rem; padding: .6rem 1.2rem; }
 .review .critic-line.epi { border-left: 2px solid #d0735a; padding-left: .5rem; font-style: italic; }
+
+/* ---- service review: one headline, one incident, one consequence ---- */
+.review.service-review {
+  width: min(38rem, calc(100vw - 2rem));
+  max-width: none;
+  box-sizing: border-box;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  padding: clamp(1rem, 3vh, 2rem);
+  clip-path: none; /* the perforated edge clips scrolled content — plain ticket here */
+}
+.review.service-review .headline { font-size: 1.2rem; font-weight: 700; letter-spacing: .06em; color: #5a3510; margin: .2rem 0 .6rem; }
+.review.service-review .incident { font-size: 1rem; line-height: 1.5; margin: 0 0 .9rem; font-style: italic; }
+.review.service-review .rlabel { font-size: .62rem; letter-spacing: .22em; color: #8a6418; margin-bottom: .2rem; }
+.review.service-review .consequence { font-size: .95rem; line-height: 1.5; color: #4a3010; margin: 0 0 1rem; }
+.review.service-review .main-action { margin-bottom: .8rem; }
+.review-details { text-align: left; margin: .4rem 0 .2rem; font-size: .8rem; }
+.review-details summary { cursor: pointer; font-size: .72rem; letter-spacing: .15em; color: #7a4a1a; padding: .3rem .2rem; }
+.review-details summary:focus-visible { outline: 2px solid #b06a2a; outline-offset: 2px; }
+.review-details .rstats { justify-content: flex-start; margin: .6rem 0; }
+.review-details .rbtns { flex-wrap: wrap; justify-content: flex-start; }
+.review-details .critic-line { margin: .4rem 0; }
+
+/* ---- title: blocked save notice — floats below the (often overflowing) title panel ---- */
+.save-issue {
+  position: fixed; left: 1rem; right: 1rem; bottom: 1rem; z-index: 80;
+  width: min(30rem, calc(100vw - 2rem)); box-sizing: border-box; max-width: none; margin: 0 auto;
+  padding: .6rem .9rem;
+  background: rgba(244,234,210,.92); color: #4a3010;
+  border: 1px solid #c9a44a; border-left: 4px solid #b06a2a;
+  font-size: .82rem; line-height: 1.45; text-align: left;
+}
+
+/* ---- briefing: last night, on the record ---- */
+.blast {
+  text-align: left; border-left: 3px solid #c9a44a;
+  background: rgba(120,80,40,.10); padding: .5rem .8rem; margin: 0 0 .9rem;
+}
+.blast .rlabel { font-size: .6rem; letter-spacing: .22em; color: #8a6418; }
+.blast .bincident { font-size: .78rem; font-style: italic; color: #4a3010; margin: .15rem 0; line-height: 1.45; }
+.blast .bconsequence { font-size: .74rem; color: #6a552e; line-height: 1.4; }
 .cover-line { margin-top: .5rem; padding: .45rem .6rem; border: 1px dashed #8a6230; font-style: italic; opacity: .95; }
 .cover-head { font-size: 1.05rem; font-weight: 700; letter-spacing: .06em; color: #5a3510; margin: .2rem 0 .1rem; }
 .lnote { display: block; font-size: .68rem; color: #7a6438; margin-top: .15rem; }
@@ -255,6 +298,34 @@
 .pass-actions {
   position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
   display: flex; gap: .7rem;
+}
+.pass-panel {
+  position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; gap: .4rem;
+  width: min(42rem, calc(100vw - 2rem));
+  padding: .6rem .8rem;
+  background: #f4ead2; color: #221408;
+  border-radius: 3px; box-shadow: 0 4px 14px rgba(0,0,0,.45);
+}
+.pass-panel .plate-note {
+  position: static; transform: none; margin: 0;
+  white-space: normal; color: #221408; font-size: .8rem;
+}
+.pass-panel .plate-obs { color: #4a3a26; }
+.pass-panel .plate-std { color: #6a5a44; font-size: .72rem; }
+.pass-panel .plate-verbs { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; }
+.pass-panel .btn { white-space: nowrap; }
+/* while inspecting on a wide screen the panel steps aside so the food is clear */
+@media (min-width: 761px) {
+  .pass-panel.inspecting {
+    right: 1rem; top: 9rem; bottom: auto; left: auto; transform: none;
+    width: 18rem; max-height: calc(100vh - 20rem); overflow-y: auto;
+  }
+  .pass-panel.inspecting .plate-verbs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: .4rem;
+  }
+  .pass-panel.inspecting .plate-verbs .whisk,
+  .pass-panel.inspecting .plate-verbs .big { grid-column: span 2; }
 }
 .pass-actions .btn.serve { border-color: #6aa84f; color: #cfe8bd; }
 .pass-actions .btn.back  { border-color: #b08a2a; color: #eed9a0; }
@@ -348,6 +419,13 @@
   position: absolute; top: 1rem; left: 1rem; font-size: .75rem; opacity: .65;
   max-width: 16rem; line-height: 1.5;
 }
+
+.ticker,.brigade,.status,.hint {
+  text-shadow:-1px -1px 0 #183a35,1px -1px 0 #183a35,-1px 1px 0 #183a35,1px 1px 0 #183a35;
+  opacity:1;
+}
+.ticker .line { opacity:1; }
+.hint { top:9rem; }
 
 /* ---- first-person pass ---- */
 .reticle {
@@ -576,12 +654,12 @@
 .pass-actions { flex-wrap: wrap; justify-content: center; max-width: 94vw; }
 /* 1024x768 laptop: tighter rail + ticker so the pass stays readable */
 @media (max-width: 1100px) {
-  .ticket { min-width: 6rem; font-size: .66rem; }
+  button.ticket { flex-basis: 8rem; width: 8rem; min-width: 8rem; font-size: .68rem; }
   .ticker { max-width: 16rem; font-size: .66rem; }
 }
 /* 800x600 window: shrink the furniture, keep every verb reachable */
 @media (max-width: 760px) {
-  .ticket { min-width: 5.2rem; font-size: .6rem; padding: .35rem .45rem; }
+  button.ticket { flex-basis: 7rem; width: 7rem; min-width: 7rem; font-size: .66rem; padding: .35rem .45rem; }
   .ticker { max-width: 12rem; font-size: .6rem; bottom: 12rem; }
   .brigade { bottom: 7rem; font-size: .6rem; }
   .status { font-size: .66rem; bottom: .6rem; }
@@ -601,8 +679,8 @@
   .title-card h1 { font-size: 2rem; }
   .hero-lineup { max-width: 86vw; }
   .ccard { width: 4.2rem; }
-  .rail { top: .5rem; gap: .3rem; }
-  .ticket { min-width: 4.6rem; }
+  .order-rail { top: .5rem; gap: .3rem; max-width: calc(100vw - 1rem); }
+  button.ticket { flex-basis: 6rem; width: 6rem; min-width: 6rem; font-size: .62rem; }
   .ticker { display: none; }
   .brigade { left: .5rem; }
   .status { left: .5rem; }
@@ -631,3 +709,110 @@
   .bshop.slim { margin-top: .4rem; }
   .btn.shop { padding: .35rem .7rem; }
 }
+
+/* ---- opening redesign: quiet title, taught-by-doing service, lean briefing ---- */
+.title-card.title-simple {
+  position: absolute; inset: 0; box-sizing: border-box; height: 100dvh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(.75rem, 3vh, 1.5rem); padding: 1rem; overflow: hidden;
+}
+.title-simple .hero-lineup {
+  max-height: min(60dvh, 32rem); max-width: min(86vw, 52rem);
+  width: auto; height: auto; object-fit: contain; margin: 0;
+}
+.title-play { font-size: 1.2rem; padding: .9rem 2.8rem; }
+.title-menu { position: absolute; top: 1rem; right: 1rem; text-align: right; z-index: 40; }
+.title-menu > summary {
+  cursor: pointer; list-style: none;
+  font-family: inherit; font-size: .78rem; letter-spacing: .14em;
+  color: #ffd9a0; background: #2a1608; border: 1px solid #b06a2a; border-radius: 2px;
+  padding: .5rem 1rem;
+}
+.title-menu > summary::-webkit-details-marker { display: none; }
+.title-menu[open] > summary { background: #3a2210; }
+.title-menu-panel {
+  margin-top: .5rem; display: flex; flex-direction: column; gap: .45rem; align-items: stretch;
+  background: #241708; border: 1px solid #b06a2a; border-radius: 2px; padding: .8rem;
+  max-height: calc(100dvh - 5rem); overflow: auto; text-align: center;
+  box-shadow: 0 8px 28px rgba(0,0,0,.6);
+}
+.title-menu-panel .btn { font-size: .78rem; padding: .5rem .9rem; }
+.cast-menu summary {
+  cursor: pointer; list-style: none;
+  font-size: .72rem; letter-spacing: .14em; color: #e8c33a; padding: .35rem;
+}
+.cast-menu summary::-webkit-details-marker { display: none; }
+.title-menu-panel .cast { flex-wrap: wrap; }
+.title-menu-panel .ccard { width: 4.4rem; }
+.title-menu-panel .ccard img { max-height: 10vh; }
+button.ccard { font-family: inherit; font-size: inherit; cursor: pointer; text-align: center; }
+
+/* lean returning-night briefing */
+.quick-brief {
+  width: min(38rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  box-sizing: border-box; overflow-y: auto;
+  padding: clamp(1rem, 3vh, 2rem);
+  text-align: center;
+}
+.qcast { justify-content: center; }
+.qcast .qcook { width: min(6.5rem, 22vw); cursor: default; }
+.qcook img { max-height: clamp(4rem, 13vh, 7rem); }
+.qcook .cname { font-size: .78rem; font-weight: 700; }
+.qmeal { margin: .8rem 0; }
+.qmeal-row { display: flex; flex-wrap: wrap; gap: .45rem; justify-content: center; }
+.lbtn.picked { border-color: #4d7030; box-shadow: inset 0 0 0 1px #4d7030; }
+.qbtns { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; justify-content: center; margin-top: .9rem; }
+.bookback { float: right; font-size: .62rem; padding: .3rem .6rem; }
+
+/* night-1 opening: the action is the prompt */
+.opening-tools { position: absolute; top: 1rem; right: 1rem; display: flex; gap: .4rem; z-index: 30; }
+.opening-tools .btn { font-size: .72rem; padding: .35rem .7rem;
+  background: #f4ead2; color: #183a35; border-color: #183a35; }
+.opening-actions { bottom: 2.2rem; }
+/* Keep these after the legacy media queries: held-plate controls and corner
+   utilities share the compact sizing, while the opening keeps its own scale. */
+.pass-panel .btn { font-size: .75rem; letter-spacing: .06em; padding: .55rem .65rem; }
+.pass-panel .btn.big { font-size: .75rem; letter-spacing: .06em; padding: .55rem .65rem; white-space: normal; }
+.hud:has(.pass-panel) .scream,
+.hud:has(.pass-panel) .comp,
+.hud:has(.pass-panel) .voice { font-size: .75rem; padding: .6rem .75rem; letter-spacing: .06em; }
+.hud:has(.pass-panel) .scream .cost,
+.hud:has(.pass-panel) .utility-explainer { display: none; }
+.btn.docket-call {
+  display: flex; flex-direction: column; gap: .15rem; align-items: center;
+  background: linear-gradient(165deg, #f4ead2, #e2d0ac); color: #33240f;
+  border: 1px dashed #8a6418; border-radius: 2px;
+  padding: .8rem 1.6rem; box-shadow: 0 10px 28px rgba(0,0,0,.55);
+}
+.btn.docket-call .dtable { font-size: .68rem; letter-spacing: .18em; color: #8a6418; }
+.btn.docket-call .ddish { font-weight: 700; font-style: italic; font-size: .95rem; }
+.btn.docket-call .daction { letter-spacing: .24em; color: #a03a20; font-weight: 700; font-size: .8rem; }
+.opening-cooking {
+  position: absolute; bottom: 6.5rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: .35rem; z-index: 20;
+}
+.ocname { letter-spacing: .22em; font-size: .72rem; color: #ffd9a0; }
+.ocbar { width: 12rem; height: .5rem; background: rgba(0,0,0,.55); border: 1px solid #b06a2a; }
+.ocfill { height: 100%; background: #c9a44a; transition: width .2s linear; }
+.oclabel { font-size: .8rem; font-style: italic; color: #e8c8a0; }
+
+/* --- flagship: semantic ticket buttons, ready rail, pass inspection --- */
+button.ticket:disabled { opacity: 1; cursor: default; }
+button.ticket:disabled .taction { opacity: .55; }
+button.ticket:disabled:hover { transform: none; }
+.ticket.selected { outline: 2px solid #286e70; outline-offset: 1px; }
+.ticket .taction { margin-top: .25rem; font-size: .58rem; font-weight: 700; letter-spacing: .08em; color: #286e70; }
+.ticket.ready { background: #dcead2; }
+.ticket.ready .taction { color: #2e6b2e; }
+.ready-rail { margin-top: .35rem; }
+.ready-rail.fp { position: fixed; left: 12px; bottom: 96px; z-index: 40; }
+.plate-obs { font-size: .72rem; opacity: .8; margin: .1rem 0; }
+.plate-inspect { border-left: 2px solid #286e70; padding-left: .5rem; margin: .3rem 0; }
+.plate-std { font-size: .66rem; opacity: .6; font-style: italic; margin: .15rem 0 .3rem; }
+.btn.sm { padding: .2rem .55rem; font-size: .62rem; }
+.btn.whisk { background: #dfaa3c; color: #302c2b; border-color: #a8742a; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.corrbar { display: inline-block; width: 90px; height: 6px; background: rgba(0,0,0,.2); border-radius: 3px; margin-left: .4rem; vertical-align: middle; overflow: hidden; }
+.corrfill { display: block; height: 100%; background: #286e70; transition: width .2s linear; }
+.qrecipe { margin: .4rem 0; }

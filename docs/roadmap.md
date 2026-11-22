@@ -1,5 +1,9 @@
 # Roadmap — 30 days to Dec 18 close
 
+**Current direction:** [design.md — flagship experience](design.md#flagship-direction--culinary-authorship-and-a-living-restaurant): culinary authorship, an expressive living kitchen, genuine brigade coordination and a restaurant that remembers. Execution follows [M0–M3 in the attachment plan](player-attachment-plan.md#flagship-milestones-and-priorities-21-nov).
+
+**Implemented baseline:** factual reviews and critic fixes; the direct opening and compact returning-night briefing; a locally verified service → morning → next-service route with independent stations, food conditions, sauce correction and credited Wellington recipe memory. Whole-kitchen presentation is a playable foundation, with artistic, motion, performance and human acceptance still open. The broader nine-night expansion remains planned. The historical week checklists below record delivered features; they do not establish the new quality bar or estimate the expanded schedule.
+
 Hard limits to design around: review runs OFFLINE (all assets baked),
 desktop mouse+keyboard, <50MB to first playable (warning), first frame
 <30s (hard), no sign-in/crypto/ads. 5 deploys/day, 5 reviews/UTC day.
@@ -100,7 +104,9 @@ desktop mouse+keyboard, <50MB to first playable (warning), first frame
       tremble once, title card drifts — small + slow, so the urgent
       channel (fire, dying tickets, phone flash) keeps the frame
 - [ ] Phase 3 — prep as a place: office scene, desk objects, one decision
-      each, night-gated disclosure; Night 1 cold open into service (shipped 20 Nov: mid-rush seed + single-beat briefing, market N2+, shop N3+)
+      each, night-gated disclosure; Night 1 enters service directly via the
+      two-action opening (revised 21 Nov: replaced mid-rush cold open;
+      prep lives in the optional KITCHEN BOOK)
       *(family-meal ritual already in: praise / crispy bit / silence,
       clears grudges)*
 - [ ] Phase 4 — venue re-dress (stall → bistro → flagship), lighting tiers

@@ -1,0 +1,3951 @@
+[
+  {
+    "title": "Labyrinth",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberLabyrinthAkella_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberLabyrinthAkella_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://akella.github.io/codevember-2026/13/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/akella/codevember-2026/tree/main/13-labyrinth"
+      },
+      {
+        "text": "Yuri Artiukh",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/akella"
+      },
+      {
+        "text": "isometric",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/isometric"
+      },
+      {
+        "text": "procedural",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/procedural"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-01"
+  },
+  {
+    "title": "Boo-mas",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/BooMas_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/BooMas_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://robinduckett.github.io/boo-mas/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/robinduckett/boo-mas"
+      },
+      {
+        "text": "Robin Duckett",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/robin_duckett"
+      },
+      {
+        "text": "christmas",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/christmas"
+      },
+      {
+        "text": "game",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/game"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-02"
+  },
+  {
+    "title": "Spore",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberSpore_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberSpore_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://mrdoob.github.io/codevember-2026/16/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/mrdoob/codevember-2026/tree/main/16"
+      },
+      {
+        "text": "Ricardo Cabello",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/ricardo_cabello"
+      },
+      {
+        "text": "particles",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/particles"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-03"
+  },
+  {
+    "title": "DomGL Cloth",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/cover-3-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/clothcarousel_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/ClothCarousel/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://tympanus.net/codrops/?p=126285"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/twotwentytwo-studio/domgl-cloth"
+      },
+      {
+        "text": "Jesper Landberg",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/jesper"
+      },
+      {
+        "text": "carousel",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/carousel"
+      },
+      {
+        "text": "cloth",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/cloth"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "Nuxt.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/nuxt-js"
+      },
+      {
+        "text": "simulation",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/simulation"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-04"
+  },
+  {
+    "title": "Gooey Sticky Menu",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/cover-2-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/GooeyStickyMenu_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/GooeyStickyMenu/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/codrops/GooeyStickyMenu"
+      },
+      {
+        "text": "Manoela Ilic",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/crnacura"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "gooey",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gooey"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "menu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/menu"
+      },
+      {
+        "text": "scroll",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/scroll"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-05"
+  },
+  {
+    "title": "The Future of Clothes Shopping",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/splatfashion_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/splatfashion_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://willeastcott.github.io/splat-fashion/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/willeastcott/splat-fashion"
+      },
+      {
+        "text": "Will Eastcott",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/will_eastcott"
+      },
+      {
+        "text": "fashion",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/fashion"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-06"
+  },
+  {
+    "title": "Some Ideas for Inline Hover Reveals",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/cover-1-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/InlineHoverReveals_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/InlineHoverReveals/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/codrops/InlineHoverReveals"
+      },
+      {
+        "text": "Manoela Ilic",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/crnacura"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "hover",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/hover"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-07"
+  },
+  {
+    "title": "Hollow",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberHollowAkella_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberHollowAkella_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://akella.github.io/codevember-2026/7/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/akella/codevember-2026/tree/main/07-hollow"
+      },
+      {
+        "text": "Yuri Artiukh",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/akella"
+      },
+      {
+        "text": "raymarching",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/raymarching"
+      },
+      {
+        "text": "tunnel",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tunnel"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-08"
+  },
+  {
+    "title": "Ferro Toggle",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/FerroToggle_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/FerroToggle_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://argofowl.github.io/ferro-toggle/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/argofowl/ferro-toggle"
+      },
+      {
+        "text": "Argo",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/argo"
+      },
+      {
+        "text": "audio",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/audio"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "toggle",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/toggle"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-09"
+  },
+  {
+    "title": "Caustic",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberCaustic_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberCaustic_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://mrdoob.github.io/codevember-2026/10/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/mrdoob/codevember-2026/tree/main/10"
+      },
+      {
+        "text": "Ricardo Cabello",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/ricardo_cabello"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "water",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/water"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-10"
+  },
+  {
+    "title": "Scroll-Driven Typography Animation with GSAP",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/donotscroll_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/donotscroll_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/DoNotScroll/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=125579"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/AntoineW/Codrops-GSAP-Scroll"
+      },
+      {
+        "text": "Antoine Wodniack",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/antoine_wodniack"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "scroll",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/scroll"
+      },
+      {
+        "text": "typography",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/typography"
+      }
+    ],
+    "id": "1-11"
+  },
+  {
+    "title": "Record Player",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/vinyl-gl_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/vinyl-gl_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://vinyl-gl.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/rauchg/vinyl"
+      },
+      {
+        "text": "Guillermo Rauch",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/guillermo_rauch"
+      },
+      {
+        "text": "audio",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/audio"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "lp",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/lp"
+      },
+      {
+        "text": "record player",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/record-player"
+      },
+      {
+        "text": "retro",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/retro"
+      },
+      {
+        "text": "simulation",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/simulation"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-12"
+  },
+  {
+    "title": "Hollow",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberHollow_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberHollow_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://spite.github.io/codevember-2026/7/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/spite/codevember-2026/tree/main/7"
+      },
+      {
+        "text": "Jaume Sanchez",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/jaume_sanchez"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "procedural",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/procedural"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-13"
+  },
+  {
+    "title": "Melt",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberMelt_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberMelt_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://akella.github.io/codevember-2026/3/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/akella/codevember-2026/tree/main/03-melt"
+      },
+      {
+        "text": "Yuri Artiukh",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/akella"
+      },
+      {
+        "text": "raymarching",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/raymarching"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-14"
+  },
+  {
+    "title": "Splat Walk",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/SplatWalk_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/SplatWalk_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://willeastcott.github.io/splat-walk/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/willeastcott/splat-walk"
+      },
+      {
+        "text": "Will Eastcott",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/will_eastcott"
+      },
+      {
+        "text": "audio",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/audio"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-15"
+  },
+  {
+    "title": "Moss",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Moss_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Moss_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://mrdoob.github.io/codevember-2026/05/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/mrdoob/codevember-2026/tree/main/05"
+      },
+      {
+        "text": "Ricardo Cabello",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/ricardo_cabello"
+      },
+      {
+        "text": "procedural",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/procedural"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-16"
+  },
+  {
+    "title": "Tree Demo",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/livingtrees_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/livingtrees_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tree-demo-ten.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/PabloMesquida/three-living-trees"
+      },
+      {
+        "text": "Pablo Mesquida",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/pablo_mesquida"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-17"
+  },
+  {
+    "title": "Shatter",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Shatter_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Shatter_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://akella.github.io/codevember-2026/2/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/akella/codevember-2026/tree/main/02-shatter"
+      },
+      {
+        "text": "Yuri Artiukh",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/akella"
+      },
+      {
+        "text": "blender",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/blender"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-18"
+  },
+  {
+    "title": "Melt",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Melt_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Melt_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://spite.github.io/codevember-2026/3/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/spite/codevember-2026/tree/main/3"
+      },
+      {
+        "text": "Jaume Sanchez",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/jaume_sanchez"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-19"
+  },
+  {
+    "title": "Tangle",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberTangle_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/CodevemberTangle_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://mrdoob.github.io/codevember-2026/04/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/mrdoob/codevember-2026/tree/main/04"
+      },
+      {
+        "text": "Ricardo Cabello",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/ricardo_cabello"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "simulation",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/simulation"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-20"
+  },
+  {
+    "title": "Fold",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Fold_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Fold_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://mrdoob.github.io/codevember-2026/01/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/mrdoob/codevember-2026/tree/main/01"
+      },
+      {
+        "text": "Ricardo Cabello",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/ricardo_cabello"
+      },
+      {
+        "text": "cloth",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/cloth"
+      },
+      {
+        "text": "refraction",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/refraction"
+      },
+      {
+        "text": "simulation",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/simulation"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-21"
+  },
+  {
+    "title": "Text Character Animations with GSAP",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/TextCharacterAnimations_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/TextCharacterAnimations/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/codrops/TextCharacterAnimations"
+      },
+      {
+        "text": "Manoela Ilic",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/crnacura"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "typography",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/typography"
+      }
+    ],
+    "id": "1-22"
+  },
+  {
+    "title": "Discography",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/discography_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/discography_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://dmtrbrl.github.io/discography/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/dmtrbrl/discography"
+      },
+      {
+        "text": "Dmytro Barylo",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/dmytro_barylo"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "audio",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/audio"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-23"
+  },
+  {
+    "title": "Yarn World",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/YarnWorld_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/YarnWorld_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://yarn.krisyang.dev/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/krisyangdev/yarn-world"
+      },
+      {
+        "text": "Kris Yang",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/kris_yang"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "procedural",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/procedural"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-24"
+  },
+  {
+    "title": "Jelly Zoo",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/jellyzoo_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/jellyzoo_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://jelly.krisyang.dev/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/krisyangdev/jelly"
+      },
+      {
+        "text": "Kris Yang",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/kris_yang"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "procedural",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/procedural"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-25"
+  },
+  {
+    "title": "Lookbook Hover Effects",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/LookbookHoverEffects_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/LookbookHoverEffects_800x600-1.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/LookbookHoverEffects/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/codrops/LookbookHoverEffects"
+      },
+      {
+        "text": "Manoela Ilic",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/crnacura"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "hover",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/hover"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-26"
+  },
+  {
+    "title": "Seam Transitions",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/seam-transitions_cover-1-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/seam-transitions_800x600-1.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/SeamTransitions/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/codrops/SeamTransitions"
+      },
+      {
+        "text": "Manoela Ilic",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/crnacura"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "scroll",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/scroll"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-27"
+  },
+  {
+    "title": "PRO Threads",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/prothreads_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/prothreads_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://www.kubai.design/pro-threads/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/kubai087/pro-threads"
+      },
+      {
+        "text": "Kubaibai",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/kubaibai"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "light",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/light"
+      },
+      {
+        "text": "lines",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/lines"
+      },
+      {
+        "text": "typography",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/typography"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-28"
+  },
+  {
+    "title": "Smash Your Pumpkin",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/smash_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/smash_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://lucaargentieri.github.io/smash-your-pumpkin/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/LucaArgentieri/smash-your-pumpkin"
+      },
+      {
+        "text": "Luca Argentieri",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/luca_argentieri"
+      },
+      {
+        "text": "game",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/game"
+      },
+      {
+        "text": "halloween",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/halloween"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-29"
+  },
+  {
+    "title": "The Hand",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/thehand_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/thehand_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://the-hand-chi.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/PabloMesquida/the-hand"
+      },
+      {
+        "text": "Pablo Mesquida",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/pablo_mesquida"
+      },
+      {
+        "text": "glass",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glass"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-30"
+  },
+  {
+    "title": "Ultra Water",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/ultrawater_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/ultrawater_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://gelatin.games/ultrawater"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/Humpalumps/Ultra-Water"
+      },
+      {
+        "text": "Ian Cadle",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/ian_cadle"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "water",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/water"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-31"
+  },
+  {
+    "title": "Haunted Pumpkin",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/hauntedpumpkin_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/hauntedpumpkin_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://halloween-2026-iota.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/Emotion-Agency/emotion-halloween-2026"
+      },
+      {
+        "text": "Leonid Kostetskiy",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/leonid_kostetskiy"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "halloween",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/halloween"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-32"
+  },
+  {
+    "title": "Ocarina",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/ocarina_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/ocarina-hub_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://ocarina.thibaut-lefrancois.com/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://tympanus.net/codrops/?p=124794"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/thibautlfr/ocarina"
+      },
+      {
+        "text": "Thibaut Lefrançois",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/thibautlefrancois"
+      },
+      {
+        "text": "audio",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/audio"
+      },
+      {
+        "text": "game",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/game"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      }
+    ],
+    "id": "1-33"
+  },
+  {
+    "title": "Museum of Motion",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/hero_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/hero_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/MuseumOfMotion/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=124792"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/johnpolacek/museum-of-motion"
+      },
+      {
+        "text": "John Polacek",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/johnpolacek"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "Next.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/next-js"
+      },
+      {
+        "text": "page transition",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/page-transition"
+      },
+      {
+        "text": "typography",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/typography"
+      }
+    ],
+    "id": "1-34"
+  },
+  {
+    "title": "InstancedMesh2 Asteroid Field",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/asteroids_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/asteroids_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://instanced-mesh-showcase.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/agargaro/instanced-mesh-showcase"
+      },
+      {
+        "text": "Gargaro Andrea",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/andrea_gargaro"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-35"
+  },
+  {
+    "title": "Glass",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/glasslogo_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/glasslogo_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://phileeppov.com/glass"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/phileeppov/glass"
+      },
+      {
+        "text": "Nikita Filippov",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/nikita_filippov"
+      },
+      {
+        "text": "audio",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/audio"
+      },
+      {
+        "text": "glass",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glass"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "logo",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/logo"
+      },
+      {
+        "text": "refraction",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/refraction"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-36"
+  },
+  {
+    "title": "LeafThrough",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/leafthrough_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/leafthrough_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://dmtrbrl.github.io/leafthrough/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/dmtrbrl/leafthrough"
+      },
+      {
+        "text": "Dmytro Barylo",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/dmytro_barylo"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "book",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/book"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-37"
+  },
+  {
+    "title": "Random-eyes",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/randomeyes_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/randomeyes_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://random-eyes.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/rock-biter/procedural-eye"
+      },
+      {
+        "text": "Gianluca Lomarco",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/gianluca_lomarco"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "procedural",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/procedural"
+      },
+      {
+        "text": "raymarching",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/raymarching"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-38"
+  },
+  {
+    "title": "Slop New York",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/slopnewyork_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/slopnewyork_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://mrdoob.github.io/slop-newyork/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/mrdoob/slop-newyork"
+      },
+      {
+        "text": "Ricardo Cabello",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/ricardo_cabello"
+      },
+      {
+        "text": "simulation",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/simulation"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-39"
+  },
+  {
+    "title": "Earthlight",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Earthlight_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/Earthlight_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://earthlight.maxvyshniakov.com/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://maxvyshniakov.com/work/earthlight/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/maxvyshniakov/earthlight"
+      },
+      {
+        "text": "Max Vyshniakov",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/max_vyshniakov"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "planet",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/planet"
+      },
+      {
+        "text": "space",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/space"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-40"
+  },
+  {
+    "title": "Slice of Life Crisis",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/slicecake_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/slicecake_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://davidyen1124.github.io/slice-of-life-crisis/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/davidyen1124/slice-of-life-crisis"
+      },
+      {
+        "text": "David Yen",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/david_yen"
+      },
+      {
+        "text": "food",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/food"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-41"
+  },
+  {
+    "title": "Atelier UI: Mixing WebGL and the DOM in a React UI Library",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/atelier-hub_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/atelier-hub_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/AtelierUI/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=124298"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/whatisjery/atelier-ui-codrops"
+      },
+      {
+        "text": "Jérémie Nallet",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/jeremienallet"
+      },
+      {
+        "text": "fluid",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/fluid"
+      },
+      {
+        "text": "Next.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/next-js"
+      },
+      {
+        "text": "page transition",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/page-transition"
+      },
+      {
+        "text": "React Three Fiber",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/react-three-fiber"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "1-42"
+  },
+  {
+    "title": "Paper × domgl",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/demo_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/demo_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/PaperDrops/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=124140"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/twotwentytwo-studio/codrops-paper"
+      },
+      {
+        "text": "Jesper Landberg",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/jesper"
+      },
+      {
+        "text": "Nuxt.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/nuxt-js"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-43"
+  },
+  {
+    "title": "Ocean",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/ocean_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/ocean_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://ocean-noniv.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/Noniv/web-ocean"
+      },
+      {
+        "text": "Maksymilian Dendura",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/maksymilian_dendura"
+      },
+      {
+        "text": "water",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/water"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "1-44"
+  },
+  {
+    "title": "lilpix",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/lilpix_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/lilpix_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://lilpix.dhrv.pw/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/0xdhrv/lilpix"
+      },
+      {
+        "text": "Dhruv Suthar",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/dhruv_suthar"
+      },
+      {
+        "text": "React Three Fiber",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/react-three-fiber"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-01"
+  },
+  {
+    "title": "Cinema Seat Preview",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/CinemaSeatPreview_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/CinemaSeatPreview/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/codrops/CinemaSeatPreview"
+      },
+      {
+        "text": "Manoela Ilic",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/crnacura"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-02"
+  },
+  {
+    "title": "A Drift",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/ADrift_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/ADrift_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/ADrift/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=123703"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/zen-aperios/a-drift"
+      },
+      {
+        "text": "Robert Aperios",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/roberteaperios"
+      },
+      {
+        "text": "canvas",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/canvas"
+      },
+      {
+        "text": "distortion",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/distortion"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "Motion Trail",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/motion-trail"
+      },
+      {
+        "text": "typography",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/typography"
+      }
+    ],
+    "id": "2-03"
+  },
+  {
+    "title": "Cyber Web City",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/cyberwebcity_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/cyberwebcity_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://greggman.github.io/cyber-web-city/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/greggman/cyber-web-city"
+      },
+      {
+        "text": "Gregg Tavares",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/gregg_tavares"
+      },
+      {
+        "text": "city",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/city"
+      },
+      {
+        "text": "neon",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/neon"
+      },
+      {
+        "text": "procedural",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/procedural"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-04"
+  },
+  {
+    "title": "Organ Bank",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/OrganBank_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/OrganBank_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://davidyen1124.github.io/organ-bank/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/davidyen1124/organ-bank"
+      },
+      {
+        "text": "David Yen",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/david_yen"
+      },
+      {
+        "text": "retro",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/retro"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-05"
+  },
+  {
+    "title": "Rock Demo",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/rockdemo_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/rockdemo_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://rock-demo-chi.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/PabloMesquida/rock-demo"
+      },
+      {
+        "text": "Pablo Mesquida",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/pablo_mesquida"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-06"
+  },
+  {
+    "title": "R3F Sketch Material",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/r3fsketch_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/r3fsketch_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://r3f-sketch-material.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/abhishekmill/R3FSketchMaterial"
+      },
+      {
+        "text": "Abhishek Verma",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/abhishek_verma"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "React Three Fiber",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/react-three-fiber"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-07"
+  },
+  {
+    "title": "Atelier North",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/AtelierNorth_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/AtelierNorth_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://atelier-north.crnacura.workers.dev/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=123651"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/codrops/atelier-north"
+      },
+      {
+        "text": "Kaisei Sadatoki",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/kaiseisadatoki"
+      },
+      {
+        "text": "astro",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/astro"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "template",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/template"
+      }
+    ],
+    "id": "2-08"
+  },
+  {
+    "title": "Amber Genetics",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/amber-first-frame-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/amber_demo.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://amber.isma.uy/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=123421"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/ismamz/amber"
+      },
+      {
+        "text": "Ismael Martínez",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/ismaelmartinez"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "page transition",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/page-transition"
+      },
+      {
+        "text": "React Three Fiber",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/react-three-fiber"
+      }
+    ],
+    "id": "2-09"
+  },
+  {
+    "title": "Isle Thorne Collective Astro Template",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/Isle-Thorne-01-4x3-first-frame-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/Isle-Thorne-01-4x3-1.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://isle-thorne-collective.crnacura.workers.dev/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://tympanus.net/codrops/?p=123519"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/codrops/isle-thorne-collective"
+      },
+      {
+        "text": "Manoela Ilic",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/crnacura"
+      },
+      {
+        "text": "astro",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/astro"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "page transition",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/page-transition"
+      },
+      {
+        "text": "template",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/template"
+      }
+    ],
+    "id": "2-10"
+  },
+  {
+    "title": "Procedural Tokyo",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/tokyo_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/tokyo_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://jeantimex.github.io/tokyo/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/jeantimex/tokyo"
+      },
+      {
+        "text": "Yong Su",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/yong_su"
+      },
+      {
+        "text": "city",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/city"
+      },
+      {
+        "text": "procedural",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/procedural"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-11"
+  },
+  {
+    "title": "Interlude: Custom Page Transitions in Astro",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/interlude-transitions-4x3-cover-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/interlude-transitions-4x3-1.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://interlude.crnacura.workers.dev/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://tympanus.net/codrops/?p=123511"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/codrops/interlude/"
+      },
+      {
+        "text": "Manoela Ilic",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/crnacura"
+      },
+      {
+        "text": "astro",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/astro"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "page transition",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/page-transition"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-12"
+  },
+  {
+    "title": "Under the Sea",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/underthesea_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/underthesea_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://underthesea.wawasensei.dev/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/wass08/under-the-sea"
+      },
+      {
+        "text": "Wawa Sensei",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/wawa_sensei"
+      },
+      {
+        "text": "gpgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gpgpu"
+      },
+      {
+        "text": "particles",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/particles"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "water",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/water"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-13"
+  },
+  {
+    "title": "Sakura Fantasy",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/sakurafantasy_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/sakurafantasy_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://sakura.billpwchan.art/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/billpwchan/sakura-fantasy"
+      },
+      {
+        "text": "Bill Chan",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/bill_chan"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-14"
+  },
+  {
+    "title": "Bumpy Metaballs 2026",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/BumpyMetaballs2026_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/BumpyMetaballs2026_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://spite.github.io/bumpy-metaballs-2026/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/spite/bumpy-metaballs-2026"
+      },
+      {
+        "text": "Jaume Sanchez",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/jaume_sanchez"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "metaballs",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/metaballs"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-15"
+  },
+  {
+    "title": "Wide: Grid Layout With a WebGL Shader",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/wide-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/wide-demo-6s.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://codepen.io/editor/blacklead-studio/pen/01a0d773-dab5-744d-bc5e-3f11d4f2262e"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=122699"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://codepen.io/editor/blacklead-studio/pen/01a0d773-dab5-744d-bc5e-3f11d4f2262e"
+      },
+      {
+        "text": "BL/S®",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/blackleadstudio"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "grid",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/grid"
+      },
+      {
+        "text": "template",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/template"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-16"
+  },
+  {
+    "title": "Smear Frames × Motion Blur",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/smear_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/smear_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://smear.niccolofanton.dev/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/niccolofanton/smear-blur-showreel"
+      },
+      {
+        "text": "Niccolò Fanton",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/niccolofanton"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "typography",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/typography"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-17"
+  },
+  {
+    "title": "Tidewater",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/tidewater_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/tidewater_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://dgreenheck.github.io/tidewater/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/dgreenheck/tidewater"
+      },
+      {
+        "text": "Dan Greenheck",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/dangreenheck"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "game",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/game"
+      },
+      {
+        "text": "water",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/water"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-18"
+  },
+  {
+    "title": "Custom-Shaped Cursor Trail with Three.js and TSL",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/featured-1200x900-2-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/cursor-shader-trail-demo-4s-compressed.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/CustomShapedCursorTrail/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=121682"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/BertovDev/cursor-shader-trail"
+      },
+      {
+        "text": "Bautista Berto",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/bautistaberto"
+      },
+      {
+        "text": "cursor",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/cursor"
+      },
+      {
+        "text": "React Three Fiber",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/react-three-fiber"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-19"
+  },
+  {
+    "title": "Clearwater",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/clearwater_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/clearwater_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://aureliengmz.github.io/clearwater/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/Aureliengmz/clearwater"
+      },
+      {
+        "text": "Aurélien",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/aurelien"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "water",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/water"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-20"
+  },
+  {
+    "title": "Aquarium",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/aquarium_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/aquarium_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://aquarium.wawasensei.dev/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/wass08/aquarium"
+      },
+      {
+        "text": "Wawa Sensei",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/wawa_sensei"
+      },
+      {
+        "text": "glass",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glass"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "water",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/water"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-21"
+  },
+  {
+    "title": "Paper Crumple (VAT)",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/crumbledpaper-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/papercrumble.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Demos/PaperCrumble/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=121428"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/item-develop/paper-crumple-demo"
+      },
+      {
+        "text": "Toi Nagasawa",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/toinagasawa"
+      },
+      {
+        "text": "cannon-es",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/cannon-es"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-22"
+  },
+  {
+    "title": "Sandboard",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/sand_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/sand_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://sand.scottsun.io/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/scottstts/Sandboard"
+      },
+      {
+        "text": "Scott Sun",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/scott_sun"
+      },
+      {
+        "text": "simulation",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/simulation"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-23"
+  },
+  {
+    "title": "Elemental Sandbox",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/chiro-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/chiro-1.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Development/ElementalSandbox/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/achrefelouafi/LinearAbiltyCastingThreeJS/"
+      },
+      {
+        "text": "Chiro Visuals",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/chirovisuals"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      }
+    ],
+    "id": "2-24"
+  },
+  {
+    "title": "Fluid Pixel Cursor",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/fluidpixel_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/fluidpixel_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://nestorrig.github.io/Fluid-Pixel-Cursor-Effect/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/nestorrig/Fluid-Pixel-Cursor-Effect"
+      },
+      {
+        "text": "Nestor Rios Garcia",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/nestor_rios_garcia"
+      },
+      {
+        "text": "canvas",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/canvas"
+      },
+      {
+        "text": "cursor",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/cursor"
+      },
+      {
+        "text": "fluid",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/fluid"
+      }
+    ],
+    "id": "2-25"
+  },
+  {
+    "title": "Reel Flux",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/saurow-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/saurow.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://saurow-reel.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://blog-saurow.vercel.app/article/reel"
+      },
+      {
+        "text": "Saurabh Thapliyal",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/saurabh_thapliyal"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-26"
+  },
+  {
+    "title": "iPhone Duo Unfold",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/iphoneduo_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/iphoneduo_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://emotion-iphone-duo.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/Emotion-Agency/iphone-duo-sim"
+      },
+      {
+        "text": "Leonid Kostetskiy",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/leonid_kostetskiy"
+      },
+      {
+        "text": "distortion",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/distortion"
+      },
+      {
+        "text": "folding",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/folding"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-27"
+  },
+  {
+    "title": "3D Face Mask with Three.js",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/3dfacemask-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/facemask_demo_800.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://experiment-001.madebyhex.workers.dev/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=120430"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/kaltwrk/experiment-001"
+      },
+      {
+        "text": "Marek Jóźwiak",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/marekjozwiak"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "MediaPipe",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/mediapipe"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "webcam",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webcam"
+      }
+    ],
+    "id": "2-28"
+  },
+  {
+    "title": "Liquid Lens",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/liquidlens_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/liquidlens_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://angelolibero.github.io/liquid-lens/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/angelolibero/liquid-lens"
+      },
+      {
+        "text": "Angelo Libero",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/angelo_libero"
+      },
+      {
+        "text": "cursor",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/cursor"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "metaballs",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/metaballs"
+      },
+      {
+        "text": "react",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/react"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-29"
+  },
+  {
+    "title": "Unwoven",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/unvowen_cover_demo-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/unwoven_demo.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Development/Unwoven/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://tympanus.net/codrops/?p=120129"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/clementgrellier/unwoven"
+      },
+      {
+        "text": "Clément Grellier",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/clementgrellier"
+      },
+      {
+        "text": "marquee",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/marquee"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-30"
+  },
+  {
+    "title": "ASCII Logo in Three.js",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/Ascii_logo_demo_cover-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/Ascii_logo_demo.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Tutorials/ASCIILogo/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=120018"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/edoardolunardi/ascii-logo"
+      },
+      {
+        "text": "Edoardo Lunardi",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/edoardolunardi"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "ASCII",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/ascii"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-31"
+  },
+  {
+    "title": "Three.js Datamosh Effect",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/datamosh_cover_demo-1-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/datamosh_demo.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Tutorials/Datamosh/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=119915"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/niccolofanton/data-mosh/"
+      },
+      {
+        "text": "Niccolò Fanton",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/niccolofanton"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "postprocessing",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/postprocessing"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-32"
+  },
+  {
+    "title": "Dreamfold",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/09/3dcesium-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/09/3dcesium.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://cityfold.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/Makio64/dreamfold"
+      },
+      {
+        "text": "David Ronai",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/davronaigmail-com"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "map",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/map"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-33"
+  },
+  {
+    "title": "Footballs in Motion",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/08/balls-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/08/balls.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://footballs.nestorrig.com/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://www.linkedin.com/feed/update/urn:li:activity:7489818369454702592/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/nestorrig/footballs"
+      },
+      {
+        "text": "Nestor Rios Garcia",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/nestor_rios_garcia"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "GSAP",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/gsap"
+      },
+      {
+        "text": "physics",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/physics"
+      },
+      {
+        "text": "threejs",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/threejs"
+      }
+    ],
+    "id": "2-34"
+  },
+  {
+    "title": "Eiffel Tower Catapult with Three.js",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/08/EiffelTowerCataputl_cover-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/08/EiffelTowerCataputl_demo.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Development/EiffelCatapult/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://tympanus.net/codrops/?p=119976"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/akella/threejs.paris"
+      },
+      {
+        "text": "Yuri Artiukh",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/akella"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "catapult",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/catapult"
+      },
+      {
+        "text": "map",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/map"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-35"
+  },
+  {
+    "title": "Volatile Nexus",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/08/volatile-Cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/08/volatile_demo_compressed.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://dasprinzip.com/tinker/day42/"
+      },
+      {
+        "text": "",
+        "label": "More info",
+        "url": "https://tympanus.net/codrops/?p=120121"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/prinzipiell/tsl/tree/main/volatile-nexus"
+      },
+      {
+        "text": "Frank Reitberger",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/frank_reitberger"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "particles",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/particles"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-36"
+  },
+  {
+    "title": "ABYSSAL",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/abyssal_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/abyssal_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://token-gremlin.github.io/natural-disasters/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/Token-Gremlin/natural-disasters"
+      },
+      {
+        "text": "Token Gremlin",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/token_gremlin"
+      },
+      {
+        "text": "glsl",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/glsl"
+      },
+      {
+        "text": "procedural",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/procedural"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "water",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/water"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-37"
+  },
+  {
+    "title": "Hatch & Outline Lab",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/hatchoutline_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/hatchoutline_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://blender-to-threejs-sketchy-shader.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/andrewwoan/blender-to-threejs-sketchy-shader-and-demo-portfolios"
+      },
+      {
+        "text": "Andrew Woan",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/andrewwoan"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-38"
+  },
+  {
+    "title": "Mouse-Following Square Lens Distortion Effect with RGB Shift",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/08/pointer-square-lens-distortion-with-rgb-Shift-400x300.webp",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/08/rgbshiftcursor_demo.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Tutorials/PointerSquareLensDistortion"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=119046"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/tomoyukinakata/mouse-following-square-lens-effect"
+      },
+      {
+        "text": "Tomoyuki Nakata",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/yuki"
+      },
+      {
+        "text": "cursor",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/cursor"
+      },
+      {
+        "text": "distortion",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/distortion"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      }
+    ],
+    "id": "2-39"
+  },
+  {
+    "title": "Beat Machine",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/11/beatmachine_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/11/beatmachine_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://beat-machine-three.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/MatthewGreenberg/beat-machine"
+      },
+      {
+        "text": "Matt Greenberg",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/mattgreenberg"
+      },
+      {
+        "text": "audio",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/audio"
+      },
+      {
+        "text": "React Three Fiber",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/react-three-fiber"
+      },
+      {
+        "text": "sequencer",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/sequencer"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      }
+    ],
+    "id": "2-40"
+  },
+  {
+    "title": "Plinkopinball",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/08/og-image-1-400x283.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/08/Plinkopinball.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://codrops-demo-for-threejs-conference-ten.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/andrewwoan/codrops-demo-for-threejs-conference"
+      },
+      {
+        "text": "Andrew Woan",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/andrewwoan"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "blender",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/blender"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      }
+    ],
+    "id": "2-41"
+  },
+  {
+    "title": "Relighting Images with Three.js",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/08/mother-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/08/relight_demo_opt.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Tutorials/RelightingImages"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/wp-admin/post.php?post=119000"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/DGFX/codrops-relightning-images"
+      },
+      {
+        "text": "Dominik Fojcik",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/dominikfojcik"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-42"
+  },
+  {
+    "title": "Skate Dog",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/10/skatedog_cover-400x300.jpg",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/10/skatedog_800x600.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://skate-dog.vercel.app/"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/MatthewGreenberg/skate-dog"
+      },
+      {
+        "text": "Matt Greenberg",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/mattgreenberg"
+      },
+      {
+        "text": "game",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/game"
+      },
+      {
+        "text": "React Three Fiber",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/react-three-fiber"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      }
+    ],
+    "id": "2-43"
+  },
+  {
+    "title": "Interactive 3D Cluster",
+    "poster": "https://tympanus.net/codrops/wp-content/uploads/2026/08/videoframe_8751-400x300.png",
+    "preview": "https://tympanus.net/codrops/wp-content/uploads/2026/08/ico_demo.mp4",
+    "links": [
+      {
+        "text": "Your browser does not support the video tag.",
+        "label": null,
+        "url": "https://tympanus.net/Tutorials/3DCluster/"
+      },
+      {
+        "text": "",
+        "label": "Tutorial",
+        "url": "https://tympanus.net/codrops/?p=117948"
+      },
+      {
+        "text": "",
+        "label": "Code on Github",
+        "url": "https://github.com/kekkorider/codrops-tutorial-dark-cluster"
+      },
+      {
+        "text": "Francesco Michelini",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/author/francescomichelini"
+      },
+      {
+        "text": "3D",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/3d"
+      },
+      {
+        "text": "icosahedron",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/icosahedron"
+      },
+      {
+        "text": "Three.js",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/three-js"
+      },
+      {
+        "text": "TSL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/tsl"
+      },
+      {
+        "text": "WebGL",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgl"
+      },
+      {
+        "text": "webgpu",
+        "label": null,
+        "url": "https://tympanus.net/codrops/hub/tag/webgpu"
+      }
+    ],
+    "id": "2-44"
+  }
+]

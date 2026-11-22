@@ -2,7 +2,7 @@ import { Component, type ReactNode } from "react";
 
 /** One bad prop must never black-screen the whole kitchen.
  *  If a GLB 404s or fails to parse, render nothing for that prop. */
-export default class PropBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+export default class PropBoundary extends Component<{ children: ReactNode; fallback?: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
@@ -16,6 +16,6 @@ export default class PropBoundary extends Component<{ children: ReactNode }, { f
     } catch { /* never load-bearing */ }
   }
   render() {
-    return this.state.failed ? null : this.props.children;
+    return this.state.failed ? (this.props.fallback ?? null) : this.props.children;
   }
 }

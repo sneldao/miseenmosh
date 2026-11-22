@@ -1,0 +1,1358 @@
+{
+  "type": "unstepped live observation, silent canvas capture; service clock not exposed by production build",
+  "scripts": [
+    "http://127.0.0.1:5174/assets/index-DOOOFSdL.js"
+  ],
+  "samples": [
+    {
+      "wall": 27851.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "TABLE 12\nBeef Wellington\nCALL"
+      ]
+    },
+    {
+      "wall": 28699.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "TABLE 12\nBeef Wellington\nCALL"
+      ]
+    },
+    {
+      "wall": 28724.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 28740.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 28786.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 28892.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 28961.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 28997,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29005.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29040.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29057.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29096.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29144.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29179.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29228.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29275,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29289.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29321.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29353.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29392.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29421.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29454.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29487.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29519,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29573.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29603.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29638.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29670.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29703.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29737.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29770.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29803.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29852,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29887.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29920.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29953.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 29986.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30019.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30053.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30086.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30119.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30153.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30186.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30219.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30253,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30284.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30318.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30353.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30384.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30419.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30453,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30486.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30520,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30569.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30603.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30634.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30669.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30703.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30736.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30769.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30802,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30836.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30869.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30903,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30934.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 30969.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31003.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31036.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31069.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31101,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31136.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31186.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31219.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31253.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31286.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31319.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31353.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31403.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31435.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31469.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31503,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31534.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31569.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31601.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31636.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31667.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31701.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31736.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31769.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31801.5,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31836.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31886.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31919.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31951.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE"
+      ]
+    },
+    {
+      "wall": 31988.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32020.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32053.5,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32086.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32118.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32153.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32187.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32220.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32252.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32301.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32323.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32370.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32404.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32437.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32471,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32503.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32537.5,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32570.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32604,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32635.5,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32668.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32704.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32737.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32770.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32804,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32854,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32887.5,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32921,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32954.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 32986.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33018.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33052.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33087.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33120.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33152.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33203.79999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33237.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33270.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33304.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33337.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33370.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33403.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33437.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33468.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33504,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33537.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33570.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33603.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33637.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33687.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33719.29999999702,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33753.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33787.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33818.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33854.20000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33888,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33923.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33954.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 33986.60000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34023.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34059.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34090.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34135.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34160.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34191.70000000298,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34242.90000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34273.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34305.40000000596,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    },
+    {
+      "wall": 34337.10000000894,
+      "buttons": [
+        "?",
+        "PAUSE",
+        "SERVE",
+        "SEND BACK",
+        "SMASH"
+      ]
+    }
+  ]
+}

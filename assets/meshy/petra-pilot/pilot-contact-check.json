@@ -1,0 +1,47 @@
+{
+  "hashes": {
+    "assets/props/cooker/prepared.glb": "14130c890c0add093b08ddfba299917296698795061157654ece527942cff0be",
+    "assets/meshy/petra-pilot/runtime-hold.glb": "fb0e0229cd01b8b808741ea72a0446f4132d3cdcfeccfd6a2db93db800c90b90",
+    "assets/props/tongs/prepared.glb": "184accb3b5b7f4c479b75db3674e585ad1ae39c15c0e8a8299cc0dca9462a2e1"
+  },
+  "body_sample_hz": 60,
+  "cabinet_rear_actor_z": 0.15530641400585665,
+  "cabinet_clearance": {
+    "metres": 0.014347040136735184,
+    "time_s": 2.7333333333333334,
+    "vertex": 3987,
+    "position": [
+      -0.02723456812172015,
+      0.656769710451995,
+      0.14095937386912147
+    ]
+  },
+  "cabinet_negative_control": {
+    "description": "Undo the55mm stance offset on the sampled drawn vertex",
+    "clearance_m": -0.040652959863264816,
+    "caught": true
+  },
+  "jaw_distance_note": "Minimum silicone vertex distance to .035radius/.11straight capsule; negative means penetration of the conservative capsule, not a complete triangle contact test.",
+  "jaws": [
+    {
+      "half_angle": 0.14,
+      "upper_min_vertex_capsule_distance_m": 0.0054780120182215605,
+      "lower_min_vertex_capsule_distance_m": 0.007994362207070047
+    },
+    {
+      "half_angle": 0.115,
+      "upper_min_vertex_capsule_distance_m": -0.0016548553646824685,
+      "lower_min_vertex_capsule_distance_m": 0.0008491762393864968
+    },
+    {
+      "half_angle": 0.095,
+      "upper_min_vertex_capsule_distance_m": -0.00731175093805788,
+      "lower_min_vertex_capsule_distance_m": -0.004824023913555336
+    },
+    {
+      "half_angle": 0.07,
+      "upper_min_vertex_capsule_distance_m": -0.014256623899036511,
+      "lower_min_vertex_capsule_distance_m": -0.011815487099578095
+    }
+  ]
+}

@@ -1,0 +1,2243 @@
+{
+  "source_sha256": "f2b3fd3582b7934f679a1697201d112531e67e10511a62587472d7fafffe5135",
+  "body_stance_offset_m": [
+    0,
+    0,
+    -0.055
+  ],
+  "tool_contact_local_m": [
+    0,
+    -0.006,
+    0.055
+  ],
+  "grips": {
+    "Left": [
+      0.014409585184539608,
+      0.12538576030211834,
+      0.046858976557357324
+    ],
+    "Right": [
+      -0.01121641800229245,
+      0.1357925808053796,
+      0.045623629037905955
+    ]
+  },
+  "frames": [
+    {
+      "clip": "PetraReady",
+      "t": 0,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraReady",
+      "t": 4,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.03333333507180214,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.06666667014360428,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.10000000149011612,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.13333334028720856,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.1666666716337204,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.20000000298023224,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.23333333432674408,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.2666666805744171,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.30000001192092896,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.3333333432674408,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.36666667461395264,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.4000000059604645,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.4333333373069763,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.46666666865348816,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.066704439316734,
+          "wrist_shift_m": 0.09360939489962247,
+          "grip_error_m": 7.081998289644992e-8,
+          "pronation_deg": 82.54452679860485
+        },
+        "Right": {
+          "palm_axis_deg": 19.52646385980492,
+          "wrist_shift_m": 0.04855603870237509,
+          "grip_error_m": 4.2816734018554297e-8,
+          "pronation_deg": 47.40294547638795
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.5,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.065066712229896,
+          "wrist_shift_m": 0.09360601550931633,
+          "grip_error_m": 5.5367240855911863e-8,
+          "pronation_deg": 82.54046939771438
+        },
+        "Right": {
+          "palm_axis_deg": 19.52676442192873,
+          "wrist_shift_m": 0.04856972516791929,
+          "grip_error_m": 4.359354040200287e-8,
+          "pronation_deg": 47.40294540607024
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.5333333611488342,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.059198232568516,
+          "wrist_shift_m": 0.09359400879312044,
+          "grip_error_m": 7.450246223604538e-8,
+          "pronation_deg": 82.52544042578643
+        },
+        "Right": {
+          "palm_axis_deg": 19.527868484273853,
+          "wrist_shift_m": 0.04861986122950739,
+          "grip_error_m": 6.567242089629367e-8,
+          "pronation_deg": 47.40294519704434
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.5666666626930237,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.046474492003746,
+          "wrist_shift_m": 0.0935679004178907,
+          "grip_error_m": 5.741715859287151e-8,
+          "pronation_deg": 82.49313426679268
+        },
+        "Right": {
+          "palm_axis_deg": 19.530233978726525,
+          "wrist_shift_m": 0.04872814987354889,
+          "grip_error_m": 6.731591930010519e-8,
+          "pronation_deg": 47.40294526365905
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.6000000238418579,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.024771274938807,
+          "wrist_shift_m": 0.0935232345379738,
+          "grip_error_m": 6.368611796825055e-8,
+          "pronation_deg": 82.43777014705124
+        },
+        "Right": {
+          "palm_axis_deg": 19.534257454311454,
+          "wrist_shift_m": 0.04891404721304876,
+          "grip_error_m": 6.471033541364358e-8,
+          "pronation_deg": 47.40294542897889
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.6333333253860474,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.991998143648694,
+          "wrist_shift_m": 0.0934531269367533,
+          "grip_error_m": 5.458740624067531e-8,
+          "pronation_deg": 82.36783921445112
+        },
+        "Right": {
+          "palm_axis_deg": 19.52633829107302,
+          "wrist_shift_m": 0.049169615842518784,
+          "grip_error_m": 5.629560192643948e-8,
+          "pronation_deg": 47.4029454870349
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.6666666865348816,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.946482634534114,
+          "wrist_shift_m": 0.09334976283900322,
+          "grip_error_m": 6.719288117912745e-8,
+          "pronation_deg": 82.30146854842864
+        },
+        "Right": {
+          "palm_axis_deg": 19.483710982177602,
+          "wrist_shift_m": 0.049468570084835434,
+          "grip_error_m": 4.8351542457388886e-8,
+          "pronation_deg": 47.40294545853957
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.699999988079071,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.887815263653636,
+          "wrist_shift_m": 0.09321464768741097,
+          "grip_error_m": 6.534664670280907e-8,
+          "pronation_deg": 82.21625346967444
+        },
+        "Right": {
+          "palm_axis_deg": 19.42681822772804,
+          "wrist_shift_m": 0.049860950160824674,
+          "grip_error_m": 4.4838833545687224e-8,
+          "pronation_deg": 47.40294563387623
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.7333333492279053,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.81573295442311,
+          "wrist_shift_m": 0.0930456470811767,
+          "grip_error_m": 6.006395271276319e-8,
+          "pronation_deg": 82.11214429562115
+        },
+        "Right": {
+          "palm_axis_deg": 19.35373021814314,
+          "wrist_shift_m": 0.050354395055818194,
+          "grip_error_m": 5.800353456953049e-8,
+          "pronation_deg": 47.40294535236647
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.7666666507720947,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.730489759379136,
+          "wrist_shift_m": 0.09284133264594238,
+          "grip_error_m": 5.406685586473995e-8,
+          "pronation_deg": 81.989946107627
+        },
+        "Right": {
+          "palm_axis_deg": 19.26244204135421,
+          "wrist_shift_m": 0.05095467459270217,
+          "grip_error_m": 3.693494609869828e-8,
+          "pronation_deg": 47.402945787250204
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.800000011920929,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.64092647877333,
+          "wrist_shift_m": 0.09260242806850394,
+          "grip_error_m": 6.609340143259716e-8,
+          "pronation_deg": 82.00100492104036
+        },
+        "Right": {
+          "palm_axis_deg": 19.109949909868114,
+          "wrist_shift_m": 0.0516799363389126,
+          "grip_error_m": 5.6017165610199724e-8,
+          "pronation_deg": 47.402945588309585
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.8333333134651184,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.54449533274047,
+          "wrist_shift_m": 0.0923284430065582,
+          "grip_error_m": 7.098877623851033e-8,
+          "pronation_deg": 82.06709126842631
+        },
+        "Right": {
+          "palm_axis_deg": 18.915441985094095,
+          "wrist_shift_m": 0.052523941190296984,
+          "grip_error_m": 7.29540013684327e-8,
+          "pronation_deg": 47.40294566540407
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.8666666746139526,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.44475049549087,
+          "wrist_shift_m": 0.09202934193491107,
+          "grip_error_m": 7.387354054730672e-8,
+          "pronation_deg": 82.18624820938217
+        },
+        "Right": {
+          "palm_axis_deg": 18.707250610607748,
+          "wrist_shift_m": 0.05353270756386365,
+          "grip_error_m": 4.430748753239707e-8,
+          "pronation_deg": 47.40294579247789
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.8999999761581421,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.346493140301913,
+          "wrist_shift_m": 0.09171484122875122,
+          "grip_error_m": 7.297185979669484e-8,
+          "pronation_deg": 82.38825113142094
+        },
+        "Right": {
+          "palm_axis_deg": 18.503996650142692,
+          "wrist_shift_m": 0.05475220454296699,
+          "grip_error_m": 3.5884838853052104e-8,
+          "pronation_deg": 47.40294610370572
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.9333333373069763,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.244957031643636,
+          "wrist_shift_m": 0.09139117041400813,
+          "grip_error_m": 6.200830148707256e-8,
+          "pronation_deg": 82.58045866883731
+        },
+        "Right": {
+          "palm_axis_deg": 18.332732128033022,
+          "wrist_shift_m": 0.05603970698581051,
+          "grip_error_m": 3.7014774226702285e-8,
+          "pronation_deg": 47.4029462137251
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 0.9666666388511658,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.140418103223478,
+          "wrist_shift_m": 0.09106027433059327,
+          "grip_error_m": 6.895124358923189e-8,
+          "pronation_deg": 82.75824561900035
+        },
+        "Right": {
+          "palm_axis_deg": 18.19465473152334,
+          "wrist_shift_m": 0.05738358383511748,
+          "grip_error_m": 3.857154814931291e-8,
+          "pronation_deg": 47.40294640741707
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.04245337216721,
+          "wrist_shift_m": 0.09078454530482757,
+          "grip_error_m": 7.489315576475487e-8,
+          "pronation_deg": 82.77712027220225
+        },
+        "Right": {
+          "palm_axis_deg": 18.10078435213912,
+          "wrist_shift_m": 0.05836691096674035,
+          "grip_error_m": 3.5313627344040455e-8,
+          "pronation_deg": 47.40294654297765
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.0333333015441895,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.95244397789125,
+          "wrist_shift_m": 0.0905341709029019,
+          "grip_error_m": 6.89422037162631e-8,
+          "pronation_deg": 82.70895861967223
+        },
+        "Right": {
+          "palm_axis_deg": 18.002507249223154,
+          "wrist_shift_m": 0.05905467584330414,
+          "grip_error_m": 5.1545432710170464e-8,
+          "pronation_deg": 47.40294665413768
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.0666667222976685,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.87040140742249,
+          "wrist_shift_m": 0.09030507567669989,
+          "grip_error_m": 6.263074303797257e-8,
+          "pronation_deg": 82.58076896933733
+        },
+        "Right": {
+          "palm_axis_deg": 17.890859406363006,
+          "wrist_shift_m": 0.059425490996823246,
+          "grip_error_m": 4.448175479489336e-8,
+          "pronation_deg": 47.40294673330329
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.100000023841858,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.795208115846584,
+          "wrist_shift_m": 0.09010294522152368,
+          "grip_error_m": 5.629337283439055e-8,
+          "pronation_deg": 82.42513883333339
+        },
+        "Right": {
+          "palm_axis_deg": 17.756585740567235,
+          "wrist_shift_m": 0.05947884444549502,
+          "grip_error_m": 5.072140841800316e-8,
+          "pronation_deg": 47.402946787183545
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.1333333253860474,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.73184831717965,
+          "wrist_shift_m": 0.08994787266609844,
+          "grip_error_m": 5.2463581755147595e-8,
+          "pronation_deg": 82.28141680402844
+        },
+        "Right": {
+          "palm_axis_deg": 17.59734268029997,
+          "wrist_shift_m": 0.059226324038927226,
+          "grip_error_m": 4.0494719392771606e-8,
+          "pronation_deg": 47.40294677501413
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.1666666269302368,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.696605988643707,
+          "wrist_shift_m": 0.08985087561975272,
+          "grip_error_m": 7.9483918759358e-8,
+          "pronation_deg": 82.22109340901214
+        },
+        "Right": {
+          "palm_axis_deg": 17.401557017160417,
+          "wrist_shift_m": 0.058688920476938716,
+          "grip_error_m": 4.8659737222481984e-8,
+          "pronation_deg": 47.402946764141106
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.2000000476837158,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.69207642324608,
+          "wrist_shift_m": 0.0898013713689405,
+          "grip_error_m": 5.214617494499633e-8,
+          "pronation_deg": 82.27775948606673
+        },
+        "Right": {
+          "palm_axis_deg": 17.110560452133065,
+          "wrist_shift_m": 0.05780485849952829,
+          "grip_error_m": 4.432440569761894e-8,
+          "pronation_deg": 47.402946694223836
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.2333333492279053,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.708539417373025,
+          "wrist_shift_m": 0.08977790738578165,
+          "grip_error_m": 6.921844805917113e-8,
+          "pronation_deg": 82.41087504012255
+        },
+        "Right": {
+          "palm_axis_deg": 16.678079364527303,
+          "wrist_shift_m": 0.056577109963861276,
+          "grip_error_m": 4.380592317075102e-8,
+          "pronation_deg": 47.40294661903359
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.2666666507720947,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.727028790567477,
+          "wrist_shift_m": 0.08977057403846445,
+          "grip_error_m": 6.03176685610688e-8,
+          "pronation_deg": 82.50078666524608
+        },
+        "Right": {
+          "palm_axis_deg": 16.20118455701466,
+          "wrist_shift_m": 0.05537331923624108,
+          "grip_error_m": 4.141089533883037e-8,
+          "pronation_deg": 47.40294652571566
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.2999999523162842,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.702073295153127,
+          "wrist_shift_m": 0.08967441288830674,
+          "grip_error_m": 7.584512223771301e-8,
+          "pronation_deg": 82.52812287074907
+        },
+        "Right": {
+          "palm_axis_deg": 15.895199125739842,
+          "wrist_shift_m": 0.05492820951724896,
+          "grip_error_m": 3.299847321747432e-8,
+          "pronation_deg": 47.402946507222595
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.3333333730697632,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.623761217459364,
+          "wrist_shift_m": 0.0894634309341074,
+          "grip_error_m": 5.453178605287835e-8,
+          "pronation_deg": 82.58824962935293
+        },
+        "Right": {
+          "palm_axis_deg": 15.941608467025233,
+          "wrist_shift_m": 0.05607361217962027,
+          "grip_error_m": 3.779947971158302e-8,
+          "pronation_deg": 47.40294666941855
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.3666666746139526,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.552213746623806,
+          "wrist_shift_m": 0.08920780548678456,
+          "grip_error_m": 5.6689823479776806e-8,
+          "pronation_deg": 82.83479652287417
+        },
+        "Right": {
+          "palm_axis_deg": 16.34849284392228,
+          "wrist_shift_m": 0.0585092589214464,
+          "grip_error_m": 3.4544791328450696e-8,
+          "pronation_deg": 47.40294689203134
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.399999976158142,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.531440168994656,
+          "wrist_shift_m": 0.08895336122124596,
+          "grip_error_m": 7.669126819952305e-8,
+          "pronation_deg": 83.40842029938702
+        },
+        "Right": {
+          "palm_axis_deg": 17.106534680740552,
+          "wrist_shift_m": 0.06179518414250418,
+          "grip_error_m": 5.5073928204227066e-8,
+          "pronation_deg": 47.402947364583675
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.4333332777023315,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.547974765215415,
+          "wrist_shift_m": 0.08868153816729141,
+          "grip_error_m": 6.541226434864891e-8,
+          "pronation_deg": 84.35932955637101
+        },
+        "Right": {
+          "palm_axis_deg": 18.05498147938694,
+          "wrist_shift_m": 0.0652789674623379,
+          "grip_error_m": 4.98685281539702e-8,
+          "pronation_deg": 47.402946897092775
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.4666666984558105,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.538379525696964,
+          "wrist_shift_m": 0.08838431461750128,
+          "grip_error_m": 6.800786900537892e-8,
+          "pronation_deg": 85.33988303742088
+        },
+        "Right": {
+          "palm_axis_deg": 18.80794254992746,
+          "wrist_shift_m": 0.067789068777925,
+          "grip_error_m": 4.458915031578344e-8,
+          "pronation_deg": 47.402947397949504
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.5,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.472677735410826,
+          "wrist_shift_m": 0.08809092617065022,
+          "grip_error_m": 5.891233296271513e-8,
+          "pronation_deg": 86.08039259774773
+        },
+        "Right": {
+          "palm_axis_deg": 19.0729458701178,
+          "wrist_shift_m": 0.06896170997327722,
+          "grip_error_m": 4.1957053888226406e-8,
+          "pronation_deg": 47.40294729376629
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.5333333015441895,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.43592878282319,
+          "wrist_shift_m": 0.08785730546782364,
+          "grip_error_m": 6.546649593735111e-8,
+          "pronation_deg": 86.81333620135364
+        },
+        "Right": {
+          "palm_axis_deg": 18.704238661023986,
+          "wrist_shift_m": 0.0683862194626947,
+          "grip_error_m": 3.096954559115212e-8,
+          "pronation_deg": 47.402947395001966
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.5666667222976685,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.529957284394143,
+          "wrist_shift_m": 0.08779212484475632,
+          "grip_error_m": 5.3199668524900554e-8,
+          "pronation_deg": 87.5589342751143
+        },
+        "Right": {
+          "palm_axis_deg": 17.578065757321227,
+          "wrist_shift_m": 0.06498512852197359,
+          "grip_error_m": 2.8119484420256205e-8,
+          "pronation_deg": 47.40294751337588
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.600000023841858,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.703857152529118,
+          "wrist_shift_m": 0.08791702529131387,
+          "grip_error_m": 5.387886582359601e-8,
+          "pronation_deg": 87.9867335943261
+        },
+        "Right": {
+          "palm_axis_deg": 16.170576852695696,
+          "wrist_shift_m": 0.060158080831931485,
+          "grip_error_m": 3.991444763464031e-8,
+          "pronation_deg": 47.40294715325898
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.6333333253860474,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.774318210349065,
+          "wrist_shift_m": 0.08802255252082798,
+          "grip_error_m": 6.273384829289838e-8,
+          "pronation_deg": 87.90078995692754
+        },
+        "Right": {
+          "palm_axis_deg": 15.150486362735421,
+          "wrist_shift_m": 0.05639343444212955,
+          "grip_error_m": 3.0490640854805615e-8,
+          "pronation_deg": 47.40294678609854
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.6666666269302368,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.736460015422093,
+          "wrist_shift_m": 0.08800187068877587,
+          "grip_error_m": 7.613554802592854e-8,
+          "pronation_deg": 87.56756949853232
+        },
+        "Right": {
+          "palm_axis_deg": 14.687489899409623,
+          "wrist_shift_m": 0.054489569473517095,
+          "grip_error_m": 4.004344201849639e-8,
+          "pronation_deg": 47.402946652959585
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.7000000476837158,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.652283142336437,
+          "wrist_shift_m": 0.0879164674479826,
+          "grip_error_m": 7.003962688474561e-8,
+          "pronation_deg": 87.17736617653279
+        },
+        "Right": {
+          "palm_axis_deg": 14.691392378079303,
+          "wrist_shift_m": 0.05429672857500893,
+          "grip_error_m": 4.052082172727307e-8,
+          "pronation_deg": 47.402946642793914
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.7333333492279053,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.55544141516929,
+          "wrist_shift_m": 0.08786660369512868,
+          "grip_error_m": 5.182636869902185e-8,
+          "pronation_deg": 86.68555612454301
+        },
+        "Right": {
+          "palm_axis_deg": 15.35015237110392,
+          "wrist_shift_m": 0.05643943442281797,
+          "grip_error_m": 5.3369641592193836e-8,
+          "pronation_deg": 47.402946853289286
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.7666666507720947,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.521667148349824,
+          "wrist_shift_m": 0.08787558744162369,
+          "grip_error_m": 6.299222883732108e-8,
+          "pronation_deg": 86.18234912592871
+        },
+        "Right": {
+          "palm_axis_deg": 16.519534840404173,
+          "wrist_shift_m": 0.0599099245314028,
+          "grip_error_m": 5.3909171890568556e-8,
+          "pronation_deg": 47.402947121661846
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.7999999523162842,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.571515509095697,
+          "wrist_shift_m": 0.08790662968222916,
+          "grip_error_m": 7.408423107801896e-8,
+          "pronation_deg": 85.65726902087734
+        },
+        "Right": {
+          "palm_axis_deg": 17.969843827475593,
+          "wrist_shift_m": 0.06388350764792182,
+          "grip_error_m": 4.801123460947844e-8,
+          "pronation_deg": 47.40294740927106
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.8333333730697632,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.650182463303224,
+          "wrist_shift_m": 0.08790328375824688,
+          "grip_error_m": 5.577066017894744e-8,
+          "pronation_deg": 85.26248798767797
+        },
+        "Right": {
+          "palm_axis_deg": 19.048494784027138,
+          "wrist_shift_m": 0.06704128810234446,
+          "grip_error_m": 3.66835541771741e-8,
+          "pronation_deg": 47.4029475523107
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.8666666746139526,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.75502781410629,
+          "wrist_shift_m": 0.08789944985218826,
+          "grip_error_m": 7.0389207072618e-8,
+          "pronation_deg": 85.17340861895674
+        },
+        "Right": {
+          "palm_axis_deg": 19.29446167432564,
+          "wrist_shift_m": 0.06852852600026786,
+          "grip_error_m": 2.97405127810746e-8,
+          "pronation_deg": 47.40294766281511
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.899999976158142,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.873743652140515,
+          "wrist_shift_m": 0.08793399356408478,
+          "grip_error_m": 6.795561313207502e-8,
+          "pronation_deg": 85.41616595532224
+        },
+        "Right": {
+          "palm_axis_deg": 18.80742642217654,
+          "wrist_shift_m": 0.0685163342811929,
+          "grip_error_m": 3.332368813480274e-8,
+          "pronation_deg": 47.40294752818726
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.9333332777023315,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.985565325785892,
+          "wrist_shift_m": 0.0880058103664092,
+          "grip_error_m": 5.881710768088041e-8,
+          "pronation_deg": 85.80256800161492
+        },
+        "Right": {
+          "palm_axis_deg": 18.211049597009833,
+          "wrist_shift_m": 0.06809833399816695,
+          "grip_error_m": 2.8044639363168087e-8,
+          "pronation_deg": 47.40294739106859
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 1.9666666984558105,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.138308114218415,
+          "wrist_shift_m": 0.0881037426259448,
+          "grip_error_m": 5.563615433558029e-8,
+          "pronation_deg": 86.30136783967502
+        },
+        "Right": {
+          "palm_axis_deg": 17.690298828798863,
+          "wrist_shift_m": 0.06757599416793926,
+          "grip_error_m": 4.065428534521301e-8,
+          "pronation_deg": 47.40294778136484
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.31567902215341,
+          "wrist_shift_m": 0.08824117924575722,
+          "grip_error_m": 7.961815554468027e-8,
+          "pronation_deg": 86.50826558184825
+        },
+        "Right": {
+          "palm_axis_deg": 17.182858938690718,
+          "wrist_shift_m": 0.06680679133280934,
+          "grip_error_m": 3.9462996520563744e-8,
+          "pronation_deg": 47.4029476618915
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.0333333015441895,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.43246035689871,
+          "wrist_shift_m": 0.08841129899390854,
+          "grip_error_m": 6.988141767626193e-8,
+          "pronation_deg": 85.97494041224364
+        },
+        "Right": {
+          "palm_axis_deg": 16.724887131292675,
+          "wrist_shift_m": 0.06588724110240508,
+          "grip_error_m": 3.123613529005823e-8,
+          "pronation_deg": 47.402947362266076
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.066666603088379,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.44766413716326,
+          "wrist_shift_m": 0.08849934336360145,
+          "grip_error_m": 7.010447765858451e-8,
+          "pronation_deg": 85.16932702670829
+        },
+        "Right": {
+          "palm_axis_deg": 16.572339801499595,
+          "wrist_shift_m": 0.06538081843240821,
+          "grip_error_m": 2.8195115288681933e-8,
+          "pronation_deg": 47.402947250306674
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.0999999046325684,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.391451794239106,
+          "wrist_shift_m": 0.08846389712746551,
+          "grip_error_m": 6.688094173617149e-8,
+          "pronation_deg": 84.82882726864925
+        },
+        "Right": {
+          "palm_axis_deg": 16.96332105267506,
+          "wrist_shift_m": 0.06583977645935374,
+          "grip_error_m": 3.9759339677109725e-8,
+          "pronation_deg": 47.40294760992772
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.133333444595337,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.285669590574425,
+          "wrist_shift_m": 0.08835954575987628,
+          "grip_error_m": 5.771659194442228e-8,
+          "pronation_deg": 84.91767150486207
+        },
+        "Right": {
+          "palm_axis_deg": 17.90762245105142,
+          "wrist_shift_m": 0.06739100957315157,
+          "grip_error_m": 5.8753663913986574e-8,
+          "pronation_deg": 47.40294783297979
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.1666667461395264,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.155006748134987,
+          "wrist_shift_m": 0.08819384999340413,
+          "grip_error_m": 6.736840311706881e-8,
+          "pronation_deg": 85.15453162079295
+        },
+        "Right": {
+          "palm_axis_deg": 19.12480635278101,
+          "wrist_shift_m": 0.069380104452342,
+          "grip_error_m": 4.662957067841496e-8,
+          "pronation_deg": 47.40294760663913
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.200000047683716,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.031264823487895,
+          "wrist_shift_m": 0.08803389873601274,
+          "grip_error_m": 6.34131058458309e-8,
+          "pronation_deg": 85.34084320361269
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000136613433,
+          "wrist_shift_m": 0.07066958450459059,
+          "grip_error_m": 2.8662556293582087e-8,
+          "pronation_deg": 47.40294754105579
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.2333333492279053,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.934420628110196,
+          "wrist_shift_m": 0.08790475952459251,
+          "grip_error_m": 6.897569610026356e-8,
+          "pronation_deg": 85.47407564597859
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000797995437,
+          "wrist_shift_m": 0.0706288370214878,
+          "grip_error_m": 5.0506068509335606e-8,
+          "pronation_deg": 47.40294779912022
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.2666666507720947,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.87027662308394,
+          "wrist_shift_m": 0.08781086969831213,
+          "grip_error_m": 5.167626465006862e-8,
+          "pronation_deg": 85.57570468673138
+        },
+        "Right": {
+          "palm_axis_deg": 20.00000139348806,
+          "wrist_shift_m": 0.07018907588211398,
+          "grip_error_m": 4.963560955979365e-8,
+          "pronation_deg": 47.40294778401538
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.299999952316284,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.86786373939965,
+          "wrist_shift_m": 0.08777296579842109,
+          "grip_error_m": 8.518064876508293e-8,
+          "pronation_deg": 85.81345868810456
+        },
+        "Right": {
+          "palm_axis_deg": 20.000001640211195,
+          "wrist_shift_m": 0.06945244789929222,
+          "grip_error_m": 3.225532752447096e-8,
+          "pronation_deg": 47.40294749631762
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.3333332538604736,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.88380900869004,
+          "wrist_shift_m": 0.08775932687253676,
+          "grip_error_m": 8.149621210847707e-8,
+          "pronation_deg": 86.10199665671203
+        },
+        "Right": {
+          "palm_axis_deg": 20.000001730104405,
+          "wrist_shift_m": 0.06876329041710612,
+          "grip_error_m": 4.9322560680233105e-8,
+          "pronation_deg": 47.402947643836455
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.366666555404663,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 17.946057035650092,
+          "wrist_shift_m": 0.08780492692709363,
+          "grip_error_m": 6.279487476685999e-8,
+          "pronation_deg": 86.5822400687068
+        },
+        "Right": {
+          "palm_axis_deg": 20.00000153875994,
+          "wrist_shift_m": 0.06813335427680219,
+          "grip_error_m": 4.395218749640826e-8,
+          "pronation_deg": 47.40294750835686
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.4000000953674316,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.00210118329013,
+          "wrist_shift_m": 0.08784619881705573,
+          "grip_error_m": 7.09415708683064e-8,
+          "pronation_deg": 87.01192052537716
+        },
+        "Right": {
+          "palm_axis_deg": 20.000001337976016,
+          "wrist_shift_m": 0.06759111483344134,
+          "grip_error_m": 3.74393619049615e-8,
+          "pronation_deg": 47.40294715549521
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.433333396911621,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.100961288960224,
+          "wrist_shift_m": 0.08792783807019675,
+          "grip_error_m": 5.381819998296593e-8,
+          "pronation_deg": 87.70215971945156
+        },
+        "Right": {
+          "palm_axis_deg": 20.000001030827555,
+          "wrist_shift_m": 0.06728212378748978,
+          "grip_error_m": 5.55856024723236e-8,
+          "pronation_deg": 47.40294751141908
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.4666666984558105,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.183481539130238,
+          "wrist_shift_m": 0.0879956461505711,
+          "grip_error_m": 6.422885965175947e-8,
+          "pronation_deg": 88.27979506988359
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000792752108,
+          "wrist_shift_m": 0.06702903450460612,
+          "grip_error_m": 5.5379347461650457e-8,
+          "pronation_deg": 47.402947228404464
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.5,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.2506614756093,
+          "wrist_shift_m": 0.08805062865963123,
+          "grip_error_m": 5.7959089002351325e-8,
+          "pronation_deg": 88.75124106502258
+        },
+        "Right": {
+          "palm_axis_deg": 20.00000061823405,
+          "wrist_shift_m": 0.06682657475455449,
+          "grip_error_m": 3.475564197987983e-8,
+          "pronation_deg": 47.40294714766463
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.5333333015441895,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.31685265554032,
+          "wrist_shift_m": 0.08810656579791029,
+          "grip_error_m": 7.53234648584103e-8,
+          "pronation_deg": 89.19778216290663
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000485483586,
+          "wrist_shift_m": 0.06673027059860684,
+          "grip_error_m": 4.6354827395256015e-8,
+          "pronation_deg": 47.402947265854245
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.566666603088379,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.37424289817095,
+          "wrist_shift_m": 0.0881557286931152,
+          "grip_error_m": 5.398448211478441e-8,
+          "pronation_deg": 89.57757603898828
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000391630987,
+          "wrist_shift_m": 0.06669362180415667,
+          "grip_error_m": 5.313549046710021e-8,
+          "pronation_deg": 47.40294725723052
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.5999999046325684,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.415337390888944,
+          "wrist_shift_m": 0.08819090340112379,
+          "grip_error_m": 5.4273710415231876e-8,
+          "pronation_deg": 89.84979489554495
+        },
+        "Right": {
+          "palm_axis_deg": 20.00000033154667,
+          "wrist_shift_m": 0.0666688730589344,
+          "grip_error_m": 5.265740665074197e-8,
+          "pronation_deg": 47.40294699220563
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.633333444595337,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 15.913175444355696,
+          "wrist_shift_m": 0.014041960836239945,
+          "grip_error_m": 3.001906341259363e-8,
+          "pronation_deg": -89.97029434023582
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000295147828,
+          "wrist_shift_m": 0.06665322865126731,
+          "grip_error_m": 3.2752561958377133e-8,
+          "pronation_deg": 47.40294725703605
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.6666667461395264,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 15.912765388342752,
+          "wrist_shift_m": 0.014034902614058199,
+          "grip_error_m": 2.3437975835966217e-8,
+          "pronation_deg": -89.86556187133968
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000275154925,
+          "wrist_shift_m": 0.0666443846169601,
+          "grip_error_m": 3.90398490186501e-8,
+          "pronation_deg": 47.4029472301769
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.700000047683716,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 15.912583626806901,
+          "wrist_shift_m": 0.014031644898372993,
+          "grip_error_m": 2.516870818166087e-8,
+          "pronation_deg": -89.81714257106754
+        },
+        "Right": {
+          "palm_axis_deg": 20.00000026619395,
+          "wrist_shift_m": 0.06664034619037097,
+          "grip_error_m": 6.27123322983834e-8,
+          "pronation_deg": 47.402947266152125
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.7333333492279053,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 15.912518229763107,
+          "wrist_shift_m": 0.014030728346272425,
+          "grip_error_m": 2.836111858182607e-8,
+          "pronation_deg": -89.80388922710144
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000263789147,
+          "wrist_shift_m": 0.06663925962694459,
+          "grip_error_m": 6.011948614491872e-8,
+          "pronation_deg": 47.402947277864534
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.7666666507720947,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 15.912879414887254,
+          "wrist_shift_m": 0.014031060320101683,
+          "grip_error_m": 2.4286500783987574e-8,
+          "pronation_deg": -89.80513952366425
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000263567284,
+          "wrist_shift_m": 0.06663603943763238,
+          "grip_error_m": 4.9994349604375226e-8,
+          "pronation_deg": 47.40294741945766
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.799999952316284,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 15.921305175442697,
+          "wrist_shift_m": 0.014040130556833112,
+          "grip_error_m": 3.7609805216126887e-8,
+          "pronation_deg": -89.84702525197727
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000260553357,
+          "wrist_shift_m": 0.06656043223285209,
+          "grip_error_m": 4.0277583794772055e-8,
+          "pronation_deg": 47.40294719748871
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.8333332538604736,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 15.94977502890808,
+          "wrist_shift_m": 0.014071929836201143,
+          "grip_error_m": 2.305539110240137e-8,
+          "pronation_deg": -89.98776061745838
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000250723286,
+          "wrist_shift_m": 0.0663051465586096,
+          "grip_error_m": 5.33753861762514e-8,
+          "pronation_deg": 47.402947358249996
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.866666555404663,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.461086047994286,
+          "wrist_shift_m": 0.08849817111609701,
+          "grip_error_m": 5.99345287811193e-8,
+          "pronation_deg": 89.73754799315503
+        },
+        "Right": {
+          "palm_axis_deg": 20.00000023299999,
+          "wrist_shift_m": 0.06580112636615985,
+          "grip_error_m": 3.410124808623931e-8,
+          "pronation_deg": 47.4029469713555
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.9000000953674316,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.457831283734205,
+          "wrist_shift_m": 0.08874306746941632,
+          "grip_error_m": 6.720293148689996e-8,
+          "pronation_deg": 89.31654753484672
+        },
+        "Right": {
+          "palm_axis_deg": 20.00000020913455,
+          "wrist_shift_m": 0.06501350484463678,
+          "grip_error_m": 3.1068091088112606e-8,
+          "pronation_deg": 47.40294696708287
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.933333396911621,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.4579162997076,
+          "wrist_shift_m": 0.08907531743891374,
+          "grip_error_m": 7.347679714138413e-8,
+          "pronation_deg": 88.7563269254544
+        },
+        "Right": {
+          "palm_axis_deg": 20.00000018265604,
+          "wrist_shift_m": 0.0639360950173943,
+          "grip_error_m": 4.4990127525570324e-8,
+          "pronation_deg": 47.40294722999948
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 2.9666666984558105,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.465439649817267,
+          "wrist_shift_m": 0.08948729665419218,
+          "grip_error_m": 5.6623532391037685e-8,
+          "pronation_deg": 88.07972637180251
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000157131215,
+          "wrist_shift_m": 0.06258764581505556,
+          "grip_error_m": 3.105337727853477e-8,
+          "pronation_deg": 47.40294688372867
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.484944795190007,
+          "wrist_shift_m": 0.08996548171018508,
+          "grip_error_m": 6.839064711584916e-8,
+          "pronation_deg": 87.3205889938931
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000134700638,
+          "wrist_shift_m": 0.06100925474887568,
+          "grip_error_m": 4.5841110090102854e-8,
+          "pronation_deg": 47.402946884969644
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.0333333015441895,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.52027019898682,
+          "wrist_shift_m": 0.09049111778509089,
+          "grip_error_m": 7.754869547053664e-8,
+          "pronation_deg": 86.51950169098642
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000115536395,
+          "wrist_shift_m": 0.059262322182528304,
+          "grip_error_m": 4.232990220071095e-8,
+          "pronation_deg": 47.402946773525954
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.066666603088379,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.57364368344705,
+          "wrist_shift_m": 0.09104186273924303,
+          "grip_error_m": 8.23549701948843e-8,
+          "pronation_deg": 85.71902186552622
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000097907865,
+          "wrist_shift_m": 0.05742542345862141,
+          "grip_error_m": 4.988262453012951e-8,
+          "pronation_deg": 47.40294657461603
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.0999999046325684,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.64449674705644,
+          "wrist_shift_m": 0.0915924993951917,
+          "grip_error_m": 8.26474055894617e-8,
+          "pronation_deg": 84.95964407659825
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000078684756,
+          "wrist_shift_m": 0.055589589476786314,
+          "grip_error_m": 3.581052035058573e-8,
+          "pronation_deg": 47.40294639803573
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.133333444595337,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.728902020495863,
+          "wrist_shift_m": 0.09211642916570892,
+          "grip_error_m": 6.289258095383348e-8,
+          "pronation_deg": 84.27613190558453
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000054370584,
+          "wrist_shift_m": 0.053851162296439437,
+          "grip_error_m": 4.004628765655954e-8,
+          "pronation_deg": 47.402946160158585
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.1666667461395264,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.81947919300282,
+          "wrist_shift_m": 0.09258720142841649,
+          "grip_error_m": 6.437969198263509e-8,
+          "pronation_deg": 83.69526874008518
+        },
+        "Right": {
+          "palm_axis_deg": 20.000000022974223,
+          "wrist_shift_m": 0.05230259687860513,
+          "grip_error_m": 3.560690862505328e-8,
+          "pronation_deg": 47.40294604476087
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.200000047683716,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.906321840669357,
+          "wrist_shift_m": 0.09298092418469885,
+          "grip_error_m": 7.076292117586088e-8,
+          "pronation_deg": 83.23398062282716
+        },
+        "Right": {
+          "palm_axis_deg": 19.911567379991183,
+          "wrist_shift_m": 0.05093516648826325,
+          "grip_error_m": 4.507565973575661e-8,
+          "pronation_deg": 47.40294573228999
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.2333333492279053,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 18.97921097212014,
+          "wrist_shift_m": 0.0932798370468546,
+          "grip_error_m": 6.137072227284871e-8,
+          "pronation_deg": 82.89889455824422
+        },
+        "Right": {
+          "palm_axis_deg": 19.723006023711843,
+          "wrist_shift_m": 0.04979085438070421,
+          "grip_error_m": 5.329377627036323e-8,
+          "pronation_deg": 47.40294550550176
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.2666666507720947,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.03054034743517,
+          "wrist_shift_m": 0.09347657604040897,
+          "grip_error_m": 5.584915482318926e-8,
+          "pronation_deg": 82.6855650185161
+        },
+        "Right": {
+          "palm_axis_deg": 19.604254983572236,
+          "wrist_shift_m": 0.04905010968057003,
+          "grip_error_m": 4.117380072131644e-8,
+          "pronation_deg": 47.40294542320266
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.299999952316284,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.058061532889454,
+          "wrist_shift_m": 0.09357798939001624,
+          "grip_error_m": 7.201484618716414e-8,
+          "pronation_deg": 82.57787334787747
+        },
+        "Right": {
+          "palm_axis_deg": 19.544733419700545,
+          "wrist_shift_m": 0.04867242585938641,
+          "grip_error_m": 4.6059114187639714e-8,
+          "pronation_deg": 47.40294569968666
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.3333332538604736,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0664034438799,
+          "wrist_shift_m": 0.09360822107272425,
+          "grip_error_m": 7.297064333529529e-8,
+          "pronation_deg": 82.54604919214593
+        },
+        "Right": {
+          "palm_axis_deg": 19.527188734836763,
+          "wrist_shift_m": 0.04856021172502559,
+          "grip_error_m": 5.395620958956021e-8,
+          "pronation_deg": 47.40294539196532
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.366666555404663,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.4000000953674316,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.433333396911621,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.4666666984558105,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.5,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.5333333015441895,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.566666603088379,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.5999999046325684,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.633333444595337,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.6666667461395264,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.700000047683716,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.7333333492279053,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.7666666507720947,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.799999952316284,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.8333332538604736,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.866666555404663,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.9000000953674316,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.933333396911621,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 3.9666666984558105,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    },
+    {
+      "clip": "PetraWork",
+      "t": 4,
+      "hands": {
+        "Left": {
+          "palm_axis_deg": 19.0667597251985,
+          "wrist_shift_m": 0.0936095012463757,
+          "grip_error_m": 6.934594634476081e-8,
+          "pronation_deg": 82.5447062563424
+        },
+        "Right": {
+          "palm_axis_deg": 19.526451848504678,
+          "wrist_shift_m": 0.04855550178316584,
+          "grip_error_m": 4.127501401625108e-8,
+          "pronation_deg": 47.40294543494932
+        }
+      }
+    }
+  ],
+  "sha256": "fb0e0229cd01b8b808741ea72a0446f4132d3cdcfeccfd6a2db93db800c90b90",
+  "status": "candidate_requires_skin_and_motion_review"
+}

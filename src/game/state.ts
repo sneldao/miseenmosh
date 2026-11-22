@@ -5,20 +5,31 @@ import { speakChorus, speakReview } from "./voice";
 import { initOg, submitBoard, unlockAch, trackEvent } from "./og";
 import {
   CHEF_BARKS, STATION_BARKS, BRIGADE_RESPONSES, GUEST_HECKLES, RIVAL_LINES, pick,
-  MEALS, FAMILY_LINES, FAMILY_CRAFT, HEADLINE_5, HEADLINE_4, GRUDGE_BARKS, BEEFCAKES_WARN, BEEFCAKES_STEAL_LINES,
-  PRESS_TELLS, COUPLE_FIGHT, REGULARS_KIND, REGULARS_FORGIVE, CRITIC_ESCALATION,
+  MEALS, FAMILY_LINES, FAMILY_CRAFT, GRUDGE_BARKS, BEEFCAKES_WARN, BEEFCAKES_STEAL_LINES,
+  PRESS_TELLS, COUPLE_FIGHT, REGULARS_KIND, REGULARS_FORGIVE,
   SMOKE_WARN, EXPO_FIRE, EXPO_HANDS, EXPO_CORNER, TRILOGY_WELLY,
-  EMPTY_PASS_SCREAM, VAN_REMINDER, FISH_JOKE, CHAMPAGNE_KNEW,
-  SILENT_LEGEND_TAILS, OUTBID_BEEFCAKES, CRITIC_DREAD, CRITIC_VERDICTS,
+  EMPTY_PASS_SCREAM, VAN_REMINDER, FISH_JOKE,
+  OUTBID_BEEFCAKES,
   FOLKLORE_FORK_WARN, FOLKLORE_FORK_SAVED, FOLKLORE_FORK_IGNORED,
   FOLKLORE_GLASS_WARN, FOLKLORE_GLASS_SAVED, FOLKLORE_COAT_WARN,
   FOLKLORE_COAT_SAVED, FOLKLORE_RETURN_WARN, FOLKLORE_FLASH_WARN,
-  TABLE101_WARN, TABLE101_SEAT, TABLE101_MOVE, SEATING_LINES, VOW_LINES, PERMANENT_101,
-  TRUCE_LINES, BEEFCAKES_PRICEWAR, HONOR_LINES, MADAME_CAM_NOD, GILLIAM_CAM_CRAFT, EPILOGUES,
-  FATIGUE_BARKS, FLYING_BARKS, PAPER_SILENT, PAPER_WALKOUT, PAPER_SMASH, PAPER_SPOTTED, PAPER_STARS, COVERS_5, COVERS_4,
+  TABLE101_SEAT, TABLE101_MOVE, SEATING_LINES, VOW_LINES, PERMANENT_101,
+  TRUCE_LINES, BEEFCAKES_PRICEWAR, HONOR_LINES, MADAME_CAM_NOD, GILLIAM_CAM_CRAFT,
+  FATIGUE_BARKS, FLYING_BARKS,
 } from "./barks";
+import { CRITICS, criticForNight, criticTell, type CriticPersona } from "./critics";
+import { appendServiceEvent, type FolkloreOutcome, type ServiceEvent, type TellKind } from "./serviceEvents";
+import { buildServiceStory, nightAccounts, reviewNarration } from "./serviceReview";
+import {
+  type DishCondition, type Correction, type RecipeFinish, type RecipeRevision,
+  type OrderState, conditionFromCooking, qualityOfCondition, coolCondition,
+  correctionNeeded, CORRECTION_LABEL, canStartOrder, canCollectOrder,
+  cleanRecipeHistory, currentWellingtonRecipe, reviseWellington,
+  WELLINGTON_FINISHES, SAUCE_CORRECTION_SECONDS, dishProfile,
+} from "./culinary";
 
 export type Verdict = "serve" | "sendback" | "smash";
+export type OpeningStep = "serve" | "call" | "judge";
 export type Phase = "title" | "briefing" | "service" | "review" | "ending";
 export type PlateTier = "pristine" | "serviceable" | "criminal";
 
@@ -28,7 +39,7 @@ export interface Ticket {
   table: number;
   station: number;
   age: number;
-  state: "rail" | "plating" | "pass" | "done";
+  state: OrderState;
   /** serviceTime when plating completes */
   plateAt: number;
   plateDur: number;
@@ -40,6 +51,17 @@ export interface Ticket {
   sear: "golden" | "rushed" | null;
   /** split-sauce event: whisked back (saved) or gone out broken (split) */
   sauce: "saved" | "split" | null;
+  /** canonical food condition, sampled once when cooking finished */
+  condition?: DishCondition;
+  /** serviceTime the plate became ready — drives cooling */
+  readyAt?: number;
+  /** a judged send-back told the cook what to fix; the remake honours it */
+  requestedCorrection?: Correction;
+  /** Wellington revision snapshot at call time */
+  recipeFinish?: RecipeFinish;
+  recipeContributor?: string;
+  /** authored teaching ticket: the first split sauce */
+  lesson?: "split-jus";
 }
 
 export interface Cook {
@@ -74,6 +96,8 @@ export interface Guest {
   mercy: number;
   /** serviceTime of last tell burst; drives the phone flash */
   tellAt: number;
+  /** what the last tell looked like — notebook, phone, or inspection; null = no visible tell */
+  tellKind: TellKind | null;
 }
 
 export interface FeedItem {
@@ -99,18 +123,21 @@ export interface Review {
   criticVerdict: string;
   /** nobody screamed across a real service — the food shouted instead */
   silent: boolean;
+  /** the defining incident of the night, from the recorded events */
+  incident: string;
+  /** what tonight's facts mean for tomorrow */
+  consequence: string;
+  sentBack: number;
+  screams: number;
   /** call-the-board result line + cash payout (applied next morning) */
   betLine?: string;
   betCash?: number;
-  /** 9/10 missions: vow judged first, persona names the night, folklore paid off */
+  /** 9/10 missions: vow judged first, folklore paid off */
   vowLine?: string;
-  personaVerdict?: string;
   folkloreLine?: string;
-  /** the critic gets the last word: persona × stars tier */
-  epilogue?: string;
   /** 4–5★: the magazine cover line */
   cover?: string;
-  /** 4–5★: the press headline — names the night, not the numbers */
+  /** the press headline — names the night, not the numbers */
   headline?: string;
 }
 
@@ -178,7 +205,7 @@ export interface Career {
   silentLast?: boolean;
   outbidBeefcakes?: boolean;
   /** 9/10 missions: named critic rotation + grudges */
-  criticPersona?: "gilliam" | "madameV" | "kid";
+  criticPersona?: CriticPersona;
   criticGrudge?: number;
   /** cooks remember: praise sessions per cook id (twice praised earns a keepsake) */
   praiseCount?: Record<number, number>;
@@ -210,8 +237,14 @@ export interface Career {
   stories?: string[];
   /** hidden unlock: poked BEEFCAKES 3× on the title card — critic telemetry in service */
   criticCam?: boolean;
+  /** last night's factual summary — the morning callback in the next briefing */
+  lastReview?: { night: number; headline: string; incident: string; consequence: string };
   /** venue dressing: night the room moved up (briefing banner) */
   venueUpNight?: number;
+  /** bounded recipe memory: Wellington revisions, one per night */
+  recipeHistory?: RecipeRevision[];
+  /** the cook whose sauce the chef saved — thanked by name next morning */
+  lastSauceHelp?: { night: number; cookName: string; dish: string };
 }
 
 export interface Feud {
@@ -349,15 +382,15 @@ interface PlateCtx {
  * fumbles first, then the full quality arithmetic including sear + champagne. */
 function finishPlating(
   t: Ticket,
-  age: number,
+  _age: number,
   cook: Cook | undefined,
   ctx: PlateCtx
-): { fumble: boolean; quality: number; edged: boolean } {
+): { fumble: boolean; quality: number; condition: DishCondition; edged: boolean } {
   const { rng } = ctx;
   // a broken cook fumbles — plate in the bin, ticket back on the rail.
   // one holding a grudge fumbles half as often again.
   if (cook && !cook.walkedOut && cook.morale < 30 && rng() < (cook.grudge ? 0.25 : 0.15)) {
-    return { fumble: true, quality: -1, edged: false };
+    return { fumble: true, quality: -1, condition: conditionFromCooking(t.dish, 45), edged: false };
   }
   const chefPenalty = t.byChef ? 12 : 0;
   const burnPenalty = cook?.burning ? 8 : 0;
@@ -367,33 +400,37 @@ function finishPlating(
   const grudgePenalty = cook?.grudge ? 4 : 0;
   // fired on the sear: kissed by the pan. rushed off early: raw in the middle.
   const searBonus = t.sear === "golden" ? 8 : t.sear === "rushed" ? -6 : 0;
-  // comped champagne for the inspector's table smooths everything
-  const champagneBonus = ctx.champagne && t.table === ctx.criticTable ? 10 : 0;
   // kissed by the edge: smouldering stations char beautifully and dangerously
   const edgeBonus = ctx.simmer ? 4 : 0;
   // the split sauce: whisked back (+6) or gone out broken (−8)
   const sauceBonus = t.sauce === "saved" ? 6 : t.sauce === "split" ? -8 : 0;
-  const quality = Math.max(
+  // authored teaching ticket: the first split sauce arrives broken unless
+  // the player has already asked for it to be remade
+  const raw = t.lesson === "split-jus" && !t.requestedCorrection ? 85 : Math.max(
     5 + ctx.gear * 3,
     Math.min(
       100,
       38 +
         (cook?.skill ?? 0.5) * 30 +
         ((cook?.morale ?? 50) - 50) * 0.35 -
-        age * 0.5 -
         chefPenalty -
         burnPenalty -
         grudgePenalty +
         faveBonus +
         marketBonus +
         searBonus +
-        champagneBonus +
         edgeBonus +
         sauceBonus +
         (rng() - 0.5) * 30
     )
   );
-  return { fumble: false, quality, edged: ctx.simmer };
+  const condition = conditionFromCooking(t.dish, raw, {
+    sear: t.sear,
+    sauce: t.lesson === "split-jus" && !t.requestedCorrection ? "split" : t.sauce,
+    recipeFinish: t.recipeFinish,
+    correction: t.requestedCorrection,
+  });
+  return { fumble: false, quality: qualityOfCondition(t.dish, condition), condition, edged: ctx.simmer };
 }
 
 let nextId = 1;
@@ -402,6 +439,8 @@ let feedId = 1;
 interface GameState {
   phase: Phase;
   rng: () => number;
+  /** night-1 opening: two actions teach serve → call → judge before pressure starts */
+  openingStep: OpeningStep | null;
   tickets: Ticket[];
   guests: Guest[];
   cooks: Cook[];
@@ -441,8 +480,10 @@ interface GameState {
   madameNodded: boolean;
   /** the brigade is flying: announced once, favourites land harder */
   flyingAnnounced: boolean;
-  /** on-demand key glossary overlay (never in unpaused service) */
+  /** on-demand key glossary overlay — modal: owns input and pauses service */
   glossary: boolean;
+  /** whether closing the glossary releases the pause it took */
+  glossaryResume: boolean;
   /** the critic's exit: head high (fed, spotted) or coat on (slipped away) */
   criticLeft: boolean;
   criticServeAt: number;
@@ -455,7 +496,7 @@ interface GameState {
   /** user preference: embodied first-person pass during service */
   firstPerson: boolean;
   /** what the centre of the screen is aimed at, for the reticle */
-  aim: "fire" | "guest" | "ticket" | "station" | null;
+  aim: "fire" | "guest" | "ticket" | "station" | "ready" | "held" | "cooking" | null;
   rivalIdx: number;
   rivalAt: number; // serviceTime of last Beefcakes appearance
   rivalWarned: number; // rivalTimes index already warned about
@@ -472,6 +513,20 @@ interface GameState {
   /** folklore: one timed test at a time — fork, glass, coat, return, flash */
   folklore: { kind: "fork" | "glass" | "coat" | "return" | "flash"; table: number; until: number } | null;
   folkloreDone: boolean;
+  /** the rail card the chef has aimed at: fire/collect target, never auto-picked */
+  selectedTicketId: number | null;
+  /** held-plate inspection: close camera, turn the plate */
+  inspecting: boolean;
+  /** plate turn angle while inspecting — drives held and world models */
+  inspectionTurn: number;
+  /** live sauce correction on the held plate; owns that plate until done */
+  correction: { ticketId: number; startedAt: number; endsAt: number } | null;
+  /** the last table run: what actually went out, for the delivery tray */
+  lastDelivery: { id: number; at: number; table: number; plates: { dish: string; quality: number; condition?: DishCondition; recipeFinish?: RecipeFinish }[] } | null;
+  /** bounded narrative history of this service — feeds the factual review */
+  events: ServiceEvent[];
+  /** how tonight's folklore test actually ended, kept even when history evicts it */
+  folkloreOutcome: FolkloreOutcome | null;
   /** 101: turns served from the wobble table, whether it was moved mid-rush */
   table101Turns: number;
   moved101: boolean;
@@ -486,7 +541,11 @@ interface GameState {
   menuBuffs: number[]; // per-station quality bonus for tonight
   hasSave: boolean;
   canSave: boolean;
+  /** why continuing is blocked (e.g. a save from a newer build) — shown on the title */
+  saveIssue: string | null;
   start: () => void;
+  /** one route in for mouse and keyboard: start/continue, or straight into night 1 */
+  enterResidency: (options?: { fresh?: boolean; prep?: boolean }) => void;
   startService: () => void;
   continueNext: () => void;
   briefAction: (id: "drinks" | "gear" | "press") => void;
@@ -505,7 +564,14 @@ interface GameState {
   resetCareer: () => void;
   tick: (dt: number) => void;
   plateToPass: (id: number) => void;
-  firePlate: () => void;
+  firePlate: (id?: number) => void;
+  selectTicket: (id: number) => void;
+  collectPlate: (id: number) => void;
+  setInspecting: (value: boolean) => void;
+  correctPlate: () => void;
+  runTable: () => void;
+  developWellington: (finish: RecipeFinish) => void;
+  turnPlate: (delta: number) => void;
   eightySix: () => void;
   whisk: () => void;
   shooRunner: () => void;
@@ -514,7 +580,7 @@ interface GameState {
   bet: (kind: "covers" | "walks" | "spot") => void;
   borrow: () => void;
   repay: () => void;
-  judge: (v: Verdict) => void;
+  judge: (v: Verdict, options?: { batch?: boolean }) => void;
   scream: (power?: number) => void;
   flagGuest: (id: number) => void;
   togglePause: () => void;
@@ -522,7 +588,7 @@ interface GameState {
   /** platform: handshake, host pause/mute — safe anywhere, game never waits */
   initPlatform: () => void;
   toggleFirstPerson: () => void;
-  setAim: (aim: "fire" | "guest" | "ticket" | "station" | null) => void;
+  setAim: (aim: GameState["aim"]) => void;
   smotherFire: (station: number) => void;
 }
 
@@ -556,18 +622,36 @@ function recordLegends(review: Review): void {
     localStorage.setItem(LEGENDS_KEY, JSON.stringify(l));
   } catch {}
 }
-/** the morning paper: last night's defining stat, named once — the game says it remembered */
+/** the morning paper: last night's story, named once — the game says it remembered */
 function morningPaperLine(review: Review): string {
-  if (review.silent) return pick(Math.random, PAPER_SILENT);
-  if (review.walkouts > 0) return pick(Math.random, PAPER_WALKOUT);
-  if (review.smashed >= 3) return pick(Math.random, PAPER_SMASH);
-  if (review.spotted) return pick(Math.random, PAPER_SPOTTED);
-  return pick(Math.random, PAPER_STARS).replace("{S}", String(review.stars));
+  return `${review.headline} — ${review.consequence}`;
 }
 function spottedProvenance(stories: string[], persona: string): boolean {
   if (persona === "madameV" && stories.includes("lorna")) return true;
   if (persona === "kid" && stories.includes("layby")) return true;
   return false;
+}
+
+/** the opening's own ticket: a Wellington, honest and simple — no spawned variance */
+function openingTicket(table: number, state: "rail" | "pass"): Ticket {
+  const t: Ticket = { id: nextId++, dish: "Beef Wellington", table, station: 0, age: 0,
+    state, plateAt: 0, plateDur: 0, byChef: false,
+    quality: -1, verdict: null, sear: null, sauce: null };
+  if (state === "pass") {
+    // an honest first plate: raw 80 cooks to a pristine condition
+    t.condition = conditionFromCooking(t.dish, 80, {});
+    t.quality = qualityOfCondition(t.dish, t.condition);
+    t.readyAt = 0;
+  }
+  return t;
+}
+
+/** the first real rush after the two teaching plates — authored, not spawned */
+function authoredTicket(dishName: string, table: number, lesson?: "split-jus"): Ticket {
+  const d = DISHES.find((x) => x.name === dishName)!;
+  return { id: nextId++, dish: d.name, table, station: d.station, age: 0,
+    state: "rail", plateAt: 0, plateDur: 0, byChef: false,
+    quality: -1, verdict: null, sear: null, sauce: null, lesson };
 }
 
 function spawnTicket(rng: () => number, criticTable = -1, rested?: string | null): Ticket {
@@ -601,10 +685,16 @@ function freshCareer(): Career {
 }
 
 const SAVE_KEY = "mem-career";
+const NEWER_SAVE_MESSAGE =
+  "This residency was saved by a newer build. Open that build to continue; your saved progress is untouched.";
+
+/** set when a save from a newer version is found: never overwritten, never downgraded */
+let saveBlocked = false;
 
 function saveCareer(career: Career, cooks: Cook[]) {
+  if (saveBlocked) return;
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ career, cooks }));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 2, career, cooks }));
   } catch {
     /* private mode etc. — career simply won't persist */
   }
@@ -620,13 +710,56 @@ function canPersist(): boolean {
   }
 }
 
+/** drop only malformed optional fields — the rest of the career is still good */
+function cleanCareer(c: Career): Career {
+  let out = c;
+  const lr = out.lastReview;
+  if (
+    lr !== undefined &&
+    !(
+      typeof lr === "object" &&
+      lr !== null &&
+      typeof lr.night === "number" &&
+      typeof lr.headline === "string" &&
+      typeof lr.incident === "string" &&
+      typeof lr.consequence === "string"
+    )
+  ) {
+    const { lastReview, ...rest } = out;
+    out = rest;
+  }
+  out = { ...out, recipeHistory: cleanRecipeHistory(out.recipeHistory).filter((e) => e.night <= out.night) };
+  const help = out.lastSauceHelp;
+  if (
+    help !== undefined &&
+    !(
+      typeof help === "object" && help !== null &&
+      Number.isInteger(help.night) && help.night >= 1 && help.night <= 9 &&
+      typeof help.cookName === "string" && help.cookName.trim().length > 0 && help.cookName.length <= 24 &&
+      typeof help.dish === "string" && help.dish.trim().length > 0 && help.dish.length <= 40
+    )
+  ) {
+    const { lastSauceHelp, ...rest } = out;
+    out = rest;
+  }
+  return out;
+}
+
 function loadSave(): { career: Career; cooks: Cook[] } | null {
+  saveBlocked = false; // re-evaluate: a corrected supported save should load
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const p = JSON.parse(raw);
+    if (!p || typeof p !== "object") return null;
+    // unversioned saves are version 0; anything newer than we wrote is not ours to touch
+    const version = typeof p.version === "number" ? p.version : 0;
+    if (version > 2) {
+      saveBlocked = true;
+      return null;
+    }
     if (!p.career || !Array.isArray(p.cooks)) return null;
-    return p;
+    return { career: cleanCareer(p.career), cooks: p.cooks };
   } catch {
     return null;
   }
@@ -720,6 +853,7 @@ export const useGame = create<GameState>((set, get) => ({
   guests: [],
   cooks: [],
   feed: [],
+  openingStep: null,
   nextTicketIn: 2,
   serviceTime: 0,
   served: 0,
@@ -738,6 +872,11 @@ export const useGame = create<GameState>((set, get) => ({
   bestStreak: 0,
   milestoneAt: 0,
   milestoneText: "",
+  selectedTicketId: null,
+  inspecting: false,
+  inspectionTurn: 0,
+  correction: null,
+  lastDelivery: null,
   tableServeAt: {},
   runner: null,
   request: null,
@@ -747,6 +886,7 @@ export const useGame = create<GameState>((set, get) => ({
   madameNodded: false,
   flyingAnnounced: false,
   glossary: false,
+  glossaryResume: false,
   criticLeft: false,
   criticServeAt: -1,
   screamAt: 0,
@@ -773,6 +913,8 @@ export const useGame = create<GameState>((set, get) => ({
   moved101: false,
   review: null,
   career: bootSave?.career ?? freshCareer(),
+  events: [],
+  folkloreOutcome: null,
   feud: null,
   spawnMul: 1,
   tellMul: 1,
@@ -780,11 +922,17 @@ export const useGame = create<GameState>((set, get) => ({
   lots: [],
   menuBuffs: [0, 0, 0],
   hasSave: !!bootSave,
-  canSave: canPersist(),
+  canSave: !saveBlocked && canPersist(),
+  saveIssue: saveBlocked ? NEWER_SAVE_MESSAGE : null,
 
   start: () => {
     unlockAudio();
     const saved = loadSave();
+    if (!saved && saveBlocked) {
+      // a save from a newer version exists — refuse to touch it rather than downgrade
+      set({ hasSave: false, canSave: false, saveIssue: NEWER_SAVE_MESSAGE });
+      return;
+    }
     if (saved) {
       const cooks = saved.cooks.map(withMemory);
       const career = saved.career;
@@ -796,6 +944,12 @@ export const useGame = create<GameState>((set, get) => ({
         lots: makeLots(career.night),
         menuBuffs: [0, 0, 0],
         hasSave: true,
+        canSave: canPersist(),
+        saveIssue: null,
+        selectedTicketId: null,
+        inspecting: false,
+        correction: null,
+        lastDelivery: null,
         feed: [],
       });
       return;
@@ -803,8 +957,23 @@ export const useGame = create<GameState>((set, get) => ({
     get().resetCareer();
   },
 
+  enterResidency: ({ fresh = false, prep = false } = {}) => {
+    const before = get();
+    if (before.phase !== "title" && before.phase !== "ending") return;
+    if (fresh) get().resetCareer(); else get().start();
+    const s = get();
+    if (!s.saveIssue && !prep && s.phase === "briefing" && s.career.night === 1) s.startService();
+  },
+
   resetCareer: () => {
     unlockAudio();
+    // detect a newer-version envelope even if it was written after boot —
+    // never delete progress we can't read
+    loadSave();
+    if (saveBlocked) {
+      set({ hasSave: false, canSave: false, saveIssue: NEWER_SAVE_MESSAGE });
+      return;
+    }
     try {
       localStorage.removeItem(SAVE_KEY);
     } catch {}
@@ -818,8 +987,20 @@ export const useGame = create<GameState>((set, get) => ({
       cooks,
       feud: null,
       hasSave: false,
+      canSave: canPersist(),
+      saveIssue: null,
+      openingStep: null,
+      selectedTicketId: null,
+      inspecting: false,
+      inspectionTurn: 0,
+      correction: null,
+      lastDelivery: null,
+      glossary: false,
+      glossaryResume: false,
       ego: 10,
       screams: 0,
+      events: [],
+      folkloreOutcome: null,
       feed: [{ id: feedId++, text: `Night 1 — ${VENUES[0].name}. ${VENUES[0].sub}.`, kind: "info" }, { id: feedId++, text: "You're the chef because you're the only one who came back.", kind: "drama" as const }],
       review: null,
       nightTake: null,
@@ -831,13 +1012,14 @@ export const useGame = create<GameState>((set, get) => ({
   startService: () => {
     unlockAudio();
     const s = get();
+    if (s.phase !== "briefing" || s.saveIssue) return;
     const career = s.career;
     const v = VENUES[career.venue];
     const rng = mulberry32(daySeed() + career.night * 104729);
     const criticId = Math.floor(rng() * 5);
-    // teaching order, not rotation: GILLIAM N1–5 (noise), MADAME V N6–8 (fork), KID N9 (graduation)
-    const taught = career.night >= 9 ? "kid" : career.night >= 6 ? "madameV" : "gilliam";
-    const persona = career.criticPersona ?? taught;
+    // teaching order, not rotation: GILLIAM N1–5 (noise), MADAME V N6–8 (fork), KID N9 (graduation).
+    // The night's intended critic always overrides a stale saved persona.
+    const persona = criticForNight(career.night);
     // one critic, one press, one regulars, one couple, one walk-in — the
     // dining room reads back at the pass instead of five identical tables
     const kinds: GuestKind[] = ["press", "regulars", "couple", "walkin"];
@@ -872,21 +1054,19 @@ export const useGame = create<GameState>((set, get) => ({
         tells: 0,
         mercy: kind === "regulars" ? (sweetNight || (career.regularsPermanent ?? false) ? 2 : 1) : 0,
         tellAt: -1,
+        tellKind: null,
       });
     }
     nextId = 1;
     feedId = 1;
     const careerNext = { ...career, criticPersona: persona };
-    // N1 cold open: doors open mid-rush — three tickets already hanging, staggered like a bad night
+    // N1 opening: one honest plate, one serve, one call — the room waits while you learn
     const coldOpen = career.night === 1;
-    const criticTableForOpen = 10 + criticId;
-    const opening: Ticket[] = coldOpen
-      ? [
-          { ...spawnTicket(rng, criticTableForOpen, career.restedDish), age: 26 },
-          { ...spawnTicket(rng, criticTableForOpen, career.restedDish), age: 15 },
-          { ...spawnTicket(rng, criticTableForOpen, career.restedDish), age: 5 },
-        ]
-      : [];
+    const regularsTable = guests.find((g) => g.kind === "regulars")?.table ?? guests.find((g) => !g.isCritic)?.table ?? 10;
+    const opening: Ticket[] = coldOpen ? [openingTicket(regularsTable, "pass")] : [];
+    // a developed Wellington walks on first: the new recipe is a promise, not a bonus
+    const recipe = !coldOpen ? currentWellingtonRecipe(career.recipeHistory) : null;
+    if (recipe) opening.push(authoredTicket("Beef Wellington", regularsTable));
     saveCareer(careerNext, s.cooks);
     set({
       phase: "service",
@@ -898,12 +1078,11 @@ export const useGame = create<GameState>((set, get) => ({
       // cooks persist across nights — they rest a little, they don't forget
       cooks: s.cooks.map((c) => withFreshNight({ ...c, morale: Math.min(85, c.morale + 20) })),
       tickets: opening,
-      feed: [
+      feed: coldOpen
+        ? [{ id: feedId++, text: "Service, chef.", kind: "info" as const, who: "PETRA" }]
+        : [
         { id: feedId++, text: `Night ${career.night} — ${v.name}. ${v.sub}.`, kind: "drama" },
-        ...(coldOpen
-          ? [{ id: feedId++, text: "You're the chef because you're the only one who came back.", kind: "drama" as const }]
-          : []),
-        { id: feedId++, text: CRITIC_DREAD[persona], kind: "drama" },
+        { id: feedId++, text: CRITICS[persona].introduction, kind: "drama" },
         ...(career.vow ? [{ id: feedId++, text: VOW_LINES[career.vow], kind: "drama" as const }] : []),
         ...(career.mutator === "double_runners" ? [{ id: feedId++, text: "HOUSE RULE: DOUBLE SHIFT — his runners come doubled.", kind: "drama" as const }] : []),
         ...(career.mutator === "no_bin" ? [{ id: feedId++, text: "HOUSE RULE: NO BIN — everything gets cooked.", kind: "info" as const }] : []),
@@ -911,17 +1090,25 @@ export const useGame = create<GameState>((set, get) => ({
         ...(seat101 ? [{ id: feedId++, text: TABLE101_SEAT[Math.min(2, career.venue)], kind: "info" as const }] : []),
         ...(career.regularsPermanent ? [{ id: feedId++, text: PERMANENT_101, kind: "good" as const }] : []),
         ...(career.beefcakesTruce ? [{ id: feedId++, text: "Across the street, BEEFCAKES plates quietly. The truce holds.", kind: "info" as const }] : []),
-        ...(coldOpen
-          ? [{ id: feedId++, text: "Doors open mid-rush — three tickets already hanging. Fire something.", kind: "drama" as const }]
-          : [{ id: feedId++, text: "Doors open. Somewhere out there is the inspector.", kind: "info" as const }]),
+        { id: feedId++, text: "Doors open. Somewhere out there is the inspector.", kind: "info" },
         ...((s.career.debt ?? 0) > 0
           ? [{ id: feedId++, text: pick(rng, VAN_REMINDER), kind: "drama" as const }]
           : []),
         ...(s.career.silentLast
           ? [{ id: feedId++, text: "The press remembers last night: nobody raised their voice. They're listening for it.", kind: "info" as const, who: "THE PRESS" }]
           : []),
+        ...(recipe
+          ? [{ id: feedId++, text: `${recipe.contributor}'s ${WELLINGTON_FINISHES[recipe.finish].name.toLowerCase()} is on tonight.`, kind: "good" as const }]
+          : []),
       ],
-      nextTicketIn: coldOpen ? 0.5 : 1.5,
+      nextTicketIn: coldOpen ? 4 : 1.5,
+      openingStep: coldOpen ? "serve" : null,
+      selectedTicketId: null,
+      inspecting: false,
+      inspectionTurn: 0,
+      correction: null,
+      lastDelivery: null,
+      firstPerson: coldOpen ? false : s.firstPerson,
       serviceTime: 0,
       served: 0,
       sentBack: 0,
@@ -948,6 +1135,7 @@ export const useGame = create<GameState>((set, get) => ({
       madameNodded: false,
       flyingAnnounced: false,
       glossary: false,
+      glossaryResume: false,
       criticLeft: false,
       criticServeAt: -1,
       chorusText: `"YES, CHEF!"`,
@@ -966,6 +1154,8 @@ export const useGame = create<GameState>((set, get) => ({
       trilogyTonight: false,
       folklore: null,
       folkloreDone: false,
+      events: [],
+      folkloreOutcome: null,
       table101Turns: 0,
       moved101: false,
       review: null,
@@ -976,26 +1166,31 @@ export const useGame = create<GameState>((set, get) => ({
     const s = get();
     if (s.phase !== "review" || !s.review) return;
     const v = VENUES[s.career.venue];
-    const covers = s.served * v.price;
-    // walked-out cooks still expect half pay — storming off doesn't kill the bill
-    const wages =
-      30 * s.cooks.filter((c) => !c.walkedOut).length +
-      15 * s.cooks.filter((c) => c.walkedOut).length;
-    const breakage = s.smashed * 12;
-    const net = covers - wages - breakage;
     const c = s.career;
     recordLegends(s.review);
     const betCash = s.review.betCash ?? 0;
     // the man with the van collects when the residency ends — off the top, no arguments
     const lastNight = c.night + 1 > MAX_NIGHTS;
     const debtTake = lastNight ? (c.debt ?? 0) : 0;
+    const walkoutCount = s.cooks.filter((k) => k.walkedOut).length;
+    const acc = nightAccounts({
+      covers: s.served,
+      price: v.price,
+      walkedOut: walkoutCount,
+      cooks: s.cooks.length,
+      smashed: s.smashed,
+      betCash,
+      cash: c.cash,
+      debtTake,
+    });
+    const { covers, wages, breakage, net } = acc;
     // vow rewards: star +1 career star if held, brigade trauma −1, house regulars permanent
     let vowBonusStar = 0;
     if (c.vow === "star" && s.review.vowLine?.includes("HELD")) vowBonusStar = 1;
     const career: Career = {
       ...c,
       night: c.night + 1,
-      cash: c.cash + net + betCash - debtTake,
+      cash: acc.nextCash,
       stars: c.stars + s.review.stars + vowBonusStar,
       totalEgo: (c.totalEgo ?? 0) + s.review.ego,
       bet: undefined,
@@ -1010,6 +1205,13 @@ export const useGame = create<GameState>((set, get) => ({
       criticGrudge: (c.criticGrudge ?? 0) + (s.review.stars <= 2 ? 1 : 0),
       // the press has a memory: last night's silence follows you into the next briefing
       silentLast: s.review.silent,
+      // the night, on the record — the next briefing reads it back
+      lastReview: {
+        night: c.night,
+        headline: s.review.headline ?? "SERVICE, ON THE RECORD",
+        incident: s.review.incident,
+        consequence: s.review.consequence,
+      },
     };
     const oldVenue = c.venue;
     career.venue = venueFor(career.stars);
@@ -1332,8 +1534,10 @@ export const useGame = create<GameState>((set, get) => ({
 
   answerFolklore: (ok) => {
     const s = get();
-    if (s.phase !== "service" || !s.folklore) return;
+    if (s.phase !== "service" || s.paused || !s.folklore) return;
     const f = s.folklore;
+    // the flash test's only right answer is doing nothing — expiry resolves it
+    if (f.kind === "flash") return;
     let feed = s.feed;
     let criticQ = s.criticQ;
     const criticTable = s.guests.find((g) => g.isCritic)?.table;
@@ -1367,7 +1571,17 @@ export const useGame = create<GameState>((set, get) => ({
       }
     }
     // flash: correct answer is nothing — handled by expiry
-    set({ folklore: null, folkloreDone: true, feed, criticQ });
+    const result: FolkloreOutcome["result"] =
+      f.kind === "return" ? (ok ? "answered" : "refired") : ok ? "answered" : "ignored";
+    const outcome: FolkloreOutcome = { kind: "folklore", at: s.serviceTime, test: f.kind, result, table: f.table };
+    set({
+      folklore: null,
+      folkloreDone: true,
+      feed,
+      criticQ,
+      folkloreOutcome: outcome,
+      events: appendServiceEvent(s.events, outcome),
+    });
   },    move101: () => {
     const s = get();
     if (s.phase !== "service" || s.moved101 || s.career.night < 7) return;
@@ -1400,15 +1614,84 @@ export const useGame = create<GameState>((set, get) => ({
     let sauce = s.sauce;
     let request = s.request;
     let runner = s.runner;
+    let events = s.events;
+    let folkloreOutcome = s.folkloreOutcome;
 
-    // --- tickets: age, expire, finish plating ---
+    // --- the opening: nothing expires and nothing spawns until both plates teach
+    // their lesson; only the cooking clock moves ---
+    if (s.openingStep) {
+      const t = s.tickets.find((t) => t.state === "plating");
+      if (!t) return; // waits for the player's action, without eating service time
+      const serviceTime2 = Math.min(s.serviceTime + dt, t.plateAt);
+      const elapsed = serviceTime2 - s.serviceTime;
+      const ready = serviceTime2 >= t.plateAt;
+      // an honest second plate: raw 76 cooks to a good, not pristine, condition
+      const second = ready ? conditionFromCooking(t.dish, 76, { recipeFinish: t.recipeFinish }) : undefined;
+      set({
+        serviceTime: serviceTime2,
+        tickets: s.tickets.map((x) =>
+          x.id === t.id
+            ? { ...x, age: x.age + elapsed, state: ready ? "pass" : "plating",
+                quality: ready && second ? qualityOfCondition(t.dish, second) : x.quality,
+                condition: ready ? second : x.condition,
+                readyAt: ready ? t.plateAt : x.readyAt }
+            : x
+        ),
+        feed: ready ? pushFeed([], "Order up.", "info", "PETRA") : s.feed,
+      });
+      if (ready) sfx("bell");
+      return;
+    }
+
+    // --- tickets: expire first, then age, finish plating, cool ready food ---
     const tickets: Ticket[] = [];
+    const expiredIds = new Set<number>();
+    let correction = s.correction;
+    let selectedTicketId = s.selectedTicketId;
+    let inspecting = s.inspecting;
     for (const t of s.tickets) {
       if (t.state === "done") continue;
       const age = t.age + dt;
+      // expiry first: a plate cannot outrun its table by finishing on the tick it dies
+      const harsh101 = s.career.night >= 7;
+      const t101ttl = oneOhOneTable(s.career);
+      const baseTtl = t101ttl >= 0 && t.table === t101ttl && harsh101 ? (s.moved101 ? TICKET_TTL : 45) : TICKET_TTL;
+      const ttl = s.career.mutator === "short_fuse" ? baseTtl * 0.8 : baseTtl;
+      if (age > ttl) {
+        expiredIds.add(t.id);
+        // the regulars forgive — twice on dessert-on-the-house nights
+        const regular = s.guests.find((gg) => gg.table === t.table && gg.kind === "regulars" && gg.mercy > 0);
+        if (regular) {
+          regular.mercy -= 1;
+          feed = pushFeed(feed, REGULARS_FORGIVE, "good", "THE REGULARS");
+          continue;
+        }
+        feed = pushFeed(feed, t.table === 14 ? `Table 101 walks — ${t.dish} never came. The wobble wins.` : `Table ${t.table} walks — ${t.dish} never came.`, "bad");
+        sfx("gasp", { pan: tablePan(t.table) });
+        misses += 1;
+        streak = 0;
+        continue;
+      }
+      if (t.state === "plating" && !t.byChef && s.cooks[t.station]?.walkedOut) {
+        // no ghost cooks: work their station abandoned goes back on the rail
+        feed = pushFeed(feed, `${s.cooks[t.station].name} is gone — the ${t.dish} goes back on the rail.`, "info");
+        tickets.push({ ...t, state: "rail", age, quality: -1, plateAt: 0, plateDur: 0, sear: null, condition: undefined, readyAt: undefined });
+        continue;
+      }
       if (t.state === "plating" && serviceTime >= t.plateAt) {
+        // the ready slot is occupied: the plate waits at plating until it frees,
+        // keeping its original plateAt so cooling time isn't refunded
+        if (
+          tickets.some((x) => x.station === t.station && x.state === "ready") ||
+          s.tickets.some((x) => x.id !== t.id && x.station === t.station && x.state === "ready")
+        ) {
+          tickets.push({ ...t, age });
+          continue;
+        }
         const cook = s.cooks.find((c) => c.station === t.station);
-        const res = finishPlating(t, age, cook, {
+        // a live unrescued sauce interrupt goes out split — plating early does not erase it
+        const sauceSplit = sauce?.ticketId === t.id;
+        const res = finishPlating(sauceSplit ? { ...t, sauce: "split" } : t, age, cook, {
           rng,
           menuBuffs: s.menuBuffs,
           gear: s.career.gear,
@@ -1423,8 +1706,10 @@ export const useGame = create<GameState>((set, get) => ({
             // PETRA's keepsake: caught mid-air, bare hands
             cook.honoredUsed = true;
             feed = pushFeed(feed, `${cook.name} catches the ${t.dish} mid-air. Bare hands. The pass applauds. (keepsake spent)`, "good", cook.name);
+            events = appendServiceEvent(events, { kind: "rescue", at: serviceTime, cookId: cook.id, cookName: cook.name, action: "catch", dish: t.dish });
             sfx("bell");
-            tickets.push({ ...t, age, state: "pass", quality: Math.max(res.quality, 45) });
+            const kept = coolCondition(t.dish, conditionFromCooking(t.dish, 60, { recipeFinish: t.recipeFinish, sauce: t.sauce }), serviceTime - t.plateAt);
+            tickets.push({ ...t, age, state: "ready", readyAt: t.plateAt, quality: qualityOfCondition(t.dish, kept), condition: kept });
             continue;
           }
           feed = pushFeed(feed, `${cook.name} fumbles the ${t.dish} — straight in the bin.`, "bad", cook.name);
@@ -1438,7 +1723,8 @@ export const useGame = create<GameState>((set, get) => ({
           cook.overloadT += 2;
           feed = pushFeed(feed, `${cook.name}'s station kisses the ${t.dish} with smoke. Worth it. Probably.`, "info", cook.name);
         }
-        tickets.push({ ...t, age, state: "pass", quality: res.quality });
+        const cooled = coolCondition(t.dish, res.condition, serviceTime - t.plateAt);
+        tickets.push({ ...t, age, state: "ready", readyAt: t.plateAt, quality: qualityOfCondition(t.dish, cooled), condition: cooled });
         sfx("bell");
         // corner! the kitchen calls the walk so nobody wears the plate
         if (rng() < 0.35) {
@@ -1446,26 +1732,44 @@ export const useGame = create<GameState>((set, get) => ({
         }
         continue;
       }
-      // 101 — wherever they've migrated — walks faster from N7 unless moved mid-rush
-      const harsh101 = s.career.night >= 7;
-      const t101ttl = oneOhOneTable(s.career);
-      const baseTtl = t101ttl >= 0 && t.table === t101ttl && harsh101 ? (s.moved101 ? TICKET_TTL : 45) : TICKET_TTL;
-      const ttl = s.career.mutator === "short_fuse" ? baseTtl * 0.8 : baseTtl;
-      if (age > ttl) {
-        // the regulars forgive — twice on dessert-on-the-house nights
-        const regular = s.guests.find((gg) => gg.table === t.table && gg.kind === "regulars" && gg.mercy > 0);
-        if (regular) {
-          regular.mercy -= 1;
-          feed = pushFeed(feed, REGULARS_FORGIVE, "good", "THE REGULARS");
+      // ready and held food cools on the service clock
+      if ((t.state === "ready" || t.state === "pass") && t.condition) {
+        const cooled = coolCondition(t.dish, t.condition, serviceTime - (t.readyAt ?? serviceTime));
+        if (cooled !== t.condition) {
+          tickets.push({ ...t, age, condition: cooled, quality: qualityOfCondition(t.dish, cooled) });
           continue;
         }
-        feed = pushFeed(feed, t.table === 14 ? `Table 101 walks — ${t.dish} never came. The wobble wins.` : `Table ${t.table} walks — ${t.dish} never came.`, "bad");
-        sfx("gasp", { pan: tablePan(t.table) });
-        misses += 1;
-        streak = 0;
-        continue;
       }
       tickets.push({ ...t, age });
+    }
+
+    // expiry takes aim away only from the plate that vanished; inspection
+    // belongs to the held plate — it closes when no pass plate remains
+    if (selectedTicketId !== null && expiredIds.has(selectedTicketId)) {
+      selectedTicketId = null;
+    }
+    let inspectionTurn = s.inspectionTurn;
+    if (inspecting && !tickets.some((x) => x.state === "pass")) {
+      inspecting = false;
+      inspectionTurn = 0;
+    }
+    if (correction && expiredIds.has(correction.ticketId)) correction = null;
+    // a correction lands only if its held plate is still held
+    if (correction && serviceTime >= correction.endsAt) {
+      const held = tickets.find((t) => t.id === correction!.ticketId && t.state === "pass");
+      if (held?.condition?.sauce === "split") {
+        const fixed: DishCondition = { ...held.condition, sauce: "smooth" };
+        held.condition = fixed;
+        held.quality = qualityOfCondition(held.dish, fixed);
+        held.sauce = "saved";
+        const cook = s.cooks.find((c) => c.station === held.station);
+        if (cook && !cook.walkedOut) cook.morale = Math.min(100, cook.morale + 2);
+        events = appendServiceEvent(events, { kind: "intervention", at: serviceTime, action: "whisk", cookName: cook?.name, dish: held.dish, ticketId: held.id });
+        feed = pushFeed(feed, "You gave it a moment. Thank you.", "good", cook?.name);
+        career = { ...career, lastSauceHelp: { night: career.night, cookName: cook?.name ?? "THE KITCHEN", dish: held.dish } };
+        saveCareer(career, s.cooks);
+      }
+      correction = null;
     }
 
     // --- split sauce + table requests: validate the live ones, maybe start new ones ---
@@ -1480,6 +1784,7 @@ export const useGame = create<GameState>((set, get) => ({
           sauce = null;
           st.sauce = "saved";
           feed = pushFeed(feed, `${dimi.name} is already there, whisk in hand. He saw it split before it split. (keepsake spent)`, "good", dimi.name);
+          events = appendServiceEvent(events, { kind: "rescue", at: serviceTime, cookId: dimi.id, cookName: dimi.name, action: "whisk", dish: st.dish });
           sfx("whisk", { pan: STATION_PAN[st.station] ?? 0 });
         } else {
           sauce = null;
@@ -1537,6 +1842,15 @@ export const useGame = create<GameState>((set, get) => ({
     let folkloreQ = 0;
     if (folklore && serviceTime >= folklore.until) {
       // expired unanswered: fork ignored, flash correctly ignored, rest forgiven
+      const outcome: FolkloreOutcome = {
+        kind: "folklore",
+        at: serviceTime,
+        test: folklore.kind,
+        result: folklore.kind === "flash" ? "allowed" : "expired",
+        table: folklore.table,
+      };
+      events = appendServiceEvent(events, outcome);
+      folkloreOutcome = outcome;
       if (folklore.kind === "fork") {
         feed = pushFeed(feed, FOLKLORE_FORK_IGNORED, "bad");
         if (folklore.table === criticTable) folkloreQ = -20;
@@ -1733,10 +2047,12 @@ export const useGame = create<GameState>((set, get) => ({
         if (c.station === 2 && c.honored && !c.honoredUsed) {
           // ANWAR's keepsake: looks at the door, looks at the soufflé, stays
           feed = pushFeed(feed, `${c.name} looks at the door, looks at the soufflé, stays. For you. (keepsake spent)`, "good", c.name);
+          events = appendServiceEvent(events, { kind: "rescue", at: serviceTime, cookId: c.id, cookName: c.name, action: "stay" });
           sfx("bell");
           return { ...c, morale: 15, overloadT, burning, smoked, honoredUsed: true };
         }
         feed = pushFeed(feed, `${c.name} throws their apron. WALKOUT.`, "drama", c.name);
+        events = appendServiceEvent(events, { kind: "walkout", at: serviceTime, cookId: c.id, cookName: c.name });
         sfx("sting");
         const egoBeforeWalk = ego;
         ego += 4; // the room watches
@@ -1745,12 +2061,16 @@ export const useGame = create<GameState>((set, get) => ({
       }
       return { ...c, morale, overloadT, burning, smoked };
     });
-    // stalled plating on a walked-out station → the chef finishes it, slower
+    // a walked-out cook's half-done work goes back on the rail — the chef can
+    // call it explicitly, but no ghost finishes it. Ready plates stay ready.
     for (const t of tickets) {
       if (t.state === "plating" && !t.byChef && cooks[t.station]?.walkedOut) {
-        t.byChef = true;
-        t.plateAt = serviceTime + (t.plateAt - serviceTime) * 1.8 + 0.5;
-        feed = pushFeed(feed, `You dive on ${cooks[t.station].name}'s station yourself.`, "info");
+        t.state = "rail";
+        t.plateAt = 0;
+        t.plateDur = 0;
+        t.sear = null;
+        t.condition = undefined;
+        feed = pushFeed(feed, `${cooks[t.station].name} is gone — the ${t.dish} goes back on the rail.`, "info");
       }
     }
 
@@ -1771,16 +2091,24 @@ export const useGame = create<GameState>((set, get) => ({
         let line: string | null = null;
         let kind: FeedItem["kind"] = "info";
         let who: string | undefined;
+        let tellKind: TellKind | null = null;
         if (g.kind === "critic") {
-          line = CRITIC_ESCALATION[Math.min(tells - 1, CRITIC_ESCALATION.length - 1)].replace("{T}", String(g.table));
+          const tell = criticTell(personaTick, tells, g.table);
+          line = tell.text;
+          tellKind = tell.kind;
           kind = "drama";
-          sfx("flash", { pan });
-          if (kidPerforming) {
-            ego -= 2; // every flash tags the pass
-            if (!kidNoticed) {
-              kidNoticed = true;
-              feed = pushFeed(feed, "THE KID found your red eye. They're performing for it now — flashes twice as fast, every photo tags the pass (−2 ego).", "drama");
+          events = appendServiceEvent(events, { kind: "critic-tell", at: serviceTime, table: g.table, tell: tell.kind });
+          if (tell.kind === "phone") {
+            sfx("flash", { pan });
+            if (kidPerforming) {
+              ego -= 2; // every flash tags the pass
+              if (!kidNoticed) {
+                kidNoticed = true;
+                feed = pushFeed(feed, "THE KID found your red eye. They're performing for it now — flashes twice as fast, every photo tags the pass (−2 ego).", "drama");
+              }
             }
+          } else {
+            sfx("hush", { pan });
           }
           if (camMadame && !madameNodded) {
             madameNodded = true;
@@ -1789,6 +2117,7 @@ export const useGame = create<GameState>((set, get) => ({
           }
         } else if (g.kind === "press") {
           line = pick(rng, PRESS_TELLS).replace("{T}", String(g.table));
+          tellKind = "phone";
           kind = "drama";
           who = "THE PRESS";
           sfx("flash", { pan, vol: 0.6 });
@@ -1799,6 +2128,7 @@ export const useGame = create<GameState>((set, get) => ({
           who = "THE REGULARS";
         } else if (g.kind === "walkin") {
           line = `Table ${g.table} is taking photos.`;
+          tellKind = "phone";
         }
         // tell-volume governor: in the last 40s only the critic, the press, and first-kindness get lines
         const finale = serviceTime > SERVICE_LEN - 40;
@@ -1810,7 +2140,7 @@ export const useGame = create<GameState>((set, get) => ({
           : g.kind === "couple" ? 30 + rng() * 30
           : g.kind === "regulars" ? 70 + rng() * 40
           : 60 + rng() * 50;
-        return { ...g, tells, tellAt: serviceTime, tellClock: next * s.tellMul };
+        return { ...g, tells, tellAt: serviceTime, tellKind, tellClock: next * s.tellMul };
       }
       return { ...g, tellClock: tickClock };
     });
@@ -1842,14 +2172,6 @@ export const useGame = create<GameState>((set, get) => ({
       if (hasLorna && persona === "madameV" && spotted) stars = Math.min(5, stars + 1);
       if (hasRisky && persona === "kid" && spotted) stars = Math.max(0, stars - 1);
       stars = Math.max(0, Math.min(5, stars));
-      const bank = REVIEW_QUOTES[stars];
-      let quote = bank[Math.floor(rng() * bank.length)];
-      if (s.smashed >= 3) quote += " — crockery budget: exceeded.";
-      if (silent) quote += " " + pick(rng, SILENT_TAILS);
-      // the silent legend: a quiet five gets the trade's highest whisper
-      if (silent && stars >= 5) quote += " " + pick(rng, SILENT_LEGEND_TAILS);
-      if (ego >= 40) quote += " They chant your name in the alley.";
-      else if (ego <= 0 && served > 0) quote += " Nobody remembers your name. Possibly for the best.";
       // --- call the board: the wager resolves ---
       let betLine: string | undefined;
       let betCash = 0;
@@ -1871,44 +2193,73 @@ export const useGame = create<GameState>((set, get) => ({
           feed = pushFeed(feed, betLine, "bad");
         }
       }
-      if (allOut) quote = "The brigade abandoned ship mid-service. " + quote;
-      if (gilliamCap) quote += " GILLIAM stopped writing after the second scream.";
-      const criticAvg = s.criticServed > 0 ? s.criticQ / s.criticServed : -1;
-      const champagneKnew = (s.career.champagneNight ?? -1) === s.career.night && s.criticSpotted;
-      let criticVerdict = !s.criticSpotted
-        ? "The inspector left unidentified."
-        : champagneKnew && criticAvg >= 45
-          ? CHAMPAGNE_KNEW
-          : criticAvg < 0
-            ? "You clocked them, then never fed them."
-            : criticAvg >= 72
-              ? "The inspector wrote home about the Wellington — burnt sugar outside, sweet iron within."
-              : criticAvg >= 45
-                ? "The inspector nodded, once. Sour snap, sweet middle. Noted."
-                : "The inspector photographed it. For evidence. It tasted of noise.";
-      // persona names the night; provenance + folklore get name-checked
-      const personaVerdict = !spotted ? undefined : pick(rng, CRITIC_VERDICTS[persona]);
-      // the critic gets the last word: persona × stars tier (only if clocked)
-      const epiTier = stars >= 4 ? 0 : stars === 3 ? 1 : 2;
-      const epilogue = spotted ? pick(rng, EPILOGUES[`${persona}${epiTier}`]) : undefined;
-      // covers: 4–5★ names the magazine — fame, filed as texture
-      const coverRaw = stars >= 5 ? pick(rng, COVERS_5) : stars === 4 ? pick(rng, COVERS_4) : undefined;
-      const cover = coverRaw?.replace("{N}", s.cooks[Math.floor(rng() * s.cooks.length)].name);
-      // provenance pays off in words: the critic tastes what you bought, and says so
-      if (spotted && hasLorna && persona === "madameV") criticVerdict += " The scallops had the deep sear only dry flesh takes.";
-      if (spotted && hasLayby && persona === "kid") criticVerdict += " The mushrooms tasted like somewhere you're not supposed to park.";
-      // the press headline: names the night, shares like a clipping
-      const headline = stars >= 5 ? pick(rng, HEADLINE_5) : stars === 4 ? pick(rng, HEADLINE_4) : undefined;
-      const folkloreLine = s.folkloreDone ? (persona === "madameV" ? "The fork test: answered." : persona === "kid" ? "The flash test: you let them post." : "The coat test: answered.") : undefined;
-      // vow judged first, before stars
+      // vow judged first, before the story is told
       let vowLine: string | undefined;
       const vow = s.career.vow;
-      if (vow === "star" && spotted && misses === 0) { stars = Math.min(5, stars + 0); vowLine = "STAR VOW HELD: no walks, inspector clocked. +2★ tomorrow."; stars = Math.min(5, stars); }
+      if (vow === "star" && spotted && misses === 0) { vowLine = "STAR VOW HELD: no walks, inspector clocked. +1★ tomorrow."; }
       else if (vow === "star") vowLine = "STAR VOW BROKEN: the guide writes 'ambition without control.'";
       else if (vow === "house") vowLine = s.table101Turns >= 2 ? "HOUSE VOW HELD: 101 turned twice. The regulars are permanent." : "HOUSE VOW BROKEN: 101 wobbled away.";
       else if (vow === "brigade") vowLine = walkouts === 0 ? "BRIGADE VOW HELD: nobody walked. Trauma −1 all." : "BRIGADE VOW BROKEN: aprons on the tiles.";
+      // the accounts answer the question the review can't fudge: does the residency end here?
+      const v2 = VENUES[s.career.venue];
+      const lastNight2 = s.career.night + 1 > MAX_NIGHTS;
+      const acc = nightAccounts({
+        covers: served,
+        price: v2.price,
+        walkedOut: walkouts,
+        cooks: s.cooks.length,
+        smashed: s.smashed,
+        betCash,
+        cash: s.career.cash,
+        debtTake: lastNight2 ? (s.career.debt ?? 0) : 0,
+      });
+      const isFinalNight = s.career.night >= MAX_NIGHTS || acc.nextCash < -60;
+      const criticQ = s.criticQ + folkloreQ; // this tick's folklore resolves into the last word too
+      const story = buildServiceStory({
+        night: s.career.night,
+        stars,
+        served,
+        sentBack: s.sentBack,
+        screams: s.screams,
+        smashed: s.smashed,
+        misses,
+        complaints,
+        walkoutNames: cooks.filter((k) => k.walkedOut).map((k) => k.name),
+        spotted,
+        criticServed: s.criticServed,
+        criticAvg: s.criticServed > 0 ? criticQ / s.criticServed : -1,
+        events,
+        folkloreOutcome,
+        persona,
+        isFinalNight,
+      });
+      const review: Review = {
+        stars,
+        quote: story.incident,
+        covers: served,
+        avgQuality,
+        complaints,
+        misses,
+        walkouts,
+        smashed: s.smashed,
+        spotted,
+        ego,
+        bestStreak,
+        criticVerdict: story.criticVerdict,
+        silent,
+        incident: story.incident,
+        consequence: story.consequence,
+        sentBack: s.sentBack,
+        screams: s.screams,
+        betLine,
+        betCash,
+        vowLine,
+        folkloreLine: story.folkloreLine,
+        cover: story.cover,
+        headline: story.headline,
+      };
       sfx("review");
-      speakReview(stars, quote);
+      speakReview(stars, reviewNarration(review));
       set({
         phase: "review",
         tickets,
@@ -1916,29 +2267,22 @@ export const useGame = create<GameState>((set, get) => ({
         guests,
         feed,
         serviceTime,
-        review: {
-          stars,
-          quote,
-          covers: served,
-          avgQuality,
-          complaints,
-          misses,
-          walkouts,
-          smashed: s.smashed,
-          spotted,
-          ego,
-          bestStreak,
-          criticVerdict,
-          silent,
-          betLine,
-          betCash,
-          vowLine,
-          personaVerdict,
-          folkloreLine,
-          epilogue,
-          cover,
-          headline,
-        },
+        // the whole tick's worth of state commits with the review — the morning
+        // after must read the same night the reviewer just saw
+        ego, complaints, misses, served, qualitySum, streak, bestStreak, dessertDone, career,
+        nextTicketIn, barkAt, rivalIdx, rivalAt, rivalWarned, lastSteal, criticAnnounced,
+        sauce, request, runner, folklore, folkloreDone,
+        criticQ,
+        kidNoticed,
+        madameNodded,
+        flyingAnnounced,
+        events,
+        folkloreOutcome,
+        review,
+        // night ends: incomplete corrections die quietly — no invented success
+        correction: null,
+        inspecting: false,
+        selectedTicketId: null,
       });
       // platform: nightly boards, achievements, events — fire and forget
       trackEvent("night_completed", { level: String(s.career.night), score: stars });
@@ -1956,12 +2300,12 @@ export const useGame = create<GameState>((set, get) => ({
       if (s.criticSpotted && s.criticServed > 0 && serviceTime - s.criticServeAt > 25) {
         criticLeft = true;
         if (cg) cg.tellClock = 1e9;
-        feed = pushFeed(feed, `Table ${criticTable} pays and leaves head high. The inspector got what they came for.`, "drama");
+        feed = pushFeed(feed, `Table ${criticTable} pays and leaves. The inspector has finished their visit.`, "drama");
         sfx("bell", { pan: tablePan(criticTable) });
       } else if (!s.criticSpotted && serviceTime >= 120) {
         criticLeft = true;
         if (cg) cg.tellClock = 1e9;
-        feed = pushFeed(feed, `Table ${criticTable} slips out, coat on, notebook shut. If that was the inspector, they're gone.`, "bad");
+        feed = pushFeed(feed, `Table ${criticTable} slips out, coat on. The inspector is gone.`, "bad");
         sfx("gasp", { pan: tablePan(criticTable) });
       }
     }
@@ -1971,53 +2315,75 @@ export const useGame = create<GameState>((set, get) => ({
       ego, complaints, misses, served, qualitySum, streak, bestStreak, dessertDone, career,
       barkAt, rivalIdx, rivalAt, rivalWarned, lastSteal, criticAnnounced,
       sauce, request, runner, criticLeft, folklore, folkloreDone,
+      events, folkloreOutcome,
       criticQ: s.criticQ + folkloreQ,
       kidNoticed,
       madameNodded,
       flyingAnnounced,
+      correction, selectedTicketId, inspecting, inspectionTurn,
     });
   },
 
   plateToPass: (id) => {
     const s = get();
-    if (s.phase !== "service") return;
-    if (s.tickets.some((t) => t.state === "pass" || t.state === "plating")) return;
-    const t = s.tickets.find((t) => t.id === id && t.state === "rail");
-    if (!t) return;
+    if (s.phase !== "service" || s.paused || s.glossary) return;
+    // during the opening only the call exists — nothing else may start cooking
+    if (s.openingStep && s.openingStep !== "call") return;
+    if (!canStartOrder(s.tickets, id)) return;
+    const t = s.tickets.find((t) => t.id === id)!;
     const cook = s.cooks.find((c) => c.station === t.station);
     const walkedOut = cook?.walkedOut ?? false;
+    // the chef can't be in two stations: one byChef job at a time
+    if (walkedOut && s.tickets.some((x) => x.state === "plating" && x.byChef)) return;
     const adrenaline = s.serviceTime < s.adrenalineTil;
     let dur = 2.0 + (1 - (cook?.skill ?? 0.5)) * 2.5 + s.rng() * 1.2;
     if (walkedOut) dur *= 1.8;
     if (adrenaline) dur /= 1.7;
+    // the current Wellington revision is part of the work — herb takes longer
+    const recipe = t.dish === "Beef Wellington" ? currentWellingtonRecipe(s.career.recipeHistory) : null;
+    if (recipe) dur += WELLINGTON_FINISHES[recipe.finish].extraSeconds;
     // expo: the pass calls the fire, with the all-day count the trade counts on
     const allDay = s.tickets.filter((x) => x.dish === t.dish && x.state !== "done").length;
     const fireCall = pick(s.rng, EXPO_FIRE).replace("{D}", t.dish).replace("{T}", String(t.table)).replace("{N}", String(Math.max(1, allDay)));
     set({
       tickets: s.tickets.map((x) =>
         x.id === id
-          ? { ...x, state: "plating", plateAt: s.serviceTime + dur, plateDur: dur, byChef: walkedOut, sear: null }
+          ? { ...x, state: "plating", plateAt: s.serviceTime + dur, plateDur: dur, byChef: walkedOut, sear: null,
+              recipeFinish: recipe?.finish, recipeContributor: recipe?.contributor }
           : x
       ),
-      feed: walkedOut
-        ? pushFeed(pushFeed(s.feed, `${cook?.name} is gone — plating it yourself.`, "info"), fireCall, "info", "THE PASS")
-        : pushFeed(s.feed, fireCall, "info", "THE PASS"),
+      selectedTicketId: id,
+      inspecting: false,
+      feed: s.openingStep === "call"
+        ? pushFeed(s.feed, "On it.", "info", "PETRA")
+        : walkedOut
+          ? pushFeed(pushFeed(s.feed, `${cook?.name} is gone — plating it yourself.`, "info"), fireCall, "info", "THE PASS")
+          : pushFeed(s.feed, fireCall, "info", "THE PASS"),
+      openingStep: s.openingStep === "call" ? "judge" : null,
     });
   },
 
-  firePlate: () => {
+  firePlate: (id?: number) => {
     const s = get();
-    if (s.phase !== "service" || s.paused) return;
-    const t = s.tickets.find((t) => t.state === "plating");
+    if (s.phase !== "service" || s.paused || s.glossary || s.openingStep) return;
+    const target = id ?? s.selectedTicketId;
+    if (target == null) return;
+    const t = s.tickets.find((t) => t.id === target && t.state === "plating");
     if (!t) return;
+    // nobody is standing there to hand it off — the chef's own jobs only
+    if (!t.byChef && s.cooks[t.station]?.walkedOut) return;
+    // the ready slot must be free — firing into a full station would lose a plate
+    if (s.tickets.some((x) => x.station === t.station && x.state === "ready")) return;
     // the last 30% of the cook is the sear: fire inside it for the kiss
     // of the pan, fire earlier to free the slot at a cost
     const frac = t.plateDur > 0 ? 1 - (t.plateAt - s.serviceTime) / t.plateDur : 1;
     const golden = frac >= 0.7;
     const cook = s.cooks.find((c) => c.station === t.station);
     const criticTable = s.guests.find((g) => g.isCritic)?.table ?? -1;
+    // a live unrescued sauce interrupt goes out split — firing early does not erase it
+    const searFlag = golden ? "golden" as const : "rushed" as const;
     const res = finishPlating(
-      { ...t, sear: golden ? "golden" : "rushed" },
+      { ...t, sear: searFlag, sauce: s.sauce?.ticketId === t.id ? "split" : t.sauce },
       t.age,
       cook,
       {
@@ -2074,9 +2440,89 @@ export const useGame = create<GameState>((set, get) => ({
       feed,
       sauce,
       tickets: s.tickets.map((x) =>
-        x.id === t.id ? { ...x, state: "pass", quality: res.quality } : x
+        x.id === t.id
+          ? { ...x, state: "ready", readyAt: s.serviceTime, quality: res.quality, condition: res.condition, sear: searFlag }
+          : x
       ),
     });
+  },
+
+  selectTicket: (id) => {
+    const s = get();
+    if (s.phase !== "service" || s.paused || s.glossary) return;
+    // aim at a live ticket only — never a silent substitute
+    if (!s.tickets.some((t) => t.id === id && t.state !== "done" && t.state !== "pass")) return;
+    set({ selectedTicketId: id });
+  },
+
+  collectPlate: (id) => {
+    const s = get();
+    if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction || !canCollectOrder(s.tickets, id)) return;
+    set({ tickets: s.tickets.map((t) => (t.id === id ? { ...t, state: "pass" as const } : t)), selectedTicketId: id, inspecting: false, inspectionTurn: 0 });
+  },
+
+  setInspecting: (value) => {
+    const s = get();
+    if (!value) {
+      if (s.inspecting) set({ inspecting: false });
+      return;
+    }
+    if (s.phase !== "service" || s.paused || s.glossary || !s.tickets.some((t) => t.state === "pass")) return;
+    set({ inspecting: true });
+  },
+
+  turnPlate: (delta) => {
+    const s = get();
+    if (s.phase !== "service" || s.paused || s.glossary || !s.inspecting || !Number.isFinite(delta)) return;
+    set({ inspectionTurn: (s.inspectionTurn + delta) % (Math.PI * 2) });
+  },
+
+  correctPlate: () => {
+    const s = get();
+    const p = s.tickets.find((t) => t.state === "pass");
+    if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction || p?.condition?.sauce !== "split") return;
+    set({ inspecting: true, correction: { ticketId: p.id, startedAt: s.serviceTime, endsAt: s.serviceTime + SAUCE_CORRECTION_SECONDS } });
+    sfx("whisk", { pan: STATION_PAN[p.station] ?? 0 });
+  },
+
+  runTable: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction) return;
+    const held = s.tickets.find((t) => t.state === "pass");
+    if (!held) return;
+    // held plate plus every ready plate at the same table — the kitchen walks together
+    const peers = s.tickets.filter((t) => t.state === "ready" && t.table === held.table);
+    const plates: { dish: string; quality: number; condition?: DishCondition; recipeFinish?: RecipeFinish }[] = [];
+    // serve the held plate through the real judgment first, freeing the pass
+    plates.push({ dish: held.dish, quality: held.quality, condition: held.condition, recipeFinish: held.recipeFinish });
+    get().judge("serve", { batch: true });
+    // each same-table ready peer then walks the same honest path: collect, serve
+    for (const peer of peers) {
+      get().collectPlate(peer.id);
+      const cur = get().tickets.find((t) => t.id === peer.id);
+      if (cur?.state !== "pass") continue;
+      plates.push({ dish: cur.dish, quality: cur.quality, condition: cur.condition, recipeFinish: cur.recipeFinish });
+      get().judge("serve", { batch: true });
+    }
+    const after = get();
+    if (plates.length === 0) return;
+    set({
+      lastDelivery: { id: (s.lastDelivery?.id ?? 0) + 1, at: after.serviceTime, table: held.table, plates },
+      selectedTicketId: after.selectedTicketId && after.tickets.some((t) => t.id === after.selectedTicketId && t.state !== "done" && t.state !== "pass")
+        ? after.selectedTicketId
+        : null,
+    });
+    sfx("bell");
+  },
+
+  developWellington: (finish) => {
+    const s = get();
+    if (s.phase !== "briefing" || s.career.night < 2) return;
+    if (finish !== "classic" && finish !== "herb") return;
+    const contributor = s.cooks.find((c) => c.station === 0)?.name ?? "THE HOUSE";
+    const career = { ...s.career, recipeHistory: reviseWellington(s.career.recipeHistory, finish, contributor, s.career.night) };
+    saveCareer(career, s.cooks);
+    set({ career });
   },
 
   eightySix: () => {
@@ -2137,6 +2583,7 @@ export const useGame = create<GameState>((set, get) => ({
     sfx("whisk", { pan: STATION_PAN[t.station] ?? 0 });
     set({
       sauce: null,
+      events: appendServiceEvent(s.events, { kind: "intervention", at: s.serviceTime, action: "whisk", cookName: cook?.name, dish: t.dish }),
       feed: pushFeed(s.feed, `Whisked back from the edge.`, "good", cook?.name),
       tickets: s.tickets.map((x) => (x.id === t.id ? { ...x, sauce: "saved" } : x)),
     });
@@ -2151,6 +2598,7 @@ export const useGame = create<GameState>((set, get) => ({
     sfx("slam", { pan: 0.8 });
     set({
       runner: { ...r, shooed: true, fled: true },
+      events: appendServiceEvent(s.events, { kind: "intervention", at: s.serviceTime, action: "shoo" }),
       ego: s.ego + 2,
       feed: tiered(
         pushFeed(s.feed, "'Wrong kitchen, sunshine.' He leaves with the wrist.", "good"),
@@ -2179,7 +2627,7 @@ export const useGame = create<GameState>((set, get) => ({
 
   compTable: () => {
     const s = get();
-    if (s.phase !== "service" || s.paused || s.comped || s.career.cash < 20) return;
+    if (s.phase !== "service" || s.paused || s.comped || s.career.cash < 20 || s.openingStep) return;
     const rail = s.tickets.filter((t) => t.state === "rail");
     // the table with the most hanging fire gets the champagne
     const counts = new Map<number, number>();
@@ -2272,8 +2720,12 @@ export const useGame = create<GameState>((set, get) => ({
     }
   },
 
-  judge: (v) => {
+  judge: (v, options) => {
     const s = get();
+    if (s.phase !== "service" || s.paused || s.glossary || s.correction) return;
+    // the opening's two plates only accept what they're teaching
+    if (s.openingStep === "serve" && v !== "serve") return;
+    if (s.openingStep === "call") return;
     const plate = s.tickets.find((t) => t.state === "pass");
     if (!plate) return;
     let { feed, ego, served, sentBack, smashed, complaints, qualitySum, streak, bestStreak } = s;
@@ -2325,7 +2777,7 @@ export const useGame = create<GameState>((set, get) => ({
         feed = pushFeed(feed, `${stories.includes("lorna") ? "Lorna's scallops — known by the first bite" : "Layby shrooms — the Kid is already filming"} (+6).`, "good");
       }
       qualitySum += q;
-      sfx("slam");
+      if (!options?.batch) sfx("slam");
       if (plate.table === criticTable) {
         criticServed += 1;
         criticQ += q;
@@ -2382,13 +2834,33 @@ export const useGame = create<GameState>((set, get) => ({
       feed = tiered(feed, egoBefore, ego);
       // a bad plate breaks the trilogy — the myth dies hungry
       if (plate.quality < 72) wellingtonRun = 0;
+      // the opening's two plates redirect the same real serve into the next lesson
+      const ticketsNext = s.openingStep === "serve"
+        ? [openingTicket(plate.table, "rail")]
+        : s.tickets.map((t) => (t.id === plate.id ? { ...t, state: "done" as const, verdict: v } : t));
+      // the second teaching plate resolves into the first real rush: one
+      // Wellington with a split jus waiting for the new chef, all authored
+      if (s.openingStep === "judge") {
+        const coupleTable = s.guests.find((g) => g.kind === "couple")?.table ?? plate.table;
+        const regularsTable = s.guests.find((g) => g.kind === "regulars")?.table ?? plate.table;
+        ticketsNext.push(
+          authoredTicket("Beef Wellington", coupleTable, "split-jus"),
+          authoredTicket("Pommes purée", coupleTable),
+          authoredTicket("Soufflé (weeping)", regularsTable),
+        );
+      }
+      const feedNext = s.openingStep === "serve"
+        ? pushFeed([], "One more, chef.", "info", "PETRA")
+        : s.openingStep === "judge"
+          ? pushFeed(feed, `Table ${s.guests.find((g) => g.kind === "couple")?.table ?? plate.table}: Wellington and purée. Together.`, "info")
+          : feed;
       set({
-        tickets: s.tickets.map((t) => (t.id === plate.id ? { ...t, state: "done", verdict: v } : t)),
+        tickets: ticketsNext,
         served,
         complaints,
         qualitySum,
         cooks,
-        feed,
+        feed: feedNext,
         ego,
         streak,
         bestStreak,
@@ -2400,6 +2872,16 @@ export const useGame = create<GameState>((set, get) => ({
         request: req,
         wellingtonRun,
         trilogyTonight,
+        openingStep: s.openingStep === "serve" ? "call" : null,
+        nextTicketIn: s.openingStep === "judge" ? 8 : s.nextTicketIn,
+        selectedTicketId: s.selectedTicketId === plate.id ? null : s.selectedTicketId,
+        inspecting: false,
+        inspectionTurn: 0,
+        lastDelivery: options?.batch
+          ? s.lastDelivery
+          : { id: (s.lastDelivery?.id ?? 0) + 1, at: s.serviceTime, table: plate.table,
+              plates: [{ dish: plate.dish, quality: plate.quality, condition: plate.condition, recipeFinish: plate.recipeFinish }] },
+        events: appendServiceEvent(s.events, { kind: "plate", at: s.serviceTime, ticketId: plate.id, dish: plate.dish, table: plate.table, cookName: plate.byChef ? "THE CHEF" : cook?.name ?? "THE CHEF", verdict: "serve", quality: plate.quality, guestScore: q }),
         milestoneAt: ms?.at ?? s.milestoneAt,
         milestoneText: ms?.text ?? s.milestoneText,
         ...stamp("SERVED"),
@@ -2410,17 +2892,32 @@ export const useGame = create<GameState>((set, get) => ({
     if (v === "sendback") {
       sentBack += 1;
       sfx("rip");
-      feed = pushFeed(feed, `Back to ${cook?.name ?? "the pass"}: "${plate.dish}. Again."`, "info", cook?.name);
-      // sent back on their station: they will remember this
-      if (cook && !cook.walkedOut && !cook.grudge) cook.grudge = "sent back";
-      if (cook) cook.morale = Math.max(0, cook.morale - 3);
+      // a truthful send-back names the fault; a free rejection earns the grudge
+      const needed = plate.condition ? correctionNeeded(plate.dish, plate.condition) : null;
+      if (needed) {
+        feed = pushFeed(feed, `Back to ${cook?.name ?? "the pass"}: "${CORRECTION_LABEL[needed]}."`, "info", cook?.name);
+        if (cook) cook.morale = Math.max(0, cook.morale - 1);
+      } else {
+        feed = pushFeed(feed, `Back to ${cook?.name ?? "the pass"}: "${plate.dish}. Again."`, "info", cook?.name);
+        // sent back on their station: they will remember this
+        if (cook && !cook.walkedOut && !cook.grudge) cook.grudge = "sent back";
+        if (cook) cook.morale = Math.max(0, cook.morale - 3);
+      }
       set({
         tickets: s.tickets.map((t) =>
-          t.id === plate.id ? { ...t, state: "rail", age: t.age * 0.4, quality: -1, sear: null } : t
+          t.id === plate.id
+            ? { ...t, state: "rail", age: t.age * 0.4, quality: -1, sear: null,
+                condition: undefined, readyAt: undefined,
+                requestedCorrection: needed ?? t.requestedCorrection }
+            : t
         ),
         sentBack,
         cooks,
         feed,
+        inspecting: false,
+        inspectionTurn: 0,
+        events: appendServiceEvent(s.events, { kind: "plate", at: s.serviceTime, ticketId: plate.id, dish: plate.dish, table: plate.table, cookName: plate.byChef ? "THE CHEF" : cook?.name ?? "THE CHEF", verdict: "sendback", quality: plate.quality }),
+        openingStep: s.openingStep ? "call" as const : null,
         ...stamp("SENT BACK"),
       });
       return;
@@ -2449,14 +2946,36 @@ export const useGame = create<GameState>((set, get) => ({
       career,
       wellingtonRun: 0,
       request: s.request?.ticketId === plate.id ? null : s.request,
+      events: appendServiceEvent(s.events, { kind: "plate", at: s.serviceTime, ticketId: plate.id, dish: plate.dish, table: plate.table, cookName: plate.byChef ? "THE CHEF" : cook?.name ?? "THE CHEF", verdict: "smash", quality: plate.quality }),
       smashAt: performance.now(),
+      selectedTicketId: s.selectedTicketId === plate.id ? null : s.selectedTicketId,
+      inspecting: false,
+      inspectionTurn: 0,
+      ...(s.openingStep
+        ? {
+            openingStep: null,
+            nextTicketIn: 8,
+            // even a smashed second plate ends the lesson: the room fills in
+            tickets: (() => {
+              const next = s.tickets.map((t) => (t.id === plate.id ? { ...t, state: "done" as const, verdict: v } : t));
+              const coupleTable = s.guests.find((g) => g.kind === "couple")?.table ?? plate.table;
+              const regularsTable = s.guests.find((g) => g.kind === "regulars")?.table ?? plate.table;
+              next.push(
+                authoredTicket("Beef Wellington", coupleTable, "split-jus"),
+                authoredTicket("Pommes purée", coupleTable),
+                authoredTicket("Soufflé (weeping)", regularsTable),
+              );
+              return next;
+            })(),
+          }
+        : {}),
       ...stamp("SMASHED"),
     });
   },
 
   scream: (power = 1) => {
     const s = get();
-    if (s.phase !== "service") return;
+    if (s.phase !== "service" || s.paused || s.openingStep) return;
     // charge-and-release: short jab = cheap and brief, full roar = long
     // adrenaline window, over-held = the brigade stops answering.
     const p = Math.max(0.2, Math.min(1.4, power));
@@ -2479,6 +2998,7 @@ export const useGame = create<GameState>((set, get) => ({
     set({
       screamAt: performance.now(),
       chorusText: chorusLine,
+      events: appendServiceEvent(s.events, { kind: "scream", at: s.serviceTime, power: p, over }),
       screams: s.screams + 1,
       adrenalineTil: s.serviceTime + 2 + 5 * Math.min(p, 1.05),
       cooks,
@@ -2504,10 +3024,11 @@ export const useGame = create<GameState>((set, get) => ({
 
   flagGuest: (id) => {
     const s = get();
-    if (s.criticFlagged || s.phase !== "service") return;
+    if (s.criticFlagged || s.phase !== "service" || s.paused || s.openingStep) return;
     if (s.serviceTime >= DESSERT_AT) {
       set({
         criticFlagged: true,
+        events: appendServiceEvent(s.events, { kind: "critic-flag", at: s.serviceTime, result: "late" }),
         feed: pushFeed(s.feed, "Too late — they're already on the soufflé.", "bad"),
       });
       return;
@@ -2521,11 +3042,12 @@ export const useGame = create<GameState>((set, get) => ({
       criticFlagged: true,
       criticSpotted: g.isCritic,
       ego: egoAfterFlag,
+      events: appendServiceEvent(s.events, { kind: "critic-flag", at: s.serviceTime, result: g.isCritic ? "correct" : "wrong", table: g.table }),
       feed: tiered(
         pushFeed(
           s.feed,
           g.isCritic
-            ? `You clock the inspector at table ${g.table}. Comped before they asked.${gilliamCraft ? GILLIAM_CAM_CRAFT : ""}`
+            ? `You clock the inspector at table ${g.table}.${gilliamCraft ? GILLIAM_CAM_CRAFT : ""}`
             : `You accuse table ${g.table}. Wrong guest. They heard.`,
           g.isCritic ? "good" : "bad"
         ),
@@ -2537,12 +3059,17 @@ export const useGame = create<GameState>((set, get) => ({
 
   togglePause: () => {
     const s = get();
-    if (s.phase !== "service") return;
+    if (s.phase !== "service" || s.glossary) return;
     set({ paused: !s.paused });
   },
 
   toggleGlossary: () => {
-    set({ glossary: !get().glossary });
+    const s = get();
+    if (s.glossary) {
+      set({ glossary: false, paused: s.glossaryResume ? false : s.paused, glossaryResume: false });
+    } else {
+      set({ glossary: true, glossaryResume: s.phase === "service" && !s.paused, paused: s.phase === "service" ? true : s.paused });
+    }
   },
 
   initPlatform: () => {
@@ -2556,6 +3083,7 @@ export const useGame = create<GameState>((set, get) => ({
   },
 
   toggleFirstPerson: () => {
+    if (get().openingStep) return;
     set({ firstPerson: !get().firstPerson });
   },
 
@@ -2574,6 +3102,7 @@ export const useGame = create<GameState>((set, get) => ({
       cooks: s.cooks.map((c) =>
         c === cook ? { ...c, burning: false, overloadT: 0 } : c
       ),
+      events: appendServiceEvent(s.events, { kind: "intervention", at: s.serviceTime, action: "smother", cookName: cook.name }),
       feed: pushFeed(
         s.feed,
         `You smother the fire on ${cook.name}'s station with a hotel pan. Sizzling applause.`,

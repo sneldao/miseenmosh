@@ -1,0 +1,169 @@
+{
+  "input": "assets/meshy/petra-pilot/rigged.glb",
+  "sha256": "6aaf7c0521e9210dc913b1df529d577edf87ea5dce3bfdb6d489f39c20461b98",
+  "skin_weight_sum_range": [
+    0.9999999590218067,
+    1.0000000428408384
+  ],
+  "indexed_edges_measured": 14128,
+  "degenerate_edges_ignored": 0,
+  "coincident_position_tolerance_m": 0.000001,
+  "rest_joints": [
+    {
+      "name": "mixamorigHips",
+      "position": [
+        0.003704953007400036,
+        1.0250338142857227,
+        0.04075447643295188
+      ]
+    },
+    {
+      "name": "mixamorigSpine2",
+      "position": [
+        0.0037049525493862184,
+        1.4647883069162029,
+        -0.010742568139500164
+      ]
+    },
+    {
+      "name": "mixamorigNeck",
+      "position": [
+        0.0037049530617046644,
+        1.5624145025454834,
+        -0.022223227948148034
+      ]
+    },
+    {
+      "name": "mixamorigHead",
+      "position": [
+        0.0037049504387894547,
+        1.6604507502316075,
+        -0.015483926837896383
+      ]
+    },
+    {
+      "name": "mixamorigLeftShoulder",
+      "position": [
+        0.04474530447131426,
+        1.469627933698535,
+        -0.021374944129272808
+      ]
+    },
+    {
+      "name": "mixamorigLeftArm",
+      "position": [
+        0.27787148827526126,
+        1.477038005906398,
+        -0.04075444491444643
+      ]
+    },
+    {
+      "name": "mixamorigLeftForeArm",
+      "position": [
+        0.4857806232814231,
+        1.4770380572657789,
+        -0.04075446941292774
+      ]
+    },
+    {
+      "name": "mixamorigLeftHand",
+      "position": [
+        0.7202591997343349,
+        1.4770379334984693,
+        -0.045886403687048605
+      ]
+    },
+    {
+      "name": "mixamorigRightShoulder",
+      "position": [
+        -0.04037625118290907,
+        1.469628036865541,
+        -0.022135169668033673
+      ]
+    },
+    {
+      "name": "mixamorigRightArm",
+      "position": [
+        -0.27787153373153023,
+        1.4770379056098106,
+        -0.04075453482654988
+      ]
+    },
+    {
+      "name": "mixamorigRightForeArm",
+      "position": [
+        -0.4857806266268984,
+        1.4770380293111214,
+        -0.04075435431009352
+      ]
+    },
+    {
+      "name": "mixamorigRightHand",
+      "position": [
+        -0.7084048879762698,
+        1.4718884767984806,
+        -0.045903709054255504
+      ]
+    },
+    {
+      "name": "mixamorigLeftLeg",
+      "position": [
+        0.19240964609976813,
+        0.5153426098325355,
+        0.004892266393046771
+      ]
+    },
+    {
+      "name": "mixamorigLeftFoot",
+      "position": [
+        0.2222377810191343,
+        0.14547395594797397,
+        -0.048798241743758526
+      ]
+    },
+    {
+      "name": "mixamorigRightLeg",
+      "position": [
+        -0.1849419965556633,
+        0.5160581999043418,
+        0.00499609392904391
+      ]
+    },
+    {
+      "name": "mixamorigRightFoot",
+      "position": [
+        -0.21479648198888215,
+        0.14586266842697648,
+        -0.04874190968291799
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "name": "Running",
+      "duration_s": 0.6333333253860474,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 39,
+      "indexed_edge_length_ratio_range": [
+        0.023547363893272815,
+        2.1281668123441895
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 5,
+      "max_stretch_time_s": 0.30000001192092896,
+      "max_coincident_rest_position_separation_m": 0
+    },
+    {
+      "name": "Walking",
+      "duration_s": 1.0333333015441895,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 63,
+      "indexed_edge_length_ratio_range": [
+        0.21707694622592993,
+        1.9412407032593366
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 1,
+      "max_stretch_time_s": 0.8999999761581421,
+      "max_coincident_rest_position_separation_m": 0
+    }
+  ]
+}

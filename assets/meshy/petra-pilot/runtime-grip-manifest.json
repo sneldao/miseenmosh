@@ -1,0 +1,24 @@
+{
+  "source_sha256": "ea91a8ac246953cc482d112e8dc86d3d2f51df4278562d4195c7af77edf6fdaf",
+  "sha256": "8255744b79c4477333c59f60669e0ab498ad2a10a05e4b9c6de0568aeae46c40",
+  "bytes": 3861112,
+  "vertices": 5698,
+  "triangles": 7231,
+  "clips": [
+    "PetraReady",
+    "PetraWork",
+    "Running",
+    "Walking"
+  ],
+  "portrait_socket_bind_m": [
+    0,
+    1.58,
+    0.02
+  ],
+  "head_replacement_plane_y_m": 1.615,
+  "loop_blend_in_s": 0.25,
+  "loop_blend_out_s": 0.45,
+  "wrist_swing_relative_bind_max_deg": 15,
+  "wrist_twist_relative_bind_max_deg": 85,
+  "status": "requires_runtime_and_contact_review"
+}

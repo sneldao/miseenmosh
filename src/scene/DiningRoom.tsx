@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGame } from "../game/state";
+import { useReducedMotion } from "./artDirection";
 import { Group, Mesh, MeshStandardMaterial } from "three";
 
 /** Eveningwear: warm and cool so guests never read as brigade whites. */
@@ -30,39 +31,45 @@ function Guest({
   const g = guests.find((g) => g.id === id);
   const body = useRef<Group>(null);
   const phone = useRef<Group>(null);
+  const notebook = useRef<Group>(null);
   const flash = useRef<Mesh>(null);
   const flame = useRef<Mesh>(null);
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime;
+  const motionTime = useRef(0);
+  const reduced = useReducedMotion();
+  useFrame((_, dt) => {
     const st = useGame.getState();
+    // guests are ambient life: they don't animate off the service clock,
+    // but they do freeze with a pause and never jump on resume
+    if (st.paused || st.phase !== "service") return;
+    if (!reduced) motionTime.current += Math.min(dt, 0.05);
+    const t = motionTime.current;
     if (body.current) {
       // idle life: breathe, weight-shift, and a slow sip-cycle per guest.
       // small + slow on purpose — the phone flash keeps the urgent channel.
-      body.current.rotation.y = Math.sin(t * 0.5 + id) * 0.12;
+      body.current.rotation.y = reduced ? 0 : Math.sin(t * 0.5 + id) * 0.12;
       const sipCycle = (t * 0.07 + id * 0.37) % 1;
-      const sip = sipCycle > 0.88 ? Math.sin((sipCycle - 0.88) / 0.12 * Math.PI) : 0;
+      const sip = !reduced && sipCycle > 0.88 ? Math.sin((sipCycle - 0.88) / 0.12 * Math.PI) : 0;
       body.current.rotation.x = sip * 0.14;
-      body.current.rotation.z = Math.sin(t * 0.34 + id * 2.1) * 0.045;
-      body.current.position.y = Math.sin(t * 1.1 + id * 1.7) * 0.012 + sip * 0.02;
+      body.current.rotation.z = reduced ? 0 : Math.sin(t * 0.34 + id * 2.1) * 0.045;
+      body.current.position.y = (reduced ? 0 : Math.sin(t * 1.1 + id * 1.7) * 0.012) + sip * 0.02;
     }
     if (flame.current) {
-      const f = 0.8 + Math.sin(t * 7.3 + id * 2.1) * 0.22;
+      const f = reduced ? 1 : 0.8 + Math.sin(t * 7.3 + id * 2.1) * 0.22;
       flame.current.scale.set(1, f, 1);
       (flame.current.material as MeshStandardMaterial).emissiveIntensity = 3.4 * f;
     }
     if (!g) return;
+    // the tell is what the critic actually does: notebook, phone, or a
+    // lean over the place setting — identity stays hidden until flagged.
     const telling = g.tellAt >= 0 && st.serviceTime - g.tellAt < 3.5;
-    if (phone.current) {
-      // phone slides up to face height while telling
-      const target = telling ? 1.2 : 0.62;
-      phone.current.position.y += (target - phone.current.position.y) * 0.15;
-    }
+    if (phone.current) phone.current.visible = telling && g.tellKind === "phone";
+    if (notebook.current) notebook.current.visible = telling && g.tellKind === "notebook";
+    // modest forward lean: reading the notebook, or studying the setting
+    const leaning = telling && (g.tellKind === "notebook" || g.tellKind === "inspect");
+    if (body.current) body.current.rotation.x += leaning ? 0.2 : 0;
+    const snapping = telling && g.tellKind === "phone" && (reduced ? true : t % 0.8 < 0.1);
     if (flash.current) {
-      // the critic strobes; the press flashes too, dimmer, twice as guilty
-      const snapping = telling && (g.isCritic || g.kind === "press") && t % 0.8 < 0.1;
-      (flash.current.material as MeshStandardMaterial).emissiveIntensity = snapping
-        ? g.isCritic ? 8 : 4
-        : telling ? 0.9 : 0;
+      (flash.current.material as MeshStandardMaterial).emissiveIntensity = snapping ? (reduced ? 0.7 : 6) : 0;
     }
   });
   if (!g) return null;
@@ -113,8 +120,8 @@ function Guest({
           <sphereGeometry args={[0.112, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.62]} />
           <meshStandardMaterial color={id % 2 ? "#241a18" : "#4a3424"} roughness={0.95} />
         </mesh>
-        {/* the tell: phone raised to face, screen lit */}
-        <group ref={phone} position={[0.17, 0.62, 0.22]}>
+        {/* the tell: phone raised to face, screen lit — only while a phone tell is live */}
+        <group ref={phone} position={[0.17, 1.05, 0.22]} visible={false}>
           <mesh>
             <boxGeometry args={[0.07, 0.12, 0.015]} />
             <meshStandardMaterial color="#111" roughness={0.4} />
@@ -124,8 +131,27 @@ function Guest({
             <meshStandardMaterial
               color="#bcd0ff"
               emissive="#bcd0ff"
-              emissiveIntensity={0.9}
+              emissiveIntensity={0}
             />
+          </mesh>
+        </group>
+        {/* the other tell: a cream notebook raised over the table, pen out */}
+        <group ref={notebook} position={[-0.12, 0.98, 0.26]} rotation={[-0.55, 0, 0.12]} visible={false}>
+          <mesh>
+            <boxGeometry args={[0.24, 0.018, 0.17]} />
+            <meshStandardMaterial color="#2e2016" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 0.014, 0]}>
+            <boxGeometry args={[0.21, 0.008, 0.145]} />
+            <meshStandardMaterial color="#efe6d0" roughness={0.95} />
+          </mesh>
+          <mesh position={[0, 0.019, 0]}>
+            <boxGeometry args={[0.005, 0.002, 0.145]} />
+            <meshStandardMaterial color="#7a6a50" roughness={0.9} />
+          </mesh>
+          <mesh position={[0.15, 0.026, 0.02]} rotation={[0.5, 0, 0.5]}>
+            <cylinderGeometry args={[0.006, 0.006, 0.1, 6]} />
+            <meshStandardMaterial color="#1c1610" roughness={0.6} />
           </mesh>
         </group>
       </group>
@@ -149,7 +175,6 @@ function Guest({
         <sphereGeometry args={[0.02, 8, 8]} />
         <meshStandardMaterial color="#ffd9a0" emissive="#ffb04a" emissiveIntensity={3} />
       </mesh>
-      <pointLight position={[0.2, 0.99, 0.62]} color="#ff9a4a" intensity={6} distance={3} />
       {/* 101 wobbles: table 14 sits a degree off — until the flagship fixes it */}
       {g?.table === hundredOne && venue < 2 && (
         <mesh position={[0, 0.44, 0.62]} rotation={[0, 0, 0.06]}>
@@ -226,7 +251,6 @@ function FarWall({ venue = 0 }: { venue?: number }) {
             <sphereGeometry args={[0.07, 10, 10]} />
             <meshStandardMaterial color="#ffd9a0" emissive="#ffb04a" emissiveIntensity={2.4} />
           </mesh>
-          <pointLight position={[0, 0.2, 0.3]} color={d.sconceC} intensity={d.sconce} distance={5} />
         </group>
       ))}
     </group>

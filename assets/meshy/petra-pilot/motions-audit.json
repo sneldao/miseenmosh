@@ -1,0 +1,619 @@
+{
+  "input": "assets/meshy/petra-pilot/motions.glb",
+  "sha256": "32cab7d388a61bffd3a1990362dffa023c118e5ad571638be510fdf407613a09",
+  "skin_weight_sum_range": [
+    0.9999999590218067,
+    1.0000000428408384
+  ],
+  "indexed_edges_measured": 14128,
+  "degenerate_edges_ignored": 0,
+  "coincident_position_tolerance_m": 0.000001,
+  "waist_band_bind_world_y_m": [
+    1.14,
+    1.18
+  ],
+  "waist_band_vertices": 246,
+  "bind_waist_width_m": 0.28845154476824875,
+  "connected_shells": [
+    {
+      "first_vertex": 0,
+      "vertices": 780,
+      "min": [
+        0.3813432536926435,
+        1.420744282744263,
+        -0.10266803244043267
+      ],
+      "max": [
+        0.9484679390393945,
+        1.5116814559282192,
+        0.038134399139917695
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 692,
+      "vertices": 2842,
+      "min": [
+        -0.4390323667336898,
+        0.058668338445981405,
+        -0.18382695659499196
+      ],
+      "max": [
+        0.4400096606961343,
+        1.6309727695906475,
+        0.1339597587536379
+      ],
+      "mean_thigh_weight": 0.20301180774895342
+    },
+    {
+      "first_vertex": 759,
+      "vertices": 658,
+      "min": [
+        -0.099736386759795,
+        1.4735473447749552,
+        -0.09582343913076863
+      ],
+      "max": [
+        0.09680269786686067,
+        1.850000263226646,
+        0.1222248833777993
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1052,
+      "vertices": 39,
+      "min": [
+        0.040088814887970295,
+        1.3865231196981835,
+        0.10071363597153765
+      ],
+      "max": [
+        0.07040122968894873,
+        1.416833400492596,
+        0.12124765836571628
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1057,
+      "vertices": 25,
+      "min": [
+        0.04204529220375164,
+        1.4647460753331227,
+        0.06062483036390341
+      ],
+      "max": [
+        0.07529142711209731,
+        1.494081257948462,
+        0.08017961491083497
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1745,
+      "vertices": 25,
+      "min": [
+        0.04204528974904386,
+        1.2926540669575592,
+        0.12418136719207051
+      ],
+      "max": [
+        0.07724589643711319,
+        1.3268755979929931,
+        0.13493699491488684
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1751,
+      "vertices": 25,
+      "min": [
+        0.036177855144967186,
+        1.1997623667208381,
+        0.10560382654811094
+      ],
+      "max": [
+        0.06844675353725152,
+        1.2310519175035142,
+        0.12027041047740407
+      ],
+      "mean_thigh_weight": 0.0005312214867444709
+    },
+    {
+      "first_vertex": 1766,
+      "vertices": 64,
+      "min": [
+        -0.011734857720383867,
+        1.1459821197376203,
+        0.11635945466256883
+      ],
+      "max": [
+        0.01271212080074135,
+        1.1684726480040912,
+        0.14275890783273493
+      ],
+      "mean_thigh_weight": 0.057124429957184475
+    },
+    {
+      "first_vertex": 1914,
+      "vertices": 147,
+      "min": [
+        0.011732879455510579,
+        1.0354921642698325,
+        0.1124464913517158
+      ],
+      "max": [
+        0.08115683846761523,
+        1.158694268618256,
+        0.17307129540542718
+      ],
+      "mean_thigh_weight": 0.19047923087060045
+    },
+    {
+      "first_vertex": 1938,
+      "vertices": 71,
+      "min": [
+        0.012712115914352005,
+        0.8643753420191017,
+        0.11831393440495169
+      ],
+      "max": [
+        0.04400171363057718,
+        1.1518496635202795,
+        0.16133848416026342
+      ],
+      "mean_thigh_weight": 0.4701668743673765
+    },
+    {
+      "first_vertex": 2128,
+      "vertices": 201,
+      "min": [
+        -0.2747621475885381,
+        0.6463269973810143,
+        0.03422333178093132
+      ],
+      "max": [
+        0.26400657976676667,
+        1.0394031825120753,
+        0.1525373489211322
+      ],
+      "mean_thigh_weight": 0.8887555734153063
+    },
+    {
+      "first_vertex": 2551,
+      "vertices": 25,
+      "min": [
+        -0.07431416194057612,
+        1.46474612917712,
+        0.06062483164208645
+      ],
+      "max": [
+        -0.0410680279410812,
+        1.4931021122981862,
+        0.08017961312236233
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 2567,
+      "vertices": 36,
+      "min": [
+        -0.07724587779574266,
+        1.3855437112651063,
+        0.10071363885491248
+      ],
+      "max": [
+        -0.04106802745685858,
+        1.4168334269140515,
+        0.1212476627134422
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 2968,
+      "vertices": 736,
+      "min": [
+        -0.948467976215596,
+        1.4217236769994814,
+        -0.10266803615155219
+      ],
+      "max": [
+        -0.38036600220329675,
+        1.511681511962809,
+        0.038134394861277135
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 3271,
+      "vertices": 23,
+      "min": [
+        -0.07626863229349917,
+        1.2926539995929618,
+        0.12320414031294989
+      ],
+      "max": [
+        -0.0410680274020842,
+        1.3268755732928812,
+        0.13493699353558117
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 3328,
+      "vertices": 25,
+      "min": [
+        -0.06746948547477656,
+        1.1997623364033985,
+        0.10560382605490785
+      ],
+      "max": [
+        -0.03520059162382594,
+        1.2310519495563987,
+        0.12320413864158075
+      ],
+      "mean_thigh_weight": 0.00009941434720531106
+    },
+    {
+      "first_vertex": 3444,
+      "vertices": 101,
+      "min": [
+        -0.05475738707767604,
+        1.051135871146328,
+        0.12124765582206472
+      ],
+      "max": [
+        -0.0009772263564974337,
+        1.158694290426366,
+        0.18382695990627587
+      ],
+      "mean_thigh_weight": 0.1747720320847365
+    },
+    {
+      "first_vertex": 3487,
+      "vertices": 60,
+      "min": [
+        -0.025422210432490423,
+        0.9005552002283133,
+        0.11831392760213628
+      ],
+      "max": [
+        -0.002933707457113963,
+        1.155760647732696,
+        0.15742550793105628
+      ],
+      "mean_thigh_weight": 0.37307494450360534
+    },
+    {
+      "first_vertex": 5287,
+      "vertices": 214,
+      "min": [
+        0.1662267217831792,
+        4.263998132517501e-8,
+        -0.13591399624492959
+      ],
+      "max": [
+        0.30702905253196,
+        0.1212476324072849,
+        0.15351465622813878
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 5873,
+      "vertices": 214,
+      "min": [
+        -0.30702905036974965,
+        1.2421875225378793e-8,
+        -0.1359141582399398
+      ],
+      "max": [
+        -0.1730712858538343,
+        0.12124762443410556,
+        0.15351456577201283
+      ],
+      "mean_thigh_weight": 0
+    }
+  ],
+  "rest_joints": [
+    {
+      "name": "mixamorigHips",
+      "position": [
+        0.003704953007400036,
+        1.0250338142857227,
+        0.04075447643295188
+      ]
+    },
+    {
+      "name": "mixamorigSpine2",
+      "position": [
+        0.0037049525493862184,
+        1.4647883069162029,
+        -0.010742568139500164
+      ]
+    },
+    {
+      "name": "mixamorigNeck",
+      "position": [
+        0.0037049530617046644,
+        1.5624145025454834,
+        -0.022223227948148034
+      ]
+    },
+    {
+      "name": "mixamorigHead",
+      "position": [
+        0.0037049504387894547,
+        1.6604507502316075,
+        -0.015483926837896383
+      ]
+    },
+    {
+      "name": "mixamorigLeftShoulder",
+      "position": [
+        0.04474530447131426,
+        1.469627933698535,
+        -0.021374944129272808
+      ]
+    },
+    {
+      "name": "mixamorigLeftArm",
+      "position": [
+        0.27787148827526126,
+        1.477038005906398,
+        -0.04075444491444643
+      ]
+    },
+    {
+      "name": "mixamorigLeftForeArm",
+      "position": [
+        0.4857806232814231,
+        1.4770380572657789,
+        -0.04075446941292774
+      ]
+    },
+    {
+      "name": "mixamorigLeftHand",
+      "position": [
+        0.7202591997343349,
+        1.4770379334984693,
+        -0.045886403687048605
+      ]
+    },
+    {
+      "name": "mixamorigRightShoulder",
+      "position": [
+        -0.04037625118290907,
+        1.469628036865541,
+        -0.022135169668033673
+      ]
+    },
+    {
+      "name": "mixamorigRightArm",
+      "position": [
+        -0.27787153373153023,
+        1.4770379056098106,
+        -0.04075453482654988
+      ]
+    },
+    {
+      "name": "mixamorigRightForeArm",
+      "position": [
+        -0.4857806266268984,
+        1.4770380293111214,
+        -0.04075435431009352
+      ]
+    },
+    {
+      "name": "mixamorigRightHand",
+      "position": [
+        -0.7084048879762698,
+        1.4718884767984806,
+        -0.045903709054255504
+      ]
+    },
+    {
+      "name": "mixamorigLeftLeg",
+      "position": [
+        0.19240964609976813,
+        0.5153426098325355,
+        0.004892266393046771
+      ]
+    },
+    {
+      "name": "mixamorigLeftFoot",
+      "position": [
+        0.2222377810191343,
+        0.14547395594797397,
+        -0.048798241743758526
+      ]
+    },
+    {
+      "name": "mixamorigRightLeg",
+      "position": [
+        -0.1849419965556633,
+        0.5160581999043418,
+        0.00499609392904391
+      ]
+    },
+    {
+      "name": "mixamorigRightFoot",
+      "position": [
+        -0.21479648198888215,
+        0.14586266842697648,
+        -0.04874190968291799
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "name": "Running",
+      "duration_s": 0.6333333253860474,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 39,
+      "indexed_edge_length_ratio_range": [
+        0.023547363893272815,
+        2.1281668123441895
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 5,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0.0003539071347678369,
+      "min_waist_width_ratio": 0.9962148045533936,
+      "min_waist_time_s": 0.28333334624767303,
+      "most_compressed_edge": {
+        "indices": [
+          4815,
+          4816
+        ],
+        "time_s": 0.5166666805744171,
+        "bind_midpoint": [
+          0.0796910342317681,
+          0.49574524774738055,
+          -0.051823478322699956
+        ]
+      },
+      "max_stretch_time_s": 0.30000001192092896,
+      "max_coincident_rest_position_separation_m": 0
+    },
+    {
+      "name": "Walking",
+      "duration_s": 1.0333333015441895,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 63,
+      "indexed_edge_length_ratio_range": [
+        0.21707694622592993,
+        1.9412407032593366
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 1,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0.00007078142695356739,
+      "min_waist_width_ratio": 1.0158813596736596,
+      "min_waist_time_s": 0.46666666865348816,
+      "most_compressed_edge": {
+        "indices": [
+          5081,
+          5084
+        ],
+        "time_s": 0.4333333373069763,
+        "bind_midpoint": [
+          -0.2332055350095673,
+          0.5255680145106117,
+          -0.08946835133699385
+        ]
+      },
+      "max_stretch_time_s": 0.8999999761581421,
+      "max_coincident_rest_position_separation_m": 0
+    },
+    {
+      "name": "Agree_Gesture",
+      "duration_s": 13,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 781,
+      "indexed_edge_length_ratio_range": [
+        0.036906236863853734,
+        3.9087956488353575
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 13,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0.000920158550396376,
+      "min_waist_width_ratio": 0.9328327854504035,
+      "min_waist_time_s": 6,
+      "most_compressed_edge": {
+        "indices": [
+          122,
+          124
+        ],
+        "time_s": 8.583333492279053,
+        "bind_midpoint": [
+          0.911799523690102,
+          1.468168417000458,
+          -0.036177775983660114
+        ]
+      },
+      "max_stretch_time_s": 7.366666793823242,
+      "max_coincident_rest_position_separation_m": 0
+    },
+    {
+      "name": "Checkout_Gesture",
+      "duration_s": 6.4666666984558105,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 389,
+      "indexed_edge_length_ratio_range": [
+        0.14241204436082658,
+        2.4651985048229856
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 3,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0.00021234428086070215,
+      "min_waist_width_ratio": 0.9743558521065523,
+      "min_waist_time_s": 2.366666793823242,
+      "most_compressed_edge": {
+        "indices": [
+          368,
+          369
+        ],
+        "time_s": 1.2499999403953552,
+        "bind_midpoint": [
+          0.8761102722187142,
+          1.4456789077171344,
+          -0.09533474492163695
+        ]
+      },
+      "max_stretch_time_s": 3.6666667461395264,
+      "max_coincident_rest_position_separation_m": 0
+    },
+    {
+      "name": "Female_Stand_Pick_Fruit_Basket",
+      "duration_s": 6.166666507720947,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 371,
+      "indexed_edge_length_ratio_range": [
+        0.06778276319095212,
+        2.699186567253767
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 9,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0.0006370328425821065,
+      "min_waist_width_ratio": 1.022584745350863,
+      "min_waist_time_s": 4.766666889190674,
+      "most_compressed_edge": {
+        "indices": [
+          3948,
+          3949
+        ],
+        "time_s": 3.6500000953674316,
+        "bind_midpoint": [
+          -0.812064085142532,
+          1.4520349279797506,
+          0.005378875888157042
+        ]
+      },
+      "max_stretch_time_s": 5.133333206176758,
+      "max_coincident_rest_position_separation_m": 0
+    },
+    {
+      "name": "Idle",
+      "duration_s": 4,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 241,
+      "indexed_edge_length_ratio_range": [
+        0.17519646815062795,
+        2.4295922203899676
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 3,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0.00021234428086070215,
+      "min_waist_width_ratio": 0.970855107770112,
+      "min_waist_time_s": 2.9166667461395264,
+      "most_compressed_edge": {
+        "indices": [
+          3240,
+          3257
+        ],
+        "time_s": 2,
+        "bind_midpoint": [
+          -0.33098641671019646,
+          1.3943450523993413,
+          -0.06649023412234982
+        ]
+      },
+      "max_stretch_time_s": 1.3333333730697632,
+      "max_coincident_rest_position_separation_m": 0
+    }
+  ]
+}

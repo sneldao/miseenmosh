@@ -1,0 +1,24 @@
+{
+  "build": {
+    "script": "http://127.0.0.1:5174/assets/index-DZL1QECZ.js",
+    "diagnosticsPresent": false
+  },
+  "result": {
+    "text": "Beef WellingtonGolden pastry, pink centreHouse standard: Crisp pastry, a pink centre and an unbroken jus.TURNRUN TABLE 14 · 2 PLATESCLOSE ISERVE SSEND BACK BSMASH X",
+    "width": 1450,
+    "height": 736,
+    "canvasVisible": true
+  },
+  "route": [
+    "title",
+    "opening serve",
+    "call",
+    "opening judge",
+    "three stations called",
+    "Wellington ready",
+    "collect",
+    "inspect",
+    "whisk",
+    "smooth/serve enabled"
+  ]
+}

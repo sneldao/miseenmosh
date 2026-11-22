@@ -161,12 +161,6 @@ export const REGULARS_KIND = [
 
 export const REGULARS_FORGIVE = "The regulars wave it off. Once, they forgive.";
 
-export const CRITIC_ESCALATION = [
-  "Table {T} keeps photographing the plate. And writing.",
-  "Table {T} asks when the soufflé lands. They know about the soufflé.",
-  "Table {T} is writing. A lot. Underlined, probably.",
-];
-
 export const SMOKE_WARN = "{N}'s station is smoking.";
 
 // --- expo language: the pass speaks kitchen, not English ---
@@ -221,27 +215,6 @@ export const OUTBID_BEEFCAKES = [
 ];
 
 // --- 9/10 missions: named critics, provenance, 101, vows, folklore ---
-export const CRITIC_DREAD: Record<string, string> = {
-  gilliam: "GILLIAM is in town. Ex-sous, hates noise. Notebook early, never photos. Two screams and he's gone.",
-  madameV: "MADAME V is in town. Booked as 'M. Vane', table for one. She will drop a fork.",
-  kid: "THE KID is in town. 2M followers, films everything, orders the trap dish. Don't 86 anything. Let him post.",
-};
-
-export const CRITIC_VERDICTS: Record<string, string[]> = {
-  gilliam: [
-    "GILLIAM: 'Discipline on the pass. Clean iron, burnt sugar, no shouting. I noticed the quiet.'",
-    "GILLIAM: 'No theatrics. Just cooking. Salt where it should be. Rare, these days.'",
-  ],
-  madameV: [
-    "MADAME V: 'The fork was back before it stopped ringing. Lorna's scallops sang — sweet, briny, singing.'",
-    "MADAME V: 'Coursing like a metronome. Burnt sugar on the edge, iron underneath. 101 survived. Impressive.'",
-  ],
-  kid: [
-    "THE KID: 'POSTED. That edge-char close-up did 400k before dessert. Tastes like smoke and sugar. No cap.'",
-    "THE KID: 'Chat says the smoky kiss is elite — sour snap, sweet middle. 101 is literally me though.'",
-  ],
-};
-
 export const FOLKLORE_FORK_WARN = "Something small hits the floor by Table {T}. A fork. Nobody moves. (R to fix)";
 export const FOLKLORE_FORK_SAVED = "The fork was back before it stopped ringing. {T} noticed. They always notice.";
 export const FOLKLORE_FORK_IGNORED = "They waited. Nobody came. The notebook opens.";
@@ -267,7 +240,7 @@ export const SEATING_LINES: Record<string, string> = {
 };
 
 export const VOW_LINES: Record<string, string> = {
-  star: "STAR VOW: no walks, clocked inspector. +2★ if held.",
+  star: "STAR VOW: no walks, clocked inspector. +1★ if held.",
   house: "HOUSE VOW: 101 turns twice. Regulars go permanent.",
   brigade: "BRIGADE VOW: zero walkouts. Trauma −1 all if held.",
 };
@@ -279,17 +252,6 @@ export const HONOR_LINES = [
 ];
 export const MADAME_CAM_NOD = "MADAME V clocks the red eye. 'Amateur. Charming, but amateur.' (+4 ego)";
 export const GILLIAM_CAM_CRAFT = " GILLIAM respects the tradecraft. (+5 ego)";
-export const EPILOGUES: Record<string, string[]> = {
-  gilliam0: ["GILLIAM filed 400 words. Four of them were 'good'. He underlined it. Twice."],
-  gilliam1: ["GILLIAM: 'Loud. Sloppy. The Wellington nearly saved you. Nearly is doing a lot of work in that sentence.'"],
-  gilliam2: ["GILLIAM left before dessert. His notebook reads, in full: 'No.'"],
-  madameV0: ["MADAME V: 'The fork test, answered. The room, answered. I shall return — with my mother.'"],
-  madameV1: ["'Competent. The sauce split and so, briefly, did my attention.' — MADAME V"],
-  madameV2: ["MADAME V sent the plate back. Then the chair. Then the evening."],
-  kid0: ["The KID already posted it. 4M views. Caption: 'THE PASS IS A MOSHPIT AND I'M IN IT'."],
-  kid1: ["The KID: 'mid but make it fashion. the flash test? passed. barely. ily'."],
-  kid2: ["The KID posted the walkout. Slow-mo. With a sound effect. You have been memed."],
-};
 export const FATIGUE_BARKS: string[][] = [
   ["{N} is flipping with their eyes closed. Somebody say something.", "{N}'s hands are shaking. Not the fun kind.", "The grill smells like {N}'s bad decisions. Dial it back."],
   ["{N} just seasoned the same pan twice. They're gone. Bring them back.", "{N} is stirring like they're asleep standing up. Because they are.", "Somebody get {N} a stool and a reason."],

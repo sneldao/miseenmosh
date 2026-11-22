@@ -1,0 +1,783 @@
+{
+  "input": "assets/meshy/petra-pilot/runtime-hold.glb",
+  "sha256": "fb0e0229cd01b8b808741ea72a0446f4132d3cdcfeccfd6a2db93db800c90b90",
+  "skin_weight_sum_range": [
+    0.9999999590218067,
+    1.0000000428408384
+  ],
+  "indexed_edges_measured": 12700,
+  "degenerate_edges_ignored": 0,
+  "coincident_position_tolerance_m": 0.000001,
+  "waist_band_bind_world_y_m": [
+    1.14,
+    1.18
+  ],
+  "waist_band_vertices": 246,
+  "bind_waist_width_m": 0.28845154476824875,
+  "connected_shells": [
+    {
+      "first_vertex": 0,
+      "vertices": 780,
+      "min": [
+        0.3813432536926435,
+        1.420744282744263,
+        -0.15766803162086876
+      ],
+      "max": [
+        0.9484679390393945,
+        1.5116814559282192,
+        -0.016865600860082312
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 692,
+      "vertices": 2812,
+      "min": [
+        -0.4390323667336898,
+        0.058668338445981405,
+        -0.23882695659499192
+      ],
+      "max": [
+        0.4400096606961343,
+        1.6075050979861643,
+        0.078959758138965
+      ],
+      "mean_thigh_weight": 0.20517765207059943
+    },
+    {
+      "first_vertex": 759,
+      "vertices": 75,
+      "min": [
+        -0.099736386759795,
+        1.4735473447749552,
+        -0.1508234387209867
+      ],
+      "max": [
+        0.09680269786686067,
+        1.6143497255057198,
+        0.011490263561842774
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 762,
+      "vertices": 39,
+      "min": [
+        0.040088814887970295,
+        1.3865231196981835,
+        0.04571363643254233
+      ],
+      "max": [
+        0.07040122968894873,
+        1.416833400492596,
+        0.06624765918528017
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 767,
+      "vertices": 25,
+      "min": [
+        0.04204529220375164,
+        1.4647460753331227,
+        0.0056248295443395505
+      ],
+      "max": [
+        0.07529142711209731,
+        1.494081257948462,
+        0.025179613579043685
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1441,
+      "vertices": 25,
+      "min": [
+        0.04204528974904386,
+        1.2926540669575592,
+        0.06918136883119827
+      ],
+      "max": [
+        0.07724589643711319,
+        1.3268755979929931,
+        0.07993699307086813
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1447,
+      "vertices": 25,
+      "min": [
+        0.036177855144967186,
+        1.1997623667208381,
+        0.05060382784388622
+      ],
+      "max": [
+        0.06844675353725152,
+        1.2310519175035142,
+        0.0652704102725131
+      ],
+      "mean_thigh_weight": 0.0005312214867444709
+    },
+    {
+      "first_vertex": 1462,
+      "vertices": 64,
+      "min": [
+        -0.011734857573653973,
+        1.1459821634034082,
+        0.061359456432625574
+      ],
+      "max": [
+        0.012712122319999991,
+        1.1684726651635997,
+        0.08775890717207913
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1610,
+      "vertices": 147,
+      "min": [
+        0.011732882238414344,
+        1.0354921861333652,
+        0.057446494371656796
+      ],
+      "max": [
+        0.08115685731172562,
+        1.158694284613,
+        0.11807129235524588
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1634,
+      "vertices": 71,
+      "min": [
+        0.012712121941149235,
+        0.8643753528594971,
+        0.06331393090192006
+      ],
+      "max": [
+        0.04400177299976349,
+        1.1518496275587322,
+        0.10633844852447505
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1824,
+      "vertices": 201,
+      "min": [
+        -0.2747621536254883,
+        0.6463270187377931,
+        -0.020776630184327523
+      ],
+      "max": [
+        0.2640065848827362,
+        1.0394032162865947,
+        0.09753731608390803
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1954,
+      "vertices": 25,
+      "min": [
+        -0.07431416194057612,
+        1.46474612917712,
+        0.005624830361517917
+      ],
+      "max": [
+        -0.0410680279410812,
+        1.4931021122981862,
+        0.02517961332725329
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 1970,
+      "vertices": 36,
+      "min": [
+        -0.07724587779574266,
+        1.3855437112651063,
+        0.045713638048154294
+      ],
+      "max": [
+        -0.04106802745685858,
+        1.4168334269140515,
+        0.06624766168898738
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 2355,
+      "vertices": 736,
+      "min": [
+        -0.948467976215596,
+        1.4217236769994814,
+        -0.15766803599788395
+      ],
+      "max": [
+        -0.38036600220329675,
+        1.511681511962809,
+        -0.016865605138722865
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 2658,
+      "vertices": 23,
+      "min": [
+        -0.07626863229349917,
+        1.2926539995929618,
+        0.06820413908360409
+      ],
+      "max": [
+        -0.0410680274020842,
+        1.3268755732928812,
+        0.07993699251112635
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 2715,
+      "vertices": 25,
+      "min": [
+        -0.06746948547477656,
+        1.1997623364033985,
+        0.05060382810381752
+      ],
+      "max": [
+        -0.03520059162382594,
+        1.2310519495563987,
+        0.068204137207344
+      ],
+      "mean_thigh_weight": 0.00009941434720531106
+    },
+    {
+      "first_vertex": 2831,
+      "vertices": 101,
+      "min": [
+        -0.05475737858744428,
+        1.0511358898274352,
+        0.06624765464156726
+      ],
+      "max": [
+        -0.0009772253542806898,
+        1.158694267347622,
+        0.12882695122204602
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 2874,
+      "vertices": 60,
+      "min": [
+        -0.025422201760279324,
+        0.9005551934242249,
+        0.06331392901607161
+      ],
+      "max": [
+        -0.002933704661565487,
+        1.1557606459345773,
+        0.10242547810077662
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 4674,
+      "vertices": 214,
+      "min": [
+        0.1662267217831792,
+        4.263998132517501e-8,
+        -0.19091399788405733
+      ],
+      "max": [
+        0.30702905253196,
+        0.1212476324072849,
+        0.09851465622813879
+      ],
+      "mean_thigh_weight": 0
+    },
+    {
+      "first_vertex": 5260,
+      "vertices": 214,
+      "min": [
+        -0.30702905036974965,
+        1.2421875225378793e-8,
+        -0.19091415823993976
+      ],
+      "max": [
+        -0.1730712858538343,
+        0.12124762443410556,
+        0.0985145665915767
+      ],
+      "mean_thigh_weight": 0
+    }
+  ],
+  "rest_joints": [
+    {
+      "name": "mixamorigHips",
+      "position": [
+        0.003704953007400036,
+        1.0250338142857227,
+        -0.01424552356704812
+      ]
+    },
+    {
+      "name": "mixamorigSpine2",
+      "position": [
+        0.0037049525493862184,
+        1.4647883069162029,
+        -0.06574256813950016
+      ]
+    },
+    {
+      "name": "mixamorigNeck",
+      "position": [
+        0.0037049530617046644,
+        1.5624145025454834,
+        -0.07722322794814804
+      ]
+    },
+    {
+      "name": "mixamorigHead",
+      "position": [
+        0.0037049504387894547,
+        1.6604507502316075,
+        -0.07048392683789638
+      ]
+    },
+    {
+      "name": "mixamorigLeftShoulder",
+      "position": [
+        0.04474530447131426,
+        1.469627933698535,
+        -0.0763749441292728
+      ]
+    },
+    {
+      "name": "mixamorigLeftArm",
+      "position": [
+        0.27787148827526126,
+        1.477038005906398,
+        -0.09575444491444643
+      ]
+    },
+    {
+      "name": "mixamorigLeftForeArm",
+      "position": [
+        0.4857806232814231,
+        1.4770380572657789,
+        -0.09575446941292774
+      ]
+    },
+    {
+      "name": "mixamorigLeftHand",
+      "position": [
+        0.7202591997343349,
+        1.4770379334984693,
+        -0.10088640368704861
+      ]
+    },
+    {
+      "name": "mixamorigRightShoulder",
+      "position": [
+        -0.04037625118290907,
+        1.469628036865541,
+        -0.07713516966803367
+      ]
+    },
+    {
+      "name": "mixamorigRightArm",
+      "position": [
+        -0.27787153373153023,
+        1.4770379056098106,
+        -0.09575453482654987
+      ]
+    },
+    {
+      "name": "mixamorigRightForeArm",
+      "position": [
+        -0.4857806266268984,
+        1.4770380293111214,
+        -0.0957543543100935
+      ]
+    },
+    {
+      "name": "mixamorigRightHand",
+      "position": [
+        -0.7084048879762698,
+        1.4718884767984806,
+        -0.1009037090542555
+      ]
+    },
+    {
+      "name": "mixamorigLeftLeg",
+      "position": [
+        0.19240964609976813,
+        0.5153426098325355,
+        -0.05010773360695323
+      ]
+    },
+    {
+      "name": "mixamorigLeftFoot",
+      "position": [
+        0.2222377810191343,
+        0.14547395594797397,
+        -0.10379824174375853
+      ]
+    },
+    {
+      "name": "mixamorigRightLeg",
+      "position": [
+        -0.1849419965556633,
+        0.5160581999043418,
+        -0.05000390607095609
+      ]
+    },
+    {
+      "name": "mixamorigRightFoot",
+      "position": [
+        -0.21479648198888215,
+        0.14586266842697648,
+        -0.103741909682918
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "name": "PetraReady",
+      "duration_s": 4,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 3,
+      "indexed_edge_length_ratio_range": [
+        0.28347106230202,
+        2.5542784183526495
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 0,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0,
+      "min_waist_width_ratio": 1.0162081526013418,
+      "min_waist_time_s": 0,
+      "most_compressed_edge": {
+        "indices": [
+          3592,
+          3593
+        ],
+        "time_s": 0,
+        "bind_midpoint": [
+          -0.9039775987371315,
+          1.4627906028894404,
+          -0.08286724801026266
+        ]
+      },
+      "most_stretched_edge": {
+        "indices": [
+          191,
+          209
+        ],
+        "time_s": 0,
+        "rest": [
+          [
+            0.8809984873388065,
+            1.4813691697532987,
+            -0.10291265698052676
+          ],
+          [
+            0.889799657689472,
+            1.4784354410353382,
+            -0.10486713101515423
+          ]
+        ],
+        "weights": [
+          [
+            {
+              "bone": "mixamorigLeftHand",
+              "weight": 0.6651037335395813
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle1",
+              "weight": 0.3252970278263092
+            },
+            {
+              "bone": "mixamorigLeftHandIndex1",
+              "weight": 0.006930217612534761
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle2",
+              "weight": 0.002669030101969838
+            }
+          ],
+          [
+            {
+              "bone": "mixamorigLeftHandMiddle1",
+              "weight": 0.8119559288024902
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle2",
+              "weight": 0.16914018988609314
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle3",
+              "weight": 0.013539038598537445
+            },
+            {
+              "bone": "mixamorigLeftHandRing1",
+              "weight": 0.005364860408008099
+            }
+          ]
+        ]
+      },
+      "max_stretch_time_s": 0,
+      "max_coincident_rest_position_separation_m": 0
+    },
+    {
+      "name": "PetraWork",
+      "duration_s": 4,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 241,
+      "indexed_edge_length_ratio_range": [
+        0.1060177938288919,
+        2.5542800080744463
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 4,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0.00031496062992125983,
+      "min_waist_width_ratio": 1.0145564204372548,
+      "min_waist_time_s": 2.133333444595337,
+      "most_compressed_edge": {
+        "indices": [
+          644,
+          651
+        ],
+        "time_s": 2.6166666746139526,
+        "bind_midpoint": [
+          0.5319240642283336,
+          1.4535008035337702,
+          -0.141535616564696
+        ]
+      },
+      "most_stretched_edge": {
+        "indices": [
+          191,
+          209
+        ],
+        "time_s": 2.7333333492279053,
+        "rest": [
+          [
+            0.8809984873388065,
+            1.4813691697532987,
+            -0.10291265698052676
+          ],
+          [
+            0.889799657689472,
+            1.4784354410353382,
+            -0.10486713101515423
+          ]
+        ],
+        "weights": [
+          [
+            {
+              "bone": "mixamorigLeftHand",
+              "weight": 0.6651037335395813
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle1",
+              "weight": 0.3252970278263092
+            },
+            {
+              "bone": "mixamorigLeftHandIndex1",
+              "weight": 0.006930217612534761
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle2",
+              "weight": 0.002669030101969838
+            }
+          ],
+          [
+            {
+              "bone": "mixamorigLeftHandMiddle1",
+              "weight": 0.8119559288024902
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle2",
+              "weight": 0.16914018988609314
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle3",
+              "weight": 0.013539038598537445
+            },
+            {
+              "bone": "mixamorigLeftHandRing1",
+              "weight": 0.005364860408008099
+            }
+          ]
+        ]
+      },
+      "max_stretch_time_s": 2.7333333492279053,
+      "max_coincident_rest_position_separation_m": 0
+    },
+    {
+      "name": "Running",
+      "duration_s": 0.6333333253860474,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 77,
+      "indexed_edge_length_ratio_range": [
+        0.023547523498586836,
+        2.689655716616736
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 5,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0.0003937007874015748,
+      "min_waist_width_ratio": 0.9962148028034667,
+      "min_waist_time_s": 0.28333333134651184,
+      "most_compressed_edge": {
+        "indices": [
+          4202,
+          4203
+        ],
+        "time_s": 0.5166666507720947,
+        "bind_midpoint": [
+          0.0796910342317681,
+          0.49574524774738055,
+          -0.10682347996182767
+        ]
+      },
+      "most_stretched_edge": {
+        "indices": [
+          1895,
+          1899
+        ],
+        "time_s": 0.3499999940395355,
+        "rest": [
+          [
+            0.17111486706479972,
+            1.0100679698587594,
+            -0.015888434703356442
+          ],
+          [
+            0.18089325338551315,
+            0.9729128271555014,
+            -0.011975478423173883
+          ]
+        ],
+        "weights": [
+          [
+            {
+              "bone": "mixamorigHips",
+              "weight": 0.7282233834266663
+            },
+            {
+              "bone": "Apron",
+              "weight": 0.21514484286308289
+            },
+            {
+              "bone": "mixamorigSpine",
+              "weight": 0.05663180351257324
+            }
+          ],
+          [
+            {
+              "bone": "Apron",
+              "weight": 0.7463297843933105
+            },
+            {
+              "bone": "mixamorigHips",
+              "weight": 0.25244805216789246
+            },
+            {
+              "bone": "mixamorigSpine",
+              "weight": 0.001222142018377781
+            }
+          ]
+        ]
+      },
+      "max_stretch_time_s": 0.3499999940395355,
+      "max_coincident_rest_position_separation_m": 0
+    },
+    {
+      "name": "Walking",
+      "duration_s": 1.0333333015441895,
+      "sampling": "Every stored key time and every adjacent-key midpoint",
+      "samples": 125,
+      "indexed_edge_length_ratio_range": [
+        0.2170769462259298,
+        2.5542797363593954
+      ],
+      "max_edges_outside_0_25_to_3x_bind": 1,
+      "max_fraction_edges_outside_0_25_to_3x_bind": 0.00007874015748031496,
+      "min_waist_width_ratio": 1.0158813596233998,
+      "min_waist_time_s": 0.46666666865348816,
+      "most_compressed_edge": {
+        "indices": [
+          4468,
+          4471
+        ],
+        "time_s": 0.4333333373069763,
+        "bind_midpoint": [
+          -0.2332055350095673,
+          0.5255680145106117,
+          -0.14446835133699384
+        ]
+      },
+      "most_stretched_edge": {
+        "indices": [
+          191,
+          209
+        ],
+        "time_s": 0.21666666865348816,
+        "rest": [
+          [
+            0.8809984873388065,
+            1.4813691697532987,
+            -0.10291265698052676
+          ],
+          [
+            0.889799657689472,
+            1.4784354410353382,
+            -0.10486713101515423
+          ]
+        ],
+        "weights": [
+          [
+            {
+              "bone": "mixamorigLeftHand",
+              "weight": 0.6651037335395813
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle1",
+              "weight": 0.3252970278263092
+            },
+            {
+              "bone": "mixamorigLeftHandIndex1",
+              "weight": 0.006930217612534761
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle2",
+              "weight": 0.002669030101969838
+            }
+          ],
+          [
+            {
+              "bone": "mixamorigLeftHandMiddle1",
+              "weight": 0.8119559288024902
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle2",
+              "weight": 0.16914018988609314
+            },
+            {
+              "bone": "mixamorigLeftHandMiddle3",
+              "weight": 0.013539038598537445
+            },
+            {
+              "bone": "mixamorigLeftHandRing1",
+              "weight": 0.005364860408008099
+            }
+          ]
+        ]
+      },
+      "max_stretch_time_s": 0.21666666865348816,
+      "max_coincident_rest_position_separation_m": 0
+    }
+  ]
+}

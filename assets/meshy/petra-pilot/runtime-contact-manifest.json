@@ -1,0 +1,41 @@
+{
+  "source_sha256": "ea91a8ac246953cc482d112e8dc86d3d2f51df4278562d4195c7af77edf6fdaf",
+  "sha256": "f2b3fd3582b7934f679a1697201d112531e67e10511a62587472d7fafffe5135",
+  "bytes": 3708872,
+  "vertices": 5698,
+  "triangles": 7231,
+  "clips": [
+    "PetraReady",
+    "PetraWork",
+    "Running",
+    "Walking"
+  ],
+  "portrait_socket_bind_m": [
+    0,
+    1.58,
+    0.02
+  ],
+  "head_replacement_plane_y_m": 1.615,
+  "loop_blend_in_s": 0.25,
+  "loop_blend_out_s": 0.45,
+  "wrist_swing_relative_bind_max_deg": 15,
+  "wrist_twist_relative_bind_max_deg": 85,
+  "source_fraction_range": [
+    0.2,
+    0.5
+  ],
+  "work_duration_s": 4,
+  "sear_hold_until_s": 0.45,
+  "source_motion_ends_s": 2.75,
+  "return_ends_s": 3.35,
+  "left_hand_contact": {
+    "target_grip_m": [
+      0.18,
+      0.957,
+      0.16
+    ],
+    "max_palm_error_m": 0.000005086728618564455,
+    "max_capture_correction_m": 0.07629322791403825
+  },
+  "status": "requires_runtime_and_contact_review"
+}

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { useGame, tierOf, tierName, BOARD, Ticket, PlateTier, VENUES, loadLegends } from "../game/state";
+import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends } from "../game/state";
+import { dishProfile, plateObservations, correctionNeeded, CORRECTION_LABEL, currentWellingtonRecipe, WELLINGTON_FINISHES, type RecipeFinish } from "../game/culinary";
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
+import { reviewNarration } from "../game/serviceReview";
 import { speakReview, voiceEnabled, setVoiceEnabled } from "../game/voice";
 import { preloadKitchenModels } from "../scene/preloadModels";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
@@ -15,20 +17,6 @@ import castCritic from "../../assets/recraft/cast-gilliam/critic.webp";
 import castFishmonger from "../../assets/recraft/cast-gilliam/fishmonger.webp";
 import castCommis from "../../assets/recraft/cast-gilliam/commis.webp";
 import marketSign from "../../assets/recraft/paper-cookery/market-sign.webp";
-import reviewClip from "../../assets/recraft/raster/review-clipping-third-star.webp";
-
-const SPLASH = [
-  "“WHERE'S THE LAMB SAUCE?”",
-  "“Protein.” — BEEFCAKES",
-  "0 stars. Still open.",
-  "The inspector is already in the dining room.",
-  "“Technically fish.” — the fishmonger",
-  "No walkouts. No refunds. No mercy.",
-  "“It's not the pan. It's you.”",
-  "Pans will fall. Morale will too.",
-  "Serves 5 tables. Ego serves 1.",
-  "“He called it a protein bowl.” — the press",
-];
 
 const CAST_IMG: Record<string, string> = { PETRA: castPetra, DIMITRI: castDimitri, ANWAR: castAnwar };
 const FEUD_ART: Record<string, string> = { beefcakes: castBeefcakes, critic: castCritic, fishmonger: castFishmonger };
@@ -60,7 +48,7 @@ function useScreamCharge() {
     const down = (e: KeyboardEvent) => {
       if (e.key !== " " || e.repeat) return;
       const s = useGame.getState();
-      if (s.phase !== "service" || s.paused) return;
+      if (s.phase !== "service" || s.paused || s.openingStep || s.glossary) return;
       e.preventDefault();
       if (on.current) return;
       on.current = true;
@@ -75,7 +63,7 @@ function useScreamCharge() {
       const s = useGame.getState();
       const p = Math.max(0.2, Math.min(1.4, (performance.now() - start.current) / 900));
       setCharge(0);
-      if (s.phase === "service" && !s.paused) s.scream(p);
+      if (s.phase === "service" && !s.paused && !s.glossary) s.scream(p);
     };
     const up = (e: KeyboardEvent) => {
       if (e.key !== " ") return;
@@ -121,20 +109,99 @@ const STAMP_IMG: Record<string, string> = {
 const STATION_COLOR = ["#a8322a", "#b07a2a", "#3a6a9a"];
 const STATION_NAME = ["GRILL", "SAUTÉ", "PASTRY"];
 
-const TIER_LINE: Record<PlateTier, string> = {
-  pristine: "Pristine.",
-  serviceable: "Serviceable.",
-  criminal: "A war crime on a plate.",
-};
+/** The held plate: physical evidence + the calls on it. No tier labels —
+ *  observations come from the plate's actual condition. */
+function PassPanel({ plate, firstPerson }: { plate: Ticket; firstPerson: boolean }) {
+  const judge = useGame((s) => s.judge);
+  const runTable = useGame((s) => s.runTable);
+  const correctPlate = useGame((s) => s.correctPlate);
+  const turnPlate = useGame((s) => s.turnPlate);
+  const setInspecting = useGame((s) => s.setInspecting);
+  const inspecting = useGame((s) => s.inspecting);
+  const correction = useGame((s) => s.correction);
+  const serviceTime = useGame((s) => s.serviceTime);
+  const tickets = useGame((s) => s.tickets);
+  const peers = tickets.filter((t) => t.state === "ready" && t.table === plate.table).length;
+  const correcting = correction?.ticketId === plate.id ? correction : null;
+  const progress = correcting
+    ? Math.max(0, Math.min(1, (serviceTime - correcting.startedAt) / Math.max(0.01, correcting.endsAt - correcting.startedAt)))
+    : 0;
+  const condition = plate.condition;
+  const observations = condition ? plateObservations(plate.dish, condition) : [];
+  const split = condition?.sauce === "split";
+  const contributor = plate.recipeContributor;
+  const finish = condition?.recipeFinish ?? plate.recipeFinish;
+  const needed = condition ? correctionNeeded(plate.dish, condition) : null;
+  return (
+    <div className={`pass-actions pass-panel${inspecting ? " inspecting" : ""}${firstPerson ? " fp" : ""}`}>
+      <div className="pp-info">
+        <div className="plate-note">
+          {plate.dish}
+          {finish === "herb" ? " · herb finish" : ""}
+          {contributor ? ` — ${contributor}'s recipe` : ""}
+        </div>
+        {observations[0] && <div className="plate-obs">{observations[0]}</div>}
+      </div>
+      {inspecting && (
+        <div className="plate-inspect">
+          {observations.slice(1).map((o) => (
+            <div key={o} className="plate-obs">{o}</div>
+          ))}
+          <div className="plate-std">House standard: {dishProfile(plate.dish).standard}</div>
+          <button className="btn ghost sm" onClick={() => turnPlate(Math.PI / 4)}>TURN</button>
+        </div>
+      )}
+      <div className="plate-verbs">
+        {peers > 0 && (
+          <button className="btn serve big" onClick={runTable} disabled={!!correcting}>
+            RUN TABLE {plate.table} · {peers + 1} PLATES
+          </button>
+        )}
+        {split && (
+          <button className="btn whisk" onClick={correctPlate} disabled={!!correcting}>
+            {correcting ? (
+              <>WHISKING… <span className="corrbar"><span className="corrfill" style={{ width: `${progress * 100}%` }} /></span></>
+            ) : (
+              "BRING SAUCE TOGETHER"
+            )}
+          </button>
+        )}
+        <button className="btn" onClick={() => setInspecting(!inspecting)}>
+          {inspecting ? "CLOSE" : "INSPECT"} <span className="kbd">I</span>
+        </button>
+        <button className="btn serve" onClick={() => judge("serve")} disabled={!!correcting}>
+          SERVE <span className="kbd">S</span>
+        </button>
+        <button
+          className="btn back"
+          onClick={() => judge("sendback")}
+          disabled={!!correcting}
+          title={needed ? `Names the fault: ${CORRECTION_LABEL[needed]}` : "Nothing wrong with it — the kitchen will remember."}
+        >
+          SEND BACK <span className="kbd">B</span>
+        </button>
+        <button className="btn smash" onClick={() => judge("smash")} disabled={!!correcting}>
+          SMASH <span className="kbd">X</span>
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
   const plateToPass = useGame((s) => s.plateToPass);
   const firePlate = useGame((s) => s.firePlate);
+  const collectPlate = useGame((s) => s.collectPlate);
+  const selectTicket = useGame((s) => s.selectTicket);
+  const selectedTicketId = useGame((s) => s.selectedTicketId);
+  const tickets = useGame((s) => s.tickets);
+  const cooks = useGame((s) => s.cooks);
   const serviceTime = useGame((s) => s.serviceTime);
   const request = useGame((s) => s.request);
   const sauce = useGame((s) => s.sauce);
   const frac = Math.min(1, t.age / 55);
   const plating = t.state === "plating";
+  const ready = t.state === "ready";
   // the sear: the last 30% of the cook glows gold — fire inside it (F or click)
   const searFrac = plating && t.plateDur > 0
     ? Math.max(0, Math.min(1, 1 - (t.plateAt - serviceTime) / t.plateDur))
@@ -142,10 +209,27 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
   const golden = searFrac >= 0.7;
   const myReq = request?.ticketId === t.id ? request : null;
   const splitting = plating && sauce?.ticketId === t.id;
+  // capacity gates, same as the actions enforce
+  const stationBusy = t.state === "rail" && tickets.some(
+    (x) => x.station === t.station && (x.state === "plating" || x.state === "ready")
+  );
+  const handsBusy = ready && tickets.some((x) => x.state === "pass");
+  const action = ready ? "COLLECT" : plating ? (golden ? "FIRE — SEAR" : "FIRE EARLY") : "CALL";
+  const disabled = stationBusy || handsBusy;
+  const cook = cooks.find((c) => c.station === t.station);
+  const temp = ready && t.condition?.temperature && dishProfile(t.dish).servedHot ? t.condition.temperature : null;
   return (
-    <div
-      className={`ticket ${frac > 0.45 ? "aging" : ""} ${frac > 0.72 ? "dying" : ""} ${plating ? "plating" : ""} ${golden ? "golden" : ""} ${splitting ? "sauced" : ""}`}
-      onClick={() => (plating ? firePlate() : plateToPass(t.id))}
+    <button
+      type="button"
+      className={`ticket ${frac > 0.45 ? "aging" : ""} ${frac > 0.72 ? "dying" : ""} ${plating ? "plating" : ""} ${ready ? "ready" : ""} ${golden ? "golden" : ""} ${splitting ? "sauced" : ""} ${selectedTicketId === t.id ? "selected" : ""}`}
+      disabled={disabled}
+      onFocus={() => selectTicket(t.id)}
+      onClick={() => {
+        selectTicket(t.id);
+        if (ready) collectPlate(t.id);
+        else if (plating) firePlate(t.id);
+        else plateToPass(t.id);
+      }}
     >
       <div className="tno">
         TABLE {t.table} · #{t.id}
@@ -159,7 +243,7 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
       )}
       <div className="trow">
         <span className="chip" style={{ background: STATION_COLOR[t.station] }}>
-          {STATION_NAME[t.station]}
+          {STATION_NAME[t.station]}{cook ? ` · ${cook.name}` : ""}
         </span>
         <span className="tstate">
           {plating
@@ -168,7 +252,9 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
               : golden
                 ? "SEAR — FIRE IT"
                 : `PLATING…${t.sauce === "saved" ? " ✓" : ""}`
-            : `${Math.floor(t.age)}s`}
+            : ready
+              ? `READY${temp === "warm" ? " — cooling" : temp === "cold" ? " — cold" : ""}`
+              : `${Math.floor(t.age)}s`}
         </span>
       </div>
       {plating ? (
@@ -179,7 +265,8 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
       ) : (
         <div className="agebar" style={{ width: `${frac * 100}%` }} />
       )}
-    </div>
+      <div className="taction">{action}</div>
+    </button>
   );
 }
 
@@ -281,8 +368,8 @@ function CriticCam() {
   return (
     <div className="critic-cam" title="A little red eye above the pass. Tell no one.">
       <span className="cam-dot" />
-      CAM 3{kidNoticed ? " · NOTICED" : ""} · TABLE {criticFlagged && criticSpotted ? cg.table : "???"} · {cg.tells} PHOTO{cg.tells === 1 ? "" : "S"} ·{" "}
-      {ago < 0 ? "QUIET" : ago < 5 ? "FLASH!" : `FLASH ${ago}s`} · {status}
+      CAM 3{kidNoticed ? " · NOTICED" : ""} · TABLE {criticFlagged && criticSpotted ? cg.table : "???"} · {cg.tells} TELL{cg.tells === 1 ? "" : "S"} ·{" "}
+      {ago < 0 ? "QUIET" : ago < 5 ? "TELL!" : `LAST TELL ${ago}s`} · {status}
     </div>
   );
 }
@@ -344,28 +431,32 @@ function ReviewCard() {
   const career = useGame((s) => s.career);
   const continueNext = useGame((s) => s.continueNext);
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   if (!review) return null;
+  const narration = reviewNarration(review);
+  const stats =
+    `${review.covers} covers · ${review.misses} orders expired · ${review.sentBack} sent back · ` +
+    `${review.complaints} complaints · ${review.smashed} smashed · ${review.walkouts} walkouts · ${review.screams} screams · ` +
+    `streak ×${review.bestStreak} · inspector ${review.spotted ? "CLOCKED" : "missed"}`;
   const card =
     `MISE EN MOSH — night ${career.night} review (${new Date().toDateString()})\n` +
     `${"★".repeat(review.stars)}${"☆".repeat(5 - review.stars)}\n` +
-    (review.vowLine ? `${review.vowLine}\n` : "") +
-    (review.personaVerdict ? `${review.personaVerdict}\n` : "") +
-    (review.epilogue ? `${review.epilogue}\n` : "") +
-    (review.headline ? `${review.headline}\n` : "") +
-    (review.cover ? `${review.cover}\n` : "") +
-    `"${review.quote}"\n` +
-    `${review.covers} covers · ${review.misses} walks · ` +
-    `${review.smashed} plates smashed · inspector ${review.spotted ? "CLOCKED" : "missed"}`;
+    `${narration}\n` +
+    stats;
+  const copy = async () => {
+    try {
+      if (!navigator.clipboard) throw new Error("unavailable");
+      await navigator.clipboard.writeText(card);
+      setCopied(true);
+      setCopyFailed(false);
+    } catch {
+      setCopied(false);
+      setCopyFailed(true);
+    }
+  };
   return (
     <div className="review-wrap">
-      <div
-        className="review"
-        style={{
-          backgroundImage: `linear-gradient(rgba(244,234,210,.90), rgba(244,234,210,.97)), url(${reviewClip})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+      <div className="review service-review">
         <div className="rhead">
           TONIGHT'S REVIEW — {VENUES[career.venue].name}, NIGHT {career.night}
         </div>
@@ -373,41 +464,221 @@ function ReviewCard() {
           {"★".repeat(review.stars)}
           <span className="dim">{"☆".repeat(5 - review.stars)}</span>
         </div>
-        <img className="press-clip" src={reviewClip} alt="Press clipping" />
-        <div className="quote">“{review.quote}”</div>
-        {review.vowLine && <div className="board-line">{review.vowLine}</div>}
-        {review.personaVerdict && <div className="critic-line">{review.personaVerdict}</div>}          {review.folkloreLine && <div className="critic-line">{review.folkloreLine}</div>}
-          {review.epilogue && <div className="critic-line epi">{review.epilogue}</div>}
-          {review.headline && <div className="cover-head">{review.headline}</div>}
-          {review.cover && <div className="cover-line">{review.cover}</div>}
-        <div className="critic-line">{review.criticVerdict}</div>
-        <div className="rstats">
-          <span>{review.covers} covers</span>
-          <span>{review.misses} walked</span>
-          <span>{review.complaints} send-backs</span>
-          <span>{review.smashed} smashed</span>
-          <span>{review.walkouts} walkouts</span>
-          <span>streak ×{review.bestStreak}</span>
-          {review.silent && <span>SILENT SERVICE ★</span>}
-          <span>inspector {review.spotted ? "CLOCKED" : "missed"}</span>
-        </div>
-        {review.betLine && <div className="board-line">{review.betLine}</div>}
-        <div className="rfoot">EGO {Math.round(review.ego)} · {tierName(review.ego)}</div>
-        <div className="rbtns">
-          <button
-            className="btn"
-            onClick={() => {
-              navigator.clipboard?.writeText(card);
-              setCopied(true);
-            }}
-          >
-            {copied ? "COPIED" : "COPY REVIEW"}
-          </button>
-          <button className="btn" onClick={() => speakReview(review.stars, review.quote)} title="The critic reads it back">
-            READ IT ALOUD
-          </button>
+        {review.headline && <div className="headline">{review.headline}</div>}
+        <p className="incident">{review.incident}</p>
+        <div className="rlabel">WHAT FOLLOWS</div>
+        <p className="consequence">{review.consequence}</p>
+        <div className="rbtns main-action">
           <button className="btn serve" onClick={continueNext}>
             NEXT MORNING <span className="kbd">↵</span>
+          </button>
+        </div>
+        <details className="review-details">
+          <summary>Service details</summary>
+          <div className="critic-line">{review.criticVerdict}</div>
+          {review.folkloreLine && <div className="critic-line">{review.folkloreLine}</div>}
+          {review.vowLine && <div className="board-line">{review.vowLine}</div>}
+          {review.betLine && <div className="board-line">{review.betLine}</div>}
+          {review.cover && <div className="cover-line">{review.cover}</div>}
+          <div className="rstats">
+            <span>{review.covers} covers</span>
+            <span>{review.misses} orders expired</span>
+            <span>{review.sentBack} sent back</span>
+            <span>{review.complaints} complaints</span>
+            <span>{review.smashed} smashed</span>
+            <span>{review.walkouts} walkouts</span>
+            <span>{review.screams} screams</span>
+            <span>streak ×{review.bestStreak}</span>
+            {review.silent && <span>SILENT SERVICE ★</span>}
+            <span>inspector {review.spotted ? "CLOCKED" : "missed"}</span>
+          </div>
+          <div className="rfoot">EGO {Math.round(review.ego)} · {tierName(review.ego)}</div>
+          <div className="rbtns">
+            <button className="btn" onClick={copy}>
+              {copied ? "COPIED" : "COPY REVIEW"}
+            </button>
+            <button className="btn" onClick={() => speakReview(review.stars, narration)} title="The critic reads it back">
+              READ IT ALOUD
+            </button>
+          </div>
+          {copyFailed && <div className="bwarn">Clipboard unavailable — copy failed.</div>}
+        </details>
+      </div>
+    </div>
+  );
+}
+
+function ServiceTools() {
+  const toggleGlossary = useGame((s) => s.toggleGlossary);
+  const togglePause = useGame((s) => s.togglePause);
+  const paused = useGame((s) => s.paused);
+  return (
+    <div className="opening-tools">
+      <button className="btn ghost" aria-label="Controls" onClick={toggleGlossary}>?</button>
+      <button className="btn ghost" aria-label={paused ? "Resume" : "Pause"} onClick={togglePause}>{paused ? "RESUME" : "PAUSE"}</button>
+    </div>
+  );
+}
+
+/** the quiet night-1 lesson: the action itself is the prompt — no tutorial text */
+function OpeningService() {
+  const openingStep = useGame((s) => s.openingStep);
+  const tickets = useGame((s) => s.tickets);
+  const serviceTime = useGame((s) => s.serviceTime);
+  const judge = useGame((s) => s.judge);
+  const plateToPass = useGame((s) => s.plateToPass);
+  const paused = useGame((s) => s.paused);
+  const pass = tickets.find((t) => t.state === "pass");
+  const rail = tickets.find((t) => t.state === "rail");
+  const plating = tickets.find((t) => t.state === "plating");
+  return (
+    <>
+      <ServiceTools />
+      {openingStep === "serve" && pass && (
+        <div className="pass-actions opening-actions">
+          <button className="btn serve big" autoFocus onClick={() => judge("serve")}>
+            SERVE → TABLE {pass.table}
+          </button>
+        </div>
+      )}
+      {openingStep === "call" && rail && (
+        <div className="pass-actions opening-actions">
+          <button className="btn docket-call" autoFocus onClick={() => plateToPass(rail.id)}>
+            <span className="dtable">TABLE {rail.table}</span>
+            <span className="ddish">{rail.dish}</span>
+            <span className="daction">CALL</span>
+          </button>
+        </div>
+      )}
+      {openingStep === "judge" && plating && (
+        <div className="opening-cooking">
+          <span className="ocname">PETRA</span>
+          <div className="ocbar">
+            <div
+              className="ocfill"
+              style={{ width: `${plating.plateDur > 0 ? Math.min(100, Math.max(0, (1 - (plating.plateAt - serviceTime) / plating.plateDur) * 100)) : 0}%` }}
+            />
+          </div>
+          <span className="oclabel">Cooking</span>
+        </div>
+      )}
+      {openingStep === "judge" && pass && (
+        <div className="pass-actions opening-actions">
+          <button className="btn serve" autoFocus onClick={() => judge("serve")}>SERVE</button>
+          <button className="btn back" onClick={() => judge("sendback")}>SEND BACK</button>
+          <button className="btn smash" onClick={() => judge("smash")}>SMASH</button>
+        </div>
+      )}
+      <Stamp />
+      {paused && <div className="paused">PAUSED — P to resume</div>}
+    </>
+  );
+}
+
+function Briefing() {
+  const career = useGame((s) => s.career);
+  // PREP FIRST lands here from night 1: open the book straight away
+  const [bookOpen, setBookOpen] = useState(career.night === 1);
+  if (bookOpen) return <PrepBook onBack={() => setBookOpen(false)} />;
+  return <QuickBrief onBook={() => setBookOpen(true)} />;
+}
+
+/** one screen, one decision, one big button — the reading lives in the book */
+/** Morning recipe call: the Wellington's finish for tonight — one row, optional. */
+function RecipeRow() {
+  const career = useGame((s) => s.career);
+  const cooks = useGame((s) => s.cooks);
+  const developWellington = useGame((s) => s.developWellington);
+  const current = currentWellingtonRecipe(career.recipeHistory);
+  const contributor = cooks.find((c) => c.station === 0)?.name ?? "THE HOUSE";
+  const pick = (finish: RecipeFinish) => developWellington(finish);
+  return (
+    <div className="qrecipe">
+      <div className="mhead">{contributor}&rsquo;S WELLINGTON</div>
+      <div className="qmeal-row">
+        {(Object.keys(WELLINGTON_FINISHES) as RecipeFinish[]).map((finish) => (
+          <button
+            key={finish}
+            className={`btn lbtn ${current?.finish === finish ? "picked" : ""}`}
+            onClick={() => pick(finish)}
+          >
+            {WELLINGTON_FINISHES[finish].name.toUpperCase()}
+          </button>
+        ))}
+      </div>
+      {current && (
+        <div className="ltaken">
+          {current.contributor} revised this — {WELLINGTON_FINISHES[current.finish].note}
+        </div>
+      )}
+      {(career.lastSauceHelp?.night ?? -1) === career.night - 1 && (
+        <div className="ltaken">You brought {career.lastSauceHelp!.cookName}&rsquo;s {career.lastSauceHelp!.dish} back together last night.</div>
+      )}
+    </div>
+  );
+}
+
+function QuickBrief({ onBook }: { onBook: () => void }) {
+  const career = useGame((s) => s.career);
+  const cooks = useGame((s) => s.cooks);
+  const meal = useGame((s) => s.meal);
+  const startService = useGame((s) => s.startService);
+  const canSave = useGame((s) => s.canSave);
+  const v = VENUES[career.venue];
+  const mealDone = (career.mealNight ?? -1) >= career.night;
+  const [picked, setPicked] = useState<number | null>(null);
+  return (
+    <div className="brief-wrap">
+      <div className="brief quick-brief">
+        <div className="bhead">NIGHT {career.night} — {v.name}</div>
+        <div className="bstats">
+          <span>£{career.cash}</span>
+          <span>★ {career.stars}</span>
+        </div>
+        <div className="cast row qcast">
+          {cooks.map((c) => (
+            <div
+              key={c.id}
+              className={`ccard qcook ${c.walkedOut ? "gone" : ""}`}
+              title={`${c.name} — morale ${Math.round(c.morale)} · skill ${Math.round(c.skill * 100)}`}
+            >
+              <img src={CAST_IMG[c.name] ?? castCommis} alt={c.name} />
+              <span className="cname">
+                {c.name}
+                {c.trauma > 0 && <span className="scar">{" ✕".repeat(Math.min(3, c.trauma))}</span>}
+              </span>
+              <span className="mood">{moodOf(c.morale, c.walkedOut)}</span>
+            </div>
+          ))}
+        </div>
+        {career.night >= 2 && <RecipeRow />}
+        <div className="qmeal">
+          <div className="mhead">FAMILY MEAL</div>
+          <div className="qmeal-row">
+            {[
+              { label: "RAISE A TOAST", i: 0 },
+              { label: "SHARE THE CRISPY BIT", i: 1 },
+              { label: "EAT QUIETLY", i: 2 },
+            ].map(({ label, i }) => (
+              <button
+                key={i}
+                className={`btn lbtn ${picked === i ? "picked" : ""}`}
+                disabled={mealDone || picked !== null}
+                onClick={() => { meal(i); setPicked(i); }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {mealDone && picked === null && <div className="ltaken">Meal shared.</div>}
+        </div>
+        {!canSave && <div className="bwarn">Progress won't persist — this browser blocks storage.</div>}
+        <div className="qbtns">
+          <button className="btn serve big" autoFocus onClick={startService}>
+            OPEN THE DOORS
+          </button>
+          <button className="btn ghost" onClick={onBook}>
+            KITCHEN BOOK
           </button>
         </div>
       </div>
@@ -415,7 +686,8 @@ function ReviewCard() {
   );
 }
 
-function Briefing() {
+/** the old full prep: brigade detail, meal, market, accounts, feuds, vows */
+function PrepBook({ onBack }: { onBack: () => void }) {
   const career = useGame((s) => s.career);
   const cooks = useGame((s) => s.cooks);
   const feud = useGame((s) => s.feud);
@@ -446,6 +718,8 @@ function Briefing() {
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
+      // a focused button/summary owns its activation — don't steal it
+      if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
       e.preventDefault();
       if (beat < lastBeat) setBeat(beat + 1);
       else startService();
@@ -481,12 +755,20 @@ function Briefing() {
         <div className="bhead">
           NIGHT {career.night} — {v.name}
           <div className="bsub">{v.sub}</div>
+          <button className="btn ghost bookback" onClick={onBack}>← BACK TO THE DOORS</button>
         </div>
         <div className="bstats">
           <span>£{career.cash}</span>
           <span>{"★".repeat(Math.min(12, career.stars)) || "☆"} {career.stars}★ total</span>
           <span>{9 - career.night + 1} services left</span>
         </div>
+        {career.lastReview && (
+          <div className="blast">
+            <div className="rlabel">LAST NIGHT — {career.lastReview.headline}</div>
+            <div className="bincident">{career.lastReview.incident}</div>
+            <div className="bconsequence">{career.lastReview.consequence}</div>
+          </div>
+        )}
         {nightTake && (
           <div className="btake">
             Last night: £{nightTake.covers} covers − £{nightTake.wages} wages − £
@@ -780,7 +1062,7 @@ function Briefing() {
 
 function Ending() {
   const career = useGame((s) => s.career);
-  const resetCareer = useGame((s) => s.resetCareer);
+  const enterResidency = useGame((s) => s.enterResidency);
   const broke = career.cash < -60;
   const won = career.stars >= 10;
   const legend = !broke && won && (career.totalEgo ?? 0) >= 200;
@@ -810,7 +1092,7 @@ function Ending() {
           {(career.debt ?? 0) > 0 && <span>the man takes £{career.debt} off the top</span>}
         </div>
         <div className="rbtns">
-          <button className="btn serve" onClick={resetCareer}>
+          <button className="btn serve" onClick={() => enterResidency({ fresh: true })}>
             NEW RESIDENCY <span className="kbd">↵</span>
           </button>
         </div>
@@ -824,28 +1106,32 @@ function useHotkeys() {
     const onKey = (e: KeyboardEvent) => {
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
       const s = useGame.getState();
-      if (s.phase === "title" && (e.key === " " || e.key === "Enter")) {
-        e.preventDefault();
-        s.start();
+      // the controls modal owns input entirely — Escape/? close it, nothing else passes
+      if (s.glossary) {
+        if (e.key === "Escape" || e.key === "?") { e.preventDefault(); s.toggleGlossary(); }
         return;
       }
-      if (s.phase === "briefing" && e.key === "Enter") return; // Briefing owns Enter (beat advance)
-      if (s.phase === "ending" && (e.key === " " || e.key === "Enter")) {
+      if (e.key === "?") { e.preventDefault(); s.toggleGlossary(); return; }
+      if (s.phase === "title" && (e.key === " " || e.key === "Enter")) {
+        // buttons, the Menu summary and links own their own activation
+        if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
         e.preventDefault();
-        s.resetCareer();
+        s.enterResidency();
+        return;
+      }
+      if (s.phase === "briefing" && e.key === "Enter") return; // briefing components own Enter
+      if (s.phase === "ending" && (e.key === " " || e.key === "Enter")) {
+        if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
+        e.preventDefault();
+        s.enterResidency({ fresh: true });
         return;
       }
       if (s.phase === "review" && (e.key === " " || e.key === "Enter")) {
+        // a focused button, summary or link owns its own activation — don't
+        // let the global advance steal it (details must be keyboard-expandable)
+        if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
         e.preventDefault();
         s.continueNext();
-        return;
-      }
-      if (e.key === "?" && (s.phase !== "service" || s.paused)) {
-        s.toggleGlossary();
-        return;
-      }
-      if (e.key === "Escape" && s.phase !== "service" && s.glossary) {
-        s.toggleGlossary();
         return;
       }
       if (s.phase !== "service") return;
@@ -858,7 +1144,13 @@ function useHotkeys() {
         setVoiceEnabled(!voiceEnabled());
         return;
       }
-      if (e.key.toLowerCase() === "p" || e.key === "Escape") {
+      if (e.key === "Escape") {
+        // inspection closes before the pause overlay takes the key
+        if (s.inspecting) { s.setInspecting(false); return; }
+        s.togglePause();
+        return;
+      }
+      if (e.key.toLowerCase() === "p") {
         s.togglePause();
         return;
       }
@@ -867,13 +1159,24 @@ function useHotkeys() {
       if (k === "s") return s.judge("serve");
       if (k === "b") return s.judge("sendback");
       if (k === "x") return s.judge("smash");
-      if (k === "f") return s.firePlate();
+      if (k === "f") {
+        if (s.folklore?.kind === "return") return s.answerFolklore(false);
+        // F aims at the selected ticket: ready → collect, cooking → fire
+        const sel = s.selectedTicketId != null ? s.tickets.find((t) => t.id === s.selectedTicketId) : null;
+        if (sel?.state === "ready") return s.collectPlate(sel.id);
+        return s.firePlate(sel?.id);
+      }
+      if (k === "i") return s.setInspecting(!s.inspecting);
       if (k === "e") return s.eightySix();
-      if (k === "m") return s.whisk();
+      if (k === "m") {
+        // held split sauce → the pass correction; otherwise the live whisk
+        const held = s.tickets.find((t) => t.state === "pass");
+        if (held?.condition?.sauce === "split") return s.correctPlate();
+        return s.whisk();
+      }
       if (k === "t") return s.move101();
       if (k === "r" && s.folklore && s.folklore.kind !== "flash" && s.folklore.kind !== "return") return s.answerFolklore(true);
       if (k === "d" && s.folklore?.kind === "return") return s.answerFolklore(true);
-      if (k === "f" && s.folklore?.kind === "return") return s.answerFolklore(false);
       if (k === "h") return s.shooRunner();
       if (k === "d") return s.declineRequest();
       if (k === "c") return s.compTable();
@@ -893,10 +1196,11 @@ function Glossary() {
   const toggleGlossary = useGame((s) => s.toggleGlossary);
   const rows: [string, string][] = [
     ["1–9", "plate rail ticket to pass"],
-    ["S / B / X", "serve · send back · smash the judged plate"],
-    ["F", "fire plate to station"],
+    ["S / B / X", "serve · send back · smash the held plate"],
+    ["F", "fire / collect the aimed ticket"],
+    ["I", "inspect the held plate"],
     ["E", "86 the dish (bin it, slate wiped)"],
-    ["M", "whisk a splitting sauce back"],
+    ["M", "fix a split sauce — held plate or live pot"],
     ["T", "move 101 mid-rush"],
     ["H", "shoo BEEFCAKES' runner"],
     ["D", "refuse request · refuse-with-grace (cold plate)"],
@@ -908,14 +1212,30 @@ function Glossary() {
     ["V", "first-person pass view"],
     ["?", "this card"],
   ];
+  const closeBtn = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    closeBtn.current?.focus();
+    // single focusable control: keep Tab cycling inside the dialog
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      e.preventDefault();
+      closeBtn.current?.focus();
+    };
+    window.addEventListener("keydown", trap, true);
+    return () => {
+      window.removeEventListener("keydown", trap, true);
+      if (prev?.isConnected) prev.focus();
+    };
+  }, []);
   return (
     <div className="glossary" onClick={toggleGlossary}>
-      <div className="gcard" onClick={(e) => e.stopPropagation()}>
-        <div className="ghead">HOUSE MANUAL — ? to close</div>
+      <div className="gcard" role="dialog" aria-modal="true" aria-labelledby="controls-title" onClick={(e) => e.stopPropagation()}>
+        <div className="ghead" id="controls-title">HOUSE MANUAL — ? to close</div>
         {rows.map(([k, v]) => (
           <div key={k} className="grow"><span className="gkey">{k}</span><span>{v}</span></div>
         ))}
-        <button className="btn" onClick={toggleGlossary}>BACK TO WORK</button>
+        <button className="btn" ref={closeBtn} onClick={toggleGlossary}>BACK TO WORK</button>
       </div>
     </div>
   );
@@ -932,9 +1252,9 @@ export default function HUD() {
     readyOg(); // first frame the player can act in — the title card
     return onOgHandle(setOgHandle);
   }, [initPlatform]);
-  const start = useGame((s) => s.start);
-  const resetCareer = useGame((s) => s.resetCareer);
+  const enterResidency = useGame((s) => s.enterResidency);
   const hasSave = useGame((s) => s.hasSave);
+  const saveIssue = useGame((s) => s.saveIssue);
   const career = useGame((s) => s.career);
   const tickets = useGame((s) => s.tickets);
   const judge = useGame((s) => s.judge);
@@ -955,6 +1275,8 @@ export default function HUD() {
   const criticSpotted = useGame((s) => s.criticSpotted);
   const streak = useGame((s) => s.streak);
   const paused = useGame((s) => s.paused);
+  const openingStep = useGame((s) => s.openingStep);
+  const toggleGlossary = useGame((s) => s.toggleGlossary);
   const firstPerson = useGame((s) => s.firstPerson);
   const aim = useGame((s) => s.aim);
   const charge = useScreamCharge();
@@ -978,80 +1300,83 @@ export default function HUD() {
       setPokes(0);
     }
   };
-  const [splashIdx, setSplashIdx] = useState(() => Math.floor(Math.random() * SPLASH.length));
-  useEffect(() => {
-    const t = setInterval(() => setSplashIdx((i) => (i + 1) % SPLASH.length), 3800);
-    return () => clearInterval(t);
-  }, []);
-  const splash = SPLASH[splashIdx];
-
   const atPass = tickets.find((t) => t.state === "pass");
-  const live = tickets.filter((t) => t.state === "rail" || t.state === "plating");
-  // the rail is a fixed shelf: six dockets fit, the rest queue behind a chip
+  const live = tickets.filter((t) => t.state === "rail" || t.state === "plating" || t.state === "ready");
   const railAll = live.filter((t) => t.state === "rail");
-  const railShown = railAll.slice(0, 6);
-  const hiddenRail = railAll.length - railShown.length;
   const amped = serviceTime < adrenalineTil;
 
   return (
     <div className="hud">
       {glossary && <Glossary />}
       {phase === "title" && (
-        <div className="title-card">
+        <div className="title-card title-simple">
           <img className="hero-lineup" src={lineupArt} alt="MISE EN MOSH — the brigade at the pass" fetchPriority="high" loading="eager" decoding="async" />
-          <div className="splash">{splash}</div>
-          <div className="cast">
-            <div className="ccard">
-              <img src={castPetra} alt="PETRA" />
-              <span>PETRA — grill.<br />Do not touch her tongs.</span>
-            </div>
-            <div className="ccard">
-              <img src={castDimitri} alt="DIMITRI" />
-              <span>DIMITRI — sauté.<br />He's seen things.</span>
-            </div>
-            <div className="ccard">
-              <img src={castAnwar} alt="ANWAR" />
-              <span>ANWAR — pastry.<br />Fragile. Handle with care.</span>
-            </div>
-            <div className={`ccard wanted${pokes > 0 && !career.criticCam ? " poked" : ""}`} onClick={pokeBeefcakes} title="WANTED for ticket theft.">
-              <img src={castBeefcakes} alt="BEEFCAKES" />
-              <span>BEEFCAKES<br />WANTED for ticket theft.</span>
-              {pokes === 1 && !career.criticCam && <span className="poke">BEEFCAKES eyes your tickets.</span>}
-              {pokes >= 2 && !career.criticCam && <span className="poke">BEEFCAKES mouths: “nice pass. shame if—”</span>}
-              {career.criticCam && <span className="poke wired">CRITIC CAM WIRED — a red eye blinks above the pass. Tell no one.</span>}
-            </div>
-          </div>
-          <div className="tag sub">One guest tonight is the inspector.</div>
-          <div className="tag sub">BE THE TYRANT. EARN THE STARS.{ogHandle ? ` CHEF ${ogHandle.toUpperCase()} IS ON THE PASS.` : ""}</div>
-          <div className="tag sub">SAME TICKETS FOR EVERYONE TODAY.</div>
-          {(() => {
-            const l = loadLegends();
-            if (!l.residencies && !l.bestStreak) return null;
-            return <div className="legends-line">HOUSE LEGENDS — best streak ×{l.bestStreak} · silent fives {l.silentFives} · covers {l.covers.length} · residencies {l.residencies}</div>;
-          })()}
-          <div className="controls-hint">
-            CLICK takes the pass · <b>V</b> drops to the cinematic cam if mouse-lock is blocked in the embed · <b>?</b> house manual · sound on, chef
-          </div>
-          <button className="btn" autoFocus onClick={() => { preloadKitchenModels(); start(); }}>
-            {hasSave ? `CONTINUE RESIDENCY — NIGHT ${career.night}` : "BEGIN RESIDENCY"}
+          <button className="btn title-play" autoFocus disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency(); }}>
+            {hasSave ? `CONTINUE — NIGHT ${career.night}` : "TAKE THE PASS"}
           </button>
-          {hasSave && (
-            <button className="btn ghost" onClick={() => { preloadKitchenModels(); resetCareer(); }}>
-              NEW RESIDENCY
-            </button>
-          )}
+          <details className="title-menu">
+            <summary>Menu</summary>
+            <div className="title-menu-panel">
+              <button className="btn" onClick={toggleGlossary}>CONTROLS</button>
+              <button className="btn" onClick={() => { const next = !voiceOn; setVoiceEnabled(next); setVoiceOn(next); }}>
+                VOICE {voiceOn ? "ON" : "OFF"}
+              </button>
+              <button className="btn" disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency({ prep: true }); }}>
+                PREP FIRST
+              </button>
+              {hasSave && (
+                <button className="btn ghost" disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency({ fresh: true }); }}>
+                  NEW RESIDENCY
+                </button>
+              )}
+              <details className="cast-menu">
+                <summary>The brigade</summary>
+                <div className="cast">
+                  <div className="ccard">
+                    <img src={castPetra} alt="PETRA" />
+                    <span>PETRA — grill.<br />Do not touch her tongs.</span>
+                  </div>
+                  <div className="ccard">
+                    <img src={castDimitri} alt="DIMITRI" />
+                    <span>DIMITRI — sauté.<br />He's seen things.</span>
+                  </div>
+                  <div className="ccard">
+                    <img src={castAnwar} alt="ANWAR" />
+                    <span>ANWAR — pastry.<br />Fragile. Handle with care.</span>
+                  </div>
+                  <button type="button" className={`ccard wanted${pokes > 0 && !career.criticCam ? " poked" : ""}`} onClick={pokeBeefcakes} title="WANTED for ticket theft.">
+                    <img src={castBeefcakes} alt="BEEFCAKES" />
+                    <span>BEEFCAKES<br />WANTED for ticket theft.</span>
+                    {pokes === 1 && !career.criticCam && <span className="poke">BEEFCAKES eyes your tickets.</span>}
+                    {pokes >= 2 && !career.criticCam && <span className="poke">BEEFCAKES mouths: “nice pass. shame if—”</span>}
+                    {career.criticCam && <span className="poke wired">CRITIC CAM WIRED — a red eye blinks above the pass. Tell no one.</span>}
+                  </button>
+                </div>
+              </details>
+              {(() => {
+                const l = loadLegends();
+                if (!l.residencies && !l.bestStreak) return null;
+                return <div className="legends-line">HOUSE LEGENDS — best streak ×{l.bestStreak} · silent fives {l.silentFives} · covers {l.covers.length} · residencies {l.residencies}</div>;
+              })()}
+              {ogHandle && <div className="legends-line">CHEF {ogHandle.toUpperCase()} IS ON THE PASS.</div>}
+            </div>
+          </details>
         </div>
       )}
+      {/* rendered outside the overflowing title panel so the warning is always visible */}
+      {phase === "title" && saveIssue && <p className="save-issue" role="alert">{saveIssue}</p>}
       {phase === "briefing" && <Briefing />}
-      {phase === "service" && (
+      {phase === "service" && openingStep && <OpeningService />}
+      {phase === "service" && !openingStep && (
         <>
+          <ServiceTools />
           {career.criticCam && <CriticCam />}
           {firstPerson && (
             <div className={`reticle${aim ? ` aim-${aim}` : ""}`} aria-hidden />
           )}
-          {firstPerson && (aim === "fire" || aim === "guest" || aim === "ticket") && (
+          {firstPerson && aim && aim !== "station" && (
             <div className={`aimtag ${aim}`}>
-              {aim === "fire" ? "SMOTHER" : aim === "ticket" ? "PLATE IT" : "FLAG THEM"}
+              {aim === "fire" ? "SMOTHER" : aim === "ticket" ? "CALL" : aim === "ready" ? "COLLECT" : aim === "held" ? "INSPECT" : aim === "cooking" ? "FIRE" : "FLAG THEM"}
             </div>
           )}
           {firstPerson && !locked && !paused && (
@@ -1095,44 +1420,28 @@ export default function HUD() {
           ) : !criticFlagged && serviceTime < 100 ? (
             <div className="hint">Spot the inspector — click them.</div>
           ) : null}
-          {/* In first person the dockets hang on the steel; the DOM rail
-              is the fallback camera's (and the keyboard's) rail. */}
-          {!firstPerson && (
-            <div className="rail">
-              {live
-                .filter((t) => t.state === "plating")
-                .map((t) => (
-                  <TicketCard key={t.id} t={t} />
+          {/* one rail, one keyed card per order: active plates first so a
+              ready is never clipped away, then the queued dockets. In first
+              person the world's dockets hold the queue — only work shows. */}
+          {(() => {
+            const active = live.filter((t) => t.state !== "rail");
+            const cards = firstPerson ? active : [...active, ...railAll];
+            const shown = cards.slice(0, 9);
+            if (shown.length === 0) return null;
+            return (
+              <div className="order-rail">
+                {shown.map((t) => (
+                  <TicketCard
+                    key={t.id}
+                    t={t}
+                    hotkey={t.state === "rail" ? railAll.indexOf(t) + 1 : undefined}
+                  />
                 ))}
-              {railShown.map((t) => (
-                <TicketCard key={t.id} t={t} hotkey={railAll.indexOf(t) + 1} />
-              ))}
-              {hiddenRail > 0 && (
-                <div className="rail-more" title={`${hiddenRail} more on the rail`}>
-                  +{hiddenRail}
-                </div>
-              )}
-            </div>
-          )}
-          {atPass && firstPerson && (
-            <div className="plate-note fp-note">{TIER_LINE[tierOf(atPass.quality)]}</div>
-          )}
-          {atPass && (
-            <div className={`pass-actions${firstPerson ? " fp" : ""}`}>
-              {!firstPerson && (
-                <div className="plate-note">{TIER_LINE[tierOf(atPass.quality)]}</div>
-              )}
-              <button className="btn serve" onClick={() => judge("serve")}>
-                SERVE <span className="kbd">S</span>
-              </button>
-              <button className="btn back" onClick={() => judge("sendback")}>
-                SEND BACK <span className="kbd">B</span>
-              </button>
-              <button className="btn smash" onClick={() => judge("smash")}>
-                SMASH <span className="kbd">X</span>
-              </button>
-            </div>
-          )}
+
+              </div>
+            );
+          })()}
+          {atPass && <PassPanel plate={atPass} firstPerson={firstPerson} />}
           <div className="status">
             NIGHT {career.night} · SERVICE{" "}
             <b>
@@ -1155,7 +1464,11 @@ export default function HUD() {
           <Brigade />
           {/* first person shouts the newest line into the room instead */}
           {!firstPerson && <Ticker />}
-          <button className="btn scream" onClick={() => scream(1)}>
+          <button
+            className="btn scream"
+            title="Hold Space to charge; costs morale"
+            onClick={() => scream(1)}
+          >
             SCREAM <span className="kbd">SPACE</span>{" "}
             <span className="cost">hold to charge · costs morale</span>
           </button>
@@ -1170,8 +1483,16 @@ export default function HUD() {
           >
             VOICE {voiceOn ? "ON" : "OFF"} <span className="kbd">U</span>
           </button>
-          <button className="btn comp" disabled={comped || career.cash < 20} onClick={() => compTable()}>
-            COMP A TABLE <span className="kbd">C</span> <span className="cost">£20 · the room exhales</span>
+          <button
+            className="btn comp"
+            title="£20 · the room exhales"
+            disabled={comped || career.cash < 20}
+            onClick={() => compTable()}
+          >
+            COMP A TABLE <span className="kbd">C</span>{" "}
+            <span className="cost">
+              £20<span className="utility-explainer"> · the room exhales</span>
+            </span>
           </button>
           <VowRibbon />
           <FolkloreBar />

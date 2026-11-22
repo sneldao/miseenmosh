@@ -7,3 +7,4 @@ dist/
 assets/raw/
 *.tsbuildinfo
 .opengame/
+*.blend1

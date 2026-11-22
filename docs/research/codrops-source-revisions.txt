@@ -1,0 +1,108 @@
+atelier-ui-codrops
+  url: https://github.com/whatisjery/atelier-ui-codrops
+  dir: /tmp/mise-codrops-repos/atelier-ui-codrops
+  HEAD: a6c8de963224e70a8cb3021229d58d5c20dcebec
+  files: 52
+
+blender-to-threejs-sketchy-shader-and-demo-portfolios
+  url: https://github.com/andrewwoan/blender-to-threejs-sketchy-shader-and-demo-portfolios
+  dir: /tmp/mise-codrops-repos/blender-to-threejs-sketchy-shader-and-demo-portfolios
+  HEAD: 525fb3c6f9ab36662ecf56b28d005bf6e3e0f471
+  files: 34
+
+boo-mas
+  url: https://github.com/robinduckett/boo-mas
+  dir: /tmp/mise-codrops-repos/boo-mas
+  HEAD: 4196995ed1eb65bebe6db16f3a4e7d6628e55ef9
+  files: 39
+
+CinemaSeatPreview
+  url: https://github.com/codrops/CinemaSeatPreview
+  dir: /tmp/mise-codrops-repos/CinemaSeatPreview
+  HEAD: 3d9c6ae4decea570852ded9993014dec0ee200fc
+  files: 28
+
+codrops-relightning-images
+  url: https://github.com/DGFX/codrops-relightning-images
+  dir: /tmp/mise-codrops-repos/codrops-relightning-images
+  HEAD: d0ec868d45ab3c3c27faf0d9330466fac9487858
+  files: 27
+
+domgl-cloth
+  url: https://github.com/twotwentytwo-studio/domgl-cloth
+  dir: /tmp/mise-codrops-repos/domgl-cloth
+  HEAD: bd8ea5f7e0d66d96ef48e6687fed223e0846eba7
+  files: 191
+
+jelly
+  url: https://github.com/krisyangdev/jelly
+  dir: /tmp/mise-codrops-repos/jelly
+  HEAD: 414f3b60c5f438d839a68cf9c0a7082d63ee4cdd
+  files: 26
+
+leafthrough
+  url: https://github.com/dmtrbrl/leafthrough
+  dir: /tmp/mise-codrops-repos/leafthrough
+  HEAD: dadd401f05590a377dca4442aed67ecbb2cd8ff5
+  files: 87
+
+lilpix
+  url: https://github.com/0xdhrv/lilpix
+  dir: /tmp/mise-codrops-repos/lilpix
+  HEAD: d083cf1bb489bd4c6bd56573559ee57f488c9e9d
+  files: 91
+
+paper-crumple-demo
+  url: https://github.com/item-develop/paper-crumple-demo
+  dir: /tmp/mise-codrops-repos/paper-crumple-demo
+  HEAD: f84648b001dd13becda7a629ab5398cecfe3a252
+  files: 17
+
+R3FSketchMaterial
+  url: https://github.com/abhishekmill/R3FSketchMaterial
+  dir: /tmp/mise-codrops-repos/R3FSketchMaterial
+  HEAD: dbdfe826c99770be1f2683b49b1b0a645a5c4433
+  files: 31
+
+skate-dog
+  url: https://github.com/MatthewGreenberg/skate-dog
+  dir: /tmp/mise-codrops-repos/skate-dog
+  HEAD: 27d939b29a2dafe12d0c645d9225cf3b7e495a6a
+  files: 118
+
+slice-of-life-crisis
+  url: https://github.com/davidyen1124/slice-of-life-crisis
+  dir: /tmp/mise-codrops-repos/slice-of-life-crisis
+  HEAD: 1f74693935b303b98d005b730f44c8a51e610929
+  files: 97
+
+smash-your-pumpkin
+  url: https://github.com/LucaArgentieri/smash-your-pumpkin
+  dir: /tmp/mise-codrops-repos/smash-your-pumpkin
+  HEAD: a97f00632f823b64efa1b9dc9bce6ed21ca49fa0
+  files: 59
+
+smear-blur-showreel
+  url: https://github.com/niccolofanton/smear-blur-showreel
+  dir: /tmp/mise-codrops-repos/smear-blur-showreel
+  HEAD: d9a95674549e99ebc5cff83332f04bbaad96f1c1
+  files: 50
+
+the-hand
+  url: https://github.com/PabloMesquida/the-hand
+  dir: /tmp/mise-codrops-repos/the-hand
+  HEAD: cb5961974cef901905d533fd11b9b497f3dbb47c
+  files: 24
+
+vinyl
+  url: https://github.com/rauchg/vinyl
+  dir: /tmp/mise-codrops-repos/vinyl
+  HEAD: bcc9264509d78ccbf4a449618f19c1cc3104b49c
+  files: 80
+
+yarn-world
+  url: https://github.com/krisyangdev/yarn-world
+  dir: /tmp/mise-codrops-repos/yarn-world
+  HEAD: 3e8401ddbf8a6a39f63c4567f3e5a9f3a20205c3
+  files: 76
+
