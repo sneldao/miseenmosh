@@ -43,7 +43,20 @@ const IVORY = "#f2ead6";
 const PICKUP_X = 1.0;
 const STANDBY_X = 3.3;
 const EXIT_X = 9.6;
-const ROUTE_Z = 3.05;
+/** Traffic lanes — the run is a path through the room, not a rail at one
+ *  depth. He crosses BEHIND the line (0.6 m back of the cooks, where the
+ *  back-of-house strip is), steps forward to the pass to lift the plate —
+ *  which is where the plate actually is — and carries it out on the diagonal
+ *  toward the room's right edge. Visible the whole way: the old lane at z
+ *  +3.05 ran behind the player's back, which is why the room read static. */
+const LANE: Record<Phase, number> = {
+  idle: -3.3,
+  toPickup: -3.3,
+  lift: -0.55,
+  out: -1.35,
+  through: -1.35,
+  back: -3.3,
+};
 const WALK_SPEED = 1.7;
 const CARRY_SPEED = 1.25;
 
@@ -178,6 +191,8 @@ export default function CommisRunner() {
     phase: Phase;
     t: number;
     x: number;
+    /** lane depth: damped toward LANE[phase] so turns are walks, not pops */
+    z: number;
     yaw: number;
     clip: string;
     delivered: typeof delivery;
@@ -195,6 +210,7 @@ export default function CommisRunner() {
     phase: "idle",
     t: 0,
     x: STANDBY_X,
+    z: LANE.idle,
     yaw: 0,
     clip: "Ready",
     delivered: delivery,
@@ -245,7 +261,8 @@ export default function CommisRunner() {
       return;
     }
     g.visible = R.phase !== "through";
-    g.position.set(R.x, 0, ROUTE_Z);
+    R.z += (LANE[R.phase] - R.z) * (1 - Math.exp(-5 * step));
+    g.position.set(R.x, 0, R.z);
     g.rotation.y = MathUtils.damp(g.rotation.y, R.yaw, 8, step);
 
     if (delivery !== R.delivered) {
@@ -346,7 +363,7 @@ export default function CommisRunner() {
   if (reduced) return null;
   const plates = delivery?.plates.slice(0, 4) ?? [];
   return (
-    <group ref={root} position={[STANDBY_X, 0, ROUTE_Z]} visible={false}>
+    <group ref={root} position={[STANDBY_X, 0, LANE.idle]} visible={false}>
       <primitive object={rig.scene} dispose={null} />
       {createPortal(
         <group scale={0.7}>

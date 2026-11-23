@@ -42,7 +42,16 @@ const TUB = "#6f7a74";
 const PICKUP_X = -1.0;
 const STANDBY_X = -3.3;
 const EXIT_X = -9.6;
-const ROUTE_Z = 3.05;
+/** Mirrored traffic lane (see CommisRunner): behind the line, forward to the
+ *  pass to take the sent-back plates off it, then out to the left. */
+const LANE: Record<Phase, number> = {
+  idle: -3.3,
+  toPickup: -3.3,
+  grab: -0.55,
+  out: -1.35,
+  through: -1.35,
+  back: -3.3,
+};
 const WALK_SPEED = 1.45;
 const HAUL_SPEED = 1.05;
 
@@ -165,6 +174,8 @@ export default function PorterRunner() {
     phase: Phase;
     t: number;
     x: number;
+    /** lane depth: damped toward LANE[phase] so turns are walks, not pops */
+    z: number;
     yaw: number;
     clip: string;
     seen: number;
@@ -173,7 +184,7 @@ export default function PorterRunner() {
     stepN: number;
     /** standby life: his own clock, so the wait is never a frozen pose */
     life: number;
-  }>({ phase: "idle", t: 0, x: STANDBY_X, yaw: 0, clip: "Ready", seen: sentBack, queued: false, stepT: 0, stepN: 0, life: 0 });
+  }>({ phase: "idle", t: 0, x: STANDBY_X, z: LANE.idle, yaw: 0, clip: "Ready", seen: sentBack, queued: false, stepT: 0, stepN: 0, life: 0 });
 
   useFrame((_, dt) => {
     const s = useGame.getState();
@@ -215,7 +226,8 @@ export default function PorterRunner() {
       return;
     }
     g.visible = R.phase !== "through";
-    g.position.set(R.x, 0, ROUTE_Z);
+    R.z += (LANE[R.phase] - R.z) * (1 - Math.exp(-5 * step));
+    g.position.set(R.x, 0, R.z);
     g.rotation.y = MathUtils.damp(g.rotation.y, R.yaw, 8, step);
 
     if (s.sentBack !== R.seen) {
@@ -308,7 +320,7 @@ export default function PorterRunner() {
 
   if (reduced) return null;
   return (
-    <group ref={root} position={[STANDBY_X, 0, ROUTE_Z]} visible={false}>
+    <group ref={root} position={[STANDBY_X, 0, LANE.idle]} visible={false}>
       <primitive object={rig.scene} dispose={null} />
       {createPortal(
         <group scale={0.7}>
