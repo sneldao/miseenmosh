@@ -14,7 +14,7 @@ import { useFrame } from "@react-three/fiber";
 import { CanvasTexture, Group, Mesh, MeshStandardMaterial, SRGBColorSpace } from "three";
 import { useGame } from "../../game/state";
 import { sfx } from "../../game/sound";
-import { COPPER, INK, MUSTARD, PETROL, signTexture, useReducedMotion } from "../artDirection";
+import { COPPER, INK, LINE_SHIFT, MUSTARD, PETROL, signTexture, useReducedMotion } from "../artDirection";
 import GrillLine from "./GrillLine";
 import SteamField, { STEAM } from "./Steam";
 
@@ -332,7 +332,12 @@ export default function KitchenEquipment() {
       <GrillLine x={-3.6} />
       <Oven />
       <Stockpot />
-      <WashUp />
+      {/* the pot-wash bay is back-of-house, not the line: cancel the line
+          shift so it stays where it was built — which is exactly the strip
+          the restage opened behind the cooks, and where the washer works */}
+      <group position={[0, 0, -LINE_SHIFT]}>
+        <WashUp />
+      </group>
       <Crates />
       <FlourDust />
     </group>

@@ -9,6 +9,22 @@ export const PETROL = "#286e70";
 export const MUSTARD = "#dfaa3c";
 export const COPPER = "#bf7048";
 export const STATION_X = [-3.6, 0, 3.6] as const;
+
+/** Service staging, measured rather than eyeballed.
+ *
+ *  The room was built with the pass counter at z +2.2 and the station line at
+ *  z -3.2: 5.4 m of bare floor between them, 18% of the frame at eye height,
+ *  and the cooks 7.5 m out — 94 px of a 520 px frame. A real pass is a
+ *  counter's reach from the line, so the line stands this far forward of where
+ *  it was built and the pass counter moves back to meet it. Everything that
+ *  belongs to the line (stations, cooks, plates, equipment) rides this one
+ *  constant through the group in KitchenScene; the room, the back bar, the
+ *  window and the dining room stay where they are — which is what opens the
+ *  back-of-house strip where the pot-wash and the background crew live. */
+export const LINE_SHIFT = 1.6;
+/** The pass counter's z. Pulled back by the same beat the line came forward,
+ *  so the gap closes from both ends and the hands still reach the rail. */
+export const PASS_Z = 1.15;
 export const LOOK = {
   background: "#d8c8a5",
   fogNear: 28,

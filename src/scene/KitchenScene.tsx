@@ -4,6 +4,7 @@ import { useGame } from "../game/state";
 import Stations, { Station } from "./Stations";
 import DiningRoom from "./DiningRoom";
 import Cloche from "./Cloche";
+import BackgroundCrew from "./BackgroundCrew";
 import MeshyProp from "./MeshyProp";
 import { useTexture } from "@react-three/drei";
 import { PMREMGenerator } from "three";
@@ -25,7 +26,7 @@ import CommisRunner, { TrayBoard } from "./CommisRunner";
 import PorterRunner from "./PorterRunner";
 import PlateCorrection from "./PlateCorrection";
 import KitchenEquipment from "./equipment/KitchenEquipment";
-import { COPPER, INK, LOOK, MUSTARD, PETROL, STATION_X, VERMILION, signTexture, useReducedMotion } from "./artDirection";
+import { COPPER, INK, LINE_SHIFT, LOOK, MUSTARD, PASS_Z, PETROL, STATION_X, VERMILION, signTexture, useReducedMotion } from "./artDirection";
 import { type DishCondition, dishProfile } from "../game/culinary";
 
 const STEEL_DARK = "#4a4d52";
@@ -71,7 +72,7 @@ function PassCounter() {
     }
   });
   return (
-    <group position={[0, 0, 2.2]}>
+    <group position={[0, 0, PASS_Z]}>
       {/* petrol enamel fascia with cream inset panels */}
       <mesh position={[0, 0.55, 0]} castShadow receiveShadow>
         <boxGeometry args={[11, 1.1, 0.9]} />
@@ -395,7 +396,7 @@ function SmashBurst() {
     g.children.forEach((m, i) => {
       const s = shards.current[i];
       if (!s) return;
-      m.position.set(s.v[0] * dt, Math.max(0, 1.15 + s.v[1] * dt - 4.5 * dt * dt), 2.2 + s.v[2] * dt);
+      m.position.set(s.v[0] * dt, Math.max(0, 1.15 + s.v[1] * dt - 4.5 * dt * dt), PASS_Z + s.v[2] * dt);
       m.rotation.set(s.r[0] * t * 2, s.r[1] * t * 2, s.r[2] * t * 2);
       m.visible = dt < 0.9;
     });
@@ -741,27 +742,23 @@ export default function KitchenScene() {
       {/* cool fill so shaded sides stay petrol, not black */}
       <directionalLight position={[6, 5, -1]} intensity={LOOK.fillIntensity} color={LOOK.fill} />
       <Room />
-      <Stations skipPetra={booted} squashIdx={brigadeIdx} />
-      {/* living equipment — hood, pilot flame, oven, stockpot, wash-up,
-          crates. Procedural, nothing to suspend; animations gate on
-          service inside each piece */}
-      <KitchenEquipment />
-      <PassCounter />
-      <RailDockets />
-      <SpeechBubble />
-      <Ambience />
-      <DiningRoom />
-      {/* brigade: three illustrated cooks behind their stations */}
-      {booted ? (
-        <PropBoundary
-          fallback={
-            <>
-              <Station x={-3.6} index={0} />
-              <IllustratedCook cookId={0} x={-3.6} />
-            </>
-          }
-        >
-          <Suspense
+      {/* EVERYTHING ON THE LINE rides one constant. The stations, the cooks,
+          the plates and the line equipment are built at their own local z
+          (±1.6 m of the line); this group is the single place the line's
+          staging lives, so the pass counter (PASS_Z) and the camera can be
+          moved against it without hunting hard-coded numbers through ten
+          files. The room, the back bar, the window and the dining room stay
+          outside it — that gap is the back-of-house strip now. */}
+      <group name="line" position={[0, 0, LINE_SHIFT]}>
+        <Stations skipPetra={booted} squashIdx={brigadeIdx} />
+        {/* living equipment — hood, pilot flame, oven, stockpot, crates.
+            Procedural, nothing to suspend; animations gate on service
+            inside each piece. The wash-up bay stays back (see its own
+            offset) because it is the pot-wash corner, not the line. */}
+        <KitchenEquipment />
+        {/* brigade: three illustrated cooks behind their stations */}
+        {booted ? (
+          <PropBoundary
             fallback={
               <>
                 <Station x={-3.6} index={0} />
@@ -769,24 +766,48 @@ export default function KitchenScene() {
               </>
             }
           >
-            <PetraKitchen x={-3.6} onReady={setPetraReady} />
-          </Suspense>
-        </PropBoundary>
-      ) : (
-        <IllustratedCook cookId={0} x={-3.6} />
-      )}
-      {([1, 2] as const).map((i) =>
-        booted ? (
-          <PropBoundary key={i} fallback={<IllustratedCook cookId={i} x={i === 1 ? 0 : 3.6} />}>
-            <Suspense fallback={<IllustratedCook cookId={i} x={i === 1 ? 0 : 3.6} />}>
-              <BrigadeKitchen index={i} x={i === 1 ? 0 : 3.6} onReady={brigadeReady(i)} />
+            <Suspense
+              fallback={
+                <>
+                  <Station x={-3.6} index={0} />
+                  <IllustratedCook cookId={0} x={-3.6} />
+                </>
+              }
+            >
+              <PetraKitchen x={-3.6} onReady={setPetraReady} />
             </Suspense>
           </PropBoundary>
         ) : (
-          <IllustratedCook key={i} cookId={i} x={i === 1 ? 0 : 3.6} />
-        )
-      )}
-      <Plates petraReady={booted && petraReady} />
+          <IllustratedCook cookId={0} x={-3.6} />
+        )}
+        {([1, 2] as const).map((i) =>
+          booted ? (
+            <PropBoundary key={i} fallback={<IllustratedCook cookId={i} x={i === 1 ? 0 : 3.6} />}>
+              <Suspense fallback={<IllustratedCook cookId={i} x={i === 1 ? 0 : 3.6} />}>
+                <BrigadeKitchen index={i} x={i === 1 ? 0 : 3.6} onReady={brigadeReady(i)} />
+              </Suspense>
+            </PropBoundary>
+          ) : (
+            <IllustratedCook key={i} cookId={i} x={i === 1 ? 0 : 3.6} />
+          )
+        )}
+        <Plates petraReady={booted && petraReady} />
+      </group>
+      {/* these live on the room, not the line: the rail hangs over the pass,
+          the dining room is through the window, and the room itself never
+          moves when the line does */}
+      {/* the pass counter is the player's own edge of the room: it carries its
+          own PASS_Z, so it stays outside the line group and closes the gap from
+          the camera's side while the line closes it from the far side */}
+      <PassCounter />
+      {/* the rest of the brigade: pot-wash, prep bench, crate corner — they
+          stand in the back-of-house strip, so they read between and behind
+          the three cooks at every yaw the player can turn */}
+      <BackgroundCrew />
+      <RailDockets />
+      <SpeechBubble />
+      <Ambience />
+      <DiningRoom />
       {booted ? (
         <PropBoundary fallback={<DeliveryTray />}>
           <Suspense fallback={<DeliveryTray />}>
@@ -814,7 +835,7 @@ export default function KitchenScene() {
           {/* Meshy prop batch — sill + pass (see docs/meshy-pipeline.md) */}
           <PropBoundary>
             <Suspense fallback={null}>
-              <MeshyProp url={modelUrl("platestack.glb")} height={0.42} position={[-4.5, 1.16, 2.15]} tint={{ color: "#f2ead6", metalness: 0.05, roughness: 0.55 }} wobble="scream" />
+              <MeshyProp url={modelUrl("platestack.glb")} height={0.42} position={[-4.5, 1.16, PASS_Z - 0.05]} tint={{ color: "#f2ead6", metalness: 0.05, roughness: 0.55 }} wobble="scream" />
           <MeshyProp url={modelUrl("panstack.glb")} height={0.45} position={[-3.8, 1.07, -4.85]} tint={{ color: COPPER, metalness: 0.7, roughness: 0.4 }} />
           <MeshyProp url={modelUrl("seabass.glb")} height={0.3} position={[-1.9, 1.07, -4.85]} rotation={0.5} tint={{ color: "#d8b8b0", metalness: 0.2, roughness: 0.5 }} />
           <MeshyProp url={modelUrl("lamb.glb")} height={0.5} position={[1.8, 1.07, -4.85]} tint={{ color: "#c96a5a", metalness: 0.05, roughness: 0.7 }} />

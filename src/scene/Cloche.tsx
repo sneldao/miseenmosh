@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { Box3, Group, Vector3, Mesh, MeshStandardMaterial } from "three";
 import { useGame } from "../game/state";
+import { PASS_Z } from "./artDirection";
 import { modelUrl } from "./modelUrl";
 
 /** The ceremonial cloche on the pass — Meshy meshy-t2.5, baked GLB.
@@ -55,7 +56,7 @@ export default function Cloche() {
   });
 
   return (
-    <group ref={g} position={[2.7, 1.16, 2.15]}>
+    <group ref={g} position={[2.7, 1.16, PASS_Z - 0.05]}>
       <primitive object={model} />
     </group>
   );

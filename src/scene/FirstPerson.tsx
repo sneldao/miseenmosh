@@ -13,7 +13,7 @@ import {
 import { useGame, type Ticket } from "../game/state";
 import FoodModel from "./FoodModel";
 import PlateCorrection from "./PlateCorrection";
-import { INK, useReducedMotion } from "./artDirection";
+import { INK, LINE_SHIFT, useReducedMotion } from "./artDirection";
 import { canStartOrder } from "../game/culinary";
 
 /**
@@ -25,7 +25,13 @@ import { canStartOrder } from "../game/culinary";
  * cursor. Menus keep the cinematic camera; service dollies in.
  */
 const EYE = 1.74;
-const STAND_Z = 3.6;
+/** The player's stance, and with it the whole service composition. The pass
+ *  moved back and the line came forward (artDirection.LINE_SHIFT / PASS_Z),
+ *  so the eye steps in from 3.6 to keep the counter a hand's reach away while
+ *  the cooks grow from 94 px to ~131 px of a 520 px frame. Measured, not
+ *  nudged: at 3.0 the outer station edges land at 87% of the frame width —
+ *  the brigade fills the frame without clipping the end counters. */
+const STAND_Z = 3.0;
 const MENU_Y = 3.6;
 const MENU_Z = 7.3;
 const YAW_MAX = 1.15; // ~66° each way — the room, not a free-look camera
@@ -70,13 +76,13 @@ export default function FirstPerson() {
   const reduced = useReducedMotion();
 
   const scratch = useRef({
-    inspPos: new Vector3(0, 2.6, 4.3),
+    inspPos: new Vector3(0, 2.6, 3.7),
     qInsp: new Quaternion(),
     menuPos: new Vector3(),
     fpPos: new Vector3(),
     camPos: new Vector3(),
     qMenu: new Quaternion(),
-    focusPos: new Vector3(-3.15, 2.1, -1.8),
+    focusPos: new Vector3(-3.15, 2.1, -1.8 + LINE_SHIFT),
     qFocus: new Quaternion(),
     qFp: new Quaternion(),
     euler: new Euler(0, 0, 0, "YXZ"),
@@ -265,7 +271,8 @@ export default function FirstPerson() {
         ? focusWanted ? 1 : 0
         : introFocus.current + ((focusWanted ? 1 : 0) - introFocus.current) * (1 - Math.exp(-d * 3.5));
     sc.dummy.position.copy(sc.focusPos);
-    sc.dummy.lookAt(-3.42, 1.5, -3.64);
+    // ...and it has to aim at where she stands now, not where she was built
+    sc.dummy.lookAt(-3.42, 1.5, -3.64 + LINE_SHIFT);
     sc.qFocus.copy(sc.dummy.quaternion);
     sc.menuPos.lerp(sc.focusPos, introFocus.current);
     sc.qMenu.slerp(sc.qFocus, introFocus.current);

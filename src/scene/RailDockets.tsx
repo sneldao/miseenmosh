@@ -10,6 +10,7 @@ import {
   SRGBColorSpace,
 } from "three";
 import { useGame, type Ticket } from "../game/state";
+import { PASS_Z } from "./artDirection";
 
 /**
  * Phase 2 — the rail is a rail.
@@ -27,7 +28,7 @@ const CARD_H = 0.27;
 const SLOT = 0.47;
 const HANG_Y = 1.70;
 const RAIL_X = -2.6; // compact rail, left of the held plate
-const HANG_Z = 2.22;
+const HANG_Z = PASS_Z; // the rail hangs over the pass, so it rides the pass
 
 /** One soft stain texture, shared by every docket. */
 let stainTex: CanvasTexture | null = null;
