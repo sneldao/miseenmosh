@@ -63,8 +63,12 @@ interface Diagnostics {
    *  figure hidden by the counter or standing in the open?", which no projection
    *  can settle on its own. */
   pick?: (x: number, y: number) => Array<{
-    at: string; distance: number; world: [number, number, number];
+    at: string; distance: number; hitAt: [number, number, number]; world: [number, number, number];
   }>;
+  /** DEV BUILDS ONLY — every object in the scene whose world matrix holds a
+   *  NaN. Such an object either vanishes or draws garbage, and a NaN breaks
+   *  every raycast through it, so it poisons any measurement taken nearby. */
+  bad?: () => Array<{ at: string; count: number }>;
 }
 
 declare global {
@@ -218,6 +222,25 @@ export default function Telemetry() {
                 look: [+d.x.toFixed(3), +d.y.toFixed(3), +d.z.toFixed(3)] as [number, number, number],
               };
             },
+            bad: () => {
+              const { scene } = live.current;
+              const found = new Map<string, number>();
+              scene.updateMatrixWorld(true);
+              scene.traverse((node) => {
+                const m = node.matrixWorld.elements;
+                if (m.some((v) => !Number.isFinite(v))) {
+                  const parts: string[] = [];
+                  let n: Object3D | null = node;
+                  while (n && parts.length < 6) {
+                    parts.unshift(n.name || n.type);
+                    n = n.parent;
+                  }
+                  const key = `${parts.join("/")} (${(node as unknown as { geometry?: { type?: string } }).geometry?.type ?? "-"})`;
+                  found.set(key, (found.get(key) ?? 0) + 1);
+                }
+              });
+              return [...found.entries()].map(([at, count]) => ({ at, count }));
+            },
             pick: (x: number, y: number) => {
               const { camera: cam, scene } = live.current;
               const el = gl.domElement;
@@ -235,14 +258,22 @@ export default function Telemetry() {
                 .map((hit) => {
                   const parts: string[] = [];
                   let node: Object3D | null = hit.object;
-                  while (node && parts.length < 4) {
-                    parts.unshift(node.name || node.type);
+                  while (node && parts.length < 8) {
+                    // keep geometry type on the leaves, container type above, so
+                    // an unnamed mesh is at least identifiable as one
+                    parts.unshift(
+                      node.name ||
+                        (node === hit.object ? `${node.type}:${(node as unknown as { geometry?: { type?: string } }).geometry?.type ?? "?"}` : node.type),
+                    );
                     node = node.parent;
                   }
                   const w = hit.object.getWorldPosition(new Vector3());
                   return {
                     at: parts.join("/"),
                     distance: Math.round(hit.distance * 100) / 100,
+                    // where the ray actually touched it — an object's origin
+                    // says nothing about which pixel it covers
+                    hitAt: [+hit.point.x.toFixed(2), +hit.point.y.toFixed(2), +hit.point.z.toFixed(2)] as [number, number, number],
                     world: [+w.x.toFixed(2), +w.y.toFixed(2), +w.z.toFixed(2)] as [number, number, number],
                   };
                 });

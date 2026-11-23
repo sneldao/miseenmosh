@@ -1166,10 +1166,38 @@ varied silhouettes (some standing at the bar, some leaning in), which is Dev 2's
 
 Machine-checked: `tsc --noEmit` clean; **101 tests** green; `npm run build`
 clean; 180-frame capture with 0 long tasks, mean interval 17.56 ms, p95 33.3 ms,
-637 draw calls, 169k triangles, `__propErrors` empty; all four crew bodies
-confirmed on-screen by `pick` returning their own geometry as the first hit; the
-pass counter confirmed by `pick` at (450, 450) hitting the counter top before the
-floor.
+637 draw calls, 169k triangles, `__propErrors` empty; the pass counter confirmed
+by `pick` at (450, 450) hitting the counter top before the floor.
+
+The crew's motion was measured off two real frames 1.2 s apart, as changed
+pixels inside each body's box: pot-wash **23%**, porter **24%**, stocker **21%**,
+centre cook 35% (control), crate corner 7% (its cycle is deliberately the
+slowest). Against the guests' pre-fix 1.6 px per gesture, that is the difference
+between "still" and "working".
+
+An earlier draft of this section claimed the four bodies were proved visible by
+`pick` returning their own geometry as the first hit at the head pixel. That is
+**not** what the instrument shows, and the claim was wrong: at several of those
+pixels a raycast returns six hits with `NaN` distance and `NaN` intersection
+points, from objects whose world matrices are broken (below). The raycast cannot
+be trusted on this scene until they are fixed; the honest evidence for the crew
+is the frame crops and the 1.2 s pixel diff, not the pick.
+
+### Found while measuring: six objects with NaN world matrices
+
+`__miseReadOnly.bad()` walks the live scene for non-finite matrix elements:
+
+```
+Scene/line/Group/Group/Group/Mesh (CylinderGeometry)          x4
+Scene/line/PetraWorkspace/Group/Group/Mesh (CylinderGeometry) x2
+```
+
+Six cylinders on the line — station pans or their contents — carry a NaN in
+their transform. They do not visibly draw (which is why nobody has caught them),
+but they poison every raycast through those pixels and they are the kind of
+thing that becomes a black artefact on someone else's GPU. Not diagnosed here:
+it is station/cook geometry (Dev 2/3), the trace is in `bad()`, and the tool is
+committed so whoever owns it can find it in one call.
 
 Not machine-checkable and **not yet done**: nobody has stood at the screen and
 said "this feels like a hive". The crew is four bodies, not a dozen; the pass
