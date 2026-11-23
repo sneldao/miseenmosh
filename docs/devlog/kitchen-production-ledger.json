@@ -415,6 +415,54 @@
       "status": "generated_applied_embedded",
       "output": "clip Commis___tray_carry_and_present -> Work inside runtime-commis.glb",
       "review": "Chest-height two-hand tray carry verified in Blender; baked root X/Z travel pinned at runtime prep since game code drives the route."
+    },
+    {
+      "id": "porter-body-reference-01",
+      "provider": "recraft",
+      "tool": "generate_image",
+      "model": "recraftv4_1_pro_raster",
+      "credits": 10,
+      "date": "2026-11-23",
+      "prompt": "porter maquette: wiry older build, mustard work shirt rolled to forearms, long dark-petrol wet-proof rubber bib apron to shins, knotted ochre neckerchief, dark trousers, tan lace-up boots, neutral rigging head",
+      "output": "docs/devlog/media/kitchen-production/porter-body-reference-01.webp",
+      "status": "accepted",
+      "notes": "T-pose, empty hands, clean rigging head \u2014 distinct silhouette from cooks (bib apron to shin, no jacket) and commis (waist apron). Feeds Meshy T2.5 body task."
+    },
+    {
+      "id": "porter-body-meshy",
+      "provider": "meshy",
+      "tool": "image-to-3d smart topology + N1 texture",
+      "model": "meshy-t2.5 + meshy-n1",
+      "credits": 15,
+      "date": "2026-11-23",
+      "prompt": "porter-body-reference-01.webp",
+      "output": "assets/meshy/porter-pilot (library card, 8379 faces)",
+      "status": "accepted",
+      "notes": "T2.5, 8k poly, N1 texture 2K, T-pose, private. Textured mesh completed in one task."
+    },
+    {
+      "id": "porter-motion-haul",
+      "provider": "meshy",
+      "tool": "text-to-motion Motion Prime",
+      "model": "motion-prime",
+      "credits": 10,
+      "date": "2026-11-23",
+      "prompt": "porter hauling a heavy plastic bus tub of dirty plates, hunched trudge, then sets it down",
+      "output": "AI Motions: 'Porter - bus tub haul and set down'",
+      "status": "accepted",
+      "notes": "Carry 0-46f, dip 48-84f reads as grab; root XZ pinned in runtime prep."
+    },
+    {
+      "id": "porter-cast-card",
+      "provider": "recraft",
+      "tool": "generate_image",
+      "model": "custom style band-biopic grain",
+      "credits": 10,
+      "date": "2026-11-23",
+      "prompt": "PORTER \u2014 POT WASH cast card, flat cap, mustard shirt, petrol bib apron, bus tub of dirties",
+      "output": "assets/recraft/cast-gilliam/porter.webp + playable/porter.webp masked crop",
+      "status": "accepted",
+      "notes": "Feeds PortraitHead cookId=4; card doubles as cast art."
     }
   ]
 }

@@ -620,3 +620,47 @@ visible at SAUCE and PASTRY again.
 - BEEFCAKES thief runner remains the illustrated silhouette — separate
   character, not the commis.
 - Porter body still open: return-cart/clearing motion next candidate.
+
+## Porter — integrated and QA-verified (night-1 build)
+
+The porter (pot wash) ships as a real rigged body, completing the named
+brigade of five visible workers. Meshy T2.5+N1 body (15 credits mesh+texture;
+running Meshy total 135/150) from `porter-body-reference-01.webp` (Recraft
+V4.1 Pro maquette, 10 credits): wiry older build, mustard work shirt rolled
+to forearms, long petrol rubber bib apron to the shins, knotted neckerchief,
+tan boots — silhouette distinct from all four cooks/runners.
+
+Rigged humanoid; Motion Prime clip `Porter___bus_tub_haul_and_set_down`
+(10 credits): hunched trudge with arms wrapped under a tub, then a
+bend-and-set-down that reads as the pick-up dip when played forward.
+Studio review (porter-work/walking/running sheets): clean carry, apron
+holds as a front panel with no thigh split, boots grounded.
+
+Runtime prep (`prepare-brigade.mjs porter`): head cut at 1.44 (neck binds
+1.389 — same family as commis), PortraitSocket, root X/Z pinned (haul clip
+travels ~1.8m baked). Clips: Ready (Walking frame 0), Carry (Work 0–46),
+Grab (Work 48–84, once at the pass), Walking.
+
+`src/scene/PorterRunner.tsx` mirrors the commis route on the left edge:
+standby at x −3.3 facing the room; on `sentBack` increment he walks right
+to the pass' end (x −1.0), bends into the Grab dip, then hauls LEFT with
+a grey bus tub (spine2-local socket, measured mid-carry frame) holding the
+actual sent-back dish (from the newest `verdict: "sendback"` plate event)
+plus a stack of dirties; exits at x −9.6, returns empty to standby. Queues
+a second run if send-backs overlap. `s.phase !== "service"` or reduced
+motion parks him hidden; pause freezes the route.
+
+Porter portrait: new cast-gilliam card `PORTER — POT WASH` (custom
+band-biopic-grain style, 10 Recraft credits) → masked head+cap crop
+`assets/recraft/playable/porter.webp`, PORTRAITS spec index 4
+(bounds [620,270,1070,770], height .55).
+
+QA on the prod preview: two send-backs triggered the full loop —
+standby → walk to pass → grab dip → haul left with the tub visible →
+exit → return empty → standby. Zero `__propErrors`.
+
+### Watch items
+- Tub socket sits slightly under the hands; check close-up that plates
+  read inside the tub, not floating on the rim.
+- Porter standby at −3.3 is edge-cropped like the commis at +3.3 —
+  intentional symmetry, revisit if the left edge reads too tight.

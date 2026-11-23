@@ -37,8 +37,15 @@ const SPEC = {
     // position itself, so strip horizontal root translation (keep Y bob)
     stripRootXZ: true,
   },
+  porter: {
+    workClip: "Porter___bus_tub_haul_and_set_down",
+    hinge: [0, 0.95, 0.13],
+    cutY: 1.44,
+    socket: [0, 1.40, 0.05],
+    stripRootXZ: true,
+  },
 }[WHO];
-if (!SPEC) throw new Error("Usage: node prepare-brigade.mjs dimitri|anwar|commis");
+if (!SPEC) throw new Error("Usage: node prepare-brigade.mjs dimitri|anwar|commis|porter");
 // Apron reweighting is OFF for the pilot: shell/distance analysis could not
 // separate hanging apron from trouser surface cleanly (distribution is a
 // continuum), and a partial reweight produced ragged splits worse than the

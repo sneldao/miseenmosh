@@ -18,6 +18,7 @@ import petraHead from "../../assets/recraft/playable/petra.webp";
 import dimitriHead from "../../assets/recraft/playable/dimitri.webp";
 import anwarHead from "../../assets/recraft/playable/anwar.webp";
 import commisHead from "../../assets/recraft/playable/commis.webp";
+import porterHead from "../../assets/recraft/playable/porter.webp";
 
 export interface IllustratedCookProps {
   cookId: number;
@@ -112,9 +113,13 @@ const PORTRAITS = [
   outline:[[407,124],[520,124],[577,160],[584,223],[556,250],[605,268],
   [612,304],[598,340],[577,394],[556,466],[520,520],[485,552],
   [435,552],[399,511],[364,457],[336,385],[321,331],[336,277],
-  [371,241],[378,169]]}
+  [371,241],[378,169]]},
+ {name:'porter',height:.55,anchorX:850,bounds:[620,270,1070,770],
+  outline:[[710,305],[850,285],[960,290],[1020,340],[1040,400],[1045,470],
+  [1035,520],[1005,610],[950,680],[870,720],[800,730],[740,680],
+  [695,590],[675,510],[655,480],[655,430],[675,365]]}
 ] as const;
-const PORTRAIT_SRC = [petraHead, dimitriHead, anwarHead, commisHead] as const;
+const PORTRAIT_SRC = [petraHead, dimitriHead, anwarHead, commisHead, porterHead] as const;
 
 /** A shaped, thick piece of collage: the frozen crop printed on an extruded
  *  cutout, ink on the sides/back. The parent's head pivot still carries all

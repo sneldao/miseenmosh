@@ -22,6 +22,7 @@ import IllustratedCook from "./IllustratedCook";
 import PetraKitchen from "./PetraKitchen";
 import BrigadeKitchen from "./BrigadeKitchen";
 import CommisRunner, { TrayBoard } from "./CommisRunner";
+import PorterRunner from "./PorterRunner";
 import PlateCorrection from "./PlateCorrection";
 import { COPPER, INK, LOOK, MUSTARD, PETROL, STATION_X, VERMILION, signTexture, useReducedMotion } from "./artDirection";
 import { type DishCondition, dishProfile } from "../game/culinary";
@@ -789,6 +790,13 @@ export default function KitchenScene() {
         </PropBoundary>
       ) : (
         <DeliveryTray />
+      )}
+      {booted && (
+        <PropBoundary fallback={null}>
+          <Suspense fallback={null}>
+            <PorterRunner />
+          </Suspense>
+        </PropBoundary>
       )}
       {booted && (
         <>
