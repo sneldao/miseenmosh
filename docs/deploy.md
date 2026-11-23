@@ -205,3 +205,22 @@ first 90 seconds and the cold open changes what it sees.
   page; real brigade bodies at SAUCE/PASTRY; zero `__propErrors`.
 - Jam entry retained on all four tracks.
 - Quota after this deploy: 3 deploys left today, 8 playtests left.
+
+## a0374713 — Porter live: send-backs hauled to wash-up (23 Nov 2026)
+
+- `opengame deploy . --wait` → release `a0374713-9159-4602-93d0-2035ab20220f`,
+  SUB-2020, review passed and auto-published.
+- Ships: real porter body (Meshy T2.5 + N1, textured, ~8.4k faces,
+  rigged, Motion Prime heavy bus-tub haul) running the send-back loop —
+  standby left → walk to pickup → grab → haul off-frame left → return
+  empty → standby, queued on repeated send-backs, grey bus tub riding a
+  TubSocket with the actual rejected dish (FoodModel by quality) inside,
+  masked collage portrait on PortraitSocket.
+- Verified live on https://opengame.io/g/9i7mjkmdx4 (Version 12):
+  porter at left standby with portrait during service, commis at the
+  pass' right end, real Petra/Dimitri/Anwar bodies at their stations,
+  a full night-1 service ran to the review screen (brigade walkout
+  fired — Running clips exercised in the wild). No visible errors.
+- Same two known inconclusive findings: Draco `missing-ref` (false
+  positive — no GLB compressed) and the r187 engine heuristic.
+- Quota after this deploy: 2 deploys left today.
