@@ -847,7 +847,7 @@ control.
 | Anwar | `Idle2a` | 1.167 s | 0.096 | 0.311 | 0.311 | 0.0024 | 0.008 | 1.157 |
 | Anwar | `Idle2b` | 1.567 s | 0.120 | 0.311 | 0.311 | 0.0024 | 0.008 | 1.157 |
 
-6/6 windows: the wrap step is 1–4.5% of the largest ordinary step inside the
+6/6 windows: the wrap step is 0.8–4.5% of the largest ordinary step inside the
 loop, so the wrap is quieter than the loop's own fastest gesture, not an
 event. The largest in-loop steps are the same bones the source clip spikes on
 (`RightForeArm` / `RightHand`) and are smaller than the source's own maximum,
