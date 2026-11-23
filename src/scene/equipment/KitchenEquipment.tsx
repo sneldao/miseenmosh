@@ -5,9 +5,10 @@
  *  flank (where the porter is actually headed — his literal exit is
  *  off-frame), crates and floor flour. Mounted once in KitchenScene.
  *
- *  Budget rules honoured: steam ≤12 sprites total (see Steam.tsx),
- *  flame/shimmer emissive-only — zero dynamic lights, no per-frame
- *  allocation, reduced-motion suppresses every animation. */
+ *  Budget rules honoured: steam costs 1 draw for the whole room (see
+ *  ../steamBudget.ts — the cap is in draws, not sprites, because a sprite
+ *  is one draw each), flame/shimmer emissive-only — zero dynamic lights,
+ *  no per-frame allocation, reduced-motion suppresses every animation. */
 
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";

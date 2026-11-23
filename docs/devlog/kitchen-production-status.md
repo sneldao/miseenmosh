@@ -895,7 +895,12 @@ Per the living-kitchen plan v4.1. Committed on `main`:
   the menu camera's lateral cut at that depth is ~±8 m and the exit is
   off-frame. Crates on the right flank, floor flour trailing from
   Anwar's bench.
-- **Steam budget: 10 of 12 sprites**, pooled fixed counts per field
+- **Steam budget: 10 of 12 sprites** — *corrected: the counts are right, the
+  unit was wrong. A sprite is one draw each, and the pass-side plume carried
+  its 15 puffs in one merged mesh, so the room was 25 puffs and 11 draws
+  against a cap written as 12 sprites. The cap is now in draws and enforced by
+  `src/scene/steamBudget.ts` + its test; the room is 1 draw. See "Steam,
+  consolidated" below.* Pooled fixed counts per field
   (bain-marie 4 · stockpot 4 · oven vent 2), unmounts outside service
   and under reduced motion. All ambient glow is emissive-only — zero
   dynamic lights added.
