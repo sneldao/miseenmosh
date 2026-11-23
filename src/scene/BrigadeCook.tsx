@@ -5,7 +5,14 @@
  *
  *  All body motion comes from the GLB clips — the service clock drives the
  *  mixer, so pause, out-of-service and reduced-motion all behave like the
- *  rest of the kitchen. Gaze/reaction are small additive offsets on top. */
+ *  rest of the kitchen. Gaze/reaction are small additive offsets on top.
+ *
+ *  Between tickets the body does not freeze on Work's first frame: it plays a
+ *  neutral window cut from that same clip (see `idleLoops.ts`), slowed and
+ *  staggered, with its board/knife beats fired from here — the beat timing
+ *  lives in the loop, so the calls live with the loop. `Cook.mood` (Dev 3)
+ *  drives the slump/brace/tremble offsets and the tempo, so the body is the
+ *  gauge, not a second reading of the simulation. */
 
 import { Fragment, useEffect, useMemo, useRef } from "react";
 import { useFrame, createPortal } from "@react-three/fiber";
@@ -27,8 +34,19 @@ import {
 } from "three";
 import { clone as skeletonClone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { useGame } from "../game/state";
+import { sfx } from "../game/sound";
 import { useReducedMotion, INK } from "./artDirection";
 import { PortraitHead } from "./IllustratedCook";
+import {
+  applyMoodPose,
+  breathAt,
+  buildIdleClips,
+  idleRate,
+  makeIdleDrive,
+  moodPose,
+  workTimeScale,
+  type IdleDrive,
+} from "./idleLoops";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const REQUIRED_CLIPS = ["Work", "Walking", "Running"] as const;
@@ -141,7 +159,9 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     const scene = skeletonClone(gltf.scene);
     const socket = scene.getObjectByName("PortraitSocket") ?? null;
     const head = findBone(scene, "mixamorig:Head", "mixamorigHead");
+    const spine1 = findBone(scene, "mixamorig:Spine1", "mixamorigSpine1");
     const spine2 = findBone(scene, "mixamorig:Spine2", "mixamorigSpine2");
+    const leftArm = findBone(scene, "mixamorig:LeftArm", "mixamorigLeftArm");
     if (!socket) throw new Error(`${BRIGADE[cookId].glb}.glb: PortraitSocket node missing`);
     if (!head) throw new Error(`${BRIGADE[cookId].glb}.glb: head bone missing`);
 
@@ -151,7 +171,10 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
       if (!clips.has(name)) throw new Error(`${BRIGADE[cookId].glb}.glb: clip ${name} missing`);
     }
     // the pilot ships no idle clip — Ready is the Work clip's settled frame
+    // (reduced motion and the pre-first-ticket hold park on it), and the idle
+    // loops are measured neutral windows of the same clip
     clips.set("Ready", AnimationUtils.subclip(clips.get("Work")!, "Ready", 0, 1, 30));
+    for (const idleClip of buildIdleClips(clips, cookId)) clips.set(idleClip.name, idleClip);
 
     // tool sockets: Groups hard-parented to bones at the measured local
     // transforms so the props ride the hands through the whole clip
@@ -199,7 +222,7 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     scene.updateMatrixWorld(true);
 
     const spineBind = spine2 ? spine2.scale.clone() : null;
-    return { scene, socket, head, spine2, spineBind, clips, mixer, actions, ownedMaterials: owned, sockets };
+    return { scene, socket, head, spine1, spine2, spineBind, leftArm, clips, mixer, actions, ownedMaterials: owned, sockets };
   }, [gltf, cookId, config]);
 
   useEffect(() => {
@@ -238,6 +261,8 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
   const gaze = useRef({ yaw: 0, pitch: 0 });
   const time = useRef(0);
   const outElapsed = useRef(0);
+  /** the idle loop state for this body: window, phase, beats */
+  const idle = useRef<IdleDrive | null>(null);
 
   const crossfade = (next: AnimationAction) => {
     if (current.current === next) return;
@@ -267,6 +292,7 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
       outElapsed.current = 0;
       wasService.current = false;
       time.current = 0;
+      idle.current = null;
       gaze.current.yaw = 0;
       gaze.current.pitch = 0;
       g.visible = true;
@@ -296,9 +322,16 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     wasService.current = true;
     if (s.paused) return;
 
+    const serviceDelta = Math.max(0, Math.min(0.1, s.serviceTime - previousServiceTime.current));
+    // the service clock stops while it waits on the player (the opening hold,
+    // and the moment the player is deciding). The room must not stop with it:
+    // the body breathes and preps on frame time whenever the clock is stalled.
+    // Animation reads it; nothing in the simulation does.
     const delta = exitTail
       ? Math.max(0, Math.min(0.1, frameDelta))
-      : Math.max(0, Math.min(0.1, s.serviceTime - previousServiceTime.current));
+      : serviceDelta > 0
+        ? serviceDelta
+        : Math.min(0.1, frameDelta);
     previousServiceTime.current = s.serviceTime;
     time.current += delta;
     const t = time.current;
@@ -351,14 +384,48 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     g.position.z = -3.95;
     g.rotation.y = 0;
 
-    // --- work vs ready: one whole performance per active ticket, sped to
-    // fit the ticket's real plating duration
+    // --- work vs idle: one whole performance per active ticket, sped to fit
+    // the ticket's real plating duration — and between tickets the idle prep
+    // loop, never a frozen frame
     const active = s.tickets.find((tk) => tk.station === cook?.station && tk.state === "plating");
     const readyTicket = s.tickets.some((tk) => tk.station === cook?.station && (tk.state === "ready" || tk.state === "pass"));
     const working = !!active;
+    const mood = cook?.mood;
+    const pose = moodPose(mood);
     const work = rig.actions.get("Work")!;
-    crossfade(working ? work : rig.actions.get("Ready")!);
-    if (active) work.setEffectiveTimeScale(rig.clips.get("Work")!.duration / Math.max(0.1, active.plateDur));
+
+    if (!working && !reduced) {
+      // the loop is the body's whole idle life: its own tempo, its own
+      // window per loop, its own beats — and the beats are what Dev 3
+      // published the SFX names for
+      if (!idle.current) idle.current = makeIdleDrive(cookId, mood);
+      const d = idle.current;
+      if (d) {
+        const beats = d.step(cookId, delta, mood, true);
+        for (const b of beats) sfx(b.sound, { pan: MathUtils.clamp(x / 8, -1, 1), vol: b.vol });
+        const next = rig.actions.get(d.variant.id);
+        if (next) {
+          if (current.current !== next) {
+            // resume the window where the loop actually is, so swapping
+            // variants never restarts a gesture from its first frame
+            crossfade(next);
+            next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
+          }
+          next.setEffectiveTimeScale(idleRate(cookId, d.variant, d.loop, mood));
+        } else {
+          crossfade(rig.actions.get("Ready")!);
+        }
+      } else {
+        crossfade(rig.actions.get("Ready")!);
+      }
+    } else {
+      crossfade(working ? work : rig.actions.get("Ready")!);
+      if (working) {
+        work.setEffectiveTimeScale(workTimeScale(active!.plateDur, rig.clips.get("Work")!.duration, mood));
+        // the next idle stretch starts on a fresh window and phase
+        idle.current = null;
+      }
+    }
 
     // --- head: restore last raw pose, let the clip write, gaze on top
     rig.head.quaternion.copy(headRaw.current);
@@ -384,9 +451,13 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     const gp = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), gaze.current.pitch);
     rig.head.quaternion.multiply(gy).multiply(gp);
 
-    // --- breathing at Ready only: absolute from bind scale, never accrues
+    // --- the body carries the mood: additive offsets on top of the clip's
+    // own pose, dropped entirely under reduced motion
+    applyMoodPose({ spine1: rig.spine1, spine2: rig.spine2, leftArm: rig.leftArm }, pose, t, reduced);
+
+    // --- breathing while not plating: absolute from bind scale, never accrues
     if (rig.spine2 && rig.spineBind) {
-      const b = !reduced && !working ? Math.sin(t * 1.6 + cookId * 2.1) * 0.003 : 0;
+      const b = breathAt(t, cookId, pose, working, reduced);
       rig.spine2.scale.set(
         rig.spineBind.x * (1 + b),
         rig.spineBind.y,

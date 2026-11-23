@@ -3,7 +3,13 @@
  *
  *  All body motion comes from the GLB clips — the service clock drives the
  *  mixer, so pause, out-of-service and reduced-motion all behave like the
- *  rest of the kitchen. Gaze/reaction are small additive offsets on top. */
+ *  rest of the kitchen. Gaze/reaction are small additive offsets on top.
+ *
+ *  Between tickets she does not freeze: a measured neutral window of
+ *  PetraWork loops as prep (see `idleLoops.ts`) with her knife beats fired
+ *  from the loop, and the fillet leaves her tongs to rest in the pan — food
+ *  follows the work, not the idle. `Cook.mood` (Dev 3) sets the slump, brace,
+ *  tremble and tempo, so the body is the gauge. */
 
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree, createPortal } from "@react-three/fiber";
@@ -28,9 +34,32 @@ import { useGame } from "../game/state";
 import { useReducedMotion } from "./artDirection";
 import { PortraitHead } from "./IllustratedCook";
 import SearingFillet, { FILLET_IN_TOOL } from "./SearingFillet";
+import { sfx } from "../game/sound";
+import {
+  applyMoodPose,
+  breathAt,
+  buildIdleClips,
+  idleRate,
+  makeIdleDrive,
+  moodPose,
+  workTimeScale,
+  type IdleDrive,
+} from "./idleLoops";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const REQUIRED_CLIPS = ["PetraReady", "PetraWork", "Walking", "Running"] as const;
+
+/** where the fillet rests when she is not plating: in the pan by her hand,
+ *  the same spot the walkout drop uses. Baked as offsets, never re-cloned in
+ *  the frame loop. */
+const PARK_X = 0.04669360387553681;
+const PARK_Y = 0.951;
+const PARK_Z = -4.03 + 0.2933063961244632;
+const _pos = new Vector3();
+const _quat = new Quaternion();
+const _scale = new Vector3();
+const _home = new Vector3();
+const _IDENTITY = new Quaternion();
 
 function findBone(root: Object3D, ...names: string[]): Bone | null {
   const want = names.map((n) => n.replace(/:/g, ""));
@@ -57,7 +86,9 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
       scene.getObjectByName("PortraitSocket") ??
       null;
     const head = findBone(scene, "mixamorig:Head", "mixamorigHead");
+    const spine1 = findBone(scene, "mixamorig:Spine1", "mixamorigSpine1");
     const spine2 = findBone(scene, "mixamorig:Spine2", "mixamorigSpine2");
+    const leftArm = findBone(scene, "mixamorig:LeftArm", "mixamorigLeftArm");
     const handL = findBone(scene, "mixamorig:LeftHand", "mixamorigLeftHand");
     const handR = findBone(scene, "mixamorig:RightHand", "mixamorigRightHand");
     if (!socket) throw new Error("runtime.glb: PortraitSocket node missing");
@@ -85,6 +116,9 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     for (const name of REQUIRED_CLIPS) {
       if (!clips.has(name)) throw new Error(`runtime.glb: clip ${name} missing`);
     }
+    // idle prep = measured neutral windows of PetraWork, seam-blended so the
+    // loop closes without a pop
+    for (const idleClip of buildIdleClips(clips, 0)) clips.set(idleClip.name, idleClip);
 
     // graded cloth/skin materials: cloned so the cached GLB stays pristine
     const owned: Material[] = [];
@@ -124,7 +158,7 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     // spine2 bind scale: breathing is absolute-relative, never accumulated
     const spineBind = spine2 ? spine2.scale.clone() : null;
 
-    return { scene, socket, head, spine2, spineBind, handL, handR, clips, mixer, actions, ownedMaterials: owned, toolScene, toolSocket, upper, lower };
+    return { scene, socket, head, spine1, spine2, spineBind, leftArm, handL, handR, clips, mixer, actions, ownedMaterials: owned, toolScene, toolSocket, upper, lower };
   }, [gltf, tool]);
 
   // setup/cleanup: action bindings are recreated every mount (StrictMode
@@ -166,6 +200,10 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
   const gaze = useRef({ yaw: 0, pitch: 0 });
   const time = useRef(0);
   const foodMatrix = useRef(new Matrix4());
+  /** the idle prep loop for this body: window, phase, beats */
+  const idle = useRef<IdleDrive | null>(null);
+  /** 0 = fillet in the tongs, 1 = fillet resting in the pan */
+  const parkAmt = useRef(1);
   const drop = useRef<{ p: number; pos: Vector3; q: Quaternion } | null>(null);
   const outElapsed = useRef(0);
 
@@ -181,29 +219,45 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     current.current = next;
   };
 
+  // jaw pinch follows the WORK clip's real weight — an unplayed action would
+  // report weight 1 and clamp the tongs shut at bind. Hoisted out of the frame
+  // loop so the render path allocates nothing.
+  const syncJaws = () => {
+    const work = rig.actions.get("PetraWork")!;
+    const w = work.isRunning() ? work.getEffectiveWeight() : 0;
+    const h = MathUtils.lerp(0.14, 0.115, w);
+    rig.upper.rotation.z = h;
+    rig.lower.rotation.z = -h;
+  };
+  // the fillet is food: it rides the tongs only while she is plating, and
+  // rests in the pan between tickets — no float, no detach, no drift
+  const syncFood = (working: boolean, delta: number) => {
+    const f = food.current;
+    if (!f) return;
+    const want = working ? 0 : 1;
+    parkAmt.current += (want - parkAmt.current) * (1 - Math.exp(-Math.min(0.1, delta) / 0.16));
+    if (parkAmt.current > 0.995) {
+      parkAmt.current = 1;
+      f.position.set(x + PARK_X, PARK_Y, PARK_Z);
+      f.quaternion.identity();
+      return;
+    }
+    rig.toolSocket.updateWorldMatrix(true, false);
+    foodMatrix.current.multiplyMatrices(rig.toolSocket.matrixWorld, FILLET_IN_TOOL);
+    foodMatrix.current.decompose(_pos, _quat, _scale);
+    _home.set(x + PARK_X, PARK_Y, PARK_Z);
+    const k = parkAmt.current;
+    f.position.lerpVectors(_pos, _home, k);
+    // a short arc, so the hand-off reads as putting it down / taking it up
+    f.position.y += Math.sin(Math.PI * k) * 0.06;
+    f.quaternion.slerpQuaternions(_quat, _IDENTITY, k);
+  };
+
   useFrame((_, frameDelta) => {
     const g = root.current;
     if (!g) return;
     const s = useGame.getState();
     const cook = s.cooks[0];
-
-    // jaw pinch follows the WORK clip's real weight — an unplayed action
-    // would report weight 1 and clamp the tongs shut at bind
-    const syncJaws = () => {
-      const work = rig.actions.get("PetraWork")!;
-      const w = work.isRunning() ? work.getEffectiveWeight() : 0;
-      const h = MathUtils.lerp(0.14, 0.115, w);
-      rig.upper.rotation.z = h;
-      rig.lower.rotation.z = -h;
-    };
-    // the fillet lives in world space; its parent transform is the socket
-    const syncFood = () => {
-      const f = food.current;
-      if (!f) return;
-      rig.toolSocket.updateWorldMatrix(true, false);
-      foodMatrix.current.multiplyMatrices(rig.toolSocket.matrixWorld, FILLET_IN_TOOL);
-      foodMatrix.current.decompose(f.position, f.quaternion, f.scale);
-    };
 
     // --- new night, retry or a backwards clock: reset everything local
     if (s.career.night !== lastNight.current || s.serviceTime < previousServiceTime.current) {
@@ -215,6 +269,8 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
       outElapsed.current = 0;
       wasService.current = false;
       time.current = 0;
+      idle.current = null;
+      parkAmt.current = 1;
       gaze.current.yaw = 0;
       gaze.current.pitch = 0;
       g.visible = true;
@@ -230,7 +286,7 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
       drop.current = null;
       syncJaws();
       rig.scene.updateMatrixWorld(true);
-      syncFood();
+      syncFood(false, 0);
     }
 
     // --- exit tail: a walked-out cook still gets their leave during
@@ -250,9 +306,16 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
 
     // --- service-clock delta: the mixer follows the kitchen clock only;
     // the exit tail runs on bounded UI time once service has ended
+    const serviceDelta = Math.max(0, Math.min(0.1, s.serviceTime - previousServiceTime.current));
+    // the service clock stops while it waits on the player (the opening hold,
+    // and the moment the player is deciding). The room must not stop with it:
+    // the body breathes and preps on frame time whenever the clock is stalled.
+    // Animation reads it; nothing in the simulation does.
     const delta = exitTail
       ? Math.max(0, Math.min(0.1, frameDelta))
-      : Math.max(0, Math.min(0.1, s.serviceTime - previousServiceTime.current));
+      : serviceDelta > 0
+        ? serviceDelta
+        : Math.min(0.1, frameDelta);
     previousServiceTime.current = s.serviceTime;
     time.current += delta;
     const t = time.current;
@@ -328,13 +391,41 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     g.position.z = -4.03;
     g.rotation.y = 0;
 
-    // --- work vs ready: one whole performance per active ticket, sped to
-    // fit the ticket's real plating duration (no mid-return cut-off)
+    // --- work vs idle: one whole performance per active ticket, sped to fit
+    // the ticket's real plating duration (no mid-return cut-off) — and between
+    // tickets a measured neutral window of the same clip loops as prep
     const active = s.tickets.find((tk) => tk.station === cook?.station && tk.state === "plating");
     const working = !!active;
+    const mood = cook?.mood;
+    const pose = moodPose(mood);
     const work = rig.actions.get("PetraWork")!;
-    crossfade(working ? work : rig.actions.get("PetraReady")!);
-    if (active) work.setEffectiveTimeScale(rig.clips.get("PetraWork")!.duration / Math.max(0.1, active.plateDur));
+
+    if (!working && !reduced) {
+      if (!idle.current) idle.current = makeIdleDrive(0, mood);
+      const d = idle.current;
+      if (d) {
+        const beats = d.step(0, delta, mood, true);
+        for (const b of beats) sfx(b.sound, { pan: MathUtils.clamp(x / 8, -1, 1), vol: b.vol });
+        const next = rig.actions.get(d.variant.id);
+        if (next) {
+          if (current.current !== next) {
+            crossfade(next);
+            next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
+          }
+          next.setEffectiveTimeScale(idleRate(0, d.variant, d.loop, mood));
+        } else {
+          crossfade(rig.actions.get("PetraReady")!);
+        }
+      } else {
+        crossfade(rig.actions.get("PetraReady")!);
+      }
+    } else {
+      crossfade(working ? work : rig.actions.get("PetraReady")!);
+      if (working) {
+        work.setEffectiveTimeScale(workTimeScale(active!.plateDur, rig.clips.get("PetraWork")!.duration, mood));
+        idle.current = null;
+      }
+    }
 
     // --- head: restore last raw pose so constant tracks can't drift, then
     // let the clip write, capture it, and add the small gaze on top
@@ -360,16 +451,20 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     const gp = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), gaze.current.pitch);
     rig.head.quaternion.multiply(gy).multiply(gp);
 
-    // --- breathing at Ready only: absolute from bind scale, never accrues
+    // --- the body carries the mood: additive offsets on top of the clip's
+    // own pose, dropped entirely under reduced motion
+    applyMoodPose({ spine1: rig.spine1, spine2: rig.spine2, leftArm: rig.leftArm }, pose, t, reduced);
+
+    // --- breathing while not plating: absolute from bind scale, never accrues
     if (rig.spine2 && rig.spineBind) {
-      const b = !reduced && !working ? Math.sin(t * 1.6) * 0.003 : 0;
+      const b = breathAt(t, 0, pose, working, reduced);
       rig.spine2.scale.set(
         rig.spineBind.x * (1 + b),
         rig.spineBind.y,
         rig.spineBind.z * (1 + b)
       );
     }
-    syncFood();
+    syncFood(working, delta);
   });
 
   return (

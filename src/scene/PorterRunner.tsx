@@ -30,6 +30,7 @@ import { clone as skeletonClone } from "three/examples/jsm/utils/SkeletonUtils.j
 import { useGame } from "../game/state";
 import { sfx } from "../game/sound";
 import { useReducedMotion } from "./artDirection";
+import { applyStandbySway } from "./idleLoops";
 import { PortraitHead } from "./IllustratedCook";
 import FoodModel from "./FoodModel";
 import porterURL from "../../assets/meshy/porter-pilot/runtime-porter.glb?url";
@@ -106,6 +107,7 @@ export default function PorterRunner() {
   const rig = useMemo(() => {
     const scene = skeletonClone(gltf.scene);
     const socket = scene.getObjectByName("PortraitSocket") ?? null;
+    const spine1 = findBone(scene, "mixamorig:Spine1", "mixamorigSpine1");
     const spine2 = findBone(scene, "mixamorig:Spine2", "mixamorigSpine2");
     if (!socket) throw new Error("porter: PortraitSocket node missing");
     if (!spine2) throw new Error("porter: spine2 bone missing");
@@ -156,7 +158,7 @@ export default function PorterRunner() {
     actions.get("Ready")!.reset().play();
     mixer.update(0);
     scene.updateMatrixWorld(true);
-    return { scene, socket, tub, mixer, actions, ownedMaterials: owned };
+    return { scene, socket, spine1, spine2, tub, mixer, actions, ownedMaterials: owned };
   }, [gltf]);
 
   const st = useRef<{
@@ -169,7 +171,9 @@ export default function PorterRunner() {
     queued: boolean;
     stepT: number;
     stepN: number;
-  }>({ phase: "idle", t: 0, x: STANDBY_X, yaw: 0, clip: "Ready", seen: sentBack, queued: false, stepT: 0, stepN: 0 });
+    /** standby life: his own clock, so the wait is never a frozen pose */
+    life: number;
+  }>({ phase: "idle", t: 0, x: STANDBY_X, yaw: 0, clip: "Ready", seen: sentBack, queued: false, stepT: 0, stepN: 0, life: 0 });
 
   useFrame((_, dt) => {
     const s = useGame.getState();
@@ -226,6 +230,12 @@ export default function PorterRunner() {
       case "idle":
         play("Ready");
         R.yaw = 0; // faces the room — his portrait reads while waiting
+        // he shifts his weight and sets his back between hauls — procedural
+        // bone sway only; his real fetch is the tub route he already runs
+        R.life += step;
+        applyStandbySway(rig, R.life, 7.4);
+        g.position.x = STANDBY_X + Math.sin(R.life * 0.44 + 1.1) * 0.025;
+        g.position.y = Math.sin(R.life * 1.02) * 0.007;
         break;
       case "toPickup": {
         play("Walking");

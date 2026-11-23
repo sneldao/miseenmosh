@@ -31,6 +31,7 @@ import { clone as skeletonClone } from "three/examples/jsm/utils/SkeletonUtils.j
 import { useGame } from "../game/state";
 import { sfx } from "../game/sound";
 import { useReducedMotion, COPPER } from "./artDirection";
+import { applyStandbySway } from "./idleLoops";
 import { PortraitHead } from "./IllustratedCook";
 import FoodModel from "./FoodModel";
 import commisURL from "../../assets/meshy/commis-pilot/runtime-commis.glb?url";
@@ -90,6 +91,25 @@ export function TrayBoard({ plates }: { plates: TrayPlate[] }) {
   );
 }
 
+/** A clean-plate stack back from the wash-up — his one event-driven job: every
+ *  third delivery he returns loaded instead of empty. */
+function CleanPlateStack() {
+  return (
+    <group>
+      <mesh castShadow>
+        <boxGeometry args={[0.36, 0.022, 0.3]} />
+        <meshStandardMaterial color={COPPER} roughness={0.4} metalness={0.5} />
+      </mesh>
+      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+        <mesh key={i} position={[0, 0.028 + i * 0.021, 0]}>
+          <cylinderGeometry args={[0.135, 0.125, 0.012, 18]} />
+          <meshStandardMaterial color={IVORY} roughness={0.5} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 export default function CommisRunner() {
   const gltf = useGLTF(commisURL);
   const delivery = useGame((s) => s.lastDelivery);
@@ -99,6 +119,7 @@ export default function CommisRunner() {
   const rig = useMemo(() => {
     const scene = skeletonClone(gltf.scene);
     const socket = scene.getObjectByName("PortraitSocket") ?? null;
+    const spine1 = findBone(scene, "mixamorig:Spine1", "mixamorigSpine1");
     const spine2 = findBone(scene, "mixamorig:Spine2", "mixamorigSpine2");
     if (!socket) throw new Error("commis: PortraitSocket node missing");
     if (!spine2) throw new Error("commis: spine2 bone missing");
@@ -150,7 +171,7 @@ export default function CommisRunner() {
     actions.get("Ready")!.reset().play();
     mixer.update(0);
     scene.updateMatrixWorld(true);
-    return { scene, socket, tray, mixer, actions, ownedMaterials: owned };
+    return { scene, socket, spine1, spine2, tray, mixer, actions, ownedMaterials: owned };
   }, [gltf]);
 
   const st = useRef<{
@@ -162,7 +183,30 @@ export default function CommisRunner() {
     delivered: typeof delivery;
     queued: boolean;
     stepT: number;
-  }>({ phase: "idle", t: 0, x: STANDBY_X, yaw: 0, clip: "Ready", delivered: delivery, queued: false, stepT: 0 });
+    /** standby life: seconds of his own clock, never the service clock */
+    life: number;
+    /** deliveries he has carried out — the fetch job's trigger */
+    deliveries: number;
+    /** the stack is on the tray on the way back */
+    carrying: boolean;
+    /** a fetch is banked and taken at the next off-frame beat */
+    fetch: boolean;
+  }>({
+    phase: "idle",
+    t: 0,
+    x: STANDBY_X,
+    yaw: 0,
+    clip: "Ready",
+    delivered: delivery,
+    queued: false,
+    stepT: 0,
+    life: 0,
+    deliveries: 0,
+    carrying: false,
+    fetch: false,
+  });
+  const foodRef = useRef<Group>(null);
+  const cleanRef = useRef<Group>(null);
 
   useFrame((_, dt) => {
     const s = useGame.getState();
@@ -195,6 +239,8 @@ export default function CommisRunner() {
       R.x = STANDBY_X;
       R.delivered = delivery;
       R.queued = false;
+      R.carrying = false;
+      R.fetch = false;
       play("Ready");
       return;
     }
@@ -204,6 +250,11 @@ export default function CommisRunner() {
 
     if (delivery !== R.delivered) {
       R.delivered = delivery;
+      if (delivery) {
+        R.deliveries += 1;
+        // every third run he banks a fetch: the man is never empty-handed twice
+        if (R.deliveries % 3 === 0) R.fetch = true;
+      }
       if (delivery && R.phase === "idle") R.phase = "toPickup";
       else if (delivery && (R.phase === "out" || R.phase === "back")) R.queued = true;
     }
@@ -212,6 +263,12 @@ export default function CommisRunner() {
       case "idle":
         play("Ready");
         R.yaw = 0; // faces the dining room — his portrait reads while waiting
+        // standby life: he is not a statue between runs — weight shifts, the
+        // shoulders settle, and the shift is visible even at camera distance
+        R.life += step;
+        applyStandbySway(rig, R.life, 3.1);
+        g.position.x = STANDBY_X + Math.sin(R.life * 0.52) * 0.03;
+        g.position.y = Math.sin(R.life * 1.15) * 0.008;
         break;
       case "toPickup": {
         play("Walking");
@@ -249,6 +306,11 @@ export default function CommisRunner() {
       }
       case "through": {
         R.t += step;
+        // off frame: the only honest place to pick up the clean stack
+        if (R.fetch) {
+          R.fetch = false;
+          R.carrying = true;
+        }
         if (R.t >= 0.7) {
           R.phase = R.queued ? "toPickup" : "back";
           R.queued = false;
@@ -257,12 +319,14 @@ export default function CommisRunner() {
         break;
       }
       case "back": {
-        play("Walking");
+        play(R.carrying ? "Carry" : "Walking");
         R.yaw = -Math.PI / 2;
         R.x -= WALK_SPEED * step;
         stride(0.36, 0.45);
         if (R.x <= STANDBY_X) {
           R.x = STANDBY_X;
+          // the stack lands on the pass and he goes back to standing by
+          R.carrying = false;
           if (R.queued) {
             R.queued = false;
             R.phase = "toPickup";
@@ -273,7 +337,10 @@ export default function CommisRunner() {
         break;
       }
     }
-    rig.tray.visible = R.phase === "out" || R.phase === "lift";
+    rig.tray.visible =
+      R.phase === "out" || R.phase === "lift" || (R.phase === "back" && R.carrying);
+    if (foodRef.current) foodRef.current.visible = !R.carrying;
+    if (cleanRef.current) cleanRef.current.visible = R.carrying;
   });
 
   if (reduced) return null;
@@ -287,7 +354,17 @@ export default function CommisRunner() {
         </group>,
         rig.socket
       )}
-      {createPortal(<TrayBoard plates={plates} />, rig.tray)}
+      {createPortal(
+        <>
+          <group ref={foodRef}>
+            <TrayBoard plates={plates} />
+          </group>
+          <group ref={cleanRef} visible={false}>
+            <CleanPlateStack />
+          </group>
+        </>,
+        rig.tray
+      )}
     </group>
   );
 }

@@ -13,7 +13,9 @@ import {
 } from "three";
 import { useTexture } from "@react-three/drei";
 import { useGame } from "../game/state";
+import { sfx } from "../game/sound";
 import { COOK_SHAPES, INK, clothTexture, useReducedMotion } from "./artDirection";
+import { makeIdleDrive, moodPose, type IdleDrive } from "./idleLoops";
 import petraHead from "../../assets/recraft/playable/petra.webp";
 import dimitriHead from "../../assets/recraft/playable/dimitri.webp";
 import anwarHead from "../../assets/recraft/playable/anwar.webp";
@@ -294,6 +296,9 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
   const lastNight = useRef(-1);
   const wasService = useRef(false);
   const workAmt = useRef(0);
+  /** fallback bodies keep the same idle beats as the real rigs — the same
+   *  cook, the same kitchen noise, whichever body is mounted */
+  const idle = useRef<IdleDrive | null>(null);
   const outAt = useRef<number | null>(null);
   const lastEvent = useRef<unknown>(undefined);
   const react = useRef<{ kind: "serve" | "sendback" | "smash"; at: number } | null>(null);
@@ -324,6 +329,7 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
       outAt.current = null;
       react.current = null;
       workAmt.current = 0;
+      idle.current = null;
       wasService.current = false;
       g.visible = true;
       g.position.set(x, 0, -3.95);
@@ -389,11 +395,27 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
     const ready = s.tickets.some((tk) => tk.station === cook?.station && (tk.state === "ready" || tk.state === "pass"));
     workAmt.current += ((active ? 1 : 0) - workAmt.current) * ease(dt);
     const w = workAmt.current;
-    const breathe = reduced ? 0 : Math.sin(t * 1.6 + cookId * 2.1) * 0.012;
+    const idleAmt = 1 - w;
+    const mood = cook?.mood;
+    const pose = moodPose(mood);
+    const breathe = reduced ? 0 : Math.sin(t * 1.6 * pose.breathRate + cookId * 2.1) * 0.012 * pose.breathAmp;
+
+    // the fallback body still sounds like a kitchen: the idle loop's beats
+    // fire here too, so a failed GLB does not silence the station
+    if (!active && !reduced) {
+      if (!idle.current) idle.current = makeIdleDrive(cookId, mood);
+      const beats = idle.current?.step(cookId, dt, mood, !s.paused) ?? [];
+      for (const b of beats) sfx(b.sound, { pan: Math.max(-1, Math.min(1, x / 8)), vol: b.vol });
+    } else {
+      idle.current = null;
+    }
 
     if (body.current) {
       body.current.position.y = breathe;
       body.current.rotation.y = ready ? 0 : Math.sin(t * 0.4 + cookId) * (reduced ? 0 : 0.04);
+      // the body carries the mood: slump forward, brace back — dropped under
+      // reduced motion like every other offset
+      body.current.rotation.x = reduced ? 0 : pose.slump - pose.brace * 0.5;
     }
 
     // --- head: turn toward the chef when a plate is ready; reactions on top
@@ -461,6 +483,29 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
       elXR = restElX + 0.3 * w;
       elXL = restElX + 0.3 * w;
       tongClose = 0.05;
+    }
+    // between tickets the fallback body keeps working in the background:
+    // a low-amplitude prep read of the same station gesture, so prep and
+    // plating stay visibly different (never the same amplitude)
+    const idleRead = reduced ? 0 : idleAmt * (0.35 + 0.05 * pose.idleRate);
+    if (idleRead > 0.02) {
+      if (station === 1) {
+        const a = (t % 3.4) * ((Math.PI * 2) / 3.4); // slower, smaller stir
+        ellX += Math.cos(a) * 0.03 * idleRead;
+        ellY += Math.sin(a) * 0.026 * idleRead;
+        shXR += 0.1 * idleRead * Math.sin(a);
+        handYawR += a * 0.5 * idleRead;
+      } else if (station === 2) {
+        const a = (t % 2.6) * ((Math.PI * 2) / 2.6); // bench wrist circles
+        handYawR += Math.cos(a) * 0.3 * idleRead;
+        handPitchR += Math.sin(a) * 0.24 * idleRead;
+        shXR += 0.07 * idleRead;
+      } else {
+        const a = (t % 3.0) * ((Math.PI * 2) / 3.0); // tongs turned, not lifted
+        handYawR += Math.sin(a) * 0.22 * idleRead;
+        shXR += 0.06 * idleRead;
+        tongClose = 0.1 - 0.03 * (0.5 + 0.5 * Math.sin(a)) * idleRead;
+      }
     }
     // ready: plate at the pass — present it forward
     if (ready) {
