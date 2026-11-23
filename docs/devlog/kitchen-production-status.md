@@ -1427,8 +1427,9 @@ I would defend without a footnote.
 
 ### Verified / not verified
 
-Machine-checked: `tsc --noEmit` clean, **101 tests** green, 180-frame capture
-with 0 long tasks, the numbers above, and the lane/band visibility counts.
+Machine-checked: `tsc --noEmit` clean, **126 tests** green (101 at this round,
++13 steam budget, +12 since), three-window `bench(3, 90)` with 0 long tasks, the
+numbers above, and the lane/band visibility counts.
 
 **Not verified: nobody has judged this at the screen.** The pixel diffs say the
 room is now moving; they cannot say it reads as a hive to a person, and the note
@@ -1437,9 +1438,13 @@ in the window: intervals and depths no longer form a grid, but five seated busts
 behind barely visible tables still need furniture — a bar, a standing guest, a
 booth divider — not more motion.
 
-Also open, and cheap for whoever owns it: the feed card at 2 m sits on the
-centre of the arch (numbers above). Move it up or to one side and the busiest
-60 pixels of this frame stop being hidden behind paper.
+Both open items are now carried in the plan, under **"Open items from the
+feedback rounds"**, with owners — because a finding that lives only in the round
+that found it is a fact about the past, and nobody working from the plan reads
+the round.
+
+*Superseded since this round: the feed card at 2 m no longer sits on the arch
+centre (`823de82`) — the busiest 60 pixels of that frame are clear.*
 
 ## Generated beats + morning confessionals (23 Nov, commits 4599526 / 051aa60 / c819e4e)
 

@@ -393,6 +393,32 @@ SpeechBubble line per cook, skippable), the nine-night arc content
 beyond the N1/N3/N7 seeds already in the rules, and confessional
 still-swap to Recraft when quoted.
 
+## Open items from the feedback rounds
+
+Carried here rather than only in the devlog, because a finding recorded in the
+round that found it reads as history and nobody working from this plan sees it.
+Each names its owner and what would actually close it.
+
+1. **The pass gap, re-read by a person — owner: the owner.** The note that
+   started the hive round ("the three chefs who play feel very far away… all the
+   chefs behind them are completely static") came from a person looking at the
+   pass. `cc82ed4` (crew walkers, silhouettes) and the hive round moved the room
+   and netted **10 draws cheaper**; the instruments say it is cheap and moving.
+   **None of that answers the note.** The only thing that closes it is that
+   person playing one service and saying it again — in the same words or not.
+   Until then the hive is *measured* busy, not *reads* busy, and the difference
+   is the entire complaint.
+2. **Dining-row furniture — owner: Dev 2.** Five seated busts behind barely
+   visible tables. Intervals and depths no longer form a grid, but the row needs
+   *furniture*, not more motion: a bar, a standing guest, a booth divider. This
+   is the plane the eye compares the pass against, so it does more for the
+   perceived distance between us and the chefs than anything added behind them.
+   Recorded here rather than edited into Dev 2's scope above, so their spec
+   isn't changed out from under them.
+3. **The audio floor, heard by a person — owner: the owner.** New events land
+   meter-conservative because nobody has listened. A meter can say a cue is loud
+   enough; it cannot say it is the right cue.
+
 ## Open decisions (recommended defaults — owner confirms)
 
 1. **Meshy cap:** **resolved — extended (owner, 23 Nov).** Phase A's free
@@ -441,4 +467,7 @@ still-swap to Recraft when quoted.
 - **Performance:** frame budget before/after sprites + lights, on the
   design-doc device profile.
 - **Human:** person-listens pass over the audio floor; the 10-second
-  HUD-hidden test; the blind mood test.
+  HUD-hidden test; the blind mood test; **and the pass-gap re-read in "Open
+  items from the feedback rounds"** — the owner plays one service and says
+  whether the chefs still feel far away. That one is a gate, not a note: it is
+  the only check that can mark the hive round closed.
