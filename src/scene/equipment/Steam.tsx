@@ -59,6 +59,7 @@ export default function SteamField({
   const seeds = useMemo(() => Array.from({ length: count }, (_, i) => (i * 0.618) % 1), [count]);
   const tex = useMemo(() => puffTexture(), []);
   useFrame(({ clock }) => {
+    if (useGame.getState().paused) return;
     const t = clock.elapsedTime;
     for (let i = 0; i < sprites.current.length; i++) {
       const sp = sprites.current[i];

@@ -1947,49 +1947,6 @@ export const useGame = create<GameState>((set, get) => ({
       if (workBearing < 2) nextTicketIn = Math.min(nextTicketIn, 1.2);
     }
 
-    // --- ambient bark: general rage, a station-directed insult, or a
-    // personal one — cooks with grudges get barked AT, specifically ---
-    // fatigue and flight read straight off morale — no new meters, just names for the states
-    const liveBrigade = s.cooks.filter((c) => !c.walkedOut);
-    const weakest = liveBrigade.length ? liveBrigade.reduce((a, b) => (a.morale < b.morale ? a : b)) : undefined;
-    if (flying && !flyingAnnounced) {
-      flyingAnnounced = true;
-      feed = pushFeed(feed, "THE BRIGADE IS FLYING — favourites land harder (+2). Don't mention it. You'll jinx it.", "good");
-    }
-    if (serviceTime >= barkAt) {
-      const target = s.cooks.find((c) => !c.walkedOut && rng() < 0.4);
-      const grudged = target?.grudge && rng() < 0.5;
-      let bark: string;
-      let who: string | undefined;
-      if (target && grudged) {
-        bark = pick(rng, GRUDGE_BARKS[target.station]).replace("{N}", target.name);
-        who = target.name;
-      } else if (weakest && weakest.morale < 25 && rng() < 0.6) {
-        bark = pick(rng, FATIGUE_BARKS[Math.min(2, weakest.station)]).replace("{N}", weakest.name);
-        who = weakest.name;
-      } else if (target && (target.mood === "ANGRY" || target.mood === "EDGE") && rng() < 0.7) {
-        // the room talks in the mood: a furious cook gets barked AT,
-        // a rattled one hears the fatigue pool — no new banks needed
-        bark = pick(
-          rng,
-          target.mood === "ANGRY" ? GRUDGE_BARKS[target.station] : FATIGUE_BARKS[Math.min(2, target.station)]
-        ).replace("{N}", target.name);
-        who = target.name;
-      } else if (flying && rng() < 0.6) {
-        const f = liveBrigade[Math.floor(rng() * liveBrigade.length)];
-        bark = pick(rng, FLYING_BARKS[Math.min(2, f.station)]).replace("{N}", f.name);
-        who = f.name;
-      } else if (target) {
-        bark = pick(rng, STATION_BARKS[target.station]).replace("{N}", target.name);
-        who = target.name;
-      } else {
-        bark = pick(rng, CHEF_BARKS);
-        who = "THE PASS";
-      }
-      feed = pushFeed(feed, bark, "drama", who);
-      barkAt = serviceTime + 16 + rng() * 14;
-    }
-
     // --- BEEFCAKES does something unforgivable — and this time he sends a body ---
     const rivalTimes = s.career.mutator === "double_runners" ? [30, 50, 70, 90, 110, 128] : s.career.beefcakesWar ? [35, 55, 75, 95, 118] : [35, 75, 118];
     let rivalAt = s.rivalAt;
@@ -2110,6 +2067,50 @@ export const useGame = create<GameState>((set, get) => ({
         t.condition = undefined;
         feed = pushFeed(feed, `${cooks[t.station].name} is gone — the ${t.dish} goes back on the rail.`, "info");
       }
+    }
+
+    // --- ambient bark: general rage, a station-directed insult, or a
+    // personal one — cooks with grudges get barked AT, specifically ---
+    // fatigue and flight read straight off morale — no new meters, just names for the states.
+    // reads the post-tick cooks so mood, morale and walkouts are this frame's truth
+    const liveBrigade = cooks.filter((c) => !c.walkedOut);
+    const weakest = liveBrigade.length ? liveBrigade.reduce((a, b) => (a.morale < b.morale ? a : b)) : undefined;
+    if (flying && !flyingAnnounced) {
+      flyingAnnounced = true;
+      feed = pushFeed(feed, "THE BRIGADE IS FLYING — favourites land harder (+2). Don't mention it. You'll jinx it.", "good");
+    }
+    if (serviceTime >= barkAt) {
+      const target = liveBrigade.find((c) => rng() < 0.4);
+      const grudged = target?.grudge && rng() < 0.5;
+      let bark: string;
+      let who: string | undefined;
+      if (target && grudged) {
+        bark = pick(rng, GRUDGE_BARKS[target.station]).replace("{N}", target.name);
+        who = target.name;
+      } else if (weakest && weakest.morale < 25 && rng() < 0.6) {
+        bark = pick(rng, FATIGUE_BARKS[Math.min(2, weakest.station)]).replace("{N}", weakest.name);
+        who = weakest.name;
+      } else if (target && (target.mood === "ANGRY" || target.mood === "EDGE") && rng() < 0.7) {
+        // the room talks in the mood: a furious cook gets barked AT,
+        // a rattled one hears the fatigue pool — no new banks needed
+        bark = pick(
+          rng,
+          target.mood === "ANGRY" ? GRUDGE_BARKS[target.station] : FATIGUE_BARKS[Math.min(2, target.station)]
+        ).replace("{N}", target.name);
+        who = target.name;
+      } else if (flying && rng() < 0.6) {
+        const f = liveBrigade[Math.floor(rng() * liveBrigade.length)];
+        bark = pick(rng, FLYING_BARKS[Math.min(2, f.station)]).replace("{N}", f.name);
+        who = f.name;
+      } else if (target) {
+        bark = pick(rng, STATION_BARKS[target.station]).replace("{N}", target.name);
+        who = target.name;
+      } else {
+        bark = pick(rng, CHEF_BARKS);
+        who = "THE PASS";
+      }
+      feed = pushFeed(feed, bark, "drama", who);
+      barkAt = serviceTime + 16 + rng() * 14;
     }
 
     // --- the dining room tells on itself: critic escalates, press flashes,

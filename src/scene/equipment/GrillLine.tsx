@@ -71,7 +71,7 @@ function PilotFlame({ x }: { x: number }) {
   const reduced = useReducedMotion();
   const phase = useGame((s) => s.phase);
   useFrame(({ clock }) => {
-    if (reduced || phase !== "service" || !g.current) return;
+    if (reduced || phase !== "service" || !g.current || useGame.getState().paused) return;
     const t = clock.elapsedTime;
     g.current.children.forEach((m, i) => {
       const p = t * (9 + i * 1.3) + i * 2.6;

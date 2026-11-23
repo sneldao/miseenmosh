@@ -99,6 +99,26 @@ describe("wrapBlend", () => {
     }
   });
 
+  it("makes the wrap an ordinary frame, not an event", () => {
+    // the probe (assets/meshy/probe-loop-seam.mjs) measures this on the real
+    // GLBs; this keeps the property enforced in CI on a dense stand-in: the
+    // step across the wrap is never larger than the largest step inside the loop
+    const blended = wrapBlend(clip, SEAM_BLEND);
+    const step = 1 / 60;
+    const dist = (a: number[], b: number[]) => {
+      let d = 0;
+      for (let i = 0; i < a.length; i++) d += Math.abs(a[i] - b[i]);
+      return d;
+    };
+    const pose = (t: number) => blended.tracks.flatMap((tr) => sampleTrack(tr, t));
+    let inside = 0;
+    for (let t = step; t <= blended.duration + 1e-9; t += step) {
+      inside = Math.max(inside, dist(pose(t - step), pose(t % blended.duration)));
+    }
+    const seam = dist(pose(blended.duration), pose(0));
+    expect(seam).toBeLessThanOrEqual(inside);
+  });
+
   it("keeps quaternions unit length through the blend", () => {
     const blended = wrapBlend(clip, SEAM_BLEND);
     const q = blended.tracks[0];
