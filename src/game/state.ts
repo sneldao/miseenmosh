@@ -80,6 +80,7 @@ export interface Cook {
   honored?: boolean; // twice-praised: a name moment, and a once-a-night keepsake save
   honoredUsed?: boolean; // keepsake spent tonight
   smoked: boolean; // the smoke warning already fired tonight
+  mood?: import("./mood").Mood; // transient: derived each tick, reset nightly, never persisted
 }
 
 export type GuestKind = "critic" | "press" | "regulars" | "couple" | "walkin";

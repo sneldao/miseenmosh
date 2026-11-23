@@ -78,7 +78,10 @@ export type Sfx =
   | "rattle"
   | "step"
   | "clatter"
-  | "splash";
+  | "splash"
+  | "knife"
+  | "chop"
+  | "boardTap";
 
 export interface SfxOpts {
   /** -1 (far left, grill) .. +1 (far right, pastry) */
@@ -189,6 +192,21 @@ export function sfx(kind: Sfx, opts: SfxOpts = {}) {
       noise(t, 0.35, 0.4, 1200, bus);
       osc("sine", 600, 170, t, 0.3, 0.12, bus);
       noise(t + 0.12, 0.15, 0.22, 2000, bus);
+      break;
+    case "knife":
+      // steel on the board: a bright ting with the cut's tick
+      osc("triangle", 3000, 2300, t, 0.05, 0.22, bus);
+      noise(t, 0.025, 0.18, 3500, bus);
+      break;
+    case "chop":
+      // the board takes the blow: dull knock under a soft scuff
+      osc("sine", 190, 105, t, 0.07, 0.3, bus);
+      noise(t, 0.03, 0.22, 600, bus);
+      break;
+    case "boardTap":
+      // a wooden tap — mise en place punctuation, quieter than a chop
+      osc("sine", 340, 210, t, 0.045, 0.18, bus);
+      noise(t, 0.02, 0.12, 1500, bus);
       break;
   }
 }
