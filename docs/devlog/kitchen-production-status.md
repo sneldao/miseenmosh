@@ -956,5 +956,31 @@ file in it is 2.3 s and cut short — the full 30 s capture replaces it here.
 Still waiting on a person: the audio floor and the idle-beat levels have
 never been listened to (both are meter-conservative on purpose), the
 idle-vs-plating read above was run by one reader, and the scream→strain
-offset has not been reproduced through the real input path. Nothing here is
-deployed — pushing publishes the lane commits, not a build.
+offset has not been reproduced through the real input path.
+
+## Phase A deploy — 23 Nov
+
+One batched deploy, the day's last slot (1 of 5 remaining before it).
+Deployed from the repo root with `opengame deploy . --wait`; state `ready`,
+done. Release `08a46d2d-7544-470e-9f0c-c8ebb513b3a8` on game `9i7mjkmdx4`.
+
+- Preview: https://opengame.io/g/9i7mjkmdx4?preview=08a46d2d-7544-470e-9f0c-c8ebb513b3a8
+- Deploy page: https://opengame.io/settings/deployments/55d9b5b5-80b5-4721-bd0e-fc15ca128752
+
+Findings: one heuristic `missing-ref` for three draco decoder files —
+verified a false positive before shipping it: the decoder path is registered
+unconditionally but no shipped GLB requires draco (checked
+`extensionsRequired`/`extensionsUsed` on all eight), and the registered path
+is the gstatic CDN, which is also why `www.gstatic.com` appears in the
+external-hosts notice. Nothing to fix.
+
+Merged-scene frame gate before the deploy: 60.1 fps avg through live
+service on the production build, worst frame 27.9 ms; canvas frozen under
+pause (the review-pass gate held).
+
+Review playtested it and it auto-published — `SUB-2072`, state `published`,
+listed, Game Jam #1 entry under Simulation & management + the elevenlabs /
+fal / meshy sponsor tracks. **Live: https://opengame.io/g/9i7mjkmdx4**
+
+The person-checks above are now checkable *on the live build itself* — the
+simmer bed, the beat levels, and the room's read are all up there.
