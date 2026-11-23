@@ -157,7 +157,7 @@ const HAIR: Record<Look["hair"], string> = {
 
 /** The static mass of one body: legs, torso, apron with its crossed ties,
  *  collar, hair. Arms and head are built separately because they move. */
-function buildBody(look: Look): BufferGeometry {
+function buildBody(look: Look, withLegs = true): BufferGeometry {
   const s = look.height / 1.72;
   const b = look.build;
   const legs = [-0.11 * b, 0.11 * b].map((x) =>
@@ -184,10 +184,25 @@ function buildBody(look: Look): BufferGeometry {
             ])!
           : part(SPHERE(0.122), HAIR.crop, [0, 1.47, -0.01]);
   const merged = mergeGeometries(
-    [legs[0], legs[1], torso, chest, apronPanel, apronSkirt, strapA, strapB, waistTie, collar, hair],
+    withLegs
+      ? [legs[0], legs[1], torso, chest, apronPanel, apronSkirt, strapA, strapB, waistTie, collar, hair]
+      : [torso, chest, apronPanel, apronSkirt, strapA, strapB, waistTie, collar, hair],
   )!;
   merged.scale(s, s, s);
   return merged;
+}
+
+/** A body that walks: torso and head in one merged mass (a walker is crossing
+ *  the room with intent, so it does not scan — the whole body turns instead),
+ *  and legs left off entirely. Legs are not a saving so much as a measurement:
+ *  the station counters hide the lane below y ≈ 0.70, so a leg swinging under
+ *  there is four draws a frame spent on pixels nobody owns. */
+function buildWalkerMass(look: Look, seed: number): BufferGeometry {
+  const s = look.height / 1.72;
+  const torso = buildBody(look, false);
+  const head = part(SPHERE(0.125), SKIN[(seed >> 2) % SKIN.length], [0, 1.37, 0]);
+  head.scale(s, s, s);
+  return mergeGeometries([torso, head])!;
 }
 
 /** one arm as a shoulder pivot so its whole swing is one rotation */
@@ -209,12 +224,16 @@ function buildHead(look: Look, seed: number): BufferGeometry {
   return head;
 }
 
-/** the whole background crew: four bodies, four cadences, no shared clock */
+/** the whole background crew: four working in place, two crossing the room,
+ *  six cadences and no shared clock */
 export default function BackgroundCrew() {
   return (
     <group name="background-crew">
       {WORKERS.map((w, i) => (
         <Worker key={i} spec={w} />
+      ))}
+      {WALKERS.map((w, i) => (
+        <Walker key={i} spec={w} />
       ))}
     </group>
   );
@@ -381,4 +400,192 @@ function Worker({ spec }: { spec: WorkerSpec }) {
 
 /** Kept for the mood/glyph work: a body's colours are its only identity here,
  *  so the palette lives in one place. */
+
+/**
+ * The two bodies that cross the room.
+ *
+ * Everything above is a body working in place, which is what a kitchen is
+ * most of the time — but "in place" at 8 m is a 60-pixel figure whose arms
+ * move 4 px, and four of those in a row read as a still photograph. What the
+ * eye is looking for is TRANSIT: something that arrives on one side of the
+ * frame and leaves on the other. That is a change of 500+ px, two orders of
+ * magnitude past any gesture, and it costs one body.
+ *
+ * The lane is z -4.58, picked by the same raycast sampling as the standing
+ * spots: at head height 24 of 33 sample points across the strip have nothing
+ * in front of them, so a walker surfaces in the gaps between the three cooks
+ * and disappears behind the counters and the standing crew. The occlusions are
+ * the point — a body that is never hidden reads as a sticker, a body that
+ * slips behind the line and comes out the other side reads as a room.
+ *
+ * They sweep opposite ways on periods that do not divide (28.3 s and 38.5 s),
+ * so the two of them are never in step and the corridor is never empty twice
+ * the same way. Feet are omitted: the counters hide the lane below y ≈ 0.70,
+ * measured, so a leg is 6 draws a frame on pixels nobody owns.
+ */
+interface WalkerSpec {
+  /** metres of half-sweep */
+  reach: number;
+  /** radians per second; sign is direction of travel */
+  rate: number;
+  /** starting phase, so they do not launch together */
+  offset: number;
+  z: number;
+  seed: number;
+  look: Look;
+  /** what is in their hands — the silhouette has to differ from a cook's */
+  load: "tub" | "plates" | "none";
+}
+
+const WALKERS: WalkerSpec[] = [
+  {
+    reach: 4.15, rate: 0.222, offset: 0.4, z: -4.58, seed: 23,
+    look: { height: 1.66, build: 0.92, shirt: "#e7dcc4", apron: "#3f4d55", trouser: "#2b2f34", hair: "bun", rolledSleeves: true },
+    load: "tub",
+  },
+  {
+    reach: 3.9, rate: -0.163, offset: 2.1, z: -4.58, seed: 59,
+    look: { height: 1.80, build: 1.12, shirt: "#cbbfa6", apron: "#6d5a3f", trouser: "#302c28", hair: "bandana", rolledSleeves: false },
+    load: "plates",
+  },
+];
+
+/** one body carrying something across the back strip */
+function Walker({ spec }: { spec: WalkerSpec }) {
+  const reduced = useReducedMotion();
+  const mass = useMemo(() => buildWalkerMass(spec.look, spec.seed), [spec.look, spec.seed]);
+  const skin = useMemo(() => SKIN[(spec.seed >> 2) % SKIN.length], [spec.seed]);
+  const armGeo = useMemo(() => buildArm(spec.look, skin), [spec.look, skin]);
+  const cloth = useMemo(() => new MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), []);
+  // the plate stack is one merged geometry, not three draws: three discs at
+  // 8 m are one object, and they should cost one object
+  const stack = useMemo(
+    () =>
+      mergeGeometries(
+        [0, 0.035, 0.07].map((y, i) => {
+          const g = new CylinderGeometry(0.132, 0.122, 0.022, 16);
+          g.rotateY(i * 0.5);
+          g.translate(0, y, 0);
+          return g;
+        }),
+      )!,
+    [],
+  );
+
+  const root = useRef<Group>(null);
+  const body = useRef<Group>(null);
+  const armR = useRef<Group | null>(null);
+  const armL = useRef<Group | null>(null);
+  const prop = useRef<Group>(null);
+  const life = useRef(0);
+  const lastServed = useRef(-1);
+  const greetAt = useRef(-10);
+  const yaw = useRef(spec.rate > 0 ? Math.PI / 2 : -Math.PI / 2);
+  const setArmR = useCallback((g: Group | null) => { armR.current = g; }, []);
+  const setArmL = useCallback((g: Group | null) => { armL.current = g; }, []);
+  const s = spec.look.height / 1.72;
+
+  useFrame((_, dt) => {
+    const g = root.current;
+    const b = body.current;
+    if (!g || !b) return;
+    const st = useGame.getState();
+    if (!st.paused && st.phase !== "title" && st.phase !== "review" && !reduced) {
+      life.current += Math.min(dt, 0.05);
+    }
+    const raw = life.current + spec.offset;
+    const t = Math.min(dt, 0.05);
+
+    // x is a sine, not a loop with a teleport: a body that turns round at the
+    // end of the room slows, pivots and walks back. The turn is free.
+    const x = spec.reach * Math.sin(raw * spec.rate);
+    const vx = spec.reach * spec.rate * Math.cos(raw * spec.rate);
+    g.position.x = x;
+
+    // face the way you are going, eased — the pivot happens where you are
+    // already nearly stopped, which is exactly where a person pivots
+    const want = vx >= 0 ? Math.PI / 2 : -Math.PI / 2;
+    let d = want - yaw.current;
+    while (d > Math.PI) d -= Math.PI * 2;
+    while (d < -Math.PI) d += Math.PI * 2;
+    yaw.current += d * (1 - Math.exp(-5 * dt));
+    b.rotation.y = yaw.current;
+
+    // step phase from distance travelled, so the gait never slides
+    const speed = Math.abs(vx);
+    const step = (x / 0.72) * Math.PI;
+    const bounce = Math.abs(Math.sin(step)) * 0.026 * Math.min(1, speed * 1.4);
+    g.position.y = bounce;
+    // lean into the walk: more speed, more lean, and a roll on each step
+    b.rotation.x = 0.03 + Math.min(0.1, speed * 0.05);
+    b.rotation.z = Math.sin(step * 2) * 0.016 * Math.min(1, speed * 1.4);
+
+    // the pass bell: a walker turns its head-and-shoulders toward the plate
+    if (st.served !== lastServed.current) {
+      if (lastServed.current >= 0) greetAt.current = life.current;
+      lastServed.current = st.served;
+    }
+    const since = life.current - greetAt.current;
+    const greet = !reduced && since >= 0 && since < 1.4 ? Math.sin((since / 1.4) * Math.PI) : 0;
+    b.rotation.y += greet * 0.5 * (x > 0 ? -1 : 1);
+
+    const a1 = armR.current;
+    const a2 = armL.current;
+    if (!a1 || !a2) return;
+    const damp = 1 - Math.exp(-8 * dt);
+    const ease = (n: Group, rx: number, rz: number) => {
+      n.rotation.x += (rx - n.rotation.x) * damp;
+      n.rotation.z += (rz - n.rotation.z) * damp;
+    };
+
+    if (spec.load === "tub") {
+      // both hands under a bus tub, out front. The tub takes the step a beat
+      // late — that lag is the whole weight of it.
+      ease(a1, -1.02 + Math.sin(step - 0.6) * 0.03, -0.26);
+      ease(a2, -1.02 + Math.sin(step - 0.6) * 0.03, 0.26);
+      if (prop.current) {
+        prop.current.position.y = 0.95 + Math.sin(step - 0.6) * 0.012;
+        prop.current.rotation.z = Math.sin(step * 2 - 0.4) * 0.03;
+      }
+    } else {
+      // a stack of plates on the left hand, right arm swinging free
+      ease(a2, -0.95 + Math.sin(step - 0.5) * 0.04, 0.24);
+      ease(a1, -0.28 - Math.sin(step) * 0.34, -0.16);
+      if (prop.current) {
+        prop.current.position.y = 0.98 + Math.sin(step - 0.5) * 0.01;
+        prop.current.rotation.z = Math.sin(step * 2 - 0.3) * 0.02;
+      }
+    }
+  });
+
+  return (
+    <group ref={root} position={[0, 0, spec.z]}>
+      <group ref={body}>
+        <mesh geometry={mass} material={cloth} />
+        <group ref={setArmL} position={[-0.235 * spec.look.build, 1.16 * s, 0]}>
+          <mesh geometry={armGeo} material={cloth} />
+        </group>
+        <group ref={setArmR} position={[0.235 * spec.look.build, 1.16 * s, 0]}>
+          <mesh geometry={armGeo} material={cloth} />
+        </group>
+        {spec.load === "tub" && (
+          <group ref={prop} position={[0, 0.95, 0.34]}>
+            <mesh>
+              <boxGeometry args={[0.44, 0.2, 0.32]} />
+              <meshStandardMaterial color="#86a0a4" roughness={0.7} metalness={0.1} />
+            </mesh>
+          </group>
+        )}
+        {spec.load === "plates" && (
+          <group ref={prop} position={[0, 0.98, 0.3]}>
+            <mesh geometry={stack}>
+              <meshStandardMaterial color="#f0e8d8" roughness={0.45} />
+            </mesh>
+          </group>
+        )}
+      </group>
+    </group>
+  );
+}
+
 export const CREW_PALETTE = { SKIN, HAIR, INK };
