@@ -1203,3 +1203,145 @@ Not machine-checkable and **not yet done**: nobody has stood at the screen and
 said "this feels like a hive". The crew is four bodies, not a dozen; the pass
 counter now fills the bottom third of the FP frame, which is a real change to the
 player's read of "where I am"; and the dining row is still a row.
+
+## Dev 1 — the hive, measured (23 Nov, second feedback round)
+
+The note: the three cooks still feel far away, and *everyone behind them is
+completely static* — sous chefs, cleaners, washers — while one expects a hive
+during service. Two complaints, and the second one is the one with teeth,
+because a still room is not a tuning problem.
+
+### What the frame actually contains, measured
+
+`pick` reports the frontmost hit at any pixel with its distance and its
+ancestor chain, so the frame can be *read* rather than eyeballed. Walking
+x = 640 down the whole height of the live first-person service frame:
+
+| screen y | distance | what |
+| --- | --- | --- |
+| 0–48 | — | **nothing at all** (scene clear colour) |
+| 56–152 | 8.4–8.9 | pale tiled wall above the arch |
+| 168–296 | **2.0** | the feed card, a 1.2 m plane floating 2 m from the eye |
+| 312–344 | 5.2 | centre cook |
+| 360–376 | 4.2–4.9 | station counter / line |
+| 392–440 | 0.8–0.9 | pass counter top and face |
+| 456–568 | 1.5–1.6 | HUD |
+
+Three facts fall out of that table, and all three are design, not code:
+
+1. **The top quarter of the frame carries no information.** y 46–200 is a flat,
+   evenly lit tile wall. 27% of the picture is doing nothing, and that single
+   fact does more to make the room feel like a set than the distance to the
+   cooks ever did.
+2. **The middle of the arch is covered by a UI plane.** The feed card sits
+   2.0 m from the eye, 1.19 m wide, spanning screen x 510–775 and y 165–300 —
+   exactly the band where the pass, the arch and the room beyond all live. Any
+   hive built in the centre of this frame is drawn *behind a piece of HUD*.
+   It is `SpeechBubble`'s marquee (Dev 3's). Not moved here — flagged, with the
+   numbers, because it is the largest single block on the composition and it is
+   one anchor decision away from being fixed.
+3. **The strip where the crew stands is ~62 px tall.** The counters hide the
+   lane below y ≈ 0.70 (ray from the eye over the counter's back edge), so a
+   figure at 8 m is a head and shoulders over a counter. Any gesture down there
+   is confined to 62 px of screen.
+
+### The rule that came out of it
+
+At 8 m, 1 m is 66 px and 0.0022 rad is one pixel. So:
+
+* an arm swing of 0.15 m is **under 8 px** and reads as nothing;
+* a head tilt of 0.3 rad on a 0.125 m head is **~2 px**;
+* one body crossing the strip is **500+ px** of change.
+
+So the answer to "it is static" is not more amplitude on small joints. It is
+**transit** — bodies that arrive on one side of the frame and leave on the
+other — plus **shape that changes** (steam, plates stacking) plus **filling the
+empty band** so there is somewhere for the eye to go. Amplitudes were raised
+anyway where they were free, but they are the small part of the fix.
+
+### Built
+
+*`BackgroundCrew.tsx` — six people, two of them moving.* Two walkers sweep the
+back-strip lane at z −4.58 in opposite directions on 28.3 s and 38.5 s periods
+(x is a sine, so they slow, pivot and come back; step phase comes from distance
+covered so the gait does not slide). The lane was picked by raycast sampling,
+not by eye: at head height **24 of 33 points across the strip have nothing in
+front of them**, so a walker surfaces in the gaps between the three cooks and
+disappears behind the counters — the occlusions are the reason it reads as a
+room and not a sticker. Feet are omitted because the counters hide the lane
+below y 0.70. Each standing body got its own `Look` (height, build, four
+colours, cap/bun/crop/bandana, rolled sleeves): shape reads as people, colour
+reads as a palette. Every body's static mass is one merged vertex-coloured
+geometry; nothing in the crew casts a shadow.
+
+*`Steam.tsx` — the room is hot.* Four emitters (range, sauce, pastry, pot-wash),
+15 puffs, **one draw call**: every puff is a quad in one merged geometry whose
+positions and per-vertex alpha are rewritten per frame on the CPU (60 vertices
+— less work than one collider). Alpha rides the fourth component of the colour
+attribute, so one `MeshBasicMaterial` fades each puff individually with no
+material clone and no shader. Heat is read per station from the same numbers the
+sound bed sizzles on, so plume and noise are one event; a burning station turns
+its plume dusty grey.
+
+Two measurements shaped it and both killed a first draft:
+
+* A photographic radial gradient was **invisible**. Two frames 1.2 s apart
+  changed the plume band by a mean of 6/255 while a control patch of bare wall
+  changed by 0.56 — real motion, no read. Pale flat-lit rooms eat soft white
+  fog. The puff is now drawn the way this room is drawn: cream lobes with a
+  defined rim.
+* Burnt steam at a 168,162,154 grey over the cream rail reads as a **coffee
+  stain**. The burn tint is capped at 200,193,181-ish and stops at 0.8.
+
+*`HangingPans.tsx` — the empty band.* Seven copper and steel pans on a rail
+above the arch, three sizes, unevenly spaced, hung slightly out of level; one
+merged geometry each plus one for the rail and its brackets: **eight draws**.
+A rock travels down the bar when a plate leaves the pass — one number off the
+store, and the room flinches with you.
+
+*`KitchenScene.tsx` — pass plates were behind the camera.* At-pass plates were
+still positioned at the counter's old z (2.2) while the counter moved to
+`PASS_Z` (1.15), and they ride the line group, which adds `LINE_SHIFT` (+1.6):
+a plate waiting on the pass sat at z 3.8, 0.8 m *behind* the eye at z 3.
+`pick` on the pass top now finds a plate where the eye says it is.
+
+### Motion, measured rather than asserted
+
+Six frames 0.55 s apart, diffed band by band. In the back-strip band
+(y 282–356, the six bodies) the changed-pixel count is **30,404 / 36,645 /
+39,596 / 39,816 / 40,272** — 32–42% of the band in every half second, spread
+across its whole width. Whole-frame change over 1.2 s: **10.7%** of 738,560 px,
+against a control patch of bare wall that changes by 0.56/255.
+
+### Perf
+
+| | before | after |
+| --- | --- | --- |
+| draw calls | 637 | **625** |
+| triangles | 173.7k | 181.6k |
+| mean interval (180 frames) | 16.78 ms | **16.62 ms** |
+| p95 | 33.3 ms | **18.1 ms** |
+| CPU submission | 3.46 ms | 4.74 ms |
+| long tasks | 0 | 0 |
+
+Draw calls *fell* while a steam system, a pan rail and two walkers were added,
+because the crew's merge banked more than the new geometry spent. The +1.3 ms of
+CPU is eight more `useFrame` callbacks and it is the next thing to win back —
+probably by folding the walkers' per-body work into one pass, the way the pan
+rail already does.
+
+### Verified / not verified
+
+Machine-checked: `tsc --noEmit` clean, **101 tests** green, 180-frame capture
+with 0 long tasks, the numbers above, and the lane/band visibility counts.
+
+**Not verified: nobody has judged this at the screen.** The pixel diffs say the
+room is now moving; they cannot say it reads as a hive to a person, and the note
+that started this came from a person. The dining row is still the weakest thing
+in the window: intervals and depths no longer form a grid, but five seated busts
+behind barely visible tables still need furniture — a bar, a standing guest, a
+booth divider — not more motion.
+
+Also open, and cheap for whoever owns it: the feed card at 2 m sits on the
+centre of the arch (numbers above). Move it up or to one side and the busiest
+60 pixels of this frame stop being hidden behind paper.
