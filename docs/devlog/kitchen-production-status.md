@@ -1053,3 +1053,125 @@ its line and falls back to the platform synth on any error — the review
 read-out stays on synth since its text is dynamic. Verified: file plays
 in-page post-gesture (autoplay policy), stems kept in
 `assets/voice/stems/` for per-cook bark reuse.
+
+
+## Dev 1 — the pass gap and the still room (23 Nov, feedback round)
+
+Owner's note, in their words: the three cooks *"feel very far away
+(unnecessary gap between the pass and us)"*, and *"all the chefs behind them
+are completely static (sous chefs, cleaners, washers etc)"* — a hive expected
+during service. Two separate faults; both were measured before anything moved.
+
+### What the frame actually contained
+
+FP service camera was eye `(0, 1.74, 3.6)`, `FOV_FP` 66, 900×520 frame. A
+cook is 2.30–2.40 m tall on a 5.4 m-deep floor:
+
+| | before | after |
+|---|---|---|
+| camera z | 3.60 | 3.00 |
+| station line (counters / cooks) | −3.20 / −3.95 | −1.60 / −2.35 |
+| pass counter z (top spans) | 2.20 (1.75…2.65) | 1.15 (0.60…1.70) |
+| cook distance | 7.55 m | **5.35 m** |
+| cook, full body on screen | 94 px (18% of frame) | **172 px (33%)** |
+| cook visible above his counter | 48 px | **106 px** |
+| bare floor between pass and line | 93 px | **0 px in the centre** |
+
+The "sous chefs, cleaners, washers" were not kitchen staff at all: no such
+entities existed. What sat behind the line was the **dining-room guest row** —
+five seated bodies at x −4…+4, z −6.6…−7.3, heads projecting to y ≈ 231 against
+the cooks' 233, i.e. a second brigade standing level with the first. Their idle
+was ±0.12 rad of torso yaw: at 10.4 m the frame spends ~0.0023 rad/px, so the
+*whole* gesture was **1.6 px**. A still row of bodies, 1.6 px of motion, level
+heads — a staff.
+
+### The restage (contract constants)
+
+`artDirection.ts` now owns both numbers and everything on the line rides one
+group, so this cannot be half-applied again:
+
+- `LINE_SHIFT = 1.6` — `<group name="line" position={[0, 0, LINE_SHIFT]}>` in
+  `KitchenScene` wraps stations, cooks, plates and line equipment. The room, the
+  back bar, the pass window and the dining room stay put; that difference *is*
+  the back-of-house strip the background crew lives in.
+- `PASS_Z = 1.15` — the pass counter is its own edge of the room (it takes
+  `position={[0,0,PASS_Z]}` internally), so the gap closes from both ends.
+  `Cloche`, `RailDockets` (`HANG_Z`), the smashed-shard origin and the
+  platestack prop all read `PASS_Z`.
+- The pot-wash bay cancels the shift (`<group position={[0,0,-LINE_SHIFT]}>`) —
+  it is the wash-up corner, not the line.
+- `FirstPerson`: `STAND_Z` 3.6 → 3.0, inspect z 4.3 → 3.7, focus/lookAt read
+  `-3.64 + LINE_SHIFT`.
+
+**Bug caught while doing it, worth recording:** restructuring the scene dropped
+`<PassCounter />` from the mount entirely. The build then had no pass counter at
+all — the bottom third of the FP frame was bare floor, which reads as *more*
+distance, not less. Fixed by mounting it outside the line group. The lesson is
+the one this repo keeps re-learning: a staging change is not verified until
+something raycasts the frame and names what is drawn there.
+
+### The instruments (DEV only, `Telemetry.tsx`)
+
+Eyeballing a 900-px frame is how the 93-px gap survived. Three read-only
+diagnostics join `act()`:
+
+- `__miseReadOnly.probe([[x,y,z], …])` → CSS pixel, depth and in-frustum flag for
+  each world point through the **live** camera.
+- `__miseReadOnly.pick(x, y)` → what is *actually drawn* at that pixel: up to six
+  nearest hits, named by their scene path with world position and distance.
+- `__miseReadOnly.eye()` → camera position and world direction.
+
+`probe` answers "where is it", `pick` answers "is it visible or is that the
+counter". Both are gone from production builds.
+
+### The rest of the brigade (`BackgroundCrew.tsx`, new)
+
+Four procedural bodies, no GLB, no spend. Where they stand was not chosen by
+eye: for each candidate spot a 3×6 grid of points up the body (0.55–1.55 m) was
+projected and raycast **through the live scene**, and only spots where nothing
+sat between camera and body were kept. The three station centres score ~11%
+(the cooks block them, correctly); the two gaps and two flanks score 83–100%.
+
+| body | at | facing | cycle | work |
+|---|---|---|---|---|
+| pot-wash | (−6.0, −3.55) | back to room, hands in the basin | 2.6 s | scrub, torso pumping |
+| porter | (−2.6, −4.2) | profile | 5.1 s | carrying a pan stack, weight shift, stack lagging a beat |
+| stocker | (3.3, −3.55) | back to room | 3.4 s | reach to the back-bar shelf, set down, straighten |
+| crate corner | (6.05, −3.25) | three-quarter | 7.3 s | stoop, lift, hold, set down |
+
+Rules that are not style: amplitude 0.15–0.45 m (an 8-px floor at these
+distances), **coprime periods** with a hashed start phase per body (a room
+breathing in unison is more obviously fake than a still one), and their own
+clock — they advance on frame delta, freeze with a pause and under reduced
+motion, and never jump on resume. They read the game for nothing.
+
+Runners were in the wrong place too: commis and porter ran at `ROUTE_Z = 3.05`,
+behind the player and mostly out of frame. They now take a per-phase lane —
+`idle/toPickup/back` −3.3, `lift|grab` −0.55, `out|through` −1.35 — with a
+damped z transition (`1 − exp(−5·dt)`), so their traffic crosses the visible
+middle ground between line and pass.
+
+### Guests — motion only, and why the row still reads
+
+Fixed only the part that is motion (this lane's), not the part that is
+furniture: idle rotations ×2.5–3.3, the sip deepened (0.14 → 0.30 rad) and each
+body given its own seat height (0, −0.30, +0.06, −0.34, −0.12) so five level
+heads stop forming a line. At 10.4 m that is still only ~3–4 px of head travel
+from an idle, and the honest verdict is that **the row still reads as a row**
+from the pass. Making it read as a dining room needs tables in the window and
+varied silhouettes (some standing at the bar, some leaning in), which is Dev 2's
+`DiningRoom` furniture, not body motion. Flagged, not claimed.
+
+### Verified / not verified
+
+Machine-checked: `tsc --noEmit` clean; **101 tests** green; `npm run build`
+clean; 180-frame capture with 0 long tasks, mean interval 17.56 ms, p95 33.3 ms,
+637 draw calls, 169k triangles, `__propErrors` empty; all four crew bodies
+confirmed on-screen by `pick` returning their own geometry as the first hit; the
+pass counter confirmed by `pick` at (450, 450) hitting the counter top before the
+floor.
+
+Not machine-checkable and **not yet done**: nobody has stood at the screen and
+said "this feels like a hive". The crew is four bodies, not a dozen; the pass
+counter now fills the bottom third of the FP frame, which is a real change to the
+player's read of "where I am"; and the dining row is still a row.
