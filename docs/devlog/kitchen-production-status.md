@@ -1404,3 +1404,36 @@ Verified: tsc clean, **113 tests** green. Not verified: neither clip has
 been *watched* in play — the walkout's station hold and the flinch's
 strain-spike trigger both need a human pass, same as the chorus takes
 and the simmer bed.
+
+## Motion QA pass — generated clips watched (23 Nov, dev build + `__miseReadOnly.act`)
+
+Walkout and flinch seen live in play, not just baked:
+
+- **Walkout** (`media/phasec/walkout-strip.png`): the clip holds ~2.3 s at
+  the station — Petra throws both arms wide (the apron-rip reads), turns,
+  hair flying, then strides left as the scripted slide takes over and
+  Running blends in at 4.2 s. Reads as a storm-off, not a teleport.
+- **Flinch** (`media/phasec/flinch-strip.png`): a `strainAt` stamp fires
+  the LoopOnce during idle — Dimitri drops low, arms out, then settles
+  back into his window. The idle loop keeps stepping underneath so the
+  resume lands mid-gesture, not at frame 0.
+- **Confessionals** (`media/phasec/confessionals.png`): three margin-note
+  cards in the book — Petra's tongs rule (N1 gate), Dimitri's sauce
+  creed, Anwar's appointment. Paper/ink sits right in the book.
+- **Prep clips** (`media/phasec/prep-*.png`): station strips over ~16 s
+  show clear pose variety — Dimitri's arm-to-mouth beat is plausibly the
+  dip-and-taste clip; not semantically confirmed. Human eyes needed on
+  one loop of each generated gesture.
+- **Dining silhouettes**: five proportion sets + one hat + per-guest
+  scale 0.86–1.1; the row no longer reads as five copies.
+
+**Audio metering audit (numbers, not ears):** master 0.22; beds — sizzle
+≤0.22 worst case (burning), murmur ≤0.15, drone ≤0.3, simmer ≤0.09
+coefficient → ~0.02 effective peak. Beat SFX 0.4–0.6 vol through the pan
+bus → ~0.03 peaks. Conservative throughout; the simmer floor may be
+*sub-threshold on laptop speakers* — if a listen confirms, raise its
+coefficient 0.09 → ~0.15. Still needs a human listen.
+
+**Deploy:** blocked — 0/5 deploys in the rolling 24 h, next slot ~22:39
+UTC. This batch (walkout/flinch/confessionals/silhouettes) ships in the
+next one.
