@@ -53,10 +53,13 @@ gestures name Mara & June.**
 5. **Dining guests already idle** — breathing, weight-shift, sip cycle,
    candle flicker (`DiningRoom.tsx`). Extend, don't create: couple
    fight/make-up on the existing `COUPLE_FIGHT` beats, lean-ins on delivery.
-6. **Mood exists in three places, none on the body.** HUD `moodOf`
-   (sharp/tired/dangerous/feral/walked out); bark engine picks per-state
-   banks off `barkAt`; morale/overload/trauma/grudge simulated. Missing:
-   shared derivation, body expression, a visible word.
+6. **Mood is derived once now, and it reaches the body and the wall.** The
+   four separate expressions (HUD `moodOf`, bark banks off `barkAt`, morale/
+   overload/trauma/grudge) are unified behind `src/game/mood.ts`: `deriveMood()`
+   plus caller-resolved spikes, read through the transient `Cook.mood` field.
+   Body expression is `moodPose()` in the cook rigs; the visible word is the
+   `MoodGlyph` mounted at the station tops. HUD wording is the last consumer to
+   move onto the shared set (see open decision 2).
 7. **Audio floor and the simmer bed are both in.** Panned sizzle beds,
    murmur, drone, runner footfalls/clatter/splash, verdict stings, plus the
    simmer bed (`sound.ts`, looped noise 140–800 Hz) driven from `Ambience.tsx`
