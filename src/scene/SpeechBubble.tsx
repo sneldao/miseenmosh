@@ -18,9 +18,25 @@ import { useGame } from "../game/state";
  * One transient line maximum — the DOM ticker stays for the `V` camera.
  */
 const HOLD = 4600;
-const W = 1.08;
-const H = 0.54;
-const CARD_Y = 2.02;
+const W = 1.0;
+const H = 0.44;
+/**
+ * Where the card hangs, and why it is that high.
+ *
+ * It used to sit at 2.02 m, 2 m from the eye — which put a 1.19 m plane across
+ * screen x 510–775, y 165–300 of a 1280×577 frame. That is the pass, the arch
+ * and the room beyond: the three things the player is looking at, and the
+ * three things every other lane has been working to fill. Measured with the
+ * frame's own picking instrument, the card was the frontmost object at the
+ * centre of the picture 10% of the time.
+ *
+ * It now hangs at 2.66 m. The vertical FOV is fixed at 66°, so the top of the
+ * frustum at 2 m is y ≈ 3.03 whatever the aspect ratio — the card's top edge
+ * lands at 2.88 and cannot leave frame on a tall window. It occupies the pale
+ * band above the arch instead: the part of the picture with the least in it,
+ * used by the thing that is itself transient.
+ */
+const CARD_Y = 2.66;
 const CARD_Z = 1.02;
 const STATION_COLOR = ["#a8322a", "#b07a2a", "#3a6a9a"];
 const RAIL_COLOR = "#5a3a1c";
