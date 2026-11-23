@@ -5,6 +5,8 @@ import Stations, { Station } from "./Stations";
 import DiningRoom from "./DiningRoom";
 import Cloche from "./Cloche";
 import BackgroundCrew from "./BackgroundCrew";
+import Steam from "./Steam";
+import HangingPans from "./HangingPans";
 import MeshyProp from "./MeshyProp";
 import { useTexture } from "@react-three/drei";
 import { PMREMGenerator } from "three";
@@ -307,31 +309,36 @@ function Plates({ petraReady }: { petraReady: boolean }) {
   const lanes: readonly number[] = [-1.25, 0, 1.25];
   return (
     <group>
-      {atPass.map((t, i) => {
-        if (inHand && t.id === handTicket?.id) return null;
-        const laneX = atPass.length > 1 ? lanes[Math.min(i, 2)] : 0;
-        const corr = correction?.ticketId === t.id
-          ? Math.max(0, Math.min(1, (serviceTime - correction.startedAt) / Math.max(0.01, correction.endsAt - correction.startedAt)))
-          : null;
-        return (
-          <Plate
-            key={t.id}
-            quality={t.quality}
-            position={[laneX, 1.18, 2.2]}
-            // a collected plate only slides a handspan along the pass top —
-            // it never flies in from the station across the room; during the
-            // opening the tutorial plate is already on the pass
-            slideFrom={openingStep ? undefined : [laneX - 0.35, 1.18, 2.2]}
-            dish={t.dish}
-            sauce={t.sauce}
-            condition={t.condition}
-            correcting={corr}
-            turn={inspecting ? inspectionTurn : 0}
-            plateId={t.id}
-            onClick={() => setInspecting(!useGame.getState().inspecting)}
-          />
-        );
-      })}
+      {/* pass plates sit on the counter, not the line — cancel LINE_SHIFT
+          like the wash-up bay does, or they render at z=3.8: behind the
+          first-person camera and floating over open floor in the diorama */}
+      <group position={[0, 0, -LINE_SHIFT]}>
+        {atPass.map((t, i) => {
+          if (inHand && t.id === handTicket?.id) return null;
+          const laneX = atPass.length > 1 ? lanes[Math.min(i, 2)] : 0;
+          const corr = correction?.ticketId === t.id
+            ? Math.max(0, Math.min(1, (serviceTime - correction.startedAt) / Math.max(0.01, correction.endsAt - correction.startedAt)))
+            : null;
+          return (
+            <Plate
+              key={t.id}
+              quality={t.quality}
+              position={[laneX, 1.18, PASS_Z]}
+              // a collected plate only slides a handspan along the pass top —
+              // it never flies in from the station across the room; during the
+              // opening the tutorial plate is already on the pass
+              slideFrom={openingStep ? undefined : [laneX - 0.35, 1.18, PASS_Z]}
+              dish={t.dish}
+              sauce={t.sauce}
+              condition={t.condition}
+              correcting={corr}
+              turn={inspecting ? inspectionTurn : 0}
+              plateId={t.id}
+              onClick={() => setInspecting(!useGame.getState().inspecting)}
+            />
+          );
+        })}
+      </group>
       {/* ready plates wait at their stations — clickable by ticket id */}
       {ready.map((t) => (
         <Plate
@@ -804,6 +811,10 @@ export default function KitchenScene() {
           stand in the back-of-house strip, so they read between and behind
           the three cooks at every yaw the player can turn */}
       <BackgroundCrew />
+      {/* the room is hot: one draw call of vapour over the line and the
+          pot-wash, and the pan rail that fills the empty band above the arch */}
+      <Steam />
+      <HangingPans />
       <RailDockets />
       <SpeechBubble />
       <Ambience />
