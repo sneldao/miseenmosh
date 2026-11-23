@@ -755,3 +755,129 @@ Not Dev 3's: MoodGlyph stays unmounted until Dev 2 places it; the
 kitchen-book badge is still pending; bark-gating uses last-tick mood
 (barks compute before the cooks map — one frame stale, irrelevant at
 a 16–30 s cadence).
+
+## Dev 1 (bodies / motion lane) — 23 Nov, on `main`
+
+Per the living-kitchen plan v4.1. The guns no longer freeze the room.
+
+- **Idle prep loops, cut from the pilot's own Work clip.** The pilots ship
+  no idle clip, so each cook's idle is a *neutral window* of the clip they
+  already own, played at 0.72–0.82 tempo, staggered per body and phase
+  (0.94–1.06 tempo jitter per loop) and **seam-blended**: the window's
+  opening is slerped onto its own ending, so the pose at t=0 is the pose at
+  t=duration and the wrap cannot pop. Which window is not a guess —
+  `assets/meshy/probe-idle-windows.mjs` measures every candidate on the
+  shipped GLB (seam distance, motion inside, distance from the mean pose,
+  and forward hand reach via forward kinematics) and rejects any window that
+  contains the work clip's presenting reach. Chosen: Petra 3.8+2.0 s and
+  1.2+2.0 s of `PetraWork`; Dimitri 1.3+1.4 s and 0.8+1.2 s of `Work`;
+  Anwar 0.7+1.2 s and 0.2+1.6 s. Variants alternate per loop, a straining
+  cook drifts to the slower window.
+- **The room moves while the clock waits on the player.** The service clock
+  stops dead in the opening hold (it only advances while something cooks) —
+  which is exactly the "no-one is doing anything whilst we decide" complaint.
+  Animation now falls back to frame time whenever the service clock is
+  stalled. Presentation only: nothing in the simulation reads it.
+- **Idle beats fire from the loop.** Petra's knife/board taps and the
+  sauce/pastry board taps land on loop fractions, panned by station, on ~3
+  loops in 4 (a metronome is the same failure as a frozen pose), at 0.4–0.6
+  of Dev 3's published levels — meter-conservative, nobody has listened yet.
+- **Food follows the work.** The fillet rides the tongs only while she is
+  plating; between tickets it settles into the pan (0.16 s blend, a short
+  arc, never a float or a detach) and comes back up on the next ticket.
+- **The body carries the mood.** `Cook.mood` sets additive Spine1/Spine2
+  offsets (slump / brace / tremble), breathing rate and depth, idle and
+  work tempo, and EDGE's hand-on-hip. Measured on the real skeleton
+  (`assets/meshy/probe-mood-pose.mjs`, which imports the game's own pose
+  table): STRAINED puts the head 5.5–7.5 cm lower and 6.6–7.1 cm forward,
+  ANGRY 5.0–7.4 cm higher and back, and ANGRY vs EDGE differ by 5.8–6.8 cm
+  at the chest with EDGE adding a 6.5 Hz tremble. Reduced motion drops every
+  offset.
+- **Runners.** Commis and porter get procedural standby sway (weight shift,
+  shoulder settle) plus one *event-driven* job: every third delivery the
+  commis comes back carrying a clean-plate stack from the wash-up instead of
+  returning empty. No time-based second loop.
+- **Fallback parity.** The illustrated bodies run a low-amplitude prep read
+  of their station gesture when nothing is plating, keep the same idle
+  beats, and take the same slump/brace offsets — a failed GLB no longer
+  freezes a station into silence.
+
+Tests: **96 passing** (+18 in `src/scene/idleLoops.test.ts`) — two variants
+per station, windows inside their source clip, tempo never above 1, beats
+in order and conservative, the wrap is continuous and quaternions stay unit
+length through the blend, deterministic phase/tempo/variant, the straining
+cook drifts to the slower window, beats never fire on a paused or backwards
+step, ANGRY and EDGE never share a silhouette, and work tempo bounded so a
+ticket's performance always completes. `tsc --noEmit` clean, `npm run build`
+clean.
+
+Frame gate (Dev 1 slice), same camera, 120-frame captures through
+`__miseReadOnly.capture`, Apple M3 / ANGLE Metal:
+
+| idle loops | p50 | p95 | max | submit CPU | calls | tris |
+| --- | --- | --- | --- | --- | --- | --- |
+| OFF (reduced motion) | 16.7 ms | 17.7 ms | 17.8 ms | 2.15 ms | 422 | 130.6 k |
+| ON | 16.7 ms | 17.6 ms | 17.9 ms | 2.44 ms | 436 | 161.4 k |
+
+Both hold 60 Hz. Honest caveat: the OFF run also hides the two runners
+(reduced motion returns null for them), so ~14 calls and ~31 k triangles of
+that delta are the runners, not the loops; the loops' own marginal cost is
+below the noise of this measurement. Zero `__propErrors` in every run.
+
+Not Dev 1's, and still open: **the loop-seam 30 s visual scan and the
+idle-vs-plating blind read need a person at the screen** — the wrap is
+continuous by construction and by test, but a still cannot judge whether
+prep reads as background work. `?mood=CALM|STRAINED|ANGRY|EDGE` forces the
+body pose in dev builds (compiled out of production) for the blind mood
+check; Dev 2 can use it for the glyph mount. A scream-forced strain was not
+reproduced through the real input path (a scripted Space press did not
+charge the meter), so the offset table itself is verified numerically
+rather than through gameplay.
+
+## Dev 2 (room / equipment / dining lane) — 23 Nov, landed `ba847fd`
+
+Per the living-kitchen plan v4.1. Committed on `main`:
+
+- **Equipment is live and state-aware.** Grill: extraction hood +
+  chimney, gas pilot under the skillet, static painted shimmer (zero
+  per-frame material writes, hidden outside service). Sauce: bain-marie
+  with two sauce wells + ladle + second pot, steam level driven by
+  cheap boolean selectors (plating / overloadT>4 / walkedOut). Pastry:
+  tart rack, working scale, bench flour; the oven stands in the right
+  gap and its door glow lerps up while a soufflé is actually plating.
+- **Flanks dressed.** Stockpot in the left gap — its lid rattles on
+  fresh plating tickets (real fire calls, `rattle` sfx, Set-mutation
+  scan: no per-frame alloc). Wash-up corner at (-6, -4.3) with WASH-UP
+  sign — placed there, not at the porter's literal exit x -9.6, because
+  the menu camera's lateral cut at that depth is ~±8 m and the exit is
+  off-frame. Crates on the right flank, floor flour trailing from
+  Anwar's bench.
+- **Steam budget: 10 of 12 sprites**, pooled fixed counts per field
+  (bain-marie 4 · stockpot 4 · oven vent 2), unmounts outside service
+  and under reduced motion. All ambient glow is emissive-only — zero
+  dynamic lights added.
+- **MoodGlyph mounted** once per cook at `[STATION_X[i], 2.35, -2.9]` —
+  at Stations level, never inside Station, so Petra's two render paths
+  (skipPetra / Suspense fallback) can't double-mount and squashed
+  stations don't take the gauge down with the bench. Verified live:
+  STRAINED·EDGE·STRAINED observed over all three stations in service.
+- **Pair tables got their second body.** Couple and regulars guests
+  render a companion figure with its own idle drift; beats ride the
+  guest's real `tellAt` clock. The couple beat is classified from the
+  freshest `Table {T}` line in the feed (fighting/crying → turn away,
+  "made up" → lean in) — `tells % 2` was wrong because COUPLE_FIGHT
+  picks randomly. Mara & June lean together on their kindness beat.
+  Salt pass: the companion's reach arm extends across the table on a
+  slow per-table cycle, shaker in hand. Delivery lean-in rides
+  `lastDelivery` — hardest at the table it lands on (0.24 vs 0.09 rad).
+- **Verification:** tsc clean, 96 tests green, production build 26 MB.
+  Frame capture on dev (600 frames mid-service, everything live):
+  p50 16.7 ms, p90 17.6 ms, p99 19.2 ms, one 30 ms spike, zero long
+  tasks, 562 draw calls. `__propErrors` empty. Reduced-motion emulation
+  keeps the room still and the glyphs readable.
+
+Not Dev 2's: the porter's off-frame exit is a camera-framing note for
+whoever next touches the room edges; the oven glow writes one uniform
+per frame (deliberate — it lerps); the couple's suppressed-finale
+beats still gesture (tellAt updates even when the line is culled —
+accepted, reads as silent tension).
