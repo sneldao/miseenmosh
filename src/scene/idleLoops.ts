@@ -81,6 +81,17 @@ export const IDLE_VARIANTS: Record<number, IdleVariant[]> = {
         { at: 0.71, sound: "knife", vol: 0.45 },
       ],
     },
+    // the generated prep pass (Meshy text-to-motion, retargeted) — her real
+    // brush-the-grill-and-check performance, one loop in three
+    {
+      id: "Prep0",
+      source: "PetraPrep",
+      start: 0,
+      len: 5.9,
+      tempo: 0.9,
+      // one quiet scrape mid-scrub, meter-conservative until ears tune it
+      beats: [{ at: 0.52, sound: "boardTap", vol: 0.4 }],
+    },
   ],
   // Dimitri (sauce): spoon against the pot rim, relentless but low.
   1: [
@@ -103,6 +114,15 @@ export const IDLE_VARIANTS: Record<number, IdleVariant[]> = {
       tempo: 0.74,
       beats: [{ at: 0.45, sound: "boardTap", vol: 0.5 }],
     },
+    // his real dip-ladle-taste pass, generated and retargeted
+    {
+      id: "Prep1",
+      source: "DimitriPrep",
+      start: 0,
+      len: 5.9,
+      tempo: 0.9,
+      beats: [{ at: 0.44, sound: "boardTap", vol: 0.4 }],
+    },
   ],
   // Anwar (pastry): bench work, one tap per loop — the quietest station.
   2: [
@@ -124,6 +144,15 @@ export const IDLE_VARIANTS: Record<number, IdleVariant[]> = {
         { at: 0.22, sound: "boardTap", vol: 0.4 },
         { at: 0.77, sound: "knife", vol: 0.4 },
       ],
+    },
+    // his real ramekin-tap-dough-roll pass, generated and retargeted
+    {
+      id: "Prep2",
+      source: "AnwarPrep",
+      start: 0,
+      len: 5.9,
+      tempo: 0.88,
+      beats: [{ at: 0.31, sound: "boardTap", vol: 0.4 }],
     },
   ],
 };

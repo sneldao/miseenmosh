@@ -1005,16 +1005,41 @@ only entry, beat suppression, resume-in-place, pause-freeze, determinism).
 **101 tests, tsc clean.** What still needs eyes: whether `WATCH_LEN` (3–4.6 s)
 and the pitch of the scan feel right — a person watch, same as the rest.
 
-## Phase B prep-motion job — BLOCKED on the account, not the budget — 23 Nov
+## Phase B prep-motion job — DONE on the second account — 23 Nov
 
-Balance is fine (300 cr after the extension). All three
-`meshy_text_to_motion` calls (prime, the plan's prompts verbatim) returned
-**402: "task creation on the free plan is no longer supported"** — the
-account's plan gates task creation regardless of credits. Zero tasks were
-created or charged (verified via `meshy_list_tasks`). Needs the owner to
-upgrade/manage the plan at meshy.ai/settings/subscription; the job is
-otherwise ready to fire exactly as spec'd (three 6 s prime clips, FBX out,
-retargeted onto the mixamorig rigs by the existing pipeline).
+Earlier attempt blocked: the first account held 300 cr but the plan gated
+task creation (402 "task creation on the free plan is no longer
+supported"). The owner connected a different account in the Ego browser;
+a `devin-mcp` API key was minted in its developer console, the user-level
+MCP config was repointed, and the job ran over the REST API (the MCP stdio
+bridge needed a session restart to see the new server — REST needed none).
+
+- 3 tasks, prime mode, 6 s each — Petra brush-the-grill/inspect, Dimitri
+  dip-and-taste, Anwar ramekin-tap/dough-roll. 30 cr total (1115 → 1085).
+  Task ids + prompts in `assets/meshy/motion/provenance.json`.
+- The motion FBX ships an **SMPLH** skeleton (Pelvis/L_Hip/... in cm, ~16
+  duplicate hierarchies per file), not mixamorig. No rig task ids survive
+  from the old account, so `meshy_animate` server-side retarget was not
+  available; `assets/meshy/retarget-motion.mjs` does the transfer locally:
+  world-rotation delta per mapped bone (both rigs share the same T-pose
+  bind — verified in `rest-audit.mjs`), hips position scaled by standing
+  hip ratio with the delta referenced to clip frame 0, because the FBX
+  bind pelvis offset is broken. `SkeletonUtils.retargetClip` was tried
+  first and produced wrong-space output on this skeleton set.
+- `bake-prep-clip.mjs` writes each retargeted clip into its runtime GLB as
+  a fifth animation (`PetraPrep`/`DimitriPrep`/`AnwarPrep`, +205 KB each).
+- `idleLoops.ts`: each prep clip is a third idle variant (`Prep0/1/2`,
+  ~1 loop in 3, one conservative beat each until ears tune them).
+  `probe-loop-seam.mjs` measures the real GLBs: **9/9 windows loop
+  without a pop**, Prep seams at 0.8–0.9% of the largest in-loop step.
+- One `bake-prep-clip` bug mattered: accessor indices were written
+  relative to the appended block, not the file — fixed by offsetting
+  sampler refs by the accessor base. The seam probe caught it as NaN.
+
+Balance afterwards: 1,085 cr. Tools left in `assets/meshy/`:
+`inspect-motion.mjs`, `rest-audit.mjs`, `motion-audit.mjs`,
+`retarget-motion.mjs`, `bake-prep-clip.mjs`, `verify-retarget.mjs`.
+
 
 ## Voice bake — fal Kokoro chorus (23 Nov)
 

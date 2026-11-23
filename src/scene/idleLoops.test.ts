@@ -16,7 +16,13 @@ import {
 } from "./idleLoops";
 
 /** the shipped clip durations these windows are cut from (probe output) */
-const SOURCE_LEN: Record<string, number> = { Work: 2.97, PetraWork: 5.97 };
+const SOURCE_LEN: Record<string, number> = {
+  Work: 2.97,
+  PetraWork: 5.97,
+  PetraPrep: 5.97,
+  DimitriPrep: 5.97,
+  AnwarPrep: 5.97,
+};
 
 function sampleTrack(track: KeyframeTrack, t: number): number[] {
   const interp = (track as unknown as { createInterpolant(): { evaluate(t: number): Float32Array } }).createInterpolant();
@@ -151,14 +157,14 @@ describe("buildIdleClips", () => {
 
   it("builds one action-ready clip per variant, and nothing when the source is missing", () => {
     const src = denseClip("Work", 3);
-    const clips = buildIdleClips(new Map([["Work", src], ["PetraWork", src]]), 1);
+    const clips = buildIdleClips(new Map([["Work", src], ["PetraWork", src], ["DimitriPrep", denseClip("DimitriPrep", 6)]]), 1);
     expect(clips.map((c) => c.name)).toEqual(IDLE_VARIANTS[1].map((v) => v.id));
     for (const c of clips) expect(c.duration).toBeGreaterThan(0.2);
     expect(buildIdleClips(new Map(), 2)).toEqual([]);
   });
 
   it("builds a clip that loops without a pop, from a real-shaped source", () => {
-    const clips = buildIdleClips(new Map([["Work", denseClip("Work", 3)]]), 2);
+    const clips = buildIdleClips(new Map([["Work", denseClip("Work", 3)], ["AnwarPrep", denseClip("AnwarPrep", 6)]]), 2);
     expect(clips.length).toBe(IDLE_VARIANTS[2].length);
     for (const c of clips) {
       for (const track of c.tracks) {

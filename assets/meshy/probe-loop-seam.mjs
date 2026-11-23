@@ -28,7 +28,7 @@ import { IDLE_VARIANTS, SEAM_BLEND, wrapBlend } from "../../src/scene/idleLoops.
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const BODIES = {
-  0: { key: "petra", file: "assets/meshy/petra-pilot/runtime.glb" },
+  0: { key: "petra", file: "assets/meshy/petra-pilot/runtime-hold.glb" },
   1: { key: "dimitri", file: "assets/meshy/dimitri-pilot/runtime-dimitri.glb" },
   2: { key: "anwar", file: "assets/meshy/anwar-pilot/runtime-anwar.glb" },
 };
