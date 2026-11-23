@@ -29,6 +29,7 @@ import {
 } from "three";
 import { clone as skeletonClone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { useGame } from "../game/state";
+import { sfx } from "../game/sound";
 import { useReducedMotion, COPPER } from "./artDirection";
 import { PortraitHead } from "./IllustratedCook";
 import FoodModel from "./FoodModel";
@@ -160,7 +161,8 @@ export default function CommisRunner() {
     clip: string;
     delivered: typeof delivery;
     queued: boolean;
-  }>({ phase: "idle", t: 0, x: STANDBY_X, yaw: 0, clip: "Ready", delivered: delivery, queued: false });
+    stepT: number;
+  }>({ phase: "idle", t: 0, x: STANDBY_X, yaw: 0, clip: "Ready", delivered: delivery, queued: false, stepT: 0 });
 
   useFrame((_, dt) => {
     const s = useGame.getState();
@@ -175,6 +177,15 @@ export default function CommisRunner() {
       rig.actions.get(R.clip)?.fadeOut(0.22);
       rig.actions.get(name)!.reset().fadeIn(0.22).play();
       R.clip = name;
+    };
+
+    // footfalls ride his live x so the stereo field sweeps with the route
+    const stride = (interval: number, vol: number) => {
+      R.stepT += step;
+      if (R.stepT >= interval) {
+        R.stepT = 0;
+        sfx("step", { pan: MathUtils.clamp(R.x / 8, -1, 1), vol });
+      }
     };
 
     // out of service or reduced motion: park him at the standby spot
@@ -206,10 +217,12 @@ export default function CommisRunner() {
         play("Walking");
         R.yaw = -Math.PI / 2;
         R.x -= WALK_SPEED * step;
+        stride(0.36, 0.5);
         if (R.x <= PICKUP_X) {
           R.x = PICKUP_X;
           R.phase = "lift";
           R.t = 0;
+          sfx("clatter", { pan: PICKUP_X / 8, vol: 0.8 });
         }
         break;
       }
@@ -227,6 +240,7 @@ export default function CommisRunner() {
         play("Carry");
         R.yaw = Math.PI / 2 - 0.55; // angled toward the room — his face reads
         R.x += CARRY_SPEED * step;
+        stride(0.5, 0.7);
         if (R.x >= EXIT_X) {
           R.phase = "through";
           R.t = 0;
@@ -246,6 +260,7 @@ export default function CommisRunner() {
         play("Walking");
         R.yaw = -Math.PI / 2;
         R.x -= WALK_SPEED * step;
+        stride(0.36, 0.45);
         if (R.x <= STANDBY_X) {
           R.x = STANDBY_X;
           if (R.queued) {

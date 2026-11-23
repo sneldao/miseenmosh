@@ -664,3 +664,28 @@ exit → return empty → standby. Zero `__propErrors`.
   read inside the tub, not floating on the rim.
 - Porter standby at −3.3 is edge-cropped like the commis at +3.3 —
   intentional symmetry, revisit if the left edge reads too tight.
+
+## Audio — runner spatial pass (night-1 build)
+
+The synth SFX engine (`src/game/sound.ts`, zero assets) gains three cues
+and the runners now speak while they move:
+
+- `step` — soft sole-on-tile tap, fired per stride inside each runner's
+  `useFrame` route state. Pan rides the body's live x (`x/8` clamped), so
+  the stereo field sweeps with the walk: commis right side, porter left.
+- `clatter` — crockery grabbed in a hurry. Commis: tray lift at the pass
+  (pan +0.125). Porter: mid-bend at grab t≈0.45 when the tub leaves the
+  ground, plus a quiet tub-shift clink every third haul stride.
+- `splash` — the porter's wash-up dump as he exits frame left (pan −0.85).
+
+Verdict/handoff coverage already existed and stays: plate-on-pass `bell`,
+send-back `rip`, re-call `print`, smash `shatter`, walkout and critic
+stings. Service beds (three panned sizzles, murmur, drone) unchanged.
+
+NOT LISTENED TO BY A PERSON — levels are meter-conservative (steps ≤ 0.85,
+clatter ≤ 0.8) but nobody has heard the mix yet. If steps grate, drop
+vol first, then lengthen stride intervals.
+
+Verified: `tsc` clean, 59 tests, prod build boots; send-back ran the
+porter loop with the new cues live and zero `__propErrors` — audio calls
+fire inside the proven phase machines only (no new re-render paths).

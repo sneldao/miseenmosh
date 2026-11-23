@@ -28,6 +28,7 @@ import {
 } from "three";
 import { clone as skeletonClone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { useGame } from "../game/state";
+import { sfx } from "../game/sound";
 import { useReducedMotion } from "./artDirection";
 import { PortraitHead } from "./IllustratedCook";
 import FoodModel from "./FoodModel";
@@ -166,7 +167,9 @@ export default function PorterRunner() {
     clip: string;
     seen: number;
     queued: boolean;
-  }>({ phase: "idle", t: 0, x: STANDBY_X, yaw: 0, clip: "Ready", seen: sentBack, queued: false });
+    stepT: number;
+    stepN: number;
+  }>({ phase: "idle", t: 0, x: STANDBY_X, yaw: 0, clip: "Ready", seen: sentBack, queued: false, stepT: 0, stepN: 0 });
 
   useFrame((_, dt) => {
     const s = useGame.getState();
@@ -181,6 +184,19 @@ export default function PorterRunner() {
       rig.actions.get(R.clip)?.fadeOut(0.22);
       rig.actions.get(name)!.reset().fadeIn(0.22).play();
       R.clip = name;
+    };
+
+    // footfalls ride his live x so the stereo field sweeps with the route
+    const stride = (interval: number, vol: number) => {
+      R.stepT += step;
+      if (R.stepT >= interval) {
+        R.stepT = 0;
+        R.stepN += 1;
+        const pan = MathUtils.clamp(R.x / 8, -1, 1);
+        sfx("step", { pan, vol });
+        // loaded tub shifts every few strides — a distant ceramic clink
+        if (vol > 0.7 && R.stepN % 3 === 0) sfx("clatter", { pan, vol: 0.22 });
+      }
     };
 
     // out of service or reduced motion: park him at the standby spot
@@ -215,6 +231,7 @@ export default function PorterRunner() {
         play("Walking");
         R.yaw = Math.PI / 2; // facing +x, toward the pickup
         R.x += WALK_SPEED * step;
+        stride(0.4, 0.5);
         if (R.x >= PICKUP_X) {
           R.x = PICKUP_X;
           R.phase = "grab";
@@ -225,10 +242,14 @@ export default function PorterRunner() {
       case "grab": {
         play("Grab");
         R.yaw = -Math.PI / 2; // faces left — bending at the pass' end
+        const before = R.t;
         R.t += step;
+        // tub comes off the ground mid-bend — the dirties settle
+        if (before < 0.45 && R.t >= 0.45) sfx("clatter", { pan: PICKUP_X / 8, vol: 0.8 });
         if (R.t >= 1.2) {
           R.phase = "out";
           R.t = 0;
+          R.stepN = 0;
         }
         break;
       }
@@ -236,9 +257,11 @@ export default function PorterRunner() {
         play("Carry");
         R.yaw = -Math.PI / 2 + 0.55; // hauling left, angled toward the room
         R.x -= HAUL_SPEED * step;
+        stride(0.55, 0.85);
         if (R.x <= EXIT_X) {
           R.phase = "through";
           R.t = 0;
+          sfx("splash", { pan: -0.85, vol: 0.7 });
         }
         break;
       }
@@ -256,6 +279,7 @@ export default function PorterRunner() {
         play("Walking");
         R.yaw = Math.PI / 2;
         R.x += WALK_SPEED * step;
+        stride(0.4, 0.45);
         if (R.x >= STANDBY_X) {
           R.x = STANDBY_X;
           if (R.queued) {

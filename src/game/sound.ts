@@ -75,7 +75,10 @@ export type Sfx =
   | "sear"
   | "whisk"
   | "hush"
-  | "rattle";
+  | "rattle"
+  | "step"
+  | "clatter"
+  | "splash";
 
 export interface SfxOpts {
   /** -1 (far left, grill) .. +1 (far right, pastry) */
@@ -169,6 +172,23 @@ export function sfx(kind: Sfx, opts: SfxOpts = {}) {
       noise(t, 0.06, 0.4, 900, bus);
       noise(t + 0.09, 0.05, 0.32, 800, bus);
       osc("sine", 220, 180, t, 0.08, 0.12, bus);
+      break;
+    case "step":
+      // a shoe on tile — quiet, meant to be heard in sequence
+      noise(t, 0.04, 0.2, 700, bus);
+      osc("sine", 150, 95, t, 0.06, 0.13, bus);
+      break;
+    case "clatter":
+      // crockery grabbed in a hurry: two ticks and a faint ring
+      noise(t, 0.03, 0.35, 2800, bus);
+      noise(t + 0.045, 0.03, 0.26, 2400, bus);
+      osc("triangle", 1900, 1500, t, 0.09, 0.1, bus);
+      break;
+    case "splash":
+      // plates dumped at wash-up: plunging tone under broadband hiss
+      noise(t, 0.35, 0.4, 1200, bus);
+      osc("sine", 600, 170, t, 0.3, 0.12, bus);
+      noise(t + 0.12, 0.15, 0.22, 2000, bus);
       break;
   }
 }
