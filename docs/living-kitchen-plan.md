@@ -384,6 +384,15 @@ master bus.
 `(night, facts) → beat` pure functions; text-over-portrait cards with the
 debrief badge; service-open beat wiring; every fact-gated line unit-tested.
 
+**Status (23 Nov):** entry point shipped — `src/game/beats.ts`
+`morningCards()` renders one fact-gated confessional per cook per morning
+(12 gate tests), the book auto-opens on unread mornings and carries the
+"new entry" badge, `bookSeenNight` persists the read. **Remaining:**
+service-open beats (the ~8 s held beat after `openingStep`, one
+SpeechBubble line per cook, skippable), the nine-night arc content
+beyond the N1/N3/N7 seeds already in the rules, and confessional
+still-swap to Recraft when quoted.
+
 ## Open decisions (recommended defaults — owner confirms)
 
 1. **Meshy cap:** **resolved — extended (owner, 23 Nov).** Phase A's free
