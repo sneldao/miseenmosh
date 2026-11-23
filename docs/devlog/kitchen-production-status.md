@@ -1323,22 +1323,55 @@ Six frames 0.55 s apart, diffed band by band. In the back-strip band
 across its whole width. Whole-frame change over 1.2 s: **10.7%** of 738,560 px,
 against a control patch of bare wall that changes by 0.56/255.
 
-### Two steam systems, and what the budget actually measures
+### Steam, consolidated: a budget that is checked
 
-There are now two: Dev 2's `equipment/Steam.tsx` (pooled sprites on the
-bain-marie, stockpot and oven vent — **10 of a documented budget of ≤ 12
-sprites "on screen total across ALL equipment"**) and this one (`Steam.tsx`, 15
-quads in a single merged geometry). In puffs the room is at 25, double the
-written cap; in draws it is 11 for the same 25, because a `THREE.Sprite` is one
-draw each and a merged quad plume is fifteen puffs for one.
+There were two steam systems. Dev 2's `equipment/Steam.tsx` pooled ten
+`THREE.Sprite`s on the bain-marie, stockpot and oven vent — **ten draws, one
+each, because a sprite is one draw**. The pass-side plume carried fifteen puffs
+in one merged quad mesh — **one draw for fifteen**. The documented cap said
+"≤ 12 sprites on screen total across ALL equipment", so in the written unit the
+room was at 25 against a cap of 12, and in the unit the frame pays it was 11
+draws for the same 25. Both numbers were wrong, and the reason is the same in
+both cases: the cap was prose in a doc comment and `STEAM_TOTAL` was computed
+and then read by nothing. **A budget nothing checks is a wish.**
 
-So the budget was written in the wrong unit. Nothing here is over-spent — the
-frame at 625 draws is 12 *below* where it started — but the cap should say
-**11 steam draws**, not 12 sprites, or the next person will either break the
-frame or refuse a change that costs nothing. Consolidating the equipment sprites
-into the merged system would take 10 draws to 0 and is the obvious follow-up;
-it needs emitter coordinates from the three station files, which is Dev 2's
-airspace, so it is flagged rather than taken.
+Now:
+
+* one renderer — every puff in the room, the line's and the equipment's, is a
+  quad in one merged geometry, so steam is **1 draw for 25 puffs**;
+* one registry — `equipment/Steam.tsx` no longer draws, it *publishes a source*
+  and resolves its own world position from its parent's matrix at mount. The
+  three station files were not touched at all: their call sites, props and puff
+  counts are unchanged, which is what let this cross into another lane's
+  furniture without a conflict;
+* one gate — `src/scene/steamBudget.ts` is pure JavaScript (no three, no React,
+  no DOM), so `steamBudget.test.ts` can assert the caps and the registry
+  instead of hoping: **13 tests** over draw cost, the puff cap, slot
+  allocation, per-source sanity, world bounds, register/unregister ordering,
+  level clamping and the rule that a registry write never mutates the room's
+  shared sources.
+
+Measured after: **628 → 618 draw calls** — the ten sprites, exactly — with the
+room still carrying 25 puffs in 7 sources (4 line plumes + 3 equipment fields,
+verified in the live page by importing the module and reading the registry).
+
+### The bark card was sitting on the room
+
+The feed card in first person hung at y 2.02, 1.08 × 0.54 m, 2 m from the eye —
+which put it across **screen x 510–775, y 165–300** of a 1280×577 frame. That is
+the pass, the arch and the room beyond, i.e. the three things the player is
+looking at and the three things every other lane has been filling. It is
+`SpeechBubble`'s marquee.
+
+It now hangs at **y 2.66**, 1.0 × 0.44 m. The vertical FOV is fixed at 66°, so
+the top of the frustum at 2 m is y ≈ 3.03 whatever the aspect ratio; the card's
+top edge lands at 2.88 and cannot leave frame on a tall window. It occupies the
+pale band above the arch instead — the part of the picture with the least in it,
+used by the thing that is itself transient.
+
+Verified with `pick` down x = 640 afterwards: the card is the frontmost object
+only from y 60 to 140, and from y 180 to 340 the frontmost object at the centre
+of the frame is now the range's own steam plume at 4.4 m.
 
 ### Ownership taken, recorded
 
@@ -1362,13 +1395,30 @@ moving or deleting the mount lines opens neither file.
 Draw calls *fell* while a steam system, a pan rail and two walkers were added,
 because the crew's merge banked more than the new geometry spent.
 
-**Correction, re-measured at `d70715b` (same frame, 150 frames): 628 calls, mean
-16.67 ms, p95 17.4 ms, CPU submission 3.27 ms.** So the +1.3 ms I attributed to
-my eight new `useFrame` callbacks was mostly not that — it does not reproduce.
-The lesson is the one this whole section is about: a single 180-frame sample on
-a shared machine is not evidence of a cause, and the number I put in a table an
-hour ago was already wrong. What is solid is the shape: p95 halved, mean
-unchanged, and the frame got busier without getting slower.
+**Correction, re-measured at `d70715b`:** 628 calls, mean 16.67 ms, p95 17.4,
+CPU 3.27 ms. The +1.3 ms I attributed to my eight new `useFrame` callbacks was
+mostly not that — it does not reproduce. A single 180-frame sample on a shared
+machine is not evidence of a cause, and the number I put in a table an hour
+earlier was already wrong.
+
+So the instrument was fixed rather than the sentence. `__miseReadOnly.bench()`
+now runs **three capture windows with a gap between them** and reports every
+metric as min/median/p95/max plus `spreadMs`, and sets `unstable: true` when the
+windows disagree by more than a millisecond — a figure from an unstable run is a
+rumour, and the tool says so out loud.
+
+Final numbers, three windows × 90 frames, first-person service, `bench(3, 90)`:
+
+| | value |
+| --- | --- |
+| interval | min 15.1 · **median 16.6** · p95 17.3 · max 18.2 ms |
+| CPU submission | min 2.3 · **median 2.8** · p95 3.2 · max 3.9 ms |
+| draw calls | 614–627 (varies with what is plated) |
+| window means | 16.65 / 16.66 / 16.67 ms — **spread 0.02 ms, stable** |
+| long tasks | 0 |
+
+A 0.02 ms spread across three windows is the first perf figure in this document
+I would defend without a footnote.
 
 ### Verified / not verified
 

@@ -43,9 +43,9 @@ gestures name Mara & June.**
 3. **Equipment is procedural on all three stations.**
    `equipment/GrillLine.tsx` (range, pan, tongs, hood, pilot flame, shimmer),
    `SauceStation.tsx` (bain-marie), `PastryStation.tsx` (oven) and
-   `equipment/Steam.tsx` (ambient sprites, compile-time budget ≤ 12 across all
-   equipment). The dead zones at x ≈ ±1.8 and the flanks carry the background
-   crew and the wash-up bay.
+   `equipment/Steam.tsx` (publishes sources to the one steam renderer — see
+   `steamBudget.ts`). The dead zones at x ≈ ±1.8 and the flanks carry the
+   background crew and the wash-up bay.
 4. **Geometry.** Stations at x = −3.6 / 0 / +3.6. Dead zones are the gaps
    (x ≈ ±1.8) and outer flanks (x < −5.2, x > +5.2), not "the left half".
    Equipment placement targets those zones, incl. a visible wash-up at the
@@ -411,9 +411,11 @@ still-swap to Recraft when quoted.
   and prep must never read as plating.
 - Steam/particles: capped, authored paths, nothing procedural near the
   lens, suppressed under reduced motion. **The cap is counted in draws, not
-  puffs** — one merged quad plume is fifteen puffs for one draw, a `THREE.Sprite`
-  is one draw each. Room total today: 11 draws for 25 puffs (10 equipment
-  sprites + 1 merged plume).
+  puffs**, because one merged quad plume is twenty-five puffs for one draw while
+  a `THREE.Sprite` is one draw each. Room total today: **1 draw for 25 puffs**,
+  and `steamBudget.ts` + `steamBudget.test.ts` enforce it rather than describing
+  it — the previous cap was prose, and `STEAM_TOTAL` was computed and read by
+  nothing.
 - Never reintroduce verbosity: beats are seconds and skippable; cards
   live in the kitchen book (with the debrief badge); nothing gates the
   praised direct opening.
