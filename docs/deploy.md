@@ -224,3 +224,16 @@ first 90 seconds and the cold open changes what it sees.
 - Same two known inconclusive findings: Draco `missing-ref` (false
   positive — no GLB compressed) and the r187 engine heuristic.
 - Quota after this deploy: 2 deploys left today.
+
+## 7a0ec476 — Runner spatial audio pass (23 Nov 2026)
+
+- `opengame deploy . --wait` → release `7a0ec476-d7f8-4571-9ab2-564a244c9073`,
+  SUB-2021, review passed and auto-published.
+- Ships: new synth cues `step` / `clatter` / `splash` wired into the
+  runner phase machines — commis footfalls + tray-lift clatter, porter
+  footfalls + mid-grab clatter + tub-shift clinks + wash-up splash.
+  Pan rides each runner's live x so steps sweep the stereo field.
+- Verified pre-deploy on the prod preview: send-back ran the full porter
+  loop, zero `__propErrors`. Sound levels are meter-set and NOT yet
+  listened to by a person — flagged in the production status doc.
+- Quota after this deploy: 1 deploy left today.
