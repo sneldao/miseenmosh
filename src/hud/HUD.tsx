@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends, Cook } from "../game/state";
 import { deriveMood } from "../game/mood";
+import { morningCards } from "../game/beats";
 import { dishProfile, plateObservations, correctionNeeded, CORRECTION_LABEL, currentWellingtonRecipe, WELLINGTON_FINISHES, type RecipeFinish } from "../game/culinary";
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
 import { reviewNarration } from "../game/serviceReview";
@@ -580,8 +581,13 @@ function OpeningService() {
 
 function Briefing() {
   const career = useGame((s) => s.career);
-  // PREP FIRST lands here from night 1: open the book straight away
-  const [bookOpen, setBookOpen] = useState(career.night === 1);
+  const cooks = useGame((s) => s.cooks);
+  // PREP FIRST lands here from night 1: open the book straight away. After
+  // that, an unread morning of confessionals auto-opens it too — beats
+  // hidden in a closed book are beats nobody sees.
+  const [bookOpen, setBookOpen] = useState(
+    career.night === 1 || ((career.bookSeenNight ?? 0) < career.night && morningCards(career, cooks).length > 0),
+  );
   if (bookOpen) return <PrepBook onBack={() => setBookOpen(false)} />;
   return <QuickBrief onBook={() => setBookOpen(true)} />;
 }
@@ -682,6 +688,9 @@ function QuickBrief({ onBook }: { onBook: () => void }) {
           </button>
           <button className="btn ghost" onClick={onBook}>
             KITCHEN BOOK
+            {(career.bookSeenNight ?? 0) < career.night && morningCards(career, cooks).length > 0 && (
+              <span className="bnew">new entry</span>
+            )}
           </button>
         </div>
       </div>
@@ -714,8 +723,12 @@ function PrepBook({ onBack }: { onBack: () => void }) {
   const feed = useGame((s) => s.feed);
   const startService = useGame((s) => s.startService);
   const canSave = useGame((s) => s.canSave);
+  const markBookSeen = useGame((s) => s.markBookSeen);
   const v = VENUES[career.venue];
   const [beat, setBeat] = useState(0);
+  // this morning's confessionals — the reason the book carries the badge
+  const cards = morningCards(career, cooks);
+  useEffect(() => { markBookSeen(); }, [markBookSeen]);
   // N1 cold open: one beat (brigade + house rule), then doors. Market N2+, shop N3+, feud N4+.
   const lastBeat = career.night === 1 ? 0 : feud ? 2 : 1;
   useEffect(() => {
@@ -786,6 +799,17 @@ function PrepBook({ onBack }: { onBack: () => void }) {
             {career.venue >= 2
               ? "MOSH & SON — the flagship. They fixed 14's wobble. Behave."
               : "LE MOSH — white paint, same rats. Tablecloths (mostly clean)."}
+          </div>
+        )}
+        {cards.length > 0 && (
+          <div className="confess">
+            {cards.map((c) => (
+              <div key={c.cookId} className="confess-card">
+                <img src={CAST_IMG[c.speaker] ?? castCommis} alt={c.speaker} />
+                <span className="cline">&ldquo;{c.line}&rdquo;</span>
+                <span className="cwho">— {c.speaker}</span>
+              </div>
+            ))}
           </div>
         )}
         {beat === 0 && (

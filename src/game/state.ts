@@ -248,6 +248,8 @@ export interface Career {
   recipeHistory?: RecipeRevision[];
   /** the cook whose sauce the chef saved — thanked by name next morning */
   lastSauceHelp?: { night: number; cookName: string; dish: string };
+  /** last night the kitchen book was opened — unread mornings carry the badge */
+  bookSeenNight?: number;
 }
 
 export interface Feud {
@@ -553,6 +555,8 @@ interface GameState {
   continueNext: () => void;
   briefAction: (id: "drinks" | "gear" | "press") => void;
   meal: (i: number) => void;
+  /** the kitchen book was opened this morning — the badge clears */
+  markBookSeen: () => void;
   clout: (id: "champagne" | "dessert" | "door") => void;
   feudChoice: (i: number) => void;
   buyLot: (i: number, outbid: boolean) => void;
@@ -1276,6 +1280,13 @@ export const useGame = create<GameState>((set, get) => ({
     }
   },
 
+  markBookSeen: () => {
+    const s = get();
+    if (s.phase !== "briefing") return;
+    if ((s.career.bookSeenNight ?? 0) >= s.career.night) return;
+    set({ career: { ...s.career, bookSeenNight: s.career.night } });
+    saveCareer({ ...s.career, bookSeenNight: s.career.night }, s.cooks);
+  },
   meal: (i) => {
     const s = get();
     if (s.phase !== "briefing") return;
