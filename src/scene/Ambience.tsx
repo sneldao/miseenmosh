@@ -32,8 +32,12 @@ export default function Ambience() {
     });
     const live = s.tickets.filter((t) => t.state !== "done").length;
     const murmur = Math.min(1, s.served / 24) - Math.min(0.5, s.misses * 0.12);
+    // the kitchen-is-on floor: a low simmer under everything, swelling a
+    // little as the rail fills and the sauce station works
+    const sauceWorking = s.tickets.some((t) => t.station === 1 && t.state === "plating");
+    const simmer = 0.6 + Math.min(0.3, live * 0.05) + (sauceWorking ? 0.2 : 0);
     updateAmbience(
-      { sizzle, murmur: Math.max(0.05, murmur), drone: Math.min(1, live / 9) },
+      { sizzle, murmur: Math.max(0.05, murmur), drone: Math.min(1, live / 9), simmer },
       audible
     );
   });

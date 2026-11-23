@@ -34,6 +34,28 @@ export interface MoodSpikes {
 
 export const NO_SPIKES: MoodSpikes = { anger: 0, panic: 0, strain: 0, relief: 0 };
 
+/** Transient spike timestamps on a Cook — the serviceTime each spike
+ * last fired. Reset nightly, stripped before the career save. */
+export interface CookSpikes {
+  angerAt?: number;
+  panicAt?: number;
+  strainAt?: number;
+  reliefAt?: number;
+}
+
+/** Spikes decay to nothing over ~45 s of service time. */
+export const SPIKE_DECAY = 45;
+
+export function spikeStrengths(sp: CookSpikes | undefined, now: number): MoodSpikes {
+  const s = (at?: number) => (at === undefined ? 0 : Math.max(0, 1 - (now - at) / SPIKE_DECAY));
+  return {
+    anger: s(sp?.angerAt),
+    panic: s(sp?.panicAt),
+    strain: s(sp?.strainAt),
+    relief: s(sp?.reliefAt),
+  };
+}
+
 export function deriveMood(c: MoodInputs, sp: MoodSpikes = NO_SPIKES): Mood {
   if (c.walkedOut) return "CALM"; // gone is gone — consumers hide him anyway
   if (c.burning || sp.panic > 0 || c.morale < 25 || c.trauma >= 3) return "EDGE";

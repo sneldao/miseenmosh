@@ -19,6 +19,7 @@ import {
 } from "./barks";
 import { CRITICS, criticForNight, criticTell, type CriticPersona } from "./critics";
 import { appendServiceEvent, type FolkloreOutcome, type ServiceEvent, type TellKind } from "./serviceEvents";
+import { deriveMood, spikeStrengths } from "./mood";
 import { buildServiceStory, nightAccounts, reviewNarration } from "./serviceReview";
 import {
   type DishCondition, type Correction, type RecipeFinish, type RecipeRevision,
@@ -81,6 +82,7 @@ export interface Cook {
   honoredUsed?: boolean; // keepsake spent tonight
   smoked: boolean; // the smoke warning already fired tonight
   mood?: import("./mood").Mood; // transient: derived each tick, reset nightly, never persisted
+  spikes?: import("./mood").CookSpikes; // transient: event-spike timestamps, never persisted
 }
 
 export type GuestKind = "critic" | "press" | "regulars" | "couple" | "walkin";
@@ -695,7 +697,9 @@ let saveBlocked = false;
 function saveCareer(career: Career, cooks: Cook[]) {
   if (saveBlocked) return;
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 2, career, cooks }));
+    // transient mood/spikes never persist — they're tonight's weather, not history
+    const stored = cooks.map(({ mood: _m, spikes: _sp, ...rest }) => rest);
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 2, career, cooks: stored }));
   } catch {
     /* private mode etc. — career simply won't persist */
   }
@@ -766,7 +770,7 @@ function loadSave(): { career: Career; cooks: Cook[] } | null {
   }
 }
 
-type NightFields = "walkedOut" | "overloadT" | "burning" | "walkoutAt" | "smoked";
+type NightFields = "walkedOut" | "overloadT" | "burning" | "walkoutAt" | "smoked" | "mood" | "spikes";
 function makeLots(night: number): Lot[] {
   const r = mulberry32(daySeed() + night * 31337);
   const pool = [...LOT_DECK];
@@ -792,6 +796,8 @@ function withFreshNight(c: Omit<Cook, NightFields> & Partial<Pick<Cook, NightFie
     walkoutAt: -1,
     smoked: false,
     honoredUsed: false,
+    mood: undefined, // tonight's weather, derived fresh each tick
+    spikes: undefined,
     // memory persists across nights — grudges and favourites survive;
     // fresh blood arrives with the station default and nothing to forgive
     fave: c.fave ?? STATION_FAVE[c.station] ?? "Beef Wellington",
@@ -1706,6 +1712,7 @@ export const useGame = create<GameState>((set, get) => ({
           if (cook.honored && !cook.honoredUsed && cook.station === 0) {
             // PETRA's keepsake: caught mid-air, bare hands
             cook.honoredUsed = true;
+            cook.spikes = { ...cook.spikes, reliefAt: serviceTime };
             feed = pushFeed(feed, `${cook.name} catches the ${t.dish} mid-air. Bare hands. The pass applauds. (keepsake spent)`, "good", cook.name);
             events = appendServiceEvent(events, { kind: "rescue", at: serviceTime, cookId: cook.id, cookName: cook.name, action: "catch", dish: t.dish });
             sfx("bell");
@@ -1764,7 +1771,10 @@ export const useGame = create<GameState>((set, get) => ({
         held.quality = qualityOfCondition(held.dish, fixed);
         held.sauce = "saved";
         const cook = s.cooks.find((c) => c.station === held.station);
-        if (cook && !cook.walkedOut) cook.morale = Math.min(100, cook.morale + 2);
+        if (cook && !cook.walkedOut) {
+          cook.morale = Math.min(100, cook.morale + 2);
+          cook.spikes = { ...cook.spikes, reliefAt: serviceTime };
+        }
         events = appendServiceEvent(events, { kind: "intervention", at: serviceTime, action: "whisk", cookName: cook?.name, dish: held.dish, ticketId: held.id });
         feed = pushFeed(feed, "You gave it a moment. Thank you.", "good", cook?.name);
         career = { ...career, lastSauceHelp: { night: career.night, cookName: cook?.name ?? "THE KITCHEN", dish: held.dish } };
@@ -1782,6 +1792,7 @@ export const useGame = create<GameState>((set, get) => ({
         if (dimi && !dimi.walkedOut && dimi.honored && !dimi.honoredUsed && dimi.station === 1) {
           // DIMITRI's keepsake: already there, whisk in hand
           dimi.honoredUsed = true;
+          dimi.spikes = { ...dimi.spikes, reliefAt: serviceTime };
           sauce = null;
           st.sauce = "saved";
           feed = pushFeed(feed, `${dimi.name} is already there, whisk in hand. He saw it split before it split. (keepsake spent)`, "good", dimi.name);
@@ -1926,6 +1937,16 @@ export const useGame = create<GameState>((set, get) => ({
         Math.max(floor, 7.5 - serviceTime / 25) * s.spawnMul * (0.8 + rng() * 0.5);
     }
 
+    // --- pacing floor: a no-empty guard, not a busyness generator. Only
+    // rail + plating count as work-bearing — ready/pass plates are already
+    // cooked and idle. The opening early-returns above (inviolate); the
+    // finale (last 40 s) stays authored. It spawns pending tickets only —
+    // calling them is still the player's verb. ---
+    if (serviceTime <= SERVICE_LEN - 40) {
+      const workBearing = tickets.filter((t) => t.state === "rail" || t.state === "plating").length;
+      if (workBearing < 2) nextTicketIn = Math.min(nextTicketIn, 1.2);
+    }
+
     // --- ambient bark: general rage, a station-directed insult, or a
     // personal one — cooks with grudges get barked AT, specifically ---
     // fatigue and flight read straight off morale — no new meters, just names for the states
@@ -1946,6 +1967,14 @@ export const useGame = create<GameState>((set, get) => ({
       } else if (weakest && weakest.morale < 25 && rng() < 0.6) {
         bark = pick(rng, FATIGUE_BARKS[Math.min(2, weakest.station)]).replace("{N}", weakest.name);
         who = weakest.name;
+      } else if (target && (target.mood === "ANGRY" || target.mood === "EDGE") && rng() < 0.7) {
+        // the room talks in the mood: a furious cook gets barked AT,
+        // a rattled one hears the fatigue pool — no new banks needed
+        bark = pick(
+          rng,
+          target.mood === "ANGRY" ? GRUDGE_BARKS[target.station] : FATIGUE_BARKS[Math.min(2, target.station)]
+        ).replace("{N}", target.name);
+        who = target.name;
       } else if (flying && rng() < 0.6) {
         const f = liveBrigade[Math.floor(rng() * liveBrigade.length)];
         bark = pick(rng, FLYING_BARKS[Math.min(2, f.station)]).replace("{N}", f.name);
@@ -2029,9 +2058,11 @@ export const useGame = create<GameState>((set, get) => ({
         sfx("hiss", { pan: STATION_PAN[c.station] ?? 0 });
       }
       let burning = c.burning;
+      let spikes = c.spikes;
       if (!burning && overloadT > 8) {
         burning = true;
         overloadT = 0;
+        spikes = { ...spikes, panicAt: serviceTime };
         feed = pushFeed(
           feed,
           `FLAMBÉ NOBODY ORDERED — ${c.name}'s station is ON FIRE. Click it. Smother it.`,
@@ -2044,13 +2075,19 @@ export const useGame = create<GameState>((set, get) => ({
       // trauma from past walkouts makes them fragile forever; fire is worse.
       const drain = load === 0 ? -1.4 : (0.22 + load * 0.15) * (1 + c.trauma * 0.35);
       const morale = Math.min(100, Math.max(0, c.morale - dt * drain * (burning ? 2 : 1)));
+      // the body is the gauge: one derived mood feeds HUD, glyph, pose and barks
+      const working = tickets.some((t) => t.station === c.station && t.state === "plating");
+      const mood = deriveMood(
+        { morale, overloadT, grudge: c.grudge, burning, trauma: c.trauma, walkedOut: false, working },
+        spikeStrengths(spikes, serviceTime)
+      );
       if (morale <= WALKOUT_AT) {
         if (c.station === 2 && c.honored && !c.honoredUsed) {
           // ANWAR's keepsake: looks at the door, looks at the soufflé, stays
           feed = pushFeed(feed, `${c.name} looks at the door, looks at the soufflé, stays. For you. (keepsake spent)`, "good", c.name);
           events = appendServiceEvent(events, { kind: "rescue", at: serviceTime, cookId: c.id, cookName: c.name, action: "stay" });
           sfx("bell");
-          return { ...c, morale: 15, overloadT, burning, smoked, honoredUsed: true };
+          return { ...c, morale: 15, overloadT, burning, smoked, spikes: { ...spikes, reliefAt: serviceTime }, mood, honoredUsed: true };
         }
         feed = pushFeed(feed, `${c.name} throws their apron. WALKOUT.`, "drama", c.name);
         events = appendServiceEvent(events, { kind: "walkout", at: serviceTime, cookId: c.id, cookName: c.name });
@@ -2058,9 +2095,9 @@ export const useGame = create<GameState>((set, get) => ({
         const egoBeforeWalk = ego;
         ego += 4; // the room watches
         feed = tiered(feed, egoBeforeWalk, ego);
-        return { ...c, morale, overloadT, burning, walkedOut: true, walkoutAt: serviceTime };
+        return { ...c, morale, overloadT, burning, spikes, walkedOut: true, walkoutAt: serviceTime };
       }
-      return { ...c, morale, overloadT, burning, smoked };
+      return { ...c, morale, overloadT, burning, smoked, spikes, mood };
     });
     // a walked-out cook's half-done work goes back on the rail — the chef can
     // call it explicitly, but no ghost finishes it. Ready plates stay ready.
@@ -2933,7 +2970,10 @@ export const useGame = create<GameState>((set, get) => ({
     setTimeout(() => sfx("gasp"), 120);
     feed = pushFeed(feed, `You launch the ${plate.dish} into the tiles. The room stares.`, "drama");
     feed = tiered(feed, egoBeforeSmash, ego);
-    if (cook && !cook.walkedOut) cook.morale = Math.max(0, cook.morale - 6);
+    if (cook && !cook.walkedOut) {
+      cook.morale = Math.max(0, cook.morale - 6);
+      cook.spikes = { ...cook.spikes, angerAt: s.serviceTime };
+    }
     // the kitchen remembers what you smashed — tomorrow's family meal is haunted by it
     const career = { ...s.career, lastSmashed: plate.dish };
     saveCareer(career, cooks);
@@ -2983,7 +3023,9 @@ export const useGame = create<GameState>((set, get) => ({
     const over = p > 1.05;
     const cost = 2 + Math.floor(s.screams / 2) + Math.round(p * 2) + (over ? 3 : 0);
     const cooks = s.cooks.map((c) =>
-      c.walkedOut ? c : { ...c, morale: Math.max(0, c.morale - cost) }
+      c.walkedOut
+        ? c
+        : { ...c, morale: Math.max(0, c.morale - cost), spikes: { ...c.spikes, strainAt: s.serviceTime } }
     );
     // easter egg: screaming at an empty pass — nobody to hear it but the fridge
     const liveTickets = s.tickets.filter((t) => t.state !== "done").length;

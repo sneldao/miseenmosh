@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends } from "../game/state";
+import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends, Cook } from "../game/state";
+import { deriveMood } from "../game/mood";
 import { dishProfile, plateObservations, correctionNeeded, CORRECTION_LABEL, currentWellingtonRecipe, WELLINGTON_FINISHES, type RecipeFinish } from "../game/culinary";
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
 import { reviewNarration } from "../game/serviceReview";
@@ -30,8 +31,10 @@ const CAST_INTRO: Record<string, string> = {
   DIMITRI: "runs sauté. He's seen things.",
   ANWAR: "runs pastry. Fragile. Handle with care.",
 };
-const moodOf = (m: number, out: boolean) =>
-  out ? "walked out" : m >= 70 ? "sharp" : m >= 45 ? "tired" : m >= 25 ? "dangerous" : "feral";
+const moodOf = (c: Cook) =>
+  c.walkedOut
+    ? "walked out"
+    : (c.mood ?? deriveMood({ ...c, working: false })).toLowerCase();
 
 /** Charge-and-release scream: hold Space, the meter fills, let go. */
 function useScreamCharge() {
@@ -647,7 +650,7 @@ function QuickBrief({ onBook }: { onBook: () => void }) {
                 {c.name}
                 {c.trauma > 0 && <span className="scar">{" ✕".repeat(Math.min(3, c.trauma))}</span>}
               </span>
-              <span className="mood">{moodOf(c.morale, c.walkedOut)}</span>
+              <span className="mood">{moodOf(c)}</span>
             </div>
           ))}
         </div>
@@ -800,7 +803,7 @@ function PrepBook({ onBack }: { onBack: () => void }) {
                     {c.trauma > 0 && <span className="scar">{" ✕".repeat(Math.min(3, c.trauma))}</span>}
                   </span>
                   <span className="mood">
-                    {moodOf(c.morale, c.walkedOut)} · skill {Math.round(c.skill * 100)}
+                    {moodOf(c)} · skill {Math.round(c.skill * 100)}
                   </span>
                   {career.night === 1 && CAST_INTRO[c.name] && (
                     <span className="intro">{CAST_INTRO[c.name]}</span>

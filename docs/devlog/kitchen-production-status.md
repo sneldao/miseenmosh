@@ -703,8 +703,55 @@ fire inside the proven phase machines only (no new re-render paths).
 Owner feedback of 23 Nov: bodies and movement improved, but the room still
 reads static — needs constant Hell's Kitchen bustle, a visible emotional
 gauge, and narrative investment (marquee introductions, unfolding
-relationships). Plan written as `docs/living-kitchen-plan.md`, staged
-A–D: (A) ambient bustle + pacing floor — no spend; (B) emote portrait
-variants + body telegraphs — bounded Recraft spend; (C) meet-the-brigade
-cold open + confessional cards — existing art; (D) bond/rivalry matrix.
-Awaiting owner's go on Phase A.
+relationships). Plan written as `docs/living-kitchen-plan.md`, now v4.1
+(owner's v4 added a three-developer Phase A split, reviewed and
+folded back the same day): re-grounded in the verified state — all five
+rigged bodies live, Meshy cap extended for the 30-cr prep-motion job,
+grill already real equipment, dining guests already have idle life.
+Staged A–C: (A) idle content + living equipment + mood system
+(Cook.mood field, station-top glyph, whole-brigade scream spike) +
+no-empty pacing floor + audio floor — no spend; (B) true prep motions
+(approved), Recraft scene stills, beat voice lines — each a separate
+approved job; (C) nine-night beat script + kitchen-book confessional
+cards — free, fact-gated. Lanes: Dev 1 bodies/motion, Dev 2
+room/equipment/dining (mounts the glyph), Dev 3 state/mood/sound
+(day-one contracts). Staged per-lane frame-budget gates. Open
+decisions: mood words, floor count, confessionals-first. Awaiting
+owner's go on Phase A.
+
+## Dev 3 (state / mood / sound lane) — 23 Nov, landing pending merge
+
+Per the living-kitchen plan v4.1 three-dev split. Committed on `main`:
+
+- **Mood system live in the tick.** `deriveMood(cook, spikes)` runs per
+  cook per tick → transient `Cook.mood` (CALM/FOCUSED/STRAINED/ANGRY/EDGE).
+  Spikes are timestamps on `Cook.spikes` — smash→anger (the cook's plate),
+  fire→panic, praise/keepsake saves→relief, scream→strain on the whole
+  brigade — decaying over 45 s service time, reset nightly, stripped
+  from the career save.
+- **One language everywhere.** HUD words now read `Cook.mood`
+  (sharp→focused, tired→strained, dangerous→angry, feral→edge,
+  "walked out" kept as status). `MoodGlyph.tsx` shipped for Dev 2 to
+  mount at each station top (ink word via signTexture, colour-coded,
+  fades on change, hidden for CALM). Barks gate on mood: ANGRY cooks
+  get barked AT (grudge pool), EDGE get the fatigue pool.
+- **Pacing floor** — a no-empty guard: work-bearing tickets
+  (rail+plating only — ready/pass are already cooked) below 2 mid-
+  service caps `nextTicketIn` at 1.2 s. Opening and last-40 s excluded;
+  it spawns pending tickets only, calling stays the player's verb.
+- **Audio floor** — new `simmer` bed: a low bubbling rumble under the
+  whole service, swelling with rail load and sauce-station work. The
+  idle-beat one-shots (knife/chop/boardTap) stay contracted to Dev 1's
+  loop. NOT LISTENED TO by a person yet — level is conservative
+  (0.09 × level through the master bus).
+- **Tests: 78 passing** (+19) — all five moods, spike priority and
+  45 s decay, grudge/trauma inputs, scream→brigade strain, fire→EDGE,
+  floor counting (ready/pass excluded), opening/finale exclusion,
+  pause/resume.
+- **Frame gate:** production bundle held 60 fps through boot and
+  service-open with the mood tick and simmer bed live.
+
+Not Dev 3's: MoodGlyph stays unmounted until Dev 2 places it; the
+kitchen-book badge is still pending; bark-gating uses last-tick mood
+(barks compute before the cooks map — one frame stale, irrelevant at
+a 16–30 s cadence).

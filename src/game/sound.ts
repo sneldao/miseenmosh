@@ -222,6 +222,7 @@ interface Beds {
   murmur: GainNode;
   drone: GainNode;
   droneOsc: OscillatorNode;
+  simmer: GainNode;
   live: boolean;
 }
 
@@ -270,7 +271,10 @@ export function startAmbience() {
   og.gain.value = 0.05;
   droneOsc.connect(og).connect(drone);
   droneOsc.start();
-  beds = { sizzle, murmur, drone, droneOsc, live: false };
+  // the kitchen-is-on floor: a pot that never stops bubbling — low wet
+  // rumble that lives under everything the whole service
+  const { g: simmer } = loopNoise(140, 800);
+  beds = { sizzle, murmur, drone, droneOsc, simmer, live: false };
 }
 
 export interface BedLevels {
@@ -280,6 +284,8 @@ export interface BedLevels {
   murmur: number;
   /** 0..1: how full the rail is */
   drone: number;
+  /** 0..1: the always-on pot — base floor under the whole service */
+  simmer?: number;
 }
 
 function glide(param: AudioParam, v: number) {
@@ -294,5 +300,6 @@ export function updateAmbience(lv: BedLevels, audible: boolean) {
   beds.sizzle.forEach((g, i) => glide(g.gain, Math.min(1.4, lv.sizzle[i] ?? 0) * 0.16 * m));
   glide(beds.murmur.gain, (0.05 + lv.murmur * 0.1) * m);
   glide(beds.drone.gain, lv.drone * 0.3 * m);
+  glide(beds.simmer.gain, (lv.simmer ?? 0) * 0.09 * m);
   if (!beds.live) beds.live = true;
 }
