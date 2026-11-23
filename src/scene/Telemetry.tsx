@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useThree } from "@react-three/fiber";
-import type { Camera, Object3D } from "three";
+import { Raycaster, Vector2, Vector3, type Camera, type Object3D } from "three";
 import { useGame } from "../game/state";
 
 /**
@@ -43,6 +43,28 @@ interface Diagnostics {
   snapshot: () => unknown;
   profile: () => Record<string, unknown>;
   capture: (frames?: number) => Promise<Capture>;
+  /** DEV BUILDS ONLY — steps the store so a person or an agent can stage an
+   *  exact state for a screenshot (first person, a ticket mid-plate, a mood)
+   *  instead of fishing for it through clicks. Absent from production builds. */
+  act?: (patch: Record<string, unknown>) => string[];
+  /** DEV BUILDS ONLY — projects world points through the live camera and
+   *  returns CSS-pixel coordinates. This is how "it feels far away" becomes a
+   *  number that can be argued with: where a cook's head sits, how many pixels
+   *  of floor are bare, what a hand moves by at 7 m. Absent from production
+   *  builds, like `act`. */
+  probe?: (points: Array<[number, number, number]>) => Array<{
+    at: [number, number, number];
+    x: number; y: number; depth: number; covered: boolean;
+  }>;
+  /** DEV BUILDS ONLY — the live camera's world position and orientation. */
+  eye?: () => { x: number; y: number; z: number; look: [number, number, number] } | null;
+  /** DEV BUILDS ONLY — raycasts the live scene at a CSS pixel and reports what
+   *  is actually drawn there, nearest first. This is the answer to "is that
+   *  figure hidden by the counter or standing in the open?", which no projection
+   *  can settle on its own. */
+  pick?: (x: number, y: number) => Array<{
+    at: string; distance: number; world: [number, number, number];
+  }>;
 }
 
 declare global {
@@ -50,7 +72,12 @@ declare global {
 }
 
 export default function Telemetry() {
-  const { gl } = useThree();
+  const { gl, camera, size, scene } = useThree();
+  // the probe/pick instruments read the current camera, canvas size and scene
+  // even though the effect below is keyed on the renderer alone, so a resize or
+  // camera swap cannot stale them
+  const live = useRef({ camera, size, scene });
+  live.current = { camera, size, scene };
   useEffect(() => {
     const context = gl.getContext();
     const debug = context.getExtension("WEBGL_debug_renderer_info");
@@ -155,6 +182,73 @@ export default function Telemetry() {
     const api: Diagnostics = Object.freeze({
       snapshot,
       profile,
+      // dev-only store hook (compiled out of production): the honest way to
+      // photograph a state rather than hunting for it with synthetic clicks
+      ...(import.meta.env?.DEV
+        ? {
+            act: (patch: Record<string, unknown>) => {
+              useGame.setState(patch as never);
+              return Object.keys(patch);
+            },
+            probe: (points: Array<[number, number, number]>) => {
+              const { camera: cam } = live.current;
+              cam.updateMatrixWorld();
+              const v = new Vector3();
+              return points.map((p) => {
+                v.set(p[0], p[1], p[2]).project(cam);
+                const depth = -v.z;
+                return {
+                  at: p,
+                  x: Math.round(((v.x + 1) / 2) * gl.domElement.clientWidth),
+                  y: Math.round(((1 - v.y) / 2) * gl.domElement.clientHeight),
+                  depth: Math.round(depth * 100) / 100,
+                  // behind the camera or outside the frustum: not visible
+                  covered: !(v.x > -1 && v.x < 1 && v.y > -1 && v.y < 1 && v.z < 1),
+                };
+              });
+            },
+            eye: () => {
+              const { camera: cam } = live.current;
+              const d = new Vector3();
+              cam.getWorldDirection(d);
+              return {
+                x: Math.round(cam.position.x * 100) / 100,
+                y: Math.round(cam.position.y * 100) / 100,
+                z: Math.round(cam.position.z * 100) / 100,
+                look: [+d.x.toFixed(3), +d.y.toFixed(3), +d.z.toFixed(3)] as [number, number, number],
+              };
+            },
+            pick: (x: number, y: number) => {
+              const { camera: cam, scene } = live.current;
+              const el = gl.domElement;
+              const ray = new Raycaster();
+              const ndc = new Vector2(
+                (x / el.clientWidth) * 2 - 1,
+                -((y / el.clientHeight) * 2 - 1),
+              );
+              cam.updateMatrixWorld();
+              ray.setFromCamera(ndc, cam);
+              return ray
+                .intersectObjects(scene.children, true)
+                .filter((hit) => hit.object.visible)
+                .slice(0, 6)
+                .map((hit) => {
+                  const parts: string[] = [];
+                  let node: Object3D | null = hit.object;
+                  while (node && parts.length < 4) {
+                    parts.unshift(node.name || node.type);
+                    node = node.parent;
+                  }
+                  const w = hit.object.getWorldPosition(new Vector3());
+                  return {
+                    at: parts.join("/"),
+                    distance: Math.round(hit.distance * 100) / 100,
+                    world: [+w.x.toFixed(2), +w.y.toFixed(2), +w.z.toFixed(2)] as [number, number, number],
+                  };
+                });
+            },
+          }
+        : {}),
       capture: (frames = 1200) => {
         if (active) return Promise.reject(new Error("A capture is already running."));
         if (!Number.isInteger(frames) || frames < 2 || frames > 3600) {
