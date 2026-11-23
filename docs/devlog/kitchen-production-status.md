@@ -659,11 +659,19 @@ QA on the prod preview: two send-backs triggered the full loop —
 standby → walk to pass → grab dip → haul left with the tub visible →
 exit → return empty → standby. Zero `__propErrors`.
 
-### Watch items
-- Tub socket sits slightly under the hands; check close-up that plates
-  read inside the tub, not floating on the rim.
-- Porter standby at −3.3 is edge-cropped like the commis at +3.3 —
-  intentional symmetry, revisit if the left edge reads too tight.
+### Watch items — resolved in whole-room pass
+- Tub socket: close-up captures show the ivory plates reading INSIDE the
+  grey tub under his wrapped arms — not floating on the rim. Resolved.
+- Commis carry yaw + apron: close capture of the full carry shows the
+  tray level at chest, apron panels clean against the legs, no
+  pass-counter clipping on route z 3.05. Resolved.
+- Porter standby at −3.3 edge-crops like the commis at +3.3 — confirmed
+  intentional symmetry; both remain readable at frame edges.
+- Real-body walkouts exercised in the wild: a collapse run walked all
+  three cooks; Dimitri's station FIRE renders flame cones while he
+  works; no apron tearing observed on the un-reweighted rigs.
+- Performance: 60fps (vsync) during full service with all five bodies,
+  porter+commis audio calls live. Zero `__propErrors` across all runs.
 
 ## Audio — runner spatial pass (night-1 build)
 
