@@ -697,3 +697,14 @@ vol first, then lengthen stride intervals.
 Verified: `tsc` clean, 59 tests, prod build boots; send-back ran the
 porter loop with the new cues live and zero `__propErrors` — audio calls
 fire inside the proven phase machines only (no new re-render paths).
+
+## Next phase — living kitchen plan
+
+Owner feedback of 23 Nov: bodies and movement improved, but the room still
+reads static — needs constant Hell's Kitchen bustle, a visible emotional
+gauge, and narrative investment (marquee introductions, unfolding
+relationships). Plan written as `docs/living-kitchen-plan.md`, staged
+A–D: (A) ambient bustle + pacing floor — no spend; (B) emote portrait
+variants + body telegraphs — bounded Recraft spend; (C) meet-the-brigade
+cold open + confessional cards — existing art; (D) bond/rivalry matrix.
+Awaiting owner's go on Phase A.

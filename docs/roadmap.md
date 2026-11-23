@@ -2,6 +2,8 @@
 
 **Current direction:** [design.md — flagship experience](design.md#flagship-direction--culinary-authorship-and-a-living-restaurant): culinary authorship, an expressive living kitchen, genuine brigade coordination and a restaurant that remembers. Execution follows [M0–M3 in the attachment plan](player-attachment-plan.md#flagship-milestones-and-priorities-21-nov).
 
+**Active plan:** [living-kitchen-plan.md](living-kitchen-plan.md) — the owner's stillness/emotion/stakes feedback of 23 Nov, staged A–D: ambient bustle, emote portraits, marquee moments, bond/rivalry matrix.
+
 **Implemented baseline:** factual reviews and critic fixes; the direct opening and compact returning-night briefing; a locally verified service → morning → next-service route with independent stations, food conditions, sauce correction and credited Wellington recipe memory. Whole-kitchen presentation is a playable foundation, with artistic, motion, performance and human acceptance still open. The broader nine-night expansion remains planned. The historical week checklists below record delivered features; they do not establish the new quality bar or estimate the expanded schedule.
 
 Hard limits to design around: review runs OFFLINE (all assets baked),
