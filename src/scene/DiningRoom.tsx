@@ -30,6 +30,8 @@ function Guest({
   const criticFlagged = useGame((s) => s.criticFlagged);
   const g = guests.find((g) => g.id === id);
   const body = useRef<Group>(null);
+  const companion = useRef<Group>(null);
+  const saltArm = useRef<Group>(null);
   const phone = useRef<Group>(null);
   const notebook = useRef<Group>(null);
   const flash = useRef<Mesh>(null);
@@ -71,9 +73,81 @@ function Guest({
     if (flash.current) {
       (flash.current.material as MeshStandardMaterial).emissiveIntensity = snapping ? (reduced ? 0.7 : 6) : 0;
     }
+    // pair tables get a second body with a life of its own: the couple
+    // fights and makes up on its COUPLE_FIGHT beats, the regulars lean
+    // in together, and somebody occasionally passes the salt
+    if (companion.current) {
+      const cp = companion.current;
+      cp.rotation.y = reduced ? 0 : Math.sin(t * 0.44 + id + 1.9) * 0.11;
+      cp.rotation.x = reduced ? 0 : Math.sin(t * 0.62 + id * 1.3) * 0.03;
+      cp.rotation.z = 0;
+      cp.position.x = -0.62;
+      cp.position.y = reduced ? 0 : Math.sin(t * 1.05 + id * 2.3) * 0.011;
+      // the beat rides tellAt — every couple line lands as a gesture too
+      const age = st.serviceTime - g.tellAt;
+      const b = !reduced && age >= 0 && age < 5
+        ? Math.sin(Math.min(1, age / 0.9) * Math.PI * 0.5) * Math.min(1, Math.max(0, (5 - age) / 0.9))
+        : 0;
+      if (body.current && b > 0) {
+        if (g.kind === "couple") {
+          // read the beat itself: the freshest line this table actually
+          // said — fighting/crying pulls them apart, "made up" draws them
+          // back. Falls back to parity when the line was suppressed.
+          let fight = g.tells % 2 === 1;
+          const feed = st.feed;
+          for (let i = feed.length - 1; i >= 0; i--) {
+            const f = feed[i].text;
+            if (!f.startsWith(`Table ${g.table} `)) continue;
+            if (f.includes("fighting") || f.includes("crying")) fight = true;
+            else if (f.includes("made up")) fight = false;
+            else continue; // walk-outs/photo lines share the Table-T prefix
+            break;
+          }
+          if (fight) {
+            body.current.rotation.y += 0.5 * b;
+            cp.rotation.y -= 0.6 * b;
+            cp.rotation.z = Math.sin(t * 8.5) * 0.05 * b;
+            body.current.rotation.z += Math.sin(t * 9.3 + 1) * 0.04 * b;
+          } else {
+            body.current.rotation.y -= 0.35 * b;
+            cp.rotation.y += 0.42 * b;
+            cp.position.x += 0.1 * b;
+            cp.rotation.x += 0.12 * b;
+          }
+        } else {
+          // Mara & June, twenty years in: a nod and a lean on their beat
+          body.current.rotation.y -= 0.2 * b;
+          cp.rotation.y += 0.25 * b;
+          cp.rotation.x += 0.1 * b;
+        }
+      }
+      // the salt pass — one reach across the table on a long slow cycle
+      if (saltArm.current) {
+        const sc = (t * 0.05 + id * 0.53) % 1;
+        const reach = !reduced && sc > 0.9 ? Math.sin(((sc - 0.9) / 0.1) * Math.PI) : 0;
+        saltArm.current.rotation.x = 0.7 + reach * 0.85;
+        saltArm.current.rotation.y = -reach * 0.55;
+      }
+    }
+    // delivery lean-in: food lands, the room tips toward it — hardest at
+    // the table it actually lands on
+    const dlv = st.lastDelivery;
+    if (!reduced && dlv && body.current) {
+      const dAge = st.serviceTime - dlv.at;
+      if (dAge >= 0 && dAge < 2.6) {
+        const lean = Math.sin(Math.min(1, dAge / 0.5) * Math.PI * 0.5) * Math.min(1, Math.max(0, 2.6 - dAge));
+        const amp = dlv.table === g.table ? 0.24 : 0.09;
+        body.current.rotation.x += lean * amp;
+        if (companion.current) companion.current.rotation.x += lean * amp;
+      }
+    }
   });
   if (!g) return null;
   const coat = criticFlagged && g.isCritic ? "#8a3ac0" : COATS[id % COATS.length];
+  // the couple and the regulars are two-tops — Mara & June's subplot
+  // plays on the COUPLE_FIGHT beats at whatever table they've taken
+  const paired = g.kind === "couple" || g.kind === "regulars";
+  const coat2 = COATS[(id + 2) % COATS.length];
   return (
     <group
       position={[x, 0, z]}
@@ -155,6 +229,45 @@ function Guest({
           </mesh>
         </group>
       </group>
+
+      {/* the second chair — pair tables get a body with its own idle
+          life; gestures ride this guest's tell clock in useFrame */}
+      {paired && (
+        <group ref={companion} position={[-0.62, 0, -0.14]} scale={scale * 1.32}>
+          <mesh position={[0, 0.95, 0]} castShadow>
+            <boxGeometry args={[0.44, 0.16, 0.28]} />
+            <meshStandardMaterial color={coat2} emissive="#0d0b12" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 0.78, 0]}>
+            <capsuleGeometry args={[0.16, 0.3, 6, 10]} />
+            <meshStandardMaterial color={coat2} emissive="#0d0b12" roughness={0.9} />
+          </mesh>
+          {/* the reach arm — the one that passes the salt */}
+          <group ref={saltArm} position={[0.24, 0.72, 0.14]} rotation={[0.7, 0, 0]}>
+            <mesh position={[0, -0.12, 0]}>
+              <capsuleGeometry args={[0.045, 0.24, 4, 8]} />
+              <meshStandardMaterial color={coat2} emissive="#0d0b12" roughness={0.9} />
+            </mesh>
+            <mesh position={[0, -0.28, 0.04]}>
+              <cylinderGeometry args={[0.018, 0.022, 0.06, 8]} />
+              <meshStandardMaterial color="#c9ccd2" metalness={0.6} roughness={0.4} />
+            </mesh>
+          </group>
+          <mesh position={[-0.24, 0.72, 0.14]} rotation={[0.7, 0, -0.16]}>
+            <capsuleGeometry args={[0.045, 0.24, 4, 8]} />
+            <meshStandardMaterial color={coat2} emissive="#0d0b12" roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 1.18, 0]}>
+            <sphereGeometry args={[0.115, 14, 14]} />
+            <meshStandardMaterial color="#c08a62" emissive="#2a1c16" roughness={0.8} />
+          </mesh>
+          {/* hair — the regulars went grey in this room */}
+          <mesh position={[0, 1.24, -0.02]}>
+            <sphereGeometry args={[0.112, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.62]} />
+            <meshStandardMaterial color={g.kind === "regulars" ? "#b8b0a4" : "#241a18"} roughness={0.95} />
+          </mesh>
+        </group>
+      )}
 
       {/* table — the top sits above the sill, so the room reads as a room */}
       <mesh position={[0, 0.8, 0.62]} castShadow>

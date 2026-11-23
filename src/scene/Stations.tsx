@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Mesh, MeshStandardMaterial } from "three";
 import { useGame } from "../game/state";
-import { COPPER, INK, MUSTARD, PETROL, VERMILION, signTexture, useReducedMotion } from "./artDirection";
+import { COPPER, INK, MUSTARD, PETROL, STATION_X, VERMILION, signTexture, useReducedMotion } from "./artDirection";
+import { MoodGlyph } from "./MoodGlyph";
+import SauceStation from "./equipment/SauceStation";
+import PastryStation from "./equipment/PastryStation";
 
 const STONE = "#e8dcbe";
 const STONE_DARK = "#cbbd9c";
@@ -268,6 +271,9 @@ export function Station({ x, index, squash }: { x: number; index: number; squash
             </mesh>
           </group>
           <EnamelBowl x={1.3} z={-0.15} fill="#e2b23a" />
+          {/* living equipment: the bain-marie rides the squash with the
+              counter it stands on — never sinks when the bench drops */}
+          <SauceStation />
         </group>
       )}
       {index === 2 && (
@@ -287,6 +293,7 @@ export function Station({ x, index, squash }: { x: number; index: number; squash
             ))}
           </group>
           <TeaTowel x={1.25} />
+          <PastryStation />
         </group>
       )}
       {cook?.burning && <Flames />}
@@ -364,6 +371,14 @@ export default function Stations({ skipPetra = false, squashIdx = [] }: { skipPe
       {!skipPetra && <Station x={-3.6} index={0} />}
       <Station x={0} index={1} squash={squashIdx.includes(1) ? 0.8 : undefined} />
       <Station x={3.6} index={2} squash={squashIdx.includes(2) ? 0.8 : undefined} />
+      {/* the mood gauge: Dev 3's glyph mounted once per cook at the
+          station top — never inside Station, so the two Petra render
+          paths (skipPetra / Suspense fallback) can't double-mount it.
+          z = −2.9: ahead of the hood canopy and the counter, in the
+          clear air both cameras read. */}
+      {STATION_X.map((sx, i) => (
+        <MoodGlyph key={i} index={i} position={[sx, 2.35, -2.9]} />
+      ))}
     </group>
   );
 }

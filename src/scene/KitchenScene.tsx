@@ -24,6 +24,7 @@ import BrigadeKitchen from "./BrigadeKitchen";
 import CommisRunner, { TrayBoard } from "./CommisRunner";
 import PorterRunner from "./PorterRunner";
 import PlateCorrection from "./PlateCorrection";
+import KitchenEquipment from "./equipment/KitchenEquipment";
 import { COPPER, INK, LOOK, MUSTARD, PETROL, STATION_X, VERMILION, signTexture, useReducedMotion } from "./artDirection";
 import { type DishCondition, dishProfile } from "../game/culinary";
 
@@ -741,6 +742,10 @@ export default function KitchenScene() {
       <directionalLight position={[6, 5, -1]} intensity={LOOK.fillIntensity} color={LOOK.fill} />
       <Room />
       <Stations skipPetra={booted} squashIdx={brigadeIdx} />
+      {/* living equipment — hood, pilot flame, oven, stockpot, wash-up,
+          crates. Procedural, nothing to suspend; animations gate on
+          service inside each piece */}
+      <KitchenEquipment />
       <PassCounter />
       <RailDockets />
       <SpeechBubble />
