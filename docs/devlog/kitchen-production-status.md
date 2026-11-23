@@ -1195,9 +1195,19 @@ Scene/line/PetraWorkspace/Group/Group/Mesh (CylinderGeometry) x2
 Six cylinders on the line — station pans or their contents — carry a NaN in
 their transform. They do not visibly draw (which is why nobody has caught them),
 but they poison every raycast through those pixels and they are the kind of
-thing that becomes a black artefact on someone else's GPU. Not diagnosed here:
-it is station/cook geometry (Dev 2/3), the trace is in `bad()`, and the tool is
-committed so whoever owns it can find it in one call.
+thing that becomes a black artefact on someone else's GPU. Not diagnosed at the
+time of writing: it is station/cook geometry (Dev 2/3), the trace is in `bad()`,
+and the tool is committed so whoever owns it can find it in one call.
+
+**Resolved in `ed9cf7f`.** The source was not a shipped-play bug: the falling
+pans' transform is written from `serviceTime - walkoutAt`, and a staging patch
+that fed back the trimmed object `snapshot()` prints had stripped `walkoutAt`,
+so `serviceTime - undefined` was `NaN` and failed both the `p < 0` and the
+`p > 4.5` guards on its way into six matrices. The fix is a finite guard on the
+write (`!(c.walkoutAt >= 0)` and `!Number.isFinite(p)`) *and* a staging
+instrument that cannot strip a field again — `act()` now merges entity arrays
+per index rather than replacing them. `bad()` and `badRoots()` are empty on the
+live frame.
 
 Not machine-checkable and **not yet done**: nobody has stood at the screen and
 said "this feels like a hive". The crew is four bodies, not a dozen; the pass
@@ -1313,6 +1323,31 @@ Six frames 0.55 s apart, diffed band by band. In the back-strip band
 across its whole width. Whole-frame change over 1.2 s: **10.7%** of 738,560 px,
 against a control patch of bare wall that changes by 0.56/255.
 
+### Two steam systems, and what the budget actually measures
+
+There are now two: Dev 2's `equipment/Steam.tsx` (pooled sprites on the
+bain-marie, stockpot and oven vent — **10 of a documented budget of ≤ 12
+sprites "on screen total across ALL equipment"**) and this one (`Steam.tsx`, 15
+quads in a single merged geometry). In puffs the room is at 25, double the
+written cap; in draws it is 11 for the same 25, because a `THREE.Sprite` is one
+draw each and a merged quad plume is fifteen puffs for one.
+
+So the budget was written in the wrong unit. Nothing here is over-spent — the
+frame at 625 draws is 12 *below* where it started — but the cap should say
+**11 steam draws**, not 12 sprites, or the next person will either break the
+frame or refuse a change that costs nothing. Consolidating the equipment sprites
+into the merged system would take 10 draws to 0 and is the obvious follow-up;
+it needs emitter coordinates from the three station files, which is Dev 2's
+airspace, so it is flagged rather than taken.
+
+### Ownership taken, recorded
+
+Two mount lines in `KitchenScene.tsx` (Dev 2's file) are mine: `<Steam />` and
+`<HangingPans />`. Taken while Dev 2 was mid-pass, because the frame read said
+the top quarter of the pass view had nothing in it. Recorded in the plan's
+shared-airspace rule as an exception, and both components are self-contained —
+moving or deleting the mount lines opens neither file.
+
 ### Perf
 
 | | before | after |
@@ -1325,10 +1360,15 @@ against a control patch of bare wall that changes by 0.56/255.
 | long tasks | 0 | 0 |
 
 Draw calls *fell* while a steam system, a pan rail and two walkers were added,
-because the crew's merge banked more than the new geometry spent. The +1.3 ms of
-CPU is eight more `useFrame` callbacks and it is the next thing to win back —
-probably by folding the walkers' per-body work into one pass, the way the pan
-rail already does.
+because the crew's merge banked more than the new geometry spent.
+
+**Correction, re-measured at `d70715b` (same frame, 150 frames): 628 calls, mean
+16.67 ms, p95 17.4 ms, CPU submission 3.27 ms.** So the +1.3 ms I attributed to
+my eight new `useFrame` callbacks was mostly not that — it does not reproduce.
+The lesson is the one this whole section is about: a single 180-frame sample on
+a shared machine is not evidence of a cause, and the number I put in a table an
+hour ago was already wrong. What is solid is the shape: p95 halved, mean
+unchanged, and the frame got busier without getting slower.
 
 ### Verified / not verified
 

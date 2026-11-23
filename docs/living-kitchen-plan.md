@@ -33,14 +33,19 @@ gestures name Mara & June.**
    spoon, `Work`), Anwar (bowl/whisk, `Work`), commis (standby→lift→carry→
    return with panned footfalls + clatter), porter (bus-tub haul + splash).
    Approved collage portraits on `PortraitSocket` throughout.
-2. **The static gap is a content problem, not an architecture problem.**
-   Each rigged cook owns exactly one `Work` clip; `Ready` is a frozen
-   frame-0 subclip + breathing scale on Spine2 ("the pilot ships no idle
-   clip"). State machines, crossfades, gaze offsets and event reactions all
-   exist — what's missing is a *second motion* between tickets.
-3. **Equipment exists at station 0, procedural elsewhere.** Grill has the
-   real range/pan/tongs; sauce and pastry have procedural props. Missing:
-   hood + shimmer, bain-marie, pastry oven, and the dead zones.
+2. **The second motion landed.** Each rigged cook drives an idle loop
+   (`idleLoops.ts` / `makeIdleDrive`): neutral prep segments with phase
+   offsets, tempo jitter and seam blends, three generated prep clips, and a
+   strain flinch; `Ready` survives as the frozen fallback. Off-work beats fire
+   their own `sfx` calls from the loop. Motion is no longer *missing* between
+   tickets — it is a budget question and a seam-quality question, both
+   measured in the status doc.
+3. **Equipment is procedural on all three stations.**
+   `equipment/GrillLine.tsx` (range, pan, tongs, hood, pilot flame, shimmer),
+   `SauceStation.tsx` (bain-marie), `PastryStation.tsx` (oven) and
+   `equipment/Steam.tsx` (ambient sprites, compile-time budget ≤ 12 across all
+   equipment). The dead zones at x ≈ ±1.8 and the flanks carry the background
+   crew and the wash-up bay.
 4. **Geometry.** Stations at x = −3.6 / 0 / +3.6. Dead zones are the gaps
    (x ≈ ±1.8) and outer flanks (x < −5.2, x > +5.2), not "the left half".
    Equipment placement targets those zones, incl. a visible wash-up at the
@@ -52,12 +57,17 @@ gestures name Mara & June.**
    (sharp/tired/dangerous/feral/walked out); bark engine picks per-state
    banks off `barkAt`; morale/overload/trauma/grudge simulated. Missing:
    shared derivation, body expression, a visible word.
-7. **Audio floor exists** — panned sizzle beds, murmur, drone, runner
-   footfalls/clatter/splash, verdict stings. Missing: the simmering bed —
-   stockpot bubble, hood hush, oven hum, knife work on Work beats.
-8. **Pacing.** `SERVICE_LEN` 150 s; spawns on `nextTicketIn` with a ramp
-   (`7.5 − serviceTime/25`), so late service self-busies — the dead air
-   lives in the first ~60 s. Nothing guarantees a live-ticket floor.
+7. **Audio floor and the simmer bed are both in.** Panned sizzle beds,
+   murmur, drone, runner footfalls/clatter/splash, verdict stings, plus the
+   simmer bed (`sound.ts`, looped noise 140–800 Hz) driven from `Ambience.tsx`
+   off the live-ticket count and the sauce station. Knife / chop / board-tap
+   calls fire from the idle loops on their own beat times.
+8. **Pacing has a floor.** `SERVICE_LEN` 150 s with the same spawn ramp
+   (`7.5 − serviceTime/25`), plus a no-empty guard in the tick: while more
+   than 40 s remain and fewer than two *work-bearing* tickets (rail or
+   plating) are live, `nextTicketIn` is clamped to 1.2 s. It guarantees work
+   exists; it does not call the ticket — that stays the player's verb. Pinned
+   by tests in `mood.test.ts`.
 9. **Ledger.** Meshy 135/150 (15 left). Recraft ~70 spent against an
    "existing balance as needed" cap. fal $0 of $1. ElevenLabs is
    **key-blocked**, not just unquoted — sponsor-pipeline keys were never
@@ -318,13 +328,19 @@ master bus.
 
 - `KitchenScene.tsx` is shared airspace: Dev 2 owns it; Devs 1/3 hand
   mount-ready components (`<IdleCook>`) and Dev 2 mounts them behind
-  `PropBoundary` + `Suspense`, same pattern as the runners. The glyph is
+  `PropBoundary` + `Suspense`, same pattern as the runners.
+  **Exception taken 23 Nov:** Dev 1 mounted `<Steam />` and `<HangingPans />`
+  there directly while Dev 2 was mid-pass, because the frame read said the top
+  quarter of the pass view was empty and nothing was there to fill it. Noted
+  rather than blessed — Dev 2 can move or replace both without opening either
+  file, and should treat the mount lines as theirs. The glyph is
   the exception: **Dev 3 ships `MoodGlyph.tsx`, Dev 2 mounts it in
   `Stations.tsx`** at the station-top anchor — Dev 1 touches neither.
 - Day-one contract from Dev 3: `Mood` type, `deriveMood` signature,
   `Cook.mood` field, idle SFX name list — Dev 1 and Dev 2 code against
-  them from day one. Until `deriveMood` lands, Dev 1 ships idle loops
-  only, which have no dependency.
+  them from day one. **Delivered:** `src/game/mood.ts` and the `Cook.mood`
+  field landed in `932c45d` before either consumer wrote a line, and
+  `BrigadeCook`/`PetraCook` now read `Cook.mood` through `moodPose()`.
 - Merge order per milestone: Dev 3 (state + tests) → Dev 1 (bodies) →
   Dev 2 (room) — state contracts before consumers, consumers before
   dressing. Each merge re-runs the full suite before the next lane
@@ -382,7 +398,10 @@ debrief badge; service-open beat wiring; every fact-gated line unit-tested.
 - Idle loops: neutral segments, ≥ 2 variants, phase offsets, jitter —
   and prep must never read as plating.
 - Steam/particles: capped, authored paths, nothing procedural near the
-  lens, suppressed under reduced motion.
+  lens, suppressed under reduced motion. **The cap is counted in draws, not
+  puffs** — one merged quad plume is fifteen puffs for one draw, a `THREE.Sprite`
+  is one draw each. Room total today: 11 draws for 25 puffs (10 equipment
+  sprites + 1 merged plume).
 - Never reintroduce verbosity: beats are seconds and skippable; cards
   live in the kitchen book (with the debrief badge); nothing gates the
   praised direct opening.
