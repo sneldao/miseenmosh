@@ -17,6 +17,7 @@ import { COOK_SHAPES, INK, clothTexture, useReducedMotion } from "./artDirection
 import petraHead from "../../assets/recraft/playable/petra.webp";
 import dimitriHead from "../../assets/recraft/playable/dimitri.webp";
 import anwarHead from "../../assets/recraft/playable/anwar.webp";
+import commisHead from "../../assets/recraft/playable/commis.webp";
 
 export interface IllustratedCookProps {
   cookId: number;
@@ -106,16 +107,21 @@ const PORTRAITS = [
   [570,89],[583,116],[590,148],[587,181],[579,202],[598,205],
   [593,225],[576,241],[561,248],[548,275],[530,287],[518,300],
   [481,302],[451,291],[440,274],[420,253],[412,224],[410,191],
-  [405,166],[410,139]]}
+  [405,166],[410,139]]},
+ {name:'commis',height:.60,anchorX:468,bounds:[300,115,655,565],
+  outline:[[407,124],[520,124],[577,160],[584,223],[556,250],[605,268],
+  [612,304],[598,340],[577,394],[556,466],[520,520],[485,552],
+  [435,552],[399,511],[364,457],[336,385],[321,331],[336,277],
+  [371,241],[378,169]]}
 ] as const;
-const PORTRAIT_SRC = [petraHead, dimitriHead, anwarHead] as const;
+const PORTRAIT_SRC = [petraHead, dimitriHead, anwarHead, commisHead] as const;
 
 /** A shaped, thick piece of collage: the frozen crop printed on an extruded
  *  cutout, ink on the sides/back. The parent's head pivot still carries all
  *  pose/reaction animation — the printed expression itself is fixed. */
 export function PortraitHead({ cookId }: { cookId: number }) {
-  const spec = PORTRAITS[Math.min(cookId, 2)];
-  const tex = useTexture(PORTRAIT_SRC[Math.min(cookId, 2)]);
+  const spec = PORTRAITS[Math.min(cookId, PORTRAITS.length - 1)];
+  const tex = useTexture(PORTRAIT_SRC[Math.min(cookId, PORTRAIT_SRC.length - 1)]);
   tex.colorSpace = SRGBColorSpace;
   const { extruded, face } = useMemo(() => {
     const [left, top, right, bottom] = spec.bounds;

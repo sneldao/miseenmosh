@@ -13,7 +13,7 @@ from mathutils import Vector
 ROOT = "/Users/udingethe/Dev/miseenmosh"
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 NAME = argv[argv.index("--name") + 1] if "--name" in argv else "dimitri"
-assert NAME in ("dimitri", "anwar"), NAME
+assert NAME in ("dimitri", "anwar", "commis"), NAME
 
 RUNTIME = "--runtime" in argv
 RIGGED = (f"{ROOT}/assets/meshy/{NAME}-pilot/runtime-{NAME}.glb" if RUNTIME
@@ -22,7 +22,8 @@ BLEND = f"{ROOT}/assets/meshy/{NAME}-pilot/rig-review.blend"
 OUT_DIR = f"{ROOT}/docs/devlog/media/kitchen-production"
 WORK_CLIP = ("Work" if RUNTIME else
              {"dimitri": "Dimitri___sauce_stir_and_taste",
-              "anwar": "Anwar___bowl_whisk_and_check"}[NAME])
+              "anwar": "Anwar___bowl_whisk_and_check",
+              "commis": "Commis___tray_carry_and_present"}[NAME])
 
 bpy.context.scene.render.fps = 30
 bpy.ops.object.select_all(action="SELECT")

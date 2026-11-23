@@ -1,39 +1,6 @@
 {
   "scope": "First kitchen production pilot",
-  "latest_runtime_checkpoint": {
-    "status": "petra_pilot_verified_brigade_bodies_started",
-    "preview": "http://127.0.0.1:5174/",
-    "served_script": "index-CQUx-pdA.js",
-    "latest_built_candidate": "index-CQUx-pdA.js",
-    "candidate_css": "index-BiScvYfR.css",
-    "candidate_validation": "Live-verified: walkout exits complete + fillet-to-pan on film, blocked-GLB fallback collectable, thin portrait backing, service-persistent Pause/Controls, opening->service->review->morning reset. See docs/devlog/kitchen-production-status.md.",
-    "body": "assets/meshy/petra-pilot/runtime-hold.glb",
-    "body_sha256": "fb0e0229cd01b8b808741ea72a0446f4132d3cdcfeccfd6a2db93db800c90b90",
-    "body_recipe": "assets/meshy/petra-pilot/hold-rig.mjs",
-    "geometry_evidence": "assets/meshy/petra-pilot/pilot-contact-check.json",
-    "sampled_cabinet_clearance_m": 0.014347040136735184,
-    "held_jaw_half_angle": 0.115,
-    "live_evidence": "docs/devlog/media/kitchen-production/petra-live-first-order.webm",
-    "live_evidence_limits": "Silent, unstepped canvas observation; not timing, audio or performance proof. Intro auto-transfers the plate, so normal ready-trolley collection remains to check.",
-    "verified_on_dooo": [
-      "real opening and first order",
-      "three stations plating",
-      "direct trolley plate collection",
-      "Dimitri and Anwar fire recovery",
-      "pause/resume",
-      "first-person timed sauce correction"
-    ],
-    "open_gates": [
-      "new camera headroom and HUD on latest candidate",
-      "settled first-person frame",
-      "new-night reset",
-      "Petra fire recovery",
-      "final cook exit through review",
-      "blocked-model fallback"
-    ],
-    "production_status": "docs/devlog/kitchen-production-status.md",
-    "additional_paid_spend": 0
-  },
+  "latest_runtime_checkpoint": "commis runner integrated: standby->lift->carry->return loop live; brigadeReady update loop fixed",
   "approval": "Owner selected Approve both caps in the Asset pilot question.",
   "providers": {
     "recraft": {
@@ -423,6 +390,31 @@
       "output": "docs/devlog/media/kitchen-production/commis-body-reference-01.webp",
       "status": "completed_accepted_for_body_pilot",
       "review": "Slight silhouette distinct from all three cooks; waist apron and turned cuffs read clearly; clean separated limbs, complete neutral head. A-pose arms \u2014 Meshy pose_mode t-pose requests rig-ready pose; approved commis.webp portrait replaces guide head in game."
+    },
+    {
+      "id": "commis-body-meshy-web-01",
+      "provider": "meshy",
+      "model": "meshy-t2.5 + n1 texture",
+      "method": "image_to_3d web, owner-confirmed Pro account via Ego",
+      "source": "commis-body-reference-01.webp",
+      "settings": "smart topology, ~8000 faces, texture, private",
+      "quoted_credits": 15,
+      "actual_credits": 15,
+      "status": "generated_textured_rigged",
+      "output": "assets/meshy/commis-pilot/rigged-commis.glb (68 nodes, 1 skin, Mixamo skeleton)",
+      "review": "Studio render passed: slight build, oversized jacket, waist apron and boots intact; clean gaits."
+    },
+    {
+      "id": "commis-motion-meshy-web-01",
+      "provider": "meshy",
+      "model": "motion-prime",
+      "method": "text_to_motion web",
+      "source": "prompt: restaurant runner carries a tray flat at chest height with both hands, walks briskly and carefully, glances down at plates, stops and presents the tray",
+      "quoted_credits": 10,
+      "actual_credits": 10,
+      "status": "generated_applied_embedded",
+      "output": "clip Commis___tray_carry_and_present -> Work inside runtime-commis.glb",
+      "review": "Chest-height two-hand tray carry verified in Blender; baked root X/Z travel pinned at runtime prep since game code drives the route."
     }
   ]
 }

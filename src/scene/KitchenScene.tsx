@@ -21,6 +21,7 @@ import FoodModel from "./FoodModel";
 import IllustratedCook from "./IllustratedCook";
 import PetraKitchen from "./PetraKitchen";
 import BrigadeKitchen from "./BrigadeKitchen";
+import CommisRunner, { TrayBoard } from "./CommisRunner";
 import PlateCorrection from "./PlateCorrection";
 import { COPPER, INK, LOOK, MUSTARD, PETROL, STATION_X, VERMILION, signTexture, useReducedMotion } from "./artDirection";
 import { type DishCondition, dishProfile } from "../game/culinary";
@@ -640,7 +641,6 @@ function DeliveryTray() {
   });
   if (!delivery || reduced) return null;
   const plates = delivery.plates.slice(0, 4);
-  const w = Math.max(1.1, 0.34 * (plates.length - 1) + 0.35);
   return (
     <group ref={group} position={[0.6, 1.45, 2.7]} visible={false}>
       {/* mittens under the tray, cuffed forearms trailing down toward the
@@ -661,27 +661,7 @@ function DeliveryTray() {
           </mesh>
         </group>
       ))}
-      <mesh castShadow>
-        <boxGeometry args={[w, 0.025, 0.5]} />
-        <meshStandardMaterial color={COPPER} roughness={0.4} metalness={0.5} />
-      </mesh>
-      {plates.map((p, i) => (
-        <group key={`${delivery.id}-${i}`} position={[(i - (plates.length - 1) / 2) * 0.34, 0.02, 0]}>
-          <mesh>
-            <cylinderGeometry args={[0.15, 0.13, 0.012, 20]} />
-            <meshStandardMaterial color={IVORY} roughness={0.5} />
-          </mesh>
-          <group position={[0, 0.008, 0]}>
-            <FoodModel
-              dish={p.dish}
-              quality={p.quality}
-              condition={p.condition}
-              finish={p.recipeFinish}
-              scale={0.32}
-            />
-          </group>
-        </group>
-      ))}
+      <TrayBoard key={delivery.id} plates={plates} />
     </group>
   );
 }
@@ -719,8 +699,20 @@ export default function KitchenScene() {
   const booted = useGame((s) => s.phase !== "title");
   const [petraReady, setPetraReady] = useState(false);
   const [brigadeIdx, setBrigadeIdx] = useState<number[]>([]);
-  const brigadeReady = (index: number) => (ready: boolean) =>
-    setBrigadeIdx((cur) => (ready ? [...new Set([...cur, index])] : cur.filter((i) => i !== index)));
+  // stable per-station callbacks + a bail-out updater: a fresh inline
+  // callback would re-run the child's layout effect on every render, and a
+  // naïve updater (new array each call) loops re-renders until #185
+  const brigadeReady = useMemo(() => {
+    const fns = [0, 1, 2].map(
+      (index) => (ready: boolean) =>
+        setBrigadeIdx((cur) => {
+          const has = cur.includes(index);
+          if (ready === has) return cur;
+          return ready ? [...cur, index] : cur.filter((i) => i !== index);
+        })
+    );
+    return (index: number) => fns[index];
+  }, []);
   useFrame((_, dt) => {
     tick(Math.min(dt, 0.1));
   });
@@ -789,7 +781,15 @@ export default function KitchenScene() {
         )
       )}
       <Plates petraReady={booted && petraReady} />
-      <DeliveryTray />
+      {booted ? (
+        <PropBoundary fallback={<DeliveryTray />}>
+          <Suspense fallback={<DeliveryTray />}>
+            <CommisRunner />
+          </Suspense>
+        </PropBoundary>
+      ) : (
+        <DeliveryTray />
+      )}
       {booted && (
         <>
           <KitchenReflections />

@@ -28,8 +28,17 @@ const SPEC = {
     cutY: 1.44,
     socket: [0, 1.40, 0.05],
   },
+  commis: {
+    workClip: "Commis___tray_carry_and_present",
+    hinge: [0, 0.95, 0.13],
+    cutY: 1.44,
+    socket: [0, 1.40, 0.05],
+    // the carry clip travels with baked root motion; the game drives
+    // position itself, so strip horizontal root translation (keep Y bob)
+    stripRootXZ: true,
+  },
 }[WHO];
-if (!SPEC) throw new Error("Usage: node prepare-brigade.mjs dimitri|anwar");
+if (!SPEC) throw new Error("Usage: node prepare-brigade.mjs dimitri|anwar|commis");
 // Apron reweighting is OFF for the pilot: shell/distance analysis could not
 // separate hanging apron from trouser surface cleanly (distribution is a
 // continuum), and a partial reweight produced ragged splits worse than the
@@ -307,6 +316,25 @@ const socket = doc.nodes.length;
 doc.nodes.push({ name: "PortraitSocket",
   matrix: headBind.clone().invert().multiply(new Matrix4().makeTranslation(...SPEC.socket)).toArray() });
 (doc.nodes[headNodeIndex].children ??= []).push(socket);
+
+// ---- strip baked root travel (commis carry clip) — keep the Y bob ----
+if (SPEC.stripRootXZ) {
+  const hipsIndex = doc.nodes.findIndex(n => canonical(n.name ?? "") === "mixamorigHips");
+  if (hipsIndex < 0) throw new Error("Hips node missing");
+  let stripped = 0;
+  for (const animation of doc.animations) {
+    for (const channel of animation.channels) {
+      if (channel.target.node !== hipsIndex || channel.target.path !== "translation") continue;
+      const sampler = animation.samplers[channel.sampler];
+      const out = Float32Array.from(values(source, sampler.output));
+      const [x0, , z0] = out;
+      for (let i = 0; i < out.length; i += 3) { out[i] = x0; out[i + 2] = z0; }
+      sampler.output = append(out, "VEC3", 5126);
+      stripped++;
+    }
+  }
+  console.log(`stripRootXZ: ${stripped} channels pinned to frame 0`);
+}
 
 // ---- clip names the runtime expects ----
 const workAnim = doc.animations.find(a => a.name === SPEC.workClip);

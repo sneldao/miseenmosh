@@ -573,3 +573,50 @@ Runtime implementation is NOT dispatched yet: finish proof first. Lead owns
 critical measurements/configs and review; sidekick should implement/render
 and run narrow tsc/build/browser verification after the brief is settled.
 Full brigade/runner/porter/audio/whole-room sequence all remain open.
+
+## Commis runner — integrated and live-verified (night-1 build)
+
+The commis (our plate runner) now ships as a real rigged body instead of
+floating mittens. Meshy T2.5+N1 body (25 credits: 15 mesh + 10 Motion Prime
+tray-carry; running total 110/150) rigged with Walking/Running +
+`Commis___tray_carry_and_present` → `Work`.
+
+Runtime prep (`prepare-brigade.mjs commis`): head cut at 1.44 lands clean
+(neck binds 1.384), PortraitSocket, hips X/Z root translation pinned —
+the carry clip has baked root travel and the game drives the route.
+Clips: Ready (Work frame 0), Carry (Work 0–54 frames looped), Lift
+(Work 58–end, once at the pass), Walking.
+
+`src/scene/CommisRunner.tsx` runs the service loop: standby at the pass'
+right end (x 3.3, facing the dining room so the collage portrait reads),
+walk left to the pickup on each `lastDelivery`, Lift at the pass, Carry
+right angled toward the room, exit frame, return empty-handed to standby.
+The copper tray + real delivery plates ride a spine2-local socket
+(measured at Work frame 0: [0.007,-0.204,0.170]) — the same `TrayBoard`
+the mitten fallback still renders while the GLB streams in or fails.
+
+Commis portrait: masked head+toque crop `assets/recraft/playable/commis.webp`
+with a new PORTRAITS spec (bounds [300,115,655,565]) — the inked-back
+reads as silhouette while carrying, face reads at standby.
+
+Live-verified on the prod preview: lift at the pass with the real
+Wellington plate, carry out, exit, return to standby facing camera.
+No prop errors; pause freezes the route; fallback preserved.
+
+## Fix found while integrating — brigadeReady render loop
+
+`KitchenScene.brigadeReady(i)` produced a fresh `onReady` callback each
+render while `setBrigadeIdx` always returned a new array → the
+BrigadeKitchen layout effect re-ran forever → React #185 → PropBoundary
+silently fell back to illustrated cooks. Both stations were affected in
+the shipped build (Dimitri/Anwar real bodies were NOT actually rendering
+live). Fixed: memoized per-station callbacks + updater returns `cur`
+unchanged. Verified: zero `__propErrors`, real bodies and work poses
+visible at SAUCE and PASTRY again.
+
+### Watch items
+- Commis carry yaw is angled toward the room (π/2−0.55) — check apron
+  doesn't clip the pass counter on close camera.
+- BEEFCAKES thief runner remains the illustrated silhouette — separate
+  character, not the commis.
+- Porter body still open: return-cart/clearing motion next candidate.
