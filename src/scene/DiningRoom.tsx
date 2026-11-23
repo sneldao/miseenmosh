@@ -14,12 +14,15 @@ function Guest({
   id,
   x,
   z,
+  y = 0,
   scale = 1,
   venue = 0,
 }: {
   id: number;
   x: number;
   z: number;
+  /** seat height offset — used to break the row of level heads (see mount) */
+  y?: number;
   scale?: number;
   venue?: number;
 }) {
@@ -46,14 +49,20 @@ function Guest({
     if (!reduced) motionTime.current += Math.min(dt, 0.05);
     const t = motionTime.current;
     if (body.current) {
-      // idle life: breathe, weight-shift, and a slow sip-cycle per guest.
-      // small + slow on purpose — the phone flash keeps the urgent channel.
-      body.current.rotation.y = reduced ? 0 : Math.sin(t * 0.5 + id) * 0.12;
+      // Idle life: breathe, weight-shift, and a slow sip-cycle per guest.
+      // These amplitudes are set by the distance, not by taste. A guest is
+      // ~10.4 m out, where the frame spends ~0.0023 rad per pixel: the old
+      // ±0.045 rad weight-shift was 0.7 px, i.e. nothing, which is why the row
+      // behind the pass was read as "completely static". At 3x the number still
+      // isn't the point — what reads at 10 m is only the big lever (a head
+      // tilt of ±0.16 rad swings the top of a 1.45-scaled head ~3 px) — so the
+      // beats below carry the motion and the sip is deliberately deep.
+      body.current.rotation.y = reduced ? 0 : Math.sin(t * 0.5 + id) * 0.3;
       const sipCycle = (t * 0.07 + id * 0.37) % 1;
       const sip = !reduced && sipCycle > 0.88 ? Math.sin((sipCycle - 0.88) / 0.12 * Math.PI) : 0;
-      body.current.rotation.x = sip * 0.14;
-      body.current.rotation.z = reduced ? 0 : Math.sin(t * 0.34 + id * 2.1) * 0.045;
-      body.current.position.y = (reduced ? 0 : Math.sin(t * 1.1 + id * 1.7) * 0.012) + sip * 0.02;
+      body.current.rotation.x = sip * 0.3;
+      body.current.rotation.z = reduced ? 0 : Math.sin(t * 0.34 + id * 2.1) * 0.15;
+      body.current.position.y = (reduced ? 0 : Math.sin(t * 1.1 + id * 1.7) * 0.03) + sip * 0.05;
     }
     if (flame.current) {
       const f = reduced ? 1 : 0.8 + Math.sin(t * 7.3 + id * 2.1) * 0.22;
@@ -150,7 +159,7 @@ function Guest({
   const coat2 = COATS[(id + 2) % COATS.length];
   return (
     <group
-      position={[x, 0, z]}
+      position={[x, y, z]}
       userData={{ interact: { kind: "guest", id } }}
       onClick={(e) => {
         e.stopPropagation();
@@ -385,11 +394,15 @@ export default function DiningRoom() {
       <pointLight position={[0, 4.2, -8.2]} color={d.wash} intensity={d.washI} distance={14} />
       {/* window-side wash: the pass needs faces to read at 10m */}
       <pointLight position={[0, 2.4, -6.2]} color="#ffc08a" intensity={18} distance={6} />
-      <Guest id={0} x={-4.0} z={-6.7} venue={venue} />
-      <Guest id={1} x={-2.0} z={-7.3} venue={venue} />
-      <Guest id={2} x={0} z={-6.6} venue={venue} />
-      <Guest id={3} x={2.0} z={-7.3} venue={venue} />
-      <Guest id={4} x={4.0} z={-6.7} venue={venue} />
+      {/* Seated at different heights, not on one shelf. Five heads level to
+          within a few centimetres is a row of staff; the eye reads a line, not
+          a room. Each body gets its own seat height so the silhouette has a
+          rhythm and the pass window stops looking like a second brigade. */}
+      <Guest id={0} x={-4.0} z={-6.7} y={0} venue={venue} />
+      <Guest id={1} x={-2.0} z={-7.3} y={-0.3} venue={venue} />
+      <Guest id={2} x={0} z={-6.6} y={0.06} venue={venue} />
+      <Guest id={3} x={2.0} z={-7.3} y={-0.34} venue={venue} />
+      <Guest id={4} x={4.0} z={-6.7} y={-0.12} venue={venue} />
     </group>
   );
 }
