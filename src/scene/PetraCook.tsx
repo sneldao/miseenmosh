@@ -37,6 +37,7 @@ import SearingFillet, { FILLET_IN_TOOL } from "./SearingFillet";
 import { sfx } from "../game/sound";
 import {
   applyMoodPose,
+  applyStandbySway,
   breathAt,
   buildIdleClips,
   idleRate,
@@ -406,13 +407,15 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
       if (d) {
         const beats = d.step(0, delta, mood, true);
         for (const b of beats) sfx(b.sound, { pan: MathUtils.clamp(x / 8, -1, 1), vol: b.vol });
-        const next = rig.actions.get(d.variant.id);
+        // the watch stands her Ready pose — a different silhouette from the
+        // bench windows, so "between tickets" reads at a glance
+        const next = rig.actions.get(d.watching ? "PetraReady" : d.variant.id);
         if (next) {
           if (current.current !== next) {
             crossfade(next);
-            next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
+            if (!d.watching) next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
           }
-          next.setEffectiveTimeScale(idleRate(0, d.variant, d.loop, mood));
+          if (!d.watching) next.setEffectiveTimeScale(idleRate(0, d.variant, d.loop, mood));
         } else {
           crossfade(rig.actions.get("PetraReady")!);
         }
@@ -438,7 +441,12 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     let wantYaw = 0;
     let wantPitch = 0;
     if (!reduced) {
-      if (!working) wantYaw = MathUtils.clamp(-x * 0.035, -0.2, 0.2);
+      if (!working) {
+        wantYaw = idle.current?.watching
+          ? Math.sin(t * 0.21 + 2.3) * 0.3 // on the watch: a slow scan of the rail
+          : MathUtils.clamp(-x * 0.035, -0.2, 0.2);
+        if (idle.current?.watching) wantPitch -= 0.07; // head up toward the pass
+      }
       if (reacting?.kind === "serve" || reacting?.kind === "whisk") {
         wantPitch += 0.12 * Math.sin(rp * Math.PI);
       }
@@ -454,6 +462,10 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     // --- the body carries the mood: additive offsets on top of the clip's
     // own pose, dropped entirely under reduced motion
     applyMoodPose({ spine1: rig.spine1, spine2: rig.spine2, leftArm: rig.leftArm }, pose, t, reduced);
+
+    // standing the watch keeps the same sway the runners get — tall and
+    // settled, still breathing, not a mannequin
+    if (idle.current?.watching) applyStandbySway(rig, t, 3.1, reduced);
 
     // --- breathing while not plating: absolute from bind scale, never accrues
     if (rig.spine2 && rig.spineBind) {

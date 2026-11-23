@@ -984,3 +984,34 @@ fal / meshy sponsor tracks. **Live: https://opengame.io/g/9i7mjkmdx4**
 
 The person-checks above are now checkable *on the live build itself* — the
 simmer bed, the beat levels, and the room's read are all up there.
+
+## The watch — the resting silhouette the blind A/B asked for — 23 Nov
+
+The blind read's own recommendation landed: every few idle loops a cook now
+stands the **watch** — crossfades to the Ready pose (tall, hands off the
+bench) with the runners' standby sway, a slow head-up scan of the rail and
+normal breathing, then returns to the same window where it left it. It lives
+inside the idle drive (`d.watching`, fires only on a loop wrap at
+`WATCH_P = 0.22`, deterministic per cook+loop, pauses freeze it rather than
+burn it down), so the bench windows and the plating read stay untouched.
+The illustrated fallback gets parity via `watchAmt`: arms come off the
+bench, torso straightens, same scan.
+
+Verified on the production build: frame strip
+(`watch-state-strip.png`) catches Petra tall-and-scanning two frames running
+then back at the bench — the two silhouettes are unmistakable at the game
+camera, which was the whole point. 23 tests cover the drive contract (wrap-
+only entry, beat suppression, resume-in-place, pause-freeze, determinism).
+**101 tests, tsc clean.** What still needs eyes: whether `WATCH_LEN` (3–4.6 s)
+and the pitch of the scan feel right — a person watch, same as the rest.
+
+## Phase B prep-motion job — BLOCKED on the account, not the budget — 23 Nov
+
+Balance is fine (300 cr after the extension). All three
+`meshy_text_to_motion` calls (prime, the plan's prompts verbatim) returned
+**402: "task creation on the free plan is no longer supported"** — the
+account's plan gates task creation regardless of credits. Zero tasks were
+created or charged (verified via `meshy_list_tasks`). Needs the owner to
+upgrade/manage the plan at meshy.ai/settings/subscription; the job is
+otherwise ready to fire exactly as spec'd (three 6 s prime clips, FBX out,
+retargeted onto the mixamorig rigs by the existing pipeline).

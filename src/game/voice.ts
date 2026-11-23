@@ -1,9 +1,10 @@
-// Baked voice, no keys, no network. The ElevenLabs flagship (8–12 designed
-// voices, review read-out) ships as generated audio when the pipeline lands;
-// until then the brigade answers through the platform's own speech synth,
-// which renders locally and keeps the offline review sandbox intact.
-// Everything here is best-effort: no synth, no voices, no problem — the
-// game never waits on a voice.
+// Baked voice, no keys, no network. The brigade chorus is generated audio
+// (fal Kokoro → assets/voice/bake.mjs → public/voice/*.mp3) shipped in the
+// bundle; the review read-out stays on the platform's own speech synth
+// because its text is dynamic. Everything here is best-effort: no synth,
+// no files, no voices, no problem — the game never waits on a voice.
+
+import { BRIGADE_RESPONSES } from "./barks";
 
 const VOICE_KEY = "mem-voice";
 
@@ -40,6 +41,36 @@ export function stopVoice() {
   try {
     synth()?.cancel();
   } catch {}
+  for (const a of Object.values(baked)) {
+    try {
+      a.pause();
+    } catch {}
+  }
+}
+
+/** Baked chorus takes — one mp3 per BRIGADE_RESPONSES entry, mixed from
+ *  per-cook fal stems. A file that 404s or won't decode marks itself dead
+ *  and we fall back to the synth forever after. */
+const baked: Record<number, HTMLAudioElement> = {};
+const bakedDead = new Set<number>();
+
+function playBaked(idx: number): boolean {
+  if (!enabled || bakedDead.has(idx)) return false;
+  try {
+    let a = baked[idx];
+    if (!a) {
+      a = new Audio(`${import.meta.env.BASE_URL}voice/chorus-${idx}.mp3`);
+      a.preload = "auto";
+      a.addEventListener("error", () => bakedDead.add(idx));
+      baked[idx] = a;
+    }
+    a.currentTime = 0;
+    void a.play().catch(() => {});
+    return true;
+  } catch {
+    bakedDead.add(idx);
+    return false;
+  }
 }
 
 /** Pick a roughly-local voice so the read-out works in the offline sandbox. */
@@ -80,12 +111,15 @@ try {
   }
 } catch {}
 
-/** The brigade answers the scream — pitch varies so it never reads as one voice. */
+/** The brigade answers the scream — baked ensemble takes first, the
+ *  platform synth behind them if a take is missing. */
 export function speakChorus(line: string, over: boolean) {
   if (over) {
     say("...", { pitch: 0.6, rate: 0.9, seed: 7 });
     return;
   }
+  const idx = BRIGADE_RESPONSES.indexOf(line);
+  if (idx >= 0 && playBaked(idx)) return;
   const clean = line.replace(/[""]/g, "").slice(0, 40) || "Yes, chef!";
   say(clean, { pitch: 0.8 + Math.random() * 0.5, rate: 1.15, seed: Math.floor(Math.random() * 8) });
 }

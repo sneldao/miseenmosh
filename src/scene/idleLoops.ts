@@ -297,11 +297,21 @@ export interface IdleDrive {
   readonly loop: number;
   /** true on the frame the window swapped — crossfade to `variant.id` */
   readonly changed: boolean;
+  /** true while the body stands the watch — play the Ready pose, not a window */
+  readonly watching: boolean;
   /** advance one frame; returns the beats to sound this frame (may be empty) */
   step(cookId: number, dt: number, mood: Mood | undefined, playing: boolean): IdleBeat[];
   /** rewind to a fresh window (new night, pause/resume, back from work) */
   restart(cookId: number, mood: Mood | undefined, loop?: number): void;
 }
+
+/** The watch: every few loops a cook stops prepping and stands tall — the
+ *  Ready pose, hands off the bench, head up scanning the rail. It fires only
+ *  on a loop wrap, deterministic per (cookId, loop), and it is what makes
+ *  "between tickets" read as a different silhouette from plating at a
+ *  glance (the blind A/B could not tell the two apart without it). */
+export const WATCH_P = 0.22;
+const WATCH_LEN = 3.0;
 
 export function makeIdleDrive(cookId: number, mood: Mood | undefined, startLoop = 0): IdleDrive | null {
   const variants = IDLE_VARIANTS[cookId];
@@ -309,6 +319,7 @@ export function makeIdleDrive(cookId: number, mood: Mood | undefined, startLoop 
   const first = pickVariant(cookId, variants, startLoop, mood);
   const clock = makeBeatClock(first, cookId, idlePhase(cookId, first, startLoop));
   clock.loop = startLoop;
+  let watchT = 0;
   const drive: IdleDrive = {
     get variant() {
       return clock.variant;
@@ -319,10 +330,20 @@ export function makeIdleDrive(cookId: number, mood: Mood | undefined, startLoop 
     get loop() {
       return clock.loop;
     },
+    get watching() {
+      return watchT > 0;
+    },
     changed: false,
     step(id, dt, m, playing) {
       (drive as { changed: boolean }).changed = false;
       if (!playing || dt <= 0) return NO_BEATS;
+      // a paused service holds the watch like everything else — it freezes,
+      // it does not burn down
+      if (watchT > 0) {
+        watchT -= Math.min(dt, 0.25);
+        if (watchT > 0) return NO_BEATS;
+        watchT = 0;
+      }
       const before = clock.loop;
       const beats = clock.advance(dt, idleRate(id, clock.variant, before, m), id);
       if (clock.loop !== before) {
@@ -332,6 +353,11 @@ export function makeIdleDrive(cookId: number, mood: Mood | undefined, startLoop 
           clock.t = clock.t % next.len;
           (drive as { changed: boolean }).changed = true;
         }
+        // a watch only ever begins on a wrap, so it can never cut a window
+        // (or the prep gesture it carries) in half
+        if (hash01(id, clock.loop, 9) < WATCH_P) {
+          watchT = WATCH_LEN + hash01(id, clock.loop, 10) * 1.6;
+        }
       }
       return beats;
     },
@@ -340,6 +366,7 @@ export function makeIdleDrive(cookId: number, mood: Mood | undefined, startLoop 
       clock.variant = v;
       clock.loop = loop;
       clock.t = idlePhase(id, v, loop);
+      watchT = 0;
       (drive as { changed: boolean }).changed = true;
     },
   };

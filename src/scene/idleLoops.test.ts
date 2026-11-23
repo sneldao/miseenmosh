@@ -8,6 +8,7 @@ import {
   idlePhase,
   idleRate,
   makeBeatClock,
+  makeIdleDrive,
   moodPose,
   pickVariant,
   workTimeScale,
@@ -236,6 +237,64 @@ describe("beat clock (the sfx calls Dev 1 fires)", () => {
     expect(clock.advance(0, 1, 0)).toEqual([]);
     expect(clock.advance(-1, 1, 0)).toEqual([]);
     expect(clock.t).toBe(0);
+  });
+});
+
+describe("the watch (the between-ticket silhouette)", () => {
+  it("stands the watch eventually, only ever on a loop wrap", () => {
+    const d = makeIdleDrive(0, "CALM")!;
+    let sawWatch = false;
+    for (let i = 0; i < 6000 && !sawWatch; i++) {
+      d.step(0, 1 / 30, "CALM", true);
+      if (d.watching) {
+        sawWatch = true;
+        // a watch begins where a loop wrapped: the window clock is at or
+        // near zero, never mid-gesture
+        expect(d.t).toBeLessThan(0.2);
+      }
+    }
+    expect(sawWatch).toBe(true);
+  });
+
+  it("fires no beats strictly inside the watch and resumes the same window", () => {
+    const d = makeIdleDrive(1, "CALM")!;
+    let guard = 0;
+    while (!d.watching && guard++ < 6000) d.step(1, 1 / 30, "CALM", true);
+    expect(d.watching).toBe(true);
+    const variantAt = d.variant.id;
+    const loopAt = d.loop;
+    let beats = 0;
+    while (d.watching) {
+      const b = d.step(1, 1 / 30, "CALM", true);
+      if (d.watching) beats += b.length; // the expiry frame may already resume
+    }
+    expect(beats).toBe(0);
+    expect(d.variant.id).toBe(variantAt);
+    expect(d.loop).toBe(loopAt); // the window clock never advanced during it
+  });
+
+  it("holds the watch through a pause and clears it on restart", () => {
+    const d = makeIdleDrive(2, "CALM")!;
+    let guard = 0;
+    while (!d.watching && guard++ < 6000) d.step(2, 1 / 30, "CALM", true);
+    for (let i = 0; i < 100; i++) d.step(2, 1 / 30, "CALM", false);
+    expect(d.watching).toBe(true); // paused: it freezes, does not burn down
+    d.restart(2, "CALM", 0);
+    expect(d.watching).toBe(false);
+  });
+
+  it("is deterministic: the same cook watches on the same loops twice", () => {
+    const watchLoops = (id: number) => {
+      const d = makeIdleDrive(id, "CALM")!;
+      const seen: number[] = [];
+      for (let i = 0; i < 4000 && seen.length < 3; i++) {
+        d.step(id, 1 / 30, "CALM", true);
+        if (d.watching && seen[seen.length - 1] !== d.loop) seen.push(d.loop);
+      }
+      return seen;
+    };
+    expect(watchLoops(0)).toEqual(watchLoops(0));
+    expect(watchLoops(0).length).toBeGreaterThan(0);
   });
 });
 

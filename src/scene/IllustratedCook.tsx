@@ -296,6 +296,8 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
   const lastNight = useRef(-1);
   const wasService = useRef(false);
   const workAmt = useRef(0);
+  /** eases the watch in and out: hands off the bench, taller, head up */
+  const watchAmt = useRef(0);
   /** fallback bodies keep the same idle beats as the real rigs — the same
    *  cook, the same kitchen noise, whichever body is mounted */
   const idle = useRef<IdleDrive | null>(null);
@@ -329,6 +331,7 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
       outAt.current = null;
       react.current = null;
       workAmt.current = 0;
+      watchAmt.current = 0;
       idle.current = null;
       wasService.current = false;
       g.visible = true;
@@ -409,19 +412,29 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
     } else {
       idle.current = null;
     }
+    // the watch stands the fallback body tall too: hands off the bench,
+    // head up scanning the rail — same silhouette shift as the rigged cooks
+    const watching = !!idle.current?.watching;
+    watchAmt.current += ((watching ? 1 : 0) - watchAmt.current) * ease(dt);
+    const wa = watchAmt.current;
 
     if (body.current) {
       body.current.position.y = breathe;
       body.current.rotation.y = ready ? 0 : Math.sin(t * 0.4 + cookId) * (reduced ? 0 : 0.04);
       // the body carries the mood: slump forward, brace back — dropped under
-      // reduced motion like every other offset
-      body.current.rotation.x = reduced ? 0 : pose.slump - pose.brace * 0.5;
+      // reduced motion like every other offset; the watch stands it straighter
+      body.current.rotation.x = reduced ? 0 : pose.slump - pose.brace * 0.5 - 0.12 * wa;
     }
 
     // --- head: turn toward the chef when a plate is ready; reactions on top
     const screamRecent = s.screamAt && performance.now() - s.screamAt < 1200;
-    let headYaw = ready ? -x * 0.06 : Math.sin(t * 0.33 + cookId * 1.7) * (reduced ? 0 : 0.05);
-    let headPitch = (active ? 0.12 : 0) + (reacting?.kind === "sendback" ? 0.28 * (1 - rp) : 0);
+    let headYaw = ready
+      ? -x * 0.06
+      : watching && !reduced
+        ? Math.sin(t * 0.21 + cookId * 2.3) * 0.3 // on the watch: a slow scan of the rail
+        : Math.sin(t * 0.33 + cookId * 1.7) * (reduced ? 0 : 0.05);
+    let headPitch =
+      (active ? 0.12 : 0) + (reacting?.kind === "sendback" ? 0.28 * (1 - rp) : 0) - (reduced ? 0 : 0.08 * wa);
     if (reacting?.kind === "serve") headPitch -= 0.16 * Math.sin(rp * Math.PI);
     if (screamRecent && !reduced) headYaw += 0.3;
     if (reacting?.kind === "smash") headYaw += (cookId % 2 ? -1 : 1) * 0.3 * (1 - rp);
@@ -433,8 +446,9 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
     // --- arms: rest at the bench, work loops per station, present when ready.
     // Left arm holds the pan/bowl steady; only the right arm works the tool.
     const station = cook?.station ?? cookId;
-    const restShX = -0.72;
-    const restElX = -0.55;
+    // on the watch the arms come off the bench and settle lower at the sides
+    const restShX = -0.72 + 0.34 * wa;
+    const restElX = -0.55 + 0.25 * wa;
     let shXL = restShX - 0.12 * w;
     let shXR = restShX - 0.12 * w;
     let elXL = restElX;
@@ -486,8 +500,9 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
     }
     // between tickets the fallback body keeps working in the background:
     // a low-amplitude prep read of the same station gesture, so prep and
-    // plating stay visibly different (never the same amplitude)
-    const idleRead = reduced ? 0 : idleAmt * (0.35 + 0.05 * pose.idleRate);
+    // plating stay visibly different (never the same amplitude) — except
+    // during the watch, when the hands come off the bench entirely
+    const idleRead = reduced ? 0 : idleAmt * (1 - wa) * (0.35 + 0.05 * pose.idleRate);
     if (idleRead > 0.02) {
       if (station === 1) {
         const a = (t % 3.4) * ((Math.PI * 2) / 3.4); // slower, smaller stir

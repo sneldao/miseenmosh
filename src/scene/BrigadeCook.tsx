@@ -39,6 +39,7 @@ import { useReducedMotion, INK } from "./artDirection";
 import { PortraitHead } from "./IllustratedCook";
 import {
   applyMoodPose,
+  applyStandbySway,
   breathAt,
   buildIdleClips,
   idleRate,
@@ -403,15 +404,17 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
       if (d) {
         const beats = d.step(cookId, delta, mood, true);
         for (const b of beats) sfx(b.sound, { pan: MathUtils.clamp(x / 8, -1, 1), vol: b.vol });
-        const next = rig.actions.get(d.variant.id);
+        // the watch stands the Ready pose — a different silhouette from the
+        // bench windows, so "between tickets" reads at a glance
+        const next = rig.actions.get(d.watching ? "Ready" : d.variant.id);
         if (next) {
           if (current.current !== next) {
             // resume the window where the loop actually is, so swapping
             // variants never restarts a gesture from its first frame
             crossfade(next);
-            next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
+            if (!d.watching) next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
           }
-          next.setEffectiveTimeScale(idleRate(cookId, d.variant, d.loop, mood));
+          if (!d.watching) next.setEffectiveTimeScale(idleRate(cookId, d.variant, d.loop, mood));
         } else {
           crossfade(rig.actions.get("Ready")!);
         }
@@ -438,7 +441,12 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     if (!reduced) {
       // a ready/pass plate pulls the cook's attention toward the chef
       if (readyTicket && !working) wantYaw = MathUtils.clamp(-x * 0.05, -0.2, 0.2);
-      if (!working && !readyTicket) wantYaw = Math.sin(t * 0.33 + cookId * 1.7) * 0.05;
+      if (!working && !readyTicket) {
+        wantYaw = idle.current?.watching
+          ? Math.sin(t * 0.21 + cookId * 2.3) * 0.3 // on the watch: a slow scan of the rail
+          : Math.sin(t * 0.33 + cookId * 1.7) * 0.05;
+        if (idle.current?.watching) wantPitch -= 0.07; // head up toward the pass
+      }
       if (reacting?.kind === "serve" || reacting?.kind === "whisk") {
         wantPitch += 0.12 * Math.sin(rp * Math.PI);
       }
@@ -454,6 +462,10 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     // --- the body carries the mood: additive offsets on top of the clip's
     // own pose, dropped entirely under reduced motion
     applyMoodPose({ spine1: rig.spine1, spine2: rig.spine2, leftArm: rig.leftArm }, pose, t, reduced);
+
+    // standing the watch keeps the same sway the runners get — tall and
+    // settled, still breathing, not a mannequin
+    if (idle.current?.watching) applyStandbySway(rig, t, (cookId + 1) * 3.1, reduced);
 
     // --- breathing while not plating: absolute from bind scale, never accrues
     if (rig.spine2 && rig.spineBind) {
