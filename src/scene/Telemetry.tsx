@@ -43,6 +43,29 @@ interface Diagnostics {
   snapshot: () => unknown;
   profile: () => Record<string, unknown>;
   capture: (frames?: number) => Promise<Capture>;
+  /** DEV BUILDS ONLY — several capture windows with a gap between them, and
+   *  every metric reported as a spread rather than a point.
+   *
+   *  This exists because of a mistake worth engineering against: a single
+   *  180-frame window on a shared machine produced a CPU number, that number
+   *  went into a devlog as a cause ("eight more useFrame callbacks"), and an
+   *  hour later it did not reproduce. One sample is not evidence of anything,
+   *  and the fix is an instrument that refuses to hand you one. `unstable`
+   *  is true when the windows disagree by more than a millisecond — treat a
+   *  figure from an unstable run as a rumour. */
+  bench?: (windows?: number, frames?: number) => Promise<{
+    windows: number;
+    framesPerWindow: number;
+    interval: { min: number; median: number; p95: number; max: number };
+    cpu: { min: number; median: number; p95: number; max: number };
+    calls: { min: number; max: number };
+    perWindow: Array<{ mean: number; p95: number; cpuMean: number; calls: number }>;
+    /** max window median minus min window median, in ms */
+    spreadMs: number;
+    unstable: boolean;
+    longTasks: number;
+    state: { phase: string; firstPerson: boolean; paused: boolean; serviceTime: number } | null;
+  }>;
   /** DEV BUILDS ONLY — steps the store so a person or an agent can stage an
    *  exact state for a screenshot (first person, a ticket mid-plate, a mood)
    *  instead of fishing for it through clicks. Absent from production builds. */
@@ -358,6 +381,63 @@ export default function Telemetry() {
           };
           previousStart = null; // exclude the boundary interval before sampling began
         });
+      },
+      bench: async (windows = 3, frames = 90) => {
+        const runs: Capture[] = [];
+        for (let i = 0; i < windows; i++) {
+          runs.push(await api.capture(frames));
+          // a gap, so the windows are not adjacent samples of the same warm-up
+          if (i < windows - 1) await new Promise((r) => setTimeout(r, 320));
+        }
+        const q = (a: number[], f: number) => (a.length ? a[Math.min(a.length - 1, Math.floor(a.length * f))] : 0);
+        const median = (a: number[]) => (a.length ? a[Math.floor(a.length / 2)] : 0);
+        const mean = (a: number[]) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
+        const summarise = (a: number[]) => {
+          const sorted = [...a].sort((x, y) => x - y);
+          return {
+            min: Math.round(sorted[0] * 100) / 100,
+            median: Math.round(median(sorted) * 100) / 100,
+            p95: Math.round(q(sorted, 0.95) * 100) / 100,
+            max: Math.round(sorted[sorted.length - 1] * 100) / 100,
+          };
+        };
+        const intervals = runs.flatMap((r) => r.frames.map((f) => f.intervalMs));
+        const cpus = runs.flatMap((r) => r.frames.map((f) => f.submitCpuMs));
+        const calls = runs.flatMap((r) => r.frames.map((f) => f.calls));
+        const perWindow = runs.map((r) => {
+          const iv = r.frames.map((f) => f.intervalMs).sort((a, b) => a - b);
+          return {
+            mean: Math.round(mean(iv) * 100) / 100,
+            p95: Math.round(q(iv, 0.95) * 100) / 100,
+            cpuMean: Math.round(mean(r.frames.map((f) => f.submitCpuMs)) * 100) / 100,
+            calls: calls.length ? r.frames[r.frames.length - 1].calls : 0,
+          };
+        });
+        const means = perWindow.map((w) => w.mean);
+        const spreadMs = Math.round((Math.max(...means) - Math.min(...means)) * 100) / 100;
+        const last = runs[runs.length - 1].frames;
+        const tail = last[last.length - 1];
+        return {
+          windows: runs.length,
+          framesPerWindow: frames,
+          interval: summarise(intervals),
+          cpu: summarise(cpus),
+          calls: { min: Math.min(...calls), max: Math.max(...calls) },
+          perWindow,
+          spreadMs,
+          // the guard that would have caught the claim this instrument was
+          // built for: windows that disagree by more than a millisecond
+          unstable: spreadMs > 1,
+          longTasks: runs.reduce((n, r) => n + r.longTasks.length, 0),
+          state: tail
+            ? {
+                phase: String(tail.phase),
+                firstPerson: Boolean(tail.firstPerson),
+                paused: Boolean(tail.paused),
+                serviceTime: Math.round(Number(tail.serviceTime) * 10) / 10,
+              }
+            : null,
+        };
       },
     });
     const visibility = () => { if (document.hidden) finish("hidden"); };
