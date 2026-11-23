@@ -56,9 +56,12 @@ export function FallingPans({ cookId }: { cookId: number }) {
   useFrame(() => {
     const s = useGame.getState();
     const c = s.cooks[cookId];
-    if (!c || c.walkoutAt < 0) return;
+    if (!c || !(c.walkoutAt >= 0)) return;
     const p = s.serviceTime - c.walkoutAt - 0.25;
-    if (p < 0 || p > 4.5) {
+    // finite or nothing: a missing field here once wrote NaN into six world
+    // matrices, which does not draw but poisons every raycast through that
+    // pixel. NaN fails both comparisons below, so guard it explicitly.
+    if (!Number.isFinite(p) || p < 0 || p > 4.5) {
       pans.current.forEach((m) => m && (m.visible = false));
       return;
     }

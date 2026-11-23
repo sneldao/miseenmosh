@@ -69,6 +69,9 @@ interface Diagnostics {
    *  NaN. Such an object either vanishes or draws garbage, and a NaN breaks
    *  every raycast through it, so it poisons any measurement taken nearby. */
   bad?: () => Array<{ at: string; count: number }>;
+  /** DEV BUILDS ONLY — the first broken node on each NaN branch, with its local
+   *  transform, so the writer is identifiable rather than its victims. */
+  badRoots?: () => Array<Record<string, unknown>>;
 }
 
 declare global {
@@ -191,7 +194,25 @@ export default function Telemetry() {
       ...(import.meta.env?.DEV
         ? {
             act: (patch: Record<string, unknown>) => {
-              useGame.setState(patch as never);
+              const current = useGame.getState() as unknown as Record<string, unknown>;
+              const next: Record<string, unknown> = {};
+              for (const [key, value] of Object.entries(patch)) {
+                const previous = current[key];
+                // A staged entity array is a patch, not a replacement: feeding
+                // cooks back as the trimmed objects `snapshot()` prints once
+                // stripped `walkoutAt`, and a component that read it wrote NaN
+                // into six world matrices. Merge per item by index instead.
+                if (
+                  Array.isArray(value) &&
+                  Array.isArray(previous) &&
+                  value.every((item) => item !== null && typeof item === "object")
+                ) {
+                  next[key] = value.map((item, i) => ({ ...(previous[i] as object), ...(item as object) }));
+                } else {
+                  next[key] = value;
+                }
+              }
+              useGame.setState(next as never);
               return Object.keys(patch);
             },
             probe: (points: Array<[number, number, number]>) => {
@@ -240,6 +261,33 @@ export default function Telemetry() {
                 }
               });
               return [...found.entries()].map(([at, count]) => ({ at, count }));
+            },
+            /** DEV BUILDS ONLY — the first node on each broken branch, with its
+             *  own local transform, so a NaN is traced to the writer, not the
+             *  six meshes it spreads to. */
+            badRoots: () => {
+              const { scene } = live.current;
+              scene.updateMatrixWorld(true);
+              const rows: Array<Record<string, unknown>> = [];
+              scene.traverse((node) => {
+                const m = node.matrixWorld.elements;
+                const bad = m.some((v) => !Number.isFinite(v));
+                if (!bad) return;
+                const pm = node.parent?.matrixWorld.elements;
+                const parentBad = !!pm && pm.some((v) => !Number.isFinite(v));
+                if (parentBad) return; // only the first broken node on the branch
+                const parts: string[] = [];
+                let n: Object3D | null = node;
+                while (n) { parts.unshift(n.name || n.type); n = n.parent; }
+                rows.push({
+                  path: parts.join("/"),
+                  geo: (node as unknown as { geometry?: { type?: string } }).geometry?.type ?? "-",
+                  pos: node.position.toArray().map((v) => +v.toFixed(3)),
+                  rot: [node.rotation.x, node.rotation.y, node.rotation.z].map((v) => +v.toFixed(3)),
+                  scale: node.scale.toArray().map((v) => +v.toFixed(3)),
+                });
+              });
+              return rows;
             },
             pick: (x: number, y: number) => {
               const { camera: cam, scene } = live.current;
