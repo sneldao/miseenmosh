@@ -1,8 +1,10 @@
 # Living kitchen plan — from static room to brigade drama
 
-Status: proposed 23 November 2026, awaiting owner approval to begin Phase A.
-Replaces no prior plan; extends `player-attachment-plan.md` (emotional stakes)
-and the completed brigade body pipeline in `devlog/kitchen-production-status.md`.
+Status: v2, revised 23 November 2026 with the owner's colour pass — four
+pillars, per-station prep detail, the five-mood gauge, and the marquee
+beats/beat-arc sketch now folded in. Extends `player-attachment-plan.md`
+(emotional stakes) and the completed brigade body pipeline in
+`devlog/kitchen-production-status.md`.
 
 ## What the owner said
 
@@ -17,260 +19,168 @@ and the completed brigade body pipeline in `devlog/kitchen-production-status.md`
 > to know them from marquee moments — we root for some, some seem like
 > villains, we change our minds as we learn backstories, romance, hatred."
 
-## Diagnosis — why it reads static
+## Why it feels static — the real causes (owner's diagnosis, confirmed)
 
-Three distinct gaps, ordered by how much they cost the experience:
+1. **Cooks only perform while a ticket is plating.** The work/arm loops are
+   gated on the `plating` ticket state; between tickets the kitchen is three
+   people breathing. The rushes feel great — but the decisions (serve /
+   send-back / smash) happen in the gaps, so the room goes silent exactly
+   while the player is playing.
+2. **Three workstations in an 11-unit-wide room.** Stations sit at
+   x = −3.6 / 0 / +3.6 with nothing between or around them — no oven, hood,
+   sauce pots, prep bench or stock pot. The left half of the room is dead
+   space.
+3. **Nothing simmers.** Steam exists only on hot plates at the pass. No pot
+   bubbles, no oven glow, no constant flame — no "the kitchen is on" even
+   before a fire.
+4. **Mood lives in the HUD only.** Morale/trauma drive walkouts and barks,
+   but the bodies show no emotional state (the tremble is CSS on the name
+   tag). You hear anger in the barks and never see it.
 
-1. **Bodies only perform while a ticket is plating.** Each rigged cook owns
-   real work gestures (Dimitri's stir+taste, Anwar's cradle+whisk, Petra's
-   sear) but returns to a frozen `Ready` subclip the moment plating ends.
-   Between tickets — and always while the player deliberates — nobody moves.
-   Hell's Kitchen energy is overwhelmingly *idle work*: wiping, tasting,
-   shifting pans, calling out. We built the performers and only let them
-   work during the 10% of frames a ticket is cooking.
+## The four pillars
 
-2. **The emotional simulation already runs — invisibly.** `cook.morale`
-   (0–100), `cook.grudge`, `cook.walkedOut`, `cook.fave`, station `burning`
-   and overload all update per verdict. None of it reaches the eye: portraits
-   never change expression, body tempo never reflects pressure, and the only
-   emotional readout is a thin HUD bar. The feed narrates feeling
-   ("PETRA — the shallots can hear you crying") while the body stands serene.
+### Pillar 1 — a kitchen that never stops working (motion)
 
-3. **Nobody was ever introduced.** The fiction exists — ten cast-gilliam
-   cards, named cooks, the BEEFCAKES rivalry, a critic hiding in the room —
-   but the praised direct opening drops the player into service with no idea
-   who's who. Relationships exist in data (grudges persist across nights via
-   the career save) and never surface as drama.
+- **Idle = prep.** When a cook has no ticket they cycle station-specific
+  mise-en-place loops, aimed at props instead of the ticket: Petra re-racks
+  pans and checks the meat on the bone; Dimitri tastes the simmering pot,
+  re-shells the bain-marie, whips a spare sauce; Anwar taps ramekins, rolls
+  dough, wipes the bench. Same choreography machinery as the work loops —
+  `AnimationUtils.subclip` on the existing Work clips plus bone-local prop
+  sockets. During a rush the same bodies simply switch targets faster.
+- **Living equipment.** Constant low flame under the grill; a sauce pot that
+  visibly bubbles with steam; oven-light flicker; a spoon-bath shimmer; a
+  rattling stock lid. Pooled, cheap billboards/meshes — the "sizzling" bed
+  the ear expects from the shows. Capped counts, authored drift paths, no
+  per-frame noise near the lens; all of it suppressed under reduced motion.
+- **Cross-station traffic.** The commis/porter already haul plates — extend
+  with fetch jobs (a pan from wash-up, trays to the dining room) and short
+  walk cycles when a cook reaches for the back bench. Pacing under rush,
+  folding towels under lull.
+- **Dining room life.** Guests lean in, lift a glass, the couple argues,
+  salt is passed — small ambient gestures on a timer for the static figures
+  in the mirror/back wall.
 
-The plan attacks all three in spend order: free fixes first, then art spend,
-then the deepest system last.
+### Pillar 2 — stations you believe in (identity)
 
----
+The plaques say GRILL / SAUCE / PASTRY, but equipment sells the station:
 
-## Phase A — Ambient bustle (no spend; code and clip reuse only)
+- **Grill** → a real range with hood and heat shimmer.
+- **Sauce** → bain-marie, sauce pots, ladle, whisk on the rail.
+- **Pastry** → bench, scale, tart rack, an oven door that opens.
+- Fills the dead space between and around stations, fixing cause 2 as well
+  as identity.
 
-Goal: at any moment of service, the kitchen is visibly working. This is the
-single biggest perceived-life change available and needs no new assets.
+Much of this is pure procedural geometry and can ship this session; the
+hero pieces (the range, hero pass props) are where the pending Meshy/fal
+budget from `kitchen-production-plan.md` gets spent — Phase B below.
 
-### A1. Idle work loops per station
+### Pillar 3 — a visible mood system (the gauge)
 
-Subclip the existing Work gestures into loopable segments and cycle them
-while the station has no active ticket:
+The design rule is **no meters without verbs** — so mood is derived from
+what's already simulated and expressed on the body, not as a new stat:
 
-- **Dimitri (SAUCE):** stir segment loops; occasional taste beat (lift to
-  face) every ~8–12 s, timed by a per-cook phase offset so no two cooks ever
-  sync.
-- **Anwar (PASTRY):** whisk/cradle loop; a slower pipe-and-fold stretch as
-  the alternate.
-- **Petra (GRILL):** her Work clip's turn/sear gestures as the idle loop;
-  she already owns the richest rig (authored apron bone + swing).
+- **Derivation:** a mood per cook from `morale`, `overload`, `grudge`,
+  `burning` and trauma fields already in state, plus short event spikes
+  (smash → anger, praise → pride, fire → panic) that decay over a few
+  minutes of service time.
+- **Five moods:** CALM / FOCUSED / STRAINED / ANGRY / EDGE (nervous).
+- **Expressed three ways, all free:**
+  - *Body language* — slump vs. braced posture (additive pose offsets on
+    spine/neck bones), hand-on-hip, brow-wipe gestures (subclips or
+    procedural bone offsets), tremble amplitude, pacing tempo, work-loop
+    speed keyed to mood rather than only `plateDur`.
+  - *Ink word-glyph* — a small hand-lettered word above each cook at the
+    pass ("STRAINED", "EDGE") in the existing ink/collage style; cheap
+    quad, swaps on mood change, reads at the game's fixed camera distance.
+  - *Bark filter* — the existing bark banks get a per-mood gate so the
+    room talks in the mood too; a STRAINED kitchen barks differently to a
+    FOCUSED one.
+- The HUD morale numbers become the detail view; **the body is the gauge.**
 
-Implementation: extend `BrigadeCook`'s clip map (`REQUIRED_CLIPS` +
-`AnimationUtils.subclip`) the same way `PorterRunner` derives `Grab`/`Carry`.
-Drive selection from `useFrame`: when a station has a `plating` ticket the
-full Work clip plays at speed-mapped timescale (existing behaviour); when
-idle, the loop pool rotates with crossfades at boundaries. Tempo scales with
-ticket count on the station — a cook with three tickets fidgets fast, an
-empty station works slow mise en place.
+### Pillar 4 — marquee moments (character investment)
 
-### A2. Runner and porter idle duties
+Honest constraint first: jam rules forbid runtime generation, and video in
+bundle is not the pipeline — so "marquee video" becomes **marquee moments**:
 
-- **Commis:** between deliveries, a wipe-the-pass loop at standby (reuse the
-  Lift clip's bend at reduced timescale as a polish motion), plus occasional
-  plate-stack rearrangement — small yaw steps, tray fidget.
-- **Porter:** a scrubbing loop at his standby (Carry clip's low frames at
-  reduced timescale read as sink work) so wash-up is always faintly alive.
+- **(a) In-3D table beats.** 3–4 second beats at the start of service: the
+  camera holds, cooks idle, a speech bubble + voice line lands, then the
+  first ticket flies.
+- **(b) Reel cards in the KITCHEN BOOK.** One illustrated collage still per
+  morning (Recraft, the approved band-biopic style and faces), with a spoken
+  line — played like a mini-episode between nights.
+- **Beats unfold, they don't dump.** Each night's beat references last
+  night's recorded events — the review already captures those facts, so
+  the beat script reads the career/event log rather than inventing a
+  parallel story.
 
-### A3. Atmosphere — steam, flame, sizzle
+## The nine-night beat arcs (owner's sketch, expanded)
 
-- **Steam wisps:** a small billboarded-sprite system over the grill pot and
-  sauce pot — always on at low rate, flaring during plating, billowing on
-  `burning`. Must not crawl: capped sprite count (~24), additive blend,
-  authored drift paths, culled under reduced motion.
-- **Flame licks:** brief cone-flame pops on GRILL plating beats (reusing the
-  FIRE flame geometry at short life), a soft glow flicker under pots.
-- **Ambient audio events:** the existing beds get sporadic one-shots —
-  `sear`, `clatter`, a low `rattle` — fired on a per-station Poisson
-  schedule, panned by `STATION_PAN`, so the room murmurs between beats.
-  Conservative levels; the current mix is still unheard by a person.
+- **Petra — "do not touch her tongs."** N1 establishes the rule; N3 reveals
+  why: she walked out of a three-star place over a dish that wasn't right.
+  Her trust is what the service rides on — smash a plate in anger and N4's
+  beat goes cold; correct it well and she starts catching your fumbles (a
+  real mechanic: bonded Petra covers one ruined plate per night).
+- **Dimitri — the sauce is his religion.** Ex-boat cook. Humiliate him and
+  the grudge has a face (and a body — Pillar 3's ANGRY state); save his
+  sauce and the pre-whisk keepsake becomes a story beat, not a mechanic.
+- **Anwar — the soufflé is for his grandmother.** N7, when it collapses,
+  the room goes quiet. Whether he stays when the door calls now carries
+  emotional weight instead of a stat.
+- **Mara & June — the 20-year regulars become a subplot.** The wobble table,
+  the argument, the make-up — tied to the HOUSE vow; their table gets the
+  dining-room gesture budget first.
+- **Beefcakes — the villain you almost understand.** His place is failing
+  and the runners are all he has left. Détente gets a line that humanises
+  him; rivalry keeps him threatening. Either way he returns changed.
 
-### A4. Pacing floor
+## Build order
 
-In `tick()`: when live tickets (rail + plating + ready) drop below a
-per-night floor (2 early nights, 3 later) and `nextTicketIn` is high, pull
-it forward toward 1–2 s. Never inside `openingStep` (the teach beats are
-authored) and never overriding authored rush beats or `career` mission
-pacing. While the floor holds, occasional authored feed lines name ambient
-prep ("Dimitri preps tomorrow's veal stock") so the motion has fiction.
+### Phase A — free, procedural, this session
 
-### A — acceptance
+Idle prep loops (P1) + living equipment (P2 procedural share) + mood system
+(3D + glyph + bark filter) + dining gestures + ambient sound floor +
+pacing floor (keep ≥ 2 live tickets outside authored beats). Kills "static"
+and delivers the gauges with zero credits spent.
 
-- Any contiguous 60 s of service shows ≥ 2 bodies visibly animating and
-  ≥ 1 ambient audio/visual event, with no two cooks sharing a frozen pose.
-- Player deliberation no longer stills the room: hold a plate 20 s at the
-  pass and the kitchen keeps moving.
-- No perf regression: 60 fps target holds; steam sprite count capped;
-  reduced-motion mode suppresses all of it.
+### Phase B — generated assets (credit approval per the production plan)
 
----
+Hero station equipment (Meshy/fal), the morning reel stills (Recraft),
+the beat voice lines (ElevenLabs). Optional stretch: expression-variant
+portrait crops (Recraft) if body-language + glyph reads as insufficient —
+decide after Phase A ships, since the mood glyph may make it unnecessary.
 
-## Phase B — Emotional readability (bounded Recraft spend)
+### Phase C — the nine-night beat script
 
-Goal: a player can call each cook's state from silhouette and face alone.
+Write the arcs in full, tie each beat to recorded events from the
+review/career log, wire into the kitchen book and the service-open beats.
 
-### B1. Emote portrait variants
-
-Generate two additional expression crops per cook in the same masked
-band-biopic style as `assets/recraft/playable/*.webp`:
-
-- **strained** — jaw set, brows down: morale < 50 or station overloading.
-- **broken / furious** — the walkout edge: morale < 25, fresh grudge, or
-  station `burning` past a dwell threshold.
-
-`PortraitHead` currently binds one texture per `cookId`; extend `PORTRAITS`
-to a per-state table and swap the material map in `useFrame` from cook state.
-5 cooks × 2 states = 10 Recraft generations (~10–20 credits each by current
-ledger rates — confirm against `devlog/kitchen-production-ledger.json`
-before spending; ledger entry per generation as usual). Commis and porter
-may each take only a `strained` variant if budget tightens — they're
-background emotional reads.
-
-### B2. Body-language telegraphs
-
-- Work-clip timescale maps to morale as well as `plateDur`: a cook at
-  morale 15 works visibly slower than one at 90 — despondency is tempo.
-- Additive head droop on the portrait socket as morale falls (pitch offset
-  scaled `morale/100`), and a restless head-turn cadence while `burning`.
-- Walkout already plays Running — add a pre-walkout "frozen stare" beat
-  (~1.2 s, Ready clip, head locked on the pass) before the run starts, so
-  the moment reads as a decision, not a despawn.
-
-### B3. HUD restraint
-
-Keep the existing bars. Add at most a state-tinted edge on each portrait
-rail slot; the face carries the emotion, not a meter.
-
-### B — acceptance
-
-- Blind check: a reviewer shown three scene stills can correctly rank each
-  cook's morale without HUD text.
-- No expression pops mid-gesture: swaps land on clip boundaries or
-  crossfades, never per-frame flicker.
-
----
-
-## Phase C — Marquee moments (code + existing art; no video pipeline)
-
-Reality-TV introductions are mostly stills, title cards and confessionals —
-we already own all three ingredients. No generated video required.
-
-### C1. "Meet the brigade" cold open
-
-Before night 1's first service, a ≤ 20 s DOM cinematic over the title art:
-Ken Burns pans across the cast-gilliam cards — name, station, one line of
-scar per cook ("DIMITRI — saucier, nineteen years, has never missed a
-service"). Petra first (the player knows her), then the brigade, then a
-hard cut to the kitchen line. Skippable on any press; shown once per career
-(persist a flag in the career save — never reintroduce forced verbosity;
-the owner's first-note complaint stands).
-
-### C2. Confessional cards
-
-Event-reactive corner cards during service — the portrait slides up with
-one authored line, auto-dismisses in ~3 s, max ~3 per service, never during
-`inspecting` or a correction:
-
-- First send-back of the night → the affected cook ("Back? On my sauce?").
-- First `burning` → that cook's panic line.
-- First walkout → a bitter exit line while the body runs off.
-- Critic spotted → the cook whose ticket is live gets a nervous aside.
-- 101 wobble / BEEFCAKES runner appearance → porter/commis get rare lines —
-  the background cast earning a voice is exactly the reality-TV trick.
-
-Author 3–4 lines per cook covering the trigger states; selection keys off
-`serviceEvents` + milestone state already emitted by `tick()`.
-
-### C3. Morning debrief relationship beats
-
-The review screen already names who walked. Extend its copy to surface
-relationship state: "Anwar hasn't spoken to you since Tuesday's send-back."
-— sourced from `grudge`/morale fields that already persist.
-
-### C — acceptance
-
-- Cold open ≤ 20 s, one-time, skippable; returning players never see it
-  again.
-- Confessionals fire on real events only; a quiet night gets none.
-- Every line is authored (no generated filler) and ≤ ~90 characters.
-
----
-
-## Phase D — Bonds and rivalries (deepest system; last)
-
-Goal: relationships that change how service plays, not just what it says.
-
-### D1. Bond matrix
-
-A persisted cook-pair affinity field beside `grudge`/`fave` in the career
-save, seeded from authored fiction (e.g., Petra commis-mentorship,
-Dimitri↔Anwar tension) and mutated by events: shared send-backs strain,
-covered rescues bond. Direction can be asymmetric — hatred is rarely
-mutual, which is the material.
-
-### D2. Small, honest gameplay teeth
-
-- A bonded cook assists `smother` on a neighbouring burning station (faster
-  clear, different feed line).
-- A rival plates slower — or briefly refuses — while their rival's station
-  burns ("not my fire").
-- Walkout contagion: a cook who walks pulls their bond's morale down with
-  them.
-- A bonded pair on adjacent stations gets a shared plating flourish moment
-  (both Work clips sync for one ticket — a small earned spectacle).
-
-### D3. Surface
-
-Feed lines, confessional triggers (rival taunts, bond rescue quips) and the
-morning debrief copy — all through Phase C's channels, so no new UI.
-
-### D — acceptance
-
-- At least one bond or rivalry visibly changes a service by night 3 of a
-  career, and the morning review can name it.
-
----
-
-## Ordering rationale
+## Status
 
 | Phase | Deliverable | Spend | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| A | Ambient bustle + pacing floor | none | existing rigs | pending |
-| B | Emote portraits + body telegraphs | ~10 Recraft gens | A's clip map | pending |
-| C | Cold open + confessionals + debrief beats | none | existing cast art + events | pending |
-| D | Bond/rivalry matrix with gameplay teeth | none | B's state surface, career save | pending |
-
-A first because perceived life is the owner's loudest note and it costs
-nothing. B second because emotion needs a face and it's the only spend. C
-before D because confessional plumbing is the delivery channel for the
-relationship system's payoffs.
+| A | Bustle, equipment, mood system, dining life | none | existing rigs | pending |
+| B | Hero equipment, reel stills, voice lines | Meshy/fal/Recraft/ElevenLabs | A's scene | pending |
+| C | Nine-night beat script | none | A+B plumbing | pending |
 
 ## Standing risks and rules
 
-- **Idle loops must not look robotic.** Rotation of ≥ 2 loop variants per
-  cook, per-cook phase offsets, and tempo jitter — a perfectly repeating
-  loop is worse than a frozen pose.
-- **Steam must not crawl.** Capped count, authored paths, no per-frame
-  procedural noise near the lens (performance rule: detail that doesn't
-  crawl).
-- **Never reintroduce verbosity.** Cold open once per career; confessionals
-  one line, auto-dismissed; nothing blocks the praised direct opening.
+- **Idle loops must not look robotic.** ≥ 2 loop variants per cook, per-cook
+  phase offsets, tempo jitter — a perfectly repeating loop reads worse than
+  a frozen pose.
+- **Steam must not crawl.** Capped sprite count, authored paths, additive
+  blend, nothing procedural near the lens.
+- **Never reintroduce verbosity.** Service-open beats are seconds long and
+  skippable; reel cards live in the kitchen book, not over play; nothing
+  gates the praised direct opening after first view.
+- **Mood is derived, not a meter.** No new numeric HUD; the glyph word and
+  the body carry it — design rule "no meters without verbs" holds.
 - **Thief runner stays illustrated** until Meshy headroom returns
   (ledger 135/150; a body needs ~25).
-- **Audio is still unheard by a person.** All new ambient events land
+- **Audio is still unheard by a person.** New ambient events land
   meter-conservative on the existing master bus; the person-listens pass
-  now covers an even wider surface.
-- **Career saves mutate.** Bond fields must default-load for old saves the
-  way `grudge` was retrofitted (`state.ts` night-fields merge), or old
-  careers break.
-- Deploy quota: 1 slot remains today; batch Phase A into one deploy rather
-  than spending per slice.
+  now covers a wider surface.
+- **Career saves mutate.** Mood history / beat flags must default-load for
+  old saves the way `grudge` was retrofitted, or old careers break.
+- **Deploy quota:** 1 slot remains today — Phase A ships as one batched
+  deploy, not per slice.
