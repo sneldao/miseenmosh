@@ -192,3 +192,16 @@ first 90 seconds and the cold open changes what it sees.
   Jam entry retained: Game Jam #1, all four tracks incl. meshy + fal.
   Push needed `gh auth switch --user sneldao` first — the active gh
   account had defaulted to `thisyearnofear` which lacks write access.
+
+## a82befdd — Commis runner live + brigade mount fix (23 Nov 2026)
+
+- `opengame deploy . --wait` → release `a82befdd-c2fa-44c2-9392-ac99a209f1bd`,
+  SUB-2019, review passed and auto-published.
+- Ships: real commis body carrying the pass' plates (standby → lift →
+  carry → return loop on `lastDelivery`), commis portrait spec + crop,
+  and a fix for a pre-existing `brigadeReady` render loop that silently
+  dropped both real cooks to illustrated fallbacks (React #185).
+- Verified live: commis waits at the pass' right end on the published
+  page; real brigade bodies at SAUCE/PASTRY; zero `__propErrors`.
+- Jam entry retained on all four tracks.
+- Quota after this deploy: 3 deploys left today, 8 playtests left.
