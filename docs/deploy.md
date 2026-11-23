@@ -237,3 +237,13 @@ first 90 seconds and the cold open changes what it sees.
   loop, zero `__propErrors`. Sound levels are meter-set and NOT yet
   listened to by a person — flagged in the production status doc.
 - Quota after this deploy: 1 deploy left today.
+
+## Phase A batch — living kitchen (23 Nov 2026)
+
+- `opengame deploy` → SUB-2072, review passed and auto-published.
+- Ships: Dev 3 unified mood system (glyphs, pacing floor, simmer bed),
+  Dev 1 idle prep loops + watch state, Dev 2 equipment/dressing +
+  pair-table gestures — all three lanes merged as the one batched deploy
+  the plan called for.
+- Frame capture at integration: p50 ~16.7 ms, p99 ~18.5 ms, 0 long tasks.
+- Quota after this deploy: 0 deploys left today.

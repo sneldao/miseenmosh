@@ -1345,3 +1345,22 @@ booth divider — not more motion.
 Also open, and cheap for whoever owns it: the feed card at 2 m sits on the
 centre of the arch (numbers above). Move it up or to one side and the busiest
 60 pixels of this frame stop being hidden behind paper.
+
+## Generated beats + morning confessionals (23 Nov, commits 4599526 / 051aa60 / c819e4e)
+
+Two more prime Meshy clips on the second account (**50 cr ledger total**):
+a 4.5 s apron-rip **Walkout** (hip travel pinned to frame 0 — the scripted
+slide does the exit, Running takes over at 4.2 s) and a 2 s **Flinch**
+fired on each new `spikes.strainAt` stamp while a cook idles. Both
+retargeted SMPLH→mixamorig and baked into all three runtime GLBs.
+
+Phase C opened: `src/game/beats.ts` renders morning confessionals —
+one card per cook per morning, every line gated on a fact the career
+log can prove, first matching rule wins. The book auto-opens on unread
+mornings, carries a "new entry" badge, and `markBookSeen` persists the
+read night. 12 tests pin the fact gates.
+
+Verified: tsc clean, **113 tests** green. Not verified: neither clip has
+been *watched* in play — the walkout's station hold and the flinch's
+strain-spike trigger both need a human pass, same as the chorus takes
+and the simmer bed.

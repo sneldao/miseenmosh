@@ -7,6 +7,18 @@ import { Group, Mesh, MeshStandardMaterial } from "three";
 /** Eveningwear: warm and cool so guests never read as brigade whites. */
 const COATS = ["#6e2f3a", "#33505f", "#6d5a2c", "#463463", "#2d5346"];
 
+/** Silhouette table: five same-shaped bodies read as staff even at different
+ *  seat heights — the eye needs different *proportions*. Shoulders, torso,
+ *  head, hair and arm thickness all vary per guest; one wears a hat instead
+ *  of a hair cap so the row holds an unmistakable non-uniform head. */
+const SHAPES = [
+  { shoulder: 0.46, torsoR: 0.17, torsoL: 0.3, head: 0.115, hairH: 0.62, armR: 0.045, hat: false },
+  { shoulder: 0.56, torsoR: 0.19, torsoL: 0.24, head: 0.105, hairH: 0.45, armR: 0.052, hat: false },
+  { shoulder: 0.38, torsoR: 0.145, torsoL: 0.36, head: 0.125, hairH: 0.78, armR: 0.04, hat: false },
+  { shoulder: 0.5, torsoR: 0.16, torsoL: 0.3, head: 0.115, hairH: 0.62, armR: 0.045, hat: true },
+  { shoulder: 0.42, torsoR: 0.2, torsoL: 0.26, head: 0.1, hairH: 0.55, armR: 0.05, hat: false },
+];
+
 /** Guests beyond the pass-through window. The tell: the guest raises a
  *  phone and flashes — the critic does it often, civilians rarely.
  *  Click a guest to flag them (one shot). */
@@ -153,10 +165,12 @@ function Guest({
   });
   if (!g) return null;
   const coat = criticFlagged && g.isCritic ? "#8a3ac0" : COATS[id % COATS.length];
+  const shape = SHAPES[id % SHAPES.length];
   // the couple and the regulars are two-tops — Mara & June's subplot
   // plays on the COUPLE_FIGHT beats at whatever table they've taken
   const paired = g.kind === "couple" || g.kind === "regulars";
   const coat2 = COATS[(id + 2) % COATS.length];
+  const shape2 = SHAPES[(id + 3) % SHAPES.length];
   return (
     <group
       position={[x, y, z]}
@@ -181,28 +195,42 @@ function Guest({
         </mesh>
         {/* seated diner: you see shoulders and head over the table edge */}
         <mesh position={[0, 0.95, 0]} castShadow>
-          <boxGeometry args={[0.46, 0.16, 0.3]} />
+          <boxGeometry args={[shape.shoulder, 0.16, 0.3]} />
           <meshStandardMaterial color={coat} emissive="#0d0b12" roughness={0.9} />
         </mesh>
         <mesh position={[0, 0.78, 0]}>
-          <capsuleGeometry args={[0.17, 0.3, 6, 10]} />
+          <capsuleGeometry args={[shape.torsoR, shape.torsoL, 6, 10]} />
           <meshStandardMaterial color={coat} emissive="#0d0b12" roughness={0.9} />
         </mesh>
         {[-1, 1].map((s) => (
-          <mesh key={s} position={[s * 0.24, 0.72, 0.14]} rotation={[0.7, 0, s * 0.16]}>
-            <capsuleGeometry args={[0.045, 0.24, 4, 8]} />
+          <mesh key={s} position={[s * (shape.shoulder / 2 + 0.01), 0.72, 0.14]} rotation={[0.7, 0, s * 0.16]}>
+            <capsuleGeometry args={[shape.armR, 0.24, 4, 8]} />
             <meshStandardMaterial color={coat} emissive="#0d0b12" roughness={0.9} />
           </mesh>
         ))}
         <mesh position={[0, 1.18, 0]}>
-          <sphereGeometry args={[0.115, 14, 14]} />
+          <sphereGeometry args={[shape.head, 14, 14]} />
           <meshStandardMaterial color="#cf9d7c" emissive="#2a1c16" roughness={0.8} />
         </mesh>
-        {/* hair — a dark cap so heads separate from the brigade toques */}
-        <mesh position={[0, 1.24, -0.02]}>
-          <sphereGeometry args={[0.112, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.62]} />
-          <meshStandardMaterial color={id % 2 ? "#241a18" : "#4a3424"} roughness={0.95} />
-        </mesh>
+        {/* hair — a dark cap so heads separate from the brigade toques;
+            one guest wears a hat: the only unmistakable head in the row */}
+        {shape.hat ? (
+          <group position={[0, 1.26, -0.01]}>
+            <mesh>
+              <cylinderGeometry args={[shape.head * 1.5, shape.head * 1.6, 0.015, 14]} />
+              <meshStandardMaterial color="#2a2018" roughness={0.9} />
+            </mesh>
+            <mesh position={[0, 0.05, 0]}>
+              <cylinderGeometry args={[shape.head * 0.75, shape.head * 0.85, 0.09, 12]} />
+              <meshStandardMaterial color="#33261c" roughness={0.9} />
+            </mesh>
+          </group>
+        ) : (
+          <mesh position={[0, 1.24, -0.02]}>
+            <sphereGeometry args={[shape.head * 0.97, 12, 10, 0, Math.PI * 2, 0, Math.PI * shape.hairH]} />
+            <meshStandardMaterial color={id % 2 ? "#241a18" : "#4a3424"} roughness={0.95} />
+          </mesh>
+        )}
         {/* the tell: phone raised to face, screen lit — only while a phone tell is live */}
         <group ref={phone} position={[0.17, 1.05, 0.22]} visible={false}>
           <mesh>
@@ -244,11 +272,11 @@ function Guest({
       {paired && (
         <group ref={companion} position={[-0.62, 0, -0.14]} scale={scale * 1.32}>
           <mesh position={[0, 0.95, 0]} castShadow>
-            <boxGeometry args={[0.44, 0.16, 0.28]} />
+            <boxGeometry args={[shape2.shoulder, 0.16, 0.28]} />
             <meshStandardMaterial color={coat2} emissive="#0d0b12" roughness={0.9} />
           </mesh>
           <mesh position={[0, 0.78, 0]}>
-            <capsuleGeometry args={[0.16, 0.3, 6, 10]} />
+            <capsuleGeometry args={[shape2.torsoR, shape2.torsoL, 6, 10]} />
             <meshStandardMaterial color={coat2} emissive="#0d0b12" roughness={0.9} />
           </mesh>
           {/* the reach arm — the one that passes the salt */}
@@ -267,12 +295,12 @@ function Guest({
             <meshStandardMaterial color={coat2} emissive="#0d0b12" roughness={0.9} />
           </mesh>
           <mesh position={[0, 1.18, 0]}>
-            <sphereGeometry args={[0.115, 14, 14]} />
+            <sphereGeometry args={[shape2.head, 14, 14]} />
             <meshStandardMaterial color="#c08a62" emissive="#2a1c16" roughness={0.8} />
           </mesh>
           {/* hair — the regulars went grey in this room */}
           <mesh position={[0, 1.24, -0.02]}>
-            <sphereGeometry args={[0.112, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.62]} />
+            <sphereGeometry args={[shape2.head * 0.97, 12, 10, 0, Math.PI * 2, 0, Math.PI * shape2.hairH]} />
             <meshStandardMaterial color={g.kind === "regulars" ? "#b8b0a4" : "#241a18"} roughness={0.95} />
           </mesh>
         </group>
@@ -403,11 +431,11 @@ export default function DiningRoom() {
           tables are now set at intervals that do not repeat and at depths from
           6.0 to 7.9 m, so perspective alone gives three apparent sizes and the
           window stops looking like a second line-up. */}
-      <Guest id={0} x={-4.25} z={-6.5} y={0} venue={venue} />
-      <Guest id={1} x={-1.7} z={-7.85} y={-0.3} venue={venue} />
-      <Guest id={2} x={0.45} z={-6.05} y={0.06} venue={venue} />
-      <Guest id={3} x={2.65} z={-7.9} y={-0.34} venue={venue} />
-      <Guest id={4} x={4.35} z={-6.6} y={-0.12} venue={venue} />
+      <Guest id={0} x={-4.25} z={-6.5} y={0} scale={1.02} venue={venue} />
+      <Guest id={1} x={-1.7} z={-7.85} y={-0.3} scale={0.9} venue={venue} />
+      <Guest id={2} x={0.45} z={-6.05} y={0.06} scale={1.1} venue={venue} />
+      <Guest id={3} x={2.65} z={-7.9} y={-0.34} scale={0.86} venue={venue} />
+      <Guest id={4} x={4.35} z={-6.6} y={-0.12} scale={1.05} venue={venue} />
     </group>
   );
 }

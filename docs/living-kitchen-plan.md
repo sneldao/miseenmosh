@@ -355,7 +355,8 @@ master bus.
 
 | Job | Tool | Cost | Gate |
 | --- | --- | --- | --- |
-| 3 true prep motion clips | Meshy Motion Prime | 30 cr | **Cap extended (owner, 23 Nov)** — run after Phase A proves the free idle's limits; keep the ledger current |
+| 3 true prep motion clips | Meshy Motion Prime | 30 cr | **Spent (23 Nov)** — Petra/Dimitri/Anwar prep clips live as third idle variants, 9/9 seam-clean |
+| walkout + flinch clips | Meshy Motion Prime | 20 cr | **Spent (23 Nov, second account)** — apron-rip walkout + strain-flinch baked into all three rigs; ledger total 50 cr |
 | 3–5 confessional stills | Recraft | ~10 cr each | Balance authorised — quote first |
 | Beat voice lines | ElevenLabs | unquoted | **Key-blocked** — needs credentials from owner |
 
