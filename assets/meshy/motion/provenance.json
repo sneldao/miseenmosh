@@ -2,7 +2,7 @@
   "generated": "2025-11-23",
   "account": "second meshy account (api key 'devin-mcp', created via developer console)",
   "cost_credits_each": 10,
-  "cost_credits_total": 30,
+  "cost_credits_total": 50,
   "mode": "prime",
   "format": "fbx (SMPLH skeleton, centimetres)",
   "tasks": {
@@ -23,12 +23,26 @@
       "prompt": "a cook taps small metal ramekins down onto a counter one after another, then rolls out dough with a rolling pin",
       "duration_s": 6,
       "clip": "anwar-prep-clip.fbx -> AnwarPrep in anwar-pilot/runtime-anwar.glb"
+    },
+    "walkout": {
+      "task_id": "01a20984-be19-7785-aed8-4f70d455a8e5",
+      "prompt": "dramatic kitchen walkout: cook rips off apron, throws it down and storms off",
+      "duration_s": 4.47,
+      "clip": "walkout-clip.fbx -> Walkout in all three runtime GLBs; hip x/z pinned to frame 0 (clip root travel cut — the scripted exit slide does the travel); played as LoopOnce for ~2.3s at the station, then the Running clip takes the wall-hugging exit"
+    },
+    "flinch": {
+      "task_id": "01a20984-c2a7-743e-8f27-9b3f8372b7b5",
+      "prompt": "sudden full-body recoil/flinch, hands coming up defensively, then settling",
+      "duration_s": 1.97,
+      "clip": "flinch-clip.fbx -> Flinch in all three runtime GLBs; hip x/z scaled 0.35 (a small back-step kept, the wall stays close); fires as LoopOnce on a new spikes.strainAt stamp while the cook idles, the idle loop steps underneath and resumes mid-window"
     }
   },
   "pipeline": [
     "retarget-motion.mjs: SMPLH->mixamorig world-rotation-delta transfer (both rigs share a T-pose bind; verified in rest-audit.mjs), 30fps bake, hips position scaled by standing-hip ratio and delta-referenced to clip frame 0 (FBX bind pelvis offset is broken)",
-    "bake-prep-clip.mjs: writes the retargeted AnimationClip into the runtime GLB as a fifth animation",
-    "idleLoops.ts: each cook's prep clip is a third idle variant (source <Name>Prep), seam-closed by wrapBlend like every window"
+    "bake-prep-clip.mjs: writes the retargeted AnimationClip into the runtime GLB as an appended animation",
+    "idleLoops.ts: each cook's prep clip is a third idle variant (source <Name>Prep), seam-closed by wrapBlend like every window",
+    "BrigadeCook/PetraCook: Walkout + Flinch are LoopOnce actions; walkout holds the slide 2.3s for the apron rip, flinch triggers on cook.spikes.strainAt during idle"
   ],
-  "seam_probe": "9/9 windows loop without a pop; Prep seams are 0.8-0.9% of max in-loop step"
+  "seam_probe": "9/9 windows loop without a pop; Prep seams are 0.8-0.9% of max in-loop step",
+  "balance_after": "1065 credits (915 monthly + 150 permanent)"
 }

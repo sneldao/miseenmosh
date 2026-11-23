@@ -29,7 +29,7 @@ import {
   type MeshStandardMaterial,
 } from "three";
 import { clone as skeletonClone } from "three/examples/jsm/utils/SkeletonUtils.js";
-import { LoopRepeat } from "three";
+import { LoopOnce, LoopRepeat } from "three";
 import { useGame } from "../game/state";
 import { useReducedMotion } from "./artDirection";
 import { PortraitHead } from "./IllustratedCook";
@@ -49,6 +49,13 @@ import {
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const REQUIRED_CLIPS = ["PetraReady", "PetraWork", "Walking", "Running"] as const;
+
+/** the generated apron-rip reads at the station, then the scripted slide runs the exit */
+const WALK_SLIDE_AT = 2.3;
+/** blend into the Running clip before the Walkout tail clamps */
+const WALK_RUN_AT = 4.2;
+/** scream flinch reads for most of the 1.97s clip, then the idle loop resumes */
+const FLINCH_DUR = 1.9;
 
 /** where the fillet rests when she is not plating: in the pan by her hand,
  *  the same spot the walkout drop uses. Baked as offsets, never re-cloned in
@@ -145,7 +152,7 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     const actions = new Map<string, AnimationAction>();
     for (const [name, clip] of clips) {
       const a = mixer.clipAction(clip);
-      a.setLoop(LoopRepeat, Infinity);
+      a.setLoop(name === "Walkout" || name === "Flinch" ? LoopOnce : LoopRepeat, Infinity);
       a.clampWhenFinished = true;
       actions.set(name, a);
     }
@@ -169,7 +176,7 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     for (const [name, clip] of rig.clips) {
       const a = rig.mixer.clipAction(clip);
       a.reset();
-      a.setLoop(LoopRepeat, Infinity);
+      a.setLoop(name === "Walkout" || name === "Flinch" ? LoopOnce : LoopRepeat, Infinity);
       a.clampWhenFinished = true;
       rig.actions.set(name, a);
     }
@@ -207,6 +214,9 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
   const parkAmt = useRef(1);
   const drop = useRef<{ p: number; pos: Vector3; q: Quaternion } | null>(null);
   const outElapsed = useRef(0);
+  /** last strain-spike stamp consumed: a new one fires the flinch once */
+  const lastStrain = useRef<number | null>(null);
+  const flinchAt = useRef<number | null>(null);
 
   const crossfade = (next: AnimationAction) => {
     if (current.current === next) return;
@@ -268,6 +278,8 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
       react.current = null;
       outAt.current = null;
       outElapsed.current = 0;
+      lastStrain.current = null;
+      flinchAt.current = null;
       wasService.current = false;
       time.current = 0;
       idle.current = null;
@@ -343,11 +355,13 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     if (rp >= 1) react.current = null;
     const reacting = react.current;
 
-    // --- walkout: Running clip, routed behind the station along the wall
+    // --- walkout: the generated clip plays the apron rip at the station,
+    // then the same wall-hugging exit as before under the Running clip
     if (cook?.walkedOut) {
+      const leave = rig.actions.get("Walkout") ?? rig.actions.get("Running")!;
       if (outAt.current === null) {
         outAt.current = s.serviceTime;
-        crossfade(rig.actions.get("Running")!);
+        crossfade(leave);
         outElapsed.current = Math.max(0, s.serviceTime - (cook.walkoutAt ?? s.serviceTime));
         // freeze the fillet where the hand last carried it, before the
         // actor turns and runs — it goes back into the pan, not on her jog
@@ -371,14 +385,17 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
         }
       }
       const elapsed = outElapsed.current;
+      if (elapsed >= WALK_RUN_AT && current.current === leave && leave !== rig.actions.get("Running")) {
+        crossfade(rig.actions.get("Running")!);
+      }
       if (rig.spine2 && rig.spineBind) rig.spine2.scale.copy(rig.spineBind);
-      g.rotation.y = MathUtils.damp(g.rotation.y, -Math.PI / 2, 12, delta);
+      g.rotation.y = MathUtils.damp(g.rotation.y, elapsed >= WALK_SLIDE_AT ? -Math.PI / 2 : 0, 12, delta);
       // absolute exit path: a late-loading model never reappears at start
-      g.position.x = x - 2.8 * Math.max(0, Math.min(elapsed, 2.2) - 0.2);
+      g.position.x = x - 2.8 * Math.max(0, Math.min(elapsed, WALK_SLIDE_AT + 2.0) - WALK_SLIDE_AT);
       g.position.z = -4.03;
       g.visible = g.position.x > -8.5;
       // fully gone and the fillet already home — nothing left to animate
-      if (!g.visible && elapsed >= 2.2 && (drop.current?.p ?? 1) >= 1) return;
+      if (!g.visible && elapsed >= WALK_SLIDE_AT + 2.0 && (drop.current?.p ?? 1) >= 1) return;
       // head restore/update still applies so the last pose doesn't pop
       rig.head.quaternion.copy(headRaw.current);
       rig.mixer.update(delta);
@@ -405,17 +422,29 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
       if (!idle.current) idle.current = makeIdleDrive(0, mood);
       const d = idle.current;
       if (d) {
+        // a new scream strain-spike fires the flinch once — the loop keeps
+        // stepping underneath so it resumes the same window on the way out
+        const strainAt = cook?.spikes?.strainAt ?? 0;
+        if (lastStrain.current === null) lastStrain.current = strainAt;
+        else if (strainAt > lastStrain.current) {
+          lastStrain.current = strainAt;
+          flinchAt.current = t;
+        }
+        const flinch = flinchAt.current !== null && t - flinchAt.current < FLINCH_DUR
+          ? rig.actions.get("Flinch") ?? null
+          : null;
         const beats = d.step(0, delta, mood, true);
-        for (const b of beats) sfx(b.sound, { pan: MathUtils.clamp(x / 8, -1, 1), vol: b.vol });
+        if (!flinch) for (const b of beats) sfx(b.sound, { pan: MathUtils.clamp(x / 8, -1, 1), vol: b.vol });
         // the watch stands her Ready pose — a different silhouette from the
         // bench windows, so "between tickets" reads at a glance
-        const next = rig.actions.get(d.watching ? "PetraReady" : d.variant.id);
+        const next = flinch ?? rig.actions.get(d.watching ? "PetraReady" : d.variant.id);
         if (next) {
           if (current.current !== next) {
             crossfade(next);
-            if (!d.watching) next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
+            if (!flinch && !d.watching) next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
           }
-          if (!d.watching) next.setEffectiveTimeScale(idleRate(0, d.variant, d.loop, mood));
+          if (flinch) next.setEffectiveTimeScale(1);
+          else if (!d.watching) next.setEffectiveTimeScale(idleRate(0, d.variant, d.loop, mood));
         } else {
           crossfade(rig.actions.get("PetraReady")!);
         }

@@ -26,6 +26,7 @@ import {
   Object3D,
   Quaternion,
   SkinnedMesh,
+  LoopOnce,
   LoopRepeat,
   type AnimationAction,
   type AnimationClip,
@@ -51,6 +52,13 @@ import {
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const REQUIRED_CLIPS = ["Work", "Walking", "Running"] as const;
+
+/** the generated apron-rip reads at the station, then the scripted slide runs the exit */
+const WALK_SLIDE_AT = 2.3;
+/** blend into the Running clip before the Walkout tail clamps */
+const WALK_RUN_AT = 4.2;
+/** scream flinch reads for most of the 1.97s clip, then the idle loop resumes */
+const FLINCH_DUR = 1.9;
 
 /** Bone-local socket spec: position + euler on the named bone, measured so
  *  the tool's working end reaches its target mid-clip. */
@@ -213,7 +221,7 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     const actions = new Map<string, AnimationAction>();
     for (const [name, clip] of clips) {
       const a = mixer.clipAction(clip);
-      a.setLoop(LoopRepeat, Infinity);
+      a.setLoop(name === "Walkout" || name === "Flinch" ? LoopOnce : LoopRepeat, Infinity);
       a.clampWhenFinished = true;
       actions.set(name, a);
     }
@@ -230,7 +238,7 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     for (const [name, clip] of rig.clips) {
       const a = rig.mixer.clipAction(clip);
       a.reset();
-      a.setLoop(LoopRepeat, Infinity);
+      a.setLoop(name === "Walkout" || name === "Flinch" ? LoopOnce : LoopRepeat, Infinity);
       a.clampWhenFinished = true;
       rig.actions.set(name, a);
     }
@@ -262,6 +270,9 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
   const gaze = useRef({ yaw: 0, pitch: 0 });
   const time = useRef(0);
   const outElapsed = useRef(0);
+  /** last strain-spike stamp consumed: a new one fires the flinch once */
+  const lastStrain = useRef<number | null>(null);
+  const flinchAt = useRef<number | null>(null);
   /** the idle loop state for this body: window, phase, beats */
   const idle = useRef<IdleDrive | null>(null);
 
@@ -291,6 +302,8 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
       react.current = null;
       outAt.current = null;
       outElapsed.current = 0;
+      lastStrain.current = null;
+      flinchAt.current = null;
       wasService.current = false;
       time.current = 0;
       idle.current = null;
@@ -359,21 +372,26 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     if (rp >= 1) react.current = null;
     const reacting = react.current;
 
-    // --- walkout: Running clip, same wall-hugging exit Petra takes
+    // --- walkout: the generated clip plays the apron rip at the station,
+    // then the same wall-hugging exit as before under the Running clip
     if (cook?.walkedOut) {
+      const leave = rig.actions.get("Walkout") ?? rig.actions.get("Running")!;
       if (outAt.current === null) {
         outAt.current = s.serviceTime;
-        crossfade(rig.actions.get("Running")!);
+        crossfade(leave);
         outElapsed.current = Math.max(0, s.serviceTime - (cook.walkoutAt ?? s.serviceTime));
       }
       outElapsed.current += delta;
       const elapsed = outElapsed.current;
+      if (elapsed >= WALK_RUN_AT && current.current === leave && leave !== rig.actions.get("Running")) {
+        crossfade(rig.actions.get("Running")!);
+      }
       if (rig.spine2 && rig.spineBind) rig.spine2.scale.copy(rig.spineBind);
-      g.rotation.y = MathUtils.damp(g.rotation.y, -Math.PI / 2, 12, delta);
-      g.position.x = x - 2.8 * Math.max(0, Math.min(elapsed, 2.2) - 0.2);
+      g.rotation.y = MathUtils.damp(g.rotation.y, elapsed >= WALK_SLIDE_AT ? -Math.PI / 2 : 0, 12, delta);
+      g.position.x = x - 2.8 * Math.max(0, Math.min(elapsed, WALK_SLIDE_AT + 2.0) - WALK_SLIDE_AT);
       g.position.z = -3.95;
       g.visible = g.position.x > -8.5;
-      if (!g.visible && elapsed >= 2.2) return;
+      if (!g.visible && elapsed >= WALK_SLIDE_AT + 2.0) return;
       rig.head.quaternion.copy(headRaw.current);
       rig.mixer.update(delta);
       headRaw.current.copy(rig.head.quaternion);
@@ -402,19 +420,31 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
       if (!idle.current) idle.current = makeIdleDrive(cookId, mood);
       const d = idle.current;
       if (d) {
+        // a new scream strain-spike fires the flinch once — the loop keeps
+        // stepping underneath so it resumes the same window on the way out
+        const strainAt = cook?.spikes?.strainAt ?? 0;
+        if (lastStrain.current === null) lastStrain.current = strainAt;
+        else if (strainAt > lastStrain.current) {
+          lastStrain.current = strainAt;
+          flinchAt.current = t;
+        }
+        const flinch = flinchAt.current !== null && t - flinchAt.current < FLINCH_DUR
+          ? rig.actions.get("Flinch") ?? null
+          : null;
         const beats = d.step(cookId, delta, mood, true);
-        for (const b of beats) sfx(b.sound, { pan: MathUtils.clamp(x / 8, -1, 1), vol: b.vol });
+        if (!flinch) for (const b of beats) sfx(b.sound, { pan: MathUtils.clamp(x / 8, -1, 1), vol: b.vol });
         // the watch stands the Ready pose — a different silhouette from the
         // bench windows, so "between tickets" reads at a glance
-        const next = rig.actions.get(d.watching ? "Ready" : d.variant.id);
+        const next = flinch ?? rig.actions.get(d.watching ? "Ready" : d.variant.id);
         if (next) {
           if (current.current !== next) {
             // resume the window where the loop actually is, so swapping
             // variants never restarts a gesture from its first frame
             crossfade(next);
-            if (!d.watching) next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
+            if (!flinch && !d.watching) next.time = Math.min(d.t, Math.max(0, next.getClip().duration - 1e-3));
           }
-          if (!d.watching) next.setEffectiveTimeScale(idleRate(cookId, d.variant, d.loop, mood));
+          if (flinch) next.setEffectiveTimeScale(1);
+          else if (!d.watching) next.setEffectiveTimeScale(idleRate(cookId, d.variant, d.loop, mood));
         } else {
           crossfade(rig.actions.get("Ready")!);
         }
