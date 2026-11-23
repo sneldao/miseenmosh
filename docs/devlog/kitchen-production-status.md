@@ -1015,3 +1015,16 @@ created or charged (verified via `meshy_list_tasks`). Needs the owner to
 upgrade/manage the plan at meshy.ai/settings/subscription; the job is
 otherwise ready to fire exactly as spec'd (three 6 s prime clips, FBX out,
 retargeted onto the mixamorig rigs by the existing pipeline).
+
+## Voice bake — fal Kokoro chorus (23 Nov)
+
+ElevenLabs key never arrived; the approved fallback went through fal
+(sponsor track doubles). `assets/voice/bake.mjs` generates the five
+`BRIGADE_RESPONSES` chorus lines through `fal-ai/kokoro/american-english`
+(Petra=af_bella, Dimitri=am_fenrir, Anwar=am_puck), mixes the ensemble
+takes with staggered offsets via ffmpeg → `public/voice/chorus-*.mp3`
+(~62 KB total, ~$0.01 spend). `speakChorus` now plays the baked take for
+its line and falls back to the platform synth on any error — the review
+read-out stays on synth since its text is dynamic. Verified: file plays
+in-page post-gesture (autoplay policy), stems kept in
+`assets/voice/stems/` for per-cook bark reuse.
