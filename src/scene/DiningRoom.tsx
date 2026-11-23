@@ -398,11 +398,16 @@ export default function DiningRoom() {
           within a few centimetres is a row of staff; the eye reads a line, not
           a room. Each body gets its own seat height so the silhouette has a
           rhythm and the pass window stops looking like a second brigade. */}
-      <Guest id={0} x={-4.0} z={-6.7} y={0} venue={venue} />
-      <Guest id={1} x={-2.0} z={-7.3} y={-0.3} venue={venue} />
-      <Guest id={2} x={0} z={-6.6} y={0.06} venue={venue} />
-      <Guest id={3} x={2.0} z={-7.3} y={-0.34} venue={venue} />
-      <Guest id={4} x={4.0} z={-6.7} y={-0.12} venue={venue} />
+      {/* Evenly spaced and evenly deep is the whole reason five guests still
+          read as a brigade row: the eye gets a grid and a grid is staff. The
+          tables are now set at intervals that do not repeat and at depths from
+          6.0 to 7.9 m, so perspective alone gives three apparent sizes and the
+          window stops looking like a second line-up. */}
+      <Guest id={0} x={-4.25} z={-6.5} y={0} venue={venue} />
+      <Guest id={1} x={-1.7} z={-7.85} y={-0.3} venue={venue} />
+      <Guest id={2} x={0.45} z={-6.05} y={0.06} venue={venue} />
+      <Guest id={3} x={2.65} z={-7.9} y={-0.34} venue={venue} />
+      <Guest id={4} x={4.35} z={-6.6} y={-0.12} venue={venue} />
     </group>
   );
 }
