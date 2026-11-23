@@ -802,13 +802,14 @@ Per the living-kitchen plan v4.1. The guns no longer freeze the room.
   beats, and take the same slump/brace offsets — a failed GLB no longer
   freezes a station into silence.
 
-Tests: **96 passing** (+18 in `src/scene/idleLoops.test.ts`) — two variants
+Tests: **97 passing** (+19 in `src/scene/idleLoops.test.ts`) — two variants
 per station, windows inside their source clip, tempo never above 1, beats
 in order and conservative, the wrap is continuous and quaternions stay unit
 length through the blend, deterministic phase/tempo/variant, the straining
 cook drifts to the slower window, beats never fire on a paused or backwards
-step, ANGRY and EDGE never share a silhouette, and work tempo bounded so a
-ticket's performance always completes. `tsc --noEmit` clean, `npm run build`
+step, ANGRY and EDGE never share a silhouette, the wrap is no larger than an
+ordinary frame inside the loop, and work tempo bounded so a ticket's
+performance always completes. `tsc --noEmit` clean, `npm run build`
 clean.
 
 Frame gate (Dev 1 slice), same camera, 120-frame captures through
@@ -824,15 +825,57 @@ Both hold 60 Hz. Honest caveat: the OFF run also hides the two runners
 that delta are the runners, not the loops; the loops' own marginal cost is
 below the noise of this measurement. Zero `__propErrors` in every run.
 
-Not Dev 1's, and still open: **the loop-seam 30 s visual scan and the
-idle-vs-plating blind read need a person at the screen** — the wrap is
-continuous by construction and by test, but a still cannot judge whether
-prep reads as background work. `?mood=CALM|STRAINED|ANGRY|EDGE` forces the
-body pose in dev builds (compiled out of production) for the blind mood
-check; Dev 2 can use it for the glyph mount. A scream-forced strain was not
-reproduced through the real input path (a scripted Space press did not
-charge the meter), so the offset table itself is verified numerically
-rather than through gameplay.
+### Loop seam, measured over 30 s
+
+The plan asked for a 30 s loop with no pop. Eyeballing a screencast is not
+an instrument — a VP8 capture drops and duplicates frames, so its per-frame
+pixel diffs show catch-up spikes that are the encoder, not the body (0.00
+diff frames sit directly next to doubled ones). The seam is therefore
+measured on the clips themselves, in `assets/meshy/probe-loop-seam.mjs`:
+each window is rebuilt from the shipped GLB at 30 fps, cut with the real
+`AnimationUtils.subclip` and the game's own `wrapBlend`, then played 30 s at
+60 Hz. The step across the wrap is compared to the distribution of steps
+inside the loop, and the untouched source clip is measured the same way as a
+control.
+
+| cook | window | loop | median step | p99 | max inside | seam step | seam/max | source max |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Petra | `Idle0a` | 1.933 s | 0.035 | 0.071 | 0.071 | 0.0025 | 0.035 | 0.069 |
+| Petra | `Idle0b` | 1.967 s | 0.018 | 0.052 | 0.052 | 0.0024 | 0.045 | 0.069 |
+| Dimitri | `Idle1a` | 1.367 s | 0.076 | 0.209 | 0.209 | 0.0028 | 0.013 | 0.406 |
+| Dimitri | `Idle1b` | 1.167 s | 0.094 | 0.209 | 0.209 | 0.0025 | 0.012 | 0.406 |
+| Anwar | `Idle2a` | 1.167 s | 0.096 | 0.311 | 0.311 | 0.0024 | 0.008 | 1.157 |
+| Anwar | `Idle2b` | 1.567 s | 0.120 | 0.311 | 0.311 | 0.0024 | 0.008 | 1.157 |
+
+6/6 windows: the wrap step is 1–4.5% of the largest ordinary step inside the
+loop, so the wrap is quieter than the loop's own fastest gesture, not an
+event. The largest in-loop steps are the same bones the source clip spikes on
+(`RightForeArm` / `RightHand`) and are smaller than the source's own maximum,
+i.e. the windows avoid the actor's fastest beats rather than manufacturing
+them. The switch between the two windows is not a pop surface either: it is a
+0.28 s crossfade that resumes the loop where it actually is. A vitest case now
+holds the property (`makes the wrap an ordinary frame, not an event`), so it
+cannot regress quietly. A 30 s capture and its contact sheet are kept as the
+human-viewable pair (`dev1-idle-loop-30s.webm`,
+`dev1-idle-loop-contact-sheet.png`) — all three bodies change pose across the
+30 s and nobody freezes — but the numbers above, not the video, are the proof.
+
+### Idle vs plating, read blind
+
+One paused frame with Petra on a live plating ticket and Dimitri and Anwar on
+tickets still at the rail; both crops at the same camera, 4×, unlabelled in
+`dev1-idle-vs-plating-ab.png` and keyed in `dev1-idle-vs-plating-key.png`.
+
+**Result: not distinguishable.** Petra idling and Petra plating both read as
+"working at the board" — hands on the pan, head down, same silhouette; only
+the ticket card separates them. That is the direct consequence of cutting the
+idle from a neutral stretch of each cook's own work performance, and it is the
+right side of the plan's own reframe: the floor's job is non-emptiness, and
+nothing on the floor looks idle. What it does mean is that posture cannot be
+the glanceable "who is busy" signal — that read comes from the ticket, the
+carried plate and Dev 2's mood glyph. If the owner wants posture to carry it
+too, the change is a distinct resting shape (stand taller, hand off the pan,
+an occasional head-up scan of the rail) — a follow-up, not a fix.
 
 ## Dev 2 (room / equipment / dining lane) — 23 Nov, landed `ba847fd`
 
@@ -881,3 +924,37 @@ whoever next touches the room edges; the oven glow writes one uniform
 per frame (deliberate — it lerps); the couple's suppressed-finale
 beats still gesture (tellAt updates even when the line is culled —
 accepted, reads as silent tension).
+
+## Phase A landing — 23 Nov
+
+All three lanes are committed on `main` and pushed, and the day-one contract
+held: the mood type, `Cook.mood` and the idle SFX names landed before any lane
+wrote a line, and nothing was rewritten underneath. Order on `main`:
+contract `932c45d` → Dev 3 `5c6f1b0` → Dev 2 `ba847fd` + devlog `3ced55d`
+→ Dev 1 `c03dafe` → cross-lane review fixes `72805bb` (pause-gated ambient
+equipment, fresh-cook barks, and the seam probe) → QA media `7ff77ca`.
+
+- **Dev 3** — mood derived per tick into `Cook.mood`, spike bookkeeping with
+  45 s decay, mood-gated barks, the no-empty pacing floor, the simmer bed.
+- **Dev 2** — state-aware equipment (grill/sauce/pastry), flanks dressed,
+  10 of 12 steam sprites, emissive-only glow, MoodGlyph mounted once per
+  station, pair tables given second bodies.
+- **Dev 1** — idle prep loops that loop silently (measured above), fillet
+  parked while not plating, the room moving while the clock waits on the
+  player, mood carried by the skeleton, standby sway for the runners.
+
+Suites: `tsc --noEmit` clean, 97 tests green across the repo, `npm run
+build` clean (10.8 s, 1.45 MB app chunk), 60 Hz held on the Dev 1 and Dev 2
+frame gates.
+
+Two notes on that tail, because the order there matters more than the labels:
+the review pass carried Dev 1's seam probe in with it, so the instrument
+landed before its numbers did (they are above); and the QA-media commit
+captured the idle film from a capture that was still being written, so the
+file in it is 2.3 s and cut short — the full 30 s capture replaces it here.
+
+Still waiting on a person: the audio floor and the idle-beat levels have
+never been listened to (both are meter-conservative on purpose), the
+idle-vs-plating read above was run by one reader, and the scream→strain
+offset has not been reproduced through the real input path. Nothing here is
+deployed — pushing publishes the lane commits, not a build.
