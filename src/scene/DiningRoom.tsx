@@ -352,6 +352,91 @@ const VENUE_DRESS = [
   { wall: "#5f4a3a", floor: "#33262a", wash: "#ffd9a0" as const, washI: 46, sconce: 17, sconceC: "#ffd9a0" as const },
 ];
 
+/** The one body in the room that *moves through* space: a waiter crossing
+ *  the floor between the tables and the far wall, tray up, pausing at
+ *  tables. Guests breathe — but at 8 m their stillness is the read; a
+ *  crossing body is the proof the room is inhabited. Render clock, so it
+ *  never desyncs; pause-gated like every other ambient mover. */
+function Waiter() {
+  const g = useRef<Group>(null);
+  const tray = useRef<Group>(null);
+  const clock = useRef(0);
+  const reduced = useReducedMotion();
+  // waypoint walk: sweep the floor behind the seated row, pausing to serve
+  // at whatever x the guests actually sit. The path returns on itself so
+  // the loop wraps on the far side, never teleports across the window.
+  const stops = [-4.25, -1.7, 0.45, 2.65, 4.35, 2.65, 0.45, -1.7];
+  useFrame((_, dt) => {
+    const st = useGame.getState();
+    if (st.paused || st.phase !== "service" || !g.current) return;
+    if (!reduced) clock.current += Math.min(dt, 0.05);
+    const t = clock.current;
+    // ~45s loop across the whole floor: a walk leg, then a short serve
+    const SEG = 45 / (stops.length - 1);
+    const pos = (t % 45) / SEG;
+    const leg = Math.min(stops.length - 2, Math.floor(pos));
+    const frac = pos - leg;
+    // ease each leg, and dwell ~20% of it standing at the table
+    const move = Math.min(1, frac / 0.8);
+    const e = move * move * (3 - 2 * move);
+    const x = stops[leg] + (stops[leg + 1] - stops[leg]) * e;
+    const walking = frac < 0.8 && e > 0.02 && e < 0.98;
+    g.current.position.x = x;
+    g.current.position.y = reduced ? 0 : Math.abs(Math.sin(t * 7)) * 0.035 * (walking ? 1 : 0);
+    g.current.rotation.y = walking ? (stops[leg + 1] > stops[leg] ? Math.PI / 2 : -Math.PI / 2) * 0.9 : Math.PI;
+    // tray rides steady: high and level while walking, dips on the serve
+    if (tray.current) {
+      const serve = walking ? 0 : Math.sin(Math.min(1, (frac - 0.8) / 0.2) * Math.PI);
+      tray.current.rotation.x = reduced ? 0 : -serve * 0.4;
+      tray.current.position.y = reduced ? 1.18 : 1.18 - serve * 0.12;
+    }
+  });
+  return (
+    <group ref={g} position={[-4.25, 0, -8.4]}>
+      {/* dark vest over white — staff, but unmistakably not brigade whites */}
+      <mesh position={[0, 1.05, 0]} castShadow>
+        <capsuleGeometry args={[0.16, 0.42, 6, 10]} />
+        <meshStandardMaterial color="#e8e2d4" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.02, 0.06]}>
+        <boxGeometry args={[0.3, 0.5, 0.14]} />
+        <meshStandardMaterial color="#241f28" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 0.55, 0]}>
+        <capsuleGeometry args={[0.14, 0.4, 6, 10]} />
+        <meshStandardMaterial color="#1c181f" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 1.52, 0]}>
+        <sphereGeometry args={[0.11, 14, 14]} />
+        <meshStandardMaterial color="#c08a62" emissive="#2a1c16" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 1.6, -0.02]}>
+        <sphereGeometry args={[0.108, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.55]} />
+        <meshStandardMaterial color="#241a18" roughness={0.95} />
+      </mesh>
+      {/* tray arm: raised, flat, carrying the room's proof of service */}
+      <group ref={tray} position={[0.26, 1.18, 0.1]}>
+        <mesh position={[0, -0.14, 0]} rotation={[0.9, 0, 0]}>
+          <capsuleGeometry args={[0.04, 0.22, 4, 8]} />
+          <meshStandardMaterial color="#e8e2d4" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 0.02, 0.06]}>
+          <cylinderGeometry args={[0.16, 0.16, 0.018, 16]} />
+          <meshStandardMaterial color="#3a3630" metalness={0.5} roughness={0.4} />
+        </mesh>
+        <mesh position={[0.05, 0.06, 0.06]}>
+          <cylinderGeometry args={[0.02, 0.015, 0.07, 8]} />
+          <meshStandardMaterial color="#7a2a3a" roughness={0.4} />
+        </mesh>
+      </group>
+      <mesh position={[-0.24, 0.95, 0]} rotation={[0.4, 0, 0.2]}>
+        <capsuleGeometry args={[0.04, 0.26, 4, 8]} />
+        <meshStandardMaterial color="#e8e2d4" roughness={0.9} />
+      </mesh>
+    </group>
+  );
+}
+
 function FarWall({ venue = 0 }: { venue?: number }) {
   const d = VENUE_DRESS[Math.min(2, venue)];
   const sconces = useRef<(Group | null)[]>([]);
@@ -418,6 +503,7 @@ export default function DiningRoom() {
         <meshStandardMaterial color={d.floor} roughness={0.95} />
       </mesh>
       <FarWall venue={venue} />
+      <Waiter />
       {/* ceiling wash warms as the room moves up — gold by the flagship */}
       <pointLight position={[0, 4.2, -8.2]} color={d.wash} intensity={d.washI} distance={14} />
       {/* window-side wash: the pass needs faces to read at 10m */}

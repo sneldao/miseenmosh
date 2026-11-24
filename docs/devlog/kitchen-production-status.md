@@ -1497,3 +1497,21 @@ coefficient 0.09 → ~0.15. Still needs a human listen.
 **Deploy:** blocked — 0/5 deploys in the rolling 24 h, next slot ~22:39
 UTC. This batch (walkout/flinch/confessionals/silhouettes) ships in the
 next one.
+
+## Back-row motion — the crossing waiter (Nov 20 late)
+
+Player feedback on the live build: the new backdrop reads, but "the people
+right at the back are still motionless." The five guests do animate — but
+their motion was tuned to ~3px at 8m (deliberately, to stay under the
+candle flicker), which at game distance reads as frozen. The missing read
+was a body that moves *through* space, not one that breathes in place.
+
+Fix: `Waiter` in `DiningRoom.tsx` — a dark-vest/white-shirt body (staff,
+not brigade whites) that walks the floor behind the seated row on a
+ping-pong waypoint path over the five guest x-positions, ~45s loop:
+walk legs eased smoothstep, ~20% dwell at each table with a tray-dip
+serve pose, bob only while walking, facing into the walk direction.
+Render clock, pause-gated, reduced-motion-safe (static pose).
+
+QA: `media/phasec/waiter-a|b.png` — three-band sequence shows it at
+centre-right, centre, and far-left across ~10s. 126 tests green, tsc clean.
