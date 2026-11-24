@@ -1207,6 +1207,8 @@ function useHotkeys() {
       if (k === "h") return s.shooRunner();
       if (k === "d") return s.declineRequest();
       if (k === "c") return s.compTable();
+      if (k === "g") return s.sendBread();
+      if (k === "n") return s.expedite();
       const n = Number(e.key);
       if (n >= 1 && n <= 9) {
         const rail = s.tickets.filter((t) => t.state === "rail");
@@ -1233,6 +1235,8 @@ function Glossary() {
     ["D", "refuse request · refuse-with-grace (cold plate)"],
     ["R", "fix the folklore (fork/glass/coat)"],
     ["C", "comp the hanging table (champagne)"],
+    ["G", "bread service — settle the hanging table"],
+    ["N", "wave the next order in early"],
     ["U", "brigade voices on/off"],
     ["click table", "flag the inspector (before dessert)"],
     ["P / Esc", "pause"],
@@ -1297,6 +1301,11 @@ export default function HUD() {
   const request = useGame((s) => s.request);
   const comped = useGame((s) => s.comped);
   const compTable = useGame((s) => s.compTable);
+  const sauce = useGame((s) => s.sauce);
+  const breadAt = useGame((s) => s.breadAt);
+  const sendBread = useGame((s) => s.sendBread);
+  const nextTicketIn = useGame((s) => s.nextTicketIn);
+  const expedite = useGame((s) => s.expedite);
   const adrenalineTil = useGame((s) => s.adrenalineTil);
   const criticFlagged = useGame((s) => s.criticFlagged);
   const criticSpotted = useGame((s) => s.criticSpotted);
@@ -1444,6 +1453,18 @@ export default function HUD() {
             <div className="hint">Runner on the floor — SHOO HIM (H)!</div>
           ) : request ? (
             <div className="hint">Table {request.table} wants it {request.mod} — D to refuse.</div>
+          ) : sauce ? (
+            <div className="hint">That sauce is splitting — WHISK it (M)!</div>
+          ) : atPass ? null : live.some((t) => t.state === "ready") ? (
+            <div className="hint">A plate is up — F collects it.</div>
+          ) : live.some((t) => t.state === "plating") ? (
+            <div className="hint">Plating… F fires it early — wait for the gold.</div>
+          ) : railAll.length > 0 ? (
+            <div className="hint">Orders on the rail — keys 1–{Math.min(9, railAll.length)} call them in.</div>
+          ) : serviceTime - breadAt >= 18 ? (
+            <div className="hint">Bread service (G) — a basket settles the hanging table.</div>
+          ) : nextTicketIn > 6 ? (
+            <div className="hint">Quiet pass — N waves the next order in early.</div>
           ) : !criticFlagged && serviceTime < 100 ? (
             <div className="hint">Spot the inspector — click them.</div>
           ) : null}
@@ -1509,6 +1530,30 @@ export default function HUD() {
             }}
           >
             VOICE {voiceOn ? "ON" : "OFF"} <span className="kbd">U</span>
+          </button>
+          <button
+            className="btn bread"
+            title="The commis walks a basket to the hanging table"
+            disabled={!!openingStep || serviceTime - breadAt < 18}
+            onClick={() => sendBread()}
+          >
+            BREAD <span className="kbd">G</span>{" "}
+            <span className="cost">
+              {serviceTime - breadAt < 18
+                ? `basket out · ${Math.ceil(18 - (serviceTime - breadAt))}s`
+                : "the hanging table settles"}
+            </span>
+          </button>
+          <button
+            className="btn expedite"
+            title="Wave the next order through — more rail pressure"
+            disabled={!!openingStep || nextTicketIn <= 0.5 || live.length >= 9}
+            onClick={() => expedite()}
+          >
+            NEXT TICKET <span className="kbd">N</span>{" "}
+            <span className="cost">
+              {nextTicketIn > 0.5 ? `printer fires in ${Math.ceil(nextTicketIn)}s` : "printing…"}
+            </span>
           </button>
           <button
             className="btn comp"

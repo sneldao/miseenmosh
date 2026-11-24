@@ -357,7 +357,16 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   position: absolute; right: 1rem; bottom: 7.2rem;
   font-size: .7rem; letter-spacing: .08em; opacity: .92;
 }
+.bread {
+  position: absolute; right: 1rem; bottom: 9.8rem;
+  font-size: .7rem; letter-spacing: .08em; opacity: .92;
+}
+.expedite {
+  position: absolute; right: 1rem; bottom: 12rem;
+  font-size: .7rem; letter-spacing: .08em; opacity: .92;
+}
 .comp .cost { font-size: .6rem; opacity: .7; letter-spacing: .04em; }
+.bread .cost, .expedite .cost { font-size: .6rem; opacity: .7; letter-spacing: .04em; }
 
 /* ---- streak ceremony: the room leans in ---- */
 .milestone {

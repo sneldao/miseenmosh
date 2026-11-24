@@ -1515,3 +1515,28 @@ Render clock, pause-gated, reduced-motion-safe (static pose).
 
 QA: `media/phasec/waiter-a|b.png` — three-band sequence shows it at
 centre-right, centre, and far-left across ~10s. 126 tests green, tsc clean.
+
+## Player agency stack (Nov 20 late)
+
+Playtester feedback: "the things the user is able to do are quite limited
+e.g. when the game first loads." Honest read: the verb surface was already
+wide (15+ keys) but every verb was reactive and half were undiscoverable.
+Three fixes, all shipped:
+
+- **Bread service (G)** — new proactive verb: the commis walks a basket to
+  the most impatient table (+14 tellClock, 18s cooldown). Reuses the
+  `lastDelivery` tray path so it visibly walks out. First *initiating*
+  verb — the room answers to you, not only the other way.
+- **Expedite (N)** — waves the next order onto the rail early
+  (`nextTicketIn → 0`). The trade-off is organic: more rail pressure is
+  its own cost, so it needs no artificial price.
+- **Verb surfacing** — the hint bar was 3 states; now a priority ladder:
+  runner > request > split sauce > plate up (F collects) > plating (F
+  fires on the gold) > rail orders (1–9) > bread ready > quiet pass (N
+  expedite) > spot the inspector. One hint at a time, always the live one.
+
+QA (`media/phasec/verbs.png`): tutorial cleared → BREAD fed "Bread and
+butter on table 10", cooldown countdown on the button; NEXT TICKET fed
+"You wave the next order through" and the rail filled to six dockets.
+`src/game/verbs.test.ts`: 5 tests — target pick, cooldown, phase gates,
+printer pull, rail-cap guard. 131 tests green, tsc + build clean.

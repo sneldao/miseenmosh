@@ -179,6 +179,8 @@ export const VENUES = [
 ];
 
 const SERVICE_LEN = 150;
+/** bread round cooldown — long enough that patience is a decision, not a tap */
+const BREAD_COOLDOWN = 18;
 const DESSERT_AT = 100; // escalation beat + inspector flag deadline
 const TICKET_TTL = 55;
 const WALKOUT_AT = 12;
@@ -520,6 +522,9 @@ interface GameState {
   folkloreDone: boolean;
   /** the rail card the chef has aimed at: fire/collect target, never auto-picked */
   selectedTicketId: number | null;
+  /** serviceTime of the last bread round — the commis walks a basket to
+      the most impatient table; +patience on that table, ~18s cooldown */
+  breadAt: number;
   /** held-plate inspection: close camera, turn the plate */
   inspecting: boolean;
   /** plate turn angle while inspecting — drives held and world models */
@@ -584,6 +589,10 @@ interface GameState {
   shooRunner: () => void;
   declineRequest: () => void;
   compTable: () => void;
+  /** bread service: the commis walks a basket to the hangingest table */
+  sendBread: () => void;
+  /** expedite: wave the next order onto the rail early */
+  expedite: () => void;
   bet: (kind: "covers" | "walks" | "spot") => void;
   borrow: () => void;
   repay: () => void;
@@ -884,6 +893,7 @@ export const useGame = create<GameState>((set, get) => ({
   milestoneAt: 0,
   milestoneText: "",
   selectedTicketId: null,
+  breadAt: -999,
   inspecting: false,
   inspectionTurn: 0,
   correction: null,
@@ -958,6 +968,7 @@ export const useGame = create<GameState>((set, get) => ({
         canSave: canPersist(),
         saveIssue: null,
         selectedTicketId: null,
+        breadAt: -999,
         inspecting: false,
         correction: null,
         lastDelivery: null,
@@ -1002,6 +1013,7 @@ export const useGame = create<GameState>((set, get) => ({
       saveIssue: null,
       openingStep: null,
       selectedTicketId: null,
+      breadAt: -999,
       inspecting: false,
       inspectionTurn: 0,
       correction: null,
@@ -1115,6 +1127,7 @@ export const useGame = create<GameState>((set, get) => ({
       nextTicketIn: coldOpen ? 4 : 1.5,
       openingStep: coldOpen ? "serve" : null,
       selectedTicketId: null,
+      breadAt: -999,
       inspecting: false,
       inspectionTurn: 0,
       correction: null,
@@ -2700,6 +2713,44 @@ export const useGame = create<GameState>((set, get) => ({
       tickets: s.tickets.map((t) =>
         t.state === "rail" && t.table === target ? { ...t, age: Math.max(0, t.age - 10) } : t
       ),
+    });
+  },
+
+  sendBread: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction) return;
+    if (s.serviceTime - s.breadAt < BREAD_COOLDOWN) return;
+    // the hangingest table gets the basket — lowest patience wins
+    let target: Guest | null = null;
+    for (const g of s.guests) {
+      if (!target || g.tellClock < target.tellClock) target = g;
+    }
+    if (!target) return;
+    sfx("clatter", { pan: tablePan(target.table), vol: 0.45 });
+    set({
+      breadAt: s.serviceTime,
+      guests: s.guests.map((g) =>
+        g.id === target!.id ? { ...g, tellClock: g.tellClock + 14 } : g
+      ),
+      feed: pushFeed(s.feed, `Bread and butter on table ${target.table} — they settle.`, "info", "THE PASS"),
+      // the commis visibly walks the basket out — same tray the plates ride
+      lastDelivery: {
+        id: (s.lastDelivery?.id ?? 0) + 1,
+        at: s.serviceTime,
+        table: target.table,
+        plates: [{ dish: "Bread & butter", quality: 100 }],
+      },
+    });
+  },
+
+  expedite: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused || s.glossary || s.openingStep) return;
+    const live = s.tickets.filter((t) => t.state !== "done").length;
+    if (s.nextTicketIn <= 0.5 || live >= 9) return;
+    set({
+      nextTicketIn: 0,
+      feed: pushFeed(s.feed, "You wave the next order through.", "info", "THE PASS"),
     });
   },
 
