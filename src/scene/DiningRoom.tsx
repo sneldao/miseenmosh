@@ -530,12 +530,29 @@ export default function DiningRoom() {
       </group>
       <Guest id={0} x={-4.25} z={-6.5} y={0} scale={1.02} venue={venue} visible={false} />
       <Guest id={1} x={-1.7} z={-7.85} y={-0.3} scale={0.9} venue={venue} visible={false} />
-      <group position={[-1.7, 0, -7.85]} scale={0.9}>
-        <CharacterGLB url={modelUrl("characters/guest-b.glb")} clip="human_000025" position={[0, 0.26, -0.3]} rotation={[0, Math.PI, 0]} scale={0.9} />
+      {/* Rodin-pipeline cast: generated → rigged → decimated (scripts/rodin/).
+          Each guest plays a distinct clip set so the row reads as people, not
+          a chorus line. Capsule bodies stay mounted (hidden) for hit proxies
+          and per-guest state; only the visible body is swapped. */}
+      <group position={[-4.25, 0, -6.5]} scale={1.02}>
+        <CharacterGLB url={modelUrl("characters/guest-a.glb")} clip="human_000025" position={[0, 0.26, 0]} rotation={[0, Math.PI, 0]} scale={0.9} />
       </group>
-      <Guest id={2} x={0.45} z={-6.05} y={0.06} scale={1.1} venue={venue} />
-      <Guest id={3} x={2.65} z={-7.9} y={-0.34} scale={0.86} venue={venue} />
-      <Guest id={4} x={4.35} z={-6.6} y={-0.12} scale={1.05} venue={venue} />
+      <group position={[-1.7, 0, -7.85]} scale={0.9}>
+        <CharacterGLB url={modelUrl("characters/guest-b.glb")} clip="human_000085" position={[0, 0.26, -0.3]} rotation={[0, Math.PI, 0]} scale={0.9} />
+      </group>
+      <group position={[0.45, 0, -6.05]} scale={1.1}>
+        <CharacterGLB url={modelUrl("characters/guest-c.glb")} clip="human_000085" position={[0, 0.26, 0.06]} rotation={[0, Math.PI, 0]} scale={0.9} />
+      </group>
+      <group position={[2.65, 0, -7.9]} scale={0.86}>
+        <CharacterGLB url={modelUrl("characters/guest-d.glb")} clip="human_000041" position={[0, 0.26, -0.34]} rotation={[0, Math.PI, 0]} scale={0.9} />
+      </group>
+      <group position={[4.35, 0, -6.6]} scale={1.05}>
+        <CharacterGLB url={modelUrl("characters/guest-e.glb")} clip="human_000050" position={[0, 0.26, -0.12]} rotation={[0, Math.PI, 0]} scale={0.9} />
+      </group>
+      <Guest id={0} x={-4.25} z={-6.5} y={0} scale={1.02} venue={venue} visible={false} />
+      <Guest id={2} x={0.45} z={-6.05} y={0.06} scale={1.1} venue={venue} visible={false} />
+      <Guest id={3} x={2.65} z={-7.9} y={-0.34} scale={0.86} venue={venue} visible={false} />
+      <Guest id={4} x={4.35} z={-6.6} y={-0.12} scale={1.05} venue={venue} visible={false} />
     </group>
   );
 }
