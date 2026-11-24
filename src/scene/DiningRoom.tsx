@@ -3,6 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import { useGame } from "../game/state";
 import { useReducedMotion } from "./artDirection";
 import { Group, Mesh, MeshStandardMaterial } from "three";
+import CharacterGLB from "./CharacterGLB";
+import { modelUrl } from "./modelUrl";
 
 /** Eveningwear: warm and cool so guests never read as brigade whites. */
 const COATS = ["#6e2f3a", "#33505f", "#6d5a2c", "#463463", "#2d5346"];
@@ -29,6 +31,7 @@ function Guest({
   y = 0,
   scale = 1,
   venue = 0,
+  visible = true,
 }: {
   id: number;
   x: number;
@@ -37,6 +40,8 @@ function Guest({
   y?: number;
   scale?: number;
   venue?: number;
+  /** hide the capsule body when a Rodin-pipeline GLB stands in for it */
+  visible?: boolean;
 }) {
   // 101 migrates up with the room: wobbly corner → window → center stage
   const hundredOne = [14, 12, 10][Math.min(2, venue ?? 0)];
@@ -187,7 +192,7 @@ function Guest({
     >
       {/* Collage scale: these people are drawn slightly too big, which is
           the only way a face reads from the far side of the pass. */}
-      <group ref={body} scale={scale * 1.45}>
+      <group ref={body} scale={scale * 1.45} visible={visible}>
         {/* fat invisible hit proxy — a head is a hard target from this camera */}
         <mesh position={[0, 0.95, 0]} visible={false}>
           <sphereGeometry args={[0.5, 8, 8]} />
@@ -517,7 +522,13 @@ export default function DiningRoom() {
           tables are now set at intervals that do not repeat and at depths from
           6.0 to 7.9 m, so perspective alone gives three apparent sizes and the
           window stops looking like a second line-up. */}
-      <Guest id={0} x={-4.25} z={-6.5} y={0} scale={1.02} venue={venue} />
+      {/* Guest 0 is the Rodin-pipeline pilot: generated → rigged → decimated
+          (scripts/rodin/). Plays the sitting clip; capsule guests remain for
+          1–4 until the full cast passes QA. */}
+      <group position={[-4.25, 0, -6.5]} scale={1.02}>
+        <CharacterGLB url={modelUrl("characters/guest-a.glb")} clip="human_000025" position={[0, 0.26, 0]} rotation={[0, Math.PI, 0]} scale={0.9} />
+      </group>
+      <Guest id={0} x={-4.25} z={-6.5} y={0} scale={1.02} venue={venue} visible={false} />
       <Guest id={1} x={-1.7} z={-7.85} y={-0.3} scale={0.9} venue={venue} />
       <Guest id={2} x={0.45} z={-6.05} y={0.06} scale={1.1} venue={venue} />
       <Guest id={3} x={2.65} z={-7.9} y={-0.34} scale={0.86} venue={venue} />
