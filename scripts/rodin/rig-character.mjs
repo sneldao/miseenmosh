@@ -54,9 +54,12 @@ form.append("bone_template", arg("template", "human"));
 form.append("skinning_method", arg("skinning", "core"));
 form.append("material", arg("material", "PBR"));
 form.append("geometry_file_format", "glb");
+// Field is animation_preset (stock IDs like human_000025) — NOT "animations",
+// which the API silently ignores (verified live 2026-11-24; guest-b lost 3 rigs
+// to this before the fix). See docs /api-specification/rigging.
 const clips = arg("clips");
 if (clips) {
-  for (const c of String(clips).split(" ")) form.append("animations", c);
+  for (const c of String(clips).split(" ")) form.append("animation_preset", c);
 }
 
 // Submit. NOTE: the endpoint returns HTTP 201 even on logical failure —
@@ -107,7 +110,9 @@ const dl = await fetch(`${API}/download`, {
   body: JSON.stringify({ task_uuid: uuid }),
 });
 const files = await dl.json();
-const glb = files.result?.find?.((f) => f.name?.endsWith(".glb")) ?? files.result?.[0];
+// API returns { list: [...] } (older docs said result) — accept both.
+const fileList = files.list ?? files.result ?? []; // API returns list (older docs said result)
+const glb = fileList.find((f) => f.name?.endsWith(".glb")) ?? fileList[0];
 if (!glb?.url) {
   console.error("No GLB in download response:", JSON.stringify(files));
   process.exit(1);

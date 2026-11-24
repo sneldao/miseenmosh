@@ -157,7 +157,7 @@ function PassPanel({ plate, firstPerson }: { plate: Ticket; firstPerson: boolean
       )}
       <div className="plate-verbs">
         {peers > 0 && (
-          <button className="btn serve big" onClick={runTable} disabled={!!correcting}>
+          <button className="btn serve big" onClick={() => runTable()} disabled={!!correcting}>
             RUN TABLE {plate.table} · {peers + 1} PLATES
           </button>
         )}
@@ -439,6 +439,9 @@ function ReviewCard() {
   if (!review) return null;
   const narration = reviewNarration(review);
   const stats =
+    `food ${Math.round(review.avgQuality)}/100 (${review.foodStars}/3 stars) · ` +
+    `hospitality ${Math.round(review.avgHospitality)}/100 (${review.hospitalityStars}/1) · ` +
+    `brigade ${review.brigadeStars}/1 · penalties −${review.penalties}\n` +
     `${review.covers} covers · ${review.misses} orders expired · ${review.sentBack} sent back · ` +
     `${review.complaints} complaints · ${review.smashed} smashed · ${review.walkouts} walkouts · ${review.screams} screams · ` +
     `streak ×${review.bestStreak} · inspector ${review.spotted ? "CLOCKED" : "missed"}`;
@@ -468,6 +471,12 @@ function ReviewCard() {
           {"★".repeat(review.stars)}
           <span className="dim">{"☆".repeat(5 - review.stars)}</span>
         </div>
+        <div className="score-breakdown">
+          <span>FOOD {Math.round(review.avgQuality)} · {review.foodStars}/3</span>
+          <span>SERVICE {Math.round(review.avgHospitality)} · {review.hospitalityStars}/1</span>
+          <span>BRIGADE {review.brigadeStars}/1</span>
+          {review.penalties > 0 && <span>LOSSES −{review.penalties}</span>}
+        </div>
         {review.headline && <div className="headline">{review.headline}</div>}
         <p className="incident">{review.incident}</p>
         <div className="rlabel">WHAT FOLLOWS</div>
@@ -493,7 +502,7 @@ function ReviewCard() {
             <span>{review.walkouts} walkouts</span>
             <span>{review.screams} screams</span>
             <span>streak ×{review.bestStreak}</span>
-            {review.silent && <span>SILENT SERVICE ★</span>}
+            {review.silent && <span>SILENT SERVICE ACCOLADE</span>}
             <span>inspector {review.spotted ? "CLOCKED" : "missed"}</span>
           </div>
           <div className="rfoot">EGO {Math.round(review.ego)} · {tierName(review.ego)}</div>
