@@ -157,3 +157,25 @@ New tooling in repo: `scripts/rodin/rig-character.mjs` (submit→poll→download
 
 Blocker unchanged: no Rodin API key exists yet — create one from the
 logged-in ego-browser session at hyper3d.ai/workspace/api-dashboard.
+
+## Update — 2026-11-24 (live end-to-end verification)
+
+API key `miseenmosh-pipeline` created via the ego-browser session (stored in
+gitignored `.env.local`). Live smoke test on the real API:
+
+- **Creator tier DOES call Rigging.** The docs' Business-only assumption was
+  wrong: `POST /api/v2/rigging` accepted a 26 MB GLB upload on Creator and
+  returned a rigged, skinned GLB (JOINTS_0/1/2 + WEIGHTS_0/1/2 attributes,
+  52-bone auto human skeleton path, ~500k faces as documented, 47 MB output).
+- Tier access on Creator: Gen-2.5-Extreme-Low and Gen-2.5-Low submit fine;
+  Gen-2.5-Minimum/Medium/High and Gen-2 return `API_NO_ACTIVE_SUBSCRIPTION`.
+  So Creator = Gen-2.5 Low-and-below + rigging; higher tiers need Business.
+- Full chain verified: submit → poll (status endpoint, jobs → Done) →
+  download (signed URLs, GLB + preview.webp). Generation consumed 0.5
+  credits; rig job consumed credits on success.
+- ego-browser note: the Hyper3D dashboard throws a `black_friday` dialog that
+  intercepts pointer events; dismiss via DOM evaluate before clicking.
+
+Conclusion: the full generate → rig → decimate → three.js pipeline is live
+today on the existing Creator plan. Business only adds higher Gen-2.5 tiers
+and the 5x/10x batch modes.
