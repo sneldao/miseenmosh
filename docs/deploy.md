@@ -247,3 +247,15 @@ first 90 seconds and the cold open changes what it sees.
   the plan called for.
 - Frame capture at integration: p50 ~16.7 ms, p99 ~18.5 ms, 0 long tasks.
 - Quota after this deploy: 0 deploys left today.
+
+## Living-kitchen batch 2 (24 Nov 2026)
+
+- `opengame deploy` → SUB-2205, release `88978e5f`, review passed and
+  auto-published ~90 s after upload. Live at opengame.io/g/9i7mjkmdx4.
+- Ships: walkout + flinch generated clips (apron-rip hold then scripted
+  exit; strain-spike flinch in idle), morning confessionals + book
+  badge/auto-open (`beats.ts`), five dining silhouettes + hat +
+  per-guest scale, the NaN fix, and the restage/crew lane.
+- Same draco `missing-ref` heuristic as before — still a false positive
+  (registered decoder path, no draco-compressed GLBs ship).
+- Quota after this deploy: 4 deploys left today.
