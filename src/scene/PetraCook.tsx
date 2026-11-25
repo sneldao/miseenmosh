@@ -205,7 +205,7 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
   const wasService = useRef(false);
   const current = useRef<AnimationAction | null>(null);
   const headRaw = useRef(rig.head.quaternion.clone());
-  const gaze = useRef({ yaw: 0, pitch: 0 });
+  const gaze = useRef({ yaw: 0, pitch: 0, roll: 0 });
   const time = useRef(0);
   const foodMatrix = useRef(new Matrix4());
   /** the idle prep loop for this body: window, phase, beats */
@@ -286,6 +286,7 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
       parkAmt.current = 1;
       gaze.current.yaw = 0;
       gaze.current.pitch = 0;
+      gaze.current.roll = 0;
       g.visible = true;
       g.position.set(x, 0, -4.03);
       g.rotation.set(0, 0, 0);
@@ -469,12 +470,19 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     const damp = 1 - Math.exp(-delta / 0.12);
     let wantYaw = 0;
     let wantPitch = 0;
+    let wantRoll = 0;
     if (!reduced) {
       if (!working) {
-        wantYaw = idle.current?.watching
-          ? Math.sin(t * 0.21 + 2.3) * 0.3 // on the watch: a slow scan of the rail
-          : MathUtils.clamp(-x * 0.035, -0.2, 0.2);
-        if (idle.current?.watching) wantPitch -= 0.07; // head up toward the pass
+        if (idle.current?.watching) {
+          wantYaw = Math.sin(t * 0.21 + 2.3) * 0.3; // on the watch: a slow scan of the rail
+          wantPitch -= 0.07; // head up toward the pass
+        } else {
+          // Petra wiggles too — the lean stays, but her head wanders and
+          // tilts like she's already arguing with the ticket
+          wantYaw = MathUtils.clamp(-x * 0.035, -0.2, 0.2) + Math.sin(t * 0.41 + 1.1) * 0.08 + Math.sin(t * 0.97) * 0.055;
+          wantPitch += Math.sin(t * 1.13 + 0.6) * 0.03;
+          wantRoll = Math.sin(t * 0.67 + 2.0) * 0.05;
+        }
       }
       if (reacting?.kind === "serve" || reacting?.kind === "whisk") {
         wantPitch += 0.12 * Math.sin(rp * Math.PI);
@@ -484,9 +492,11 @@ export default function PetraCook({ x, gltf, tool }: { x: number; gltf: GLTF; to
     }
     gaze.current.yaw += (wantYaw - gaze.current.yaw) * damp;
     gaze.current.pitch += (wantPitch - gaze.current.pitch) * damp;
+    gaze.current.roll += (wantRoll - gaze.current.roll) * damp;
     const gy = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), gaze.current.yaw);
     const gp = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), gaze.current.pitch);
-    rig.head.quaternion.multiply(gy).multiply(gp);
+    const gr = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), gaze.current.roll);
+    rig.head.quaternion.multiply(gy).multiply(gp).multiply(gr);
 
     // --- the body carries the mood: additive offsets on top of the clip's
     // own pose, dropped entirely under reduced motion

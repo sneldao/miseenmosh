@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
-import { Group } from "three";
+import { Group, Mesh, SkinnedMesh } from "three";
 
 /** Drop-in for generated rigged models (Rodin / Meshy GLBs).
  *  Plays the first clip found; override `clip` to pick one.
@@ -15,6 +15,13 @@ export default function CharacterGLB({
   const group = useRef<Group>(null);
   const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, group);
+  // skinned bodies at dining distance pop when the bind-pose bounds leave
+  // the frustum mid-clip — culling stays off, same as the brigade bodies
+  useEffect(() => {
+    scene.traverse((o) => {
+      if ((o as SkinnedMesh).isSkinnedMesh || (o as Mesh).isMesh) o.frustumCulled = false;
+    });
+  }, [scene]);
   const current = useRef<string | null>(null);
   useEffect(() => {
     const name = clip ?? animations[0]?.name ?? null;

@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGame } from "../game/state";
-import { updateAmbience } from "../game/sound";
+import { updateAmbience, updateMusic } from "../game/sound";
 
 /**
  * The room's ears. No meshes — just listens to the service a few times
@@ -40,6 +40,8 @@ export default function Ambience() {
       { sizzle, murmur: Math.max(0.05, murmur), drone: Math.min(1, live / 9), simmer },
       audible
     );
+    // the house band plays the room: fuller rail, fuller sound
+    updateMusic(Math.min(1, live / 9), audible);
   });
   return null;
 }

@@ -1725,3 +1725,28 @@ megabytes, and the motion design.
 Verification: `tsc` clean, `npm test` 208/208, `npm run build` clean,
 `dist/` 27 → 29 MB (50 MB fence). New GLBs preloaded on BEGIN RESIDENCY and
 wrapped in `PropBoundary` + `Suspense fallback=null` per the Cloche pattern.
+
+## Tester feedback wave — charm, sound, HUD symmetry
+
+- Heads wiggle again: Petra, Dimitri, Anwar (and the fallback bodies) get a
+  slow wander + wobble + lazy roll on top of the clip pose, damped through
+  the same gaze objects — funny, not serious. Reactions and the rail-scan
+  watch sit on top unchanged; reduced motion still drops all of it.
+- Waiter pinned: the serve dwell's root drift walked the body off its tray
+  path until it read as disappearing. The waiter now owns its mixer
+  (`WaiterBody` — update, then pin hips to bind, every frame) and all
+  CharacterGLB bodies get `frustumCulled = false` like the brigade.
+- Onboarding trimmed, mechanics untouched: chyrons and opening labels cut to
+  one line each ("TURN IT. NAME IT."), C1–C8 correction contract preserved.
+- The pass talks: throttled (4s) call-and-response — FIRING {dish} on a
+  golden fire, the baked YES CHEF on collect, SERVICE! on a clean plate —
+  plus a procedural 132bpm walking-bass swing that swells with rail fullness
+  and ducks under voices. Zero assets, `dist/` holds 29 MB.
+- Rail from the first ticket (opening included); house columns: the right
+  tools are one uniform compact stack (SCREAM/BREAD/VOICE live N1, NEXT/COMP
+  unlock N2 with tags, detail expands on hover/focus), the left mirrors it
+  (status/brigade/3-line ticker, ellipsis-clamped). No gameplay rebalanced
+  beyond the N2 tool gate; the two pinned tests moved to N2 fixtures.
+
+Verification: `tsc` clean, `npm test` 208/208, `npm run build` clean,
+`dist/` 29 MB (50 MB fence).

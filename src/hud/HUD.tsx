@@ -331,7 +331,7 @@ function Ticker() {
   const feed = useGame((s) => s.feed);
   return (
     <div className="ticker">
-      {feed.slice(-4).map((f) => (
+      {feed.slice(-3).map((f) => (
         <div key={f.id} className={`line ${f.kind}`}>
           {rich(f.text)}
         </div>
@@ -616,10 +616,10 @@ function OpeningService() {
       )}
       {openingStep === "inspect" && pass && (
         <div className="pass-actions opening-actions opening-inspect">
-          <div className="mhead">LOOK BEFORE YOU JUDGE</div>
+          <div className="mhead">TURN IT. NAME IT.</div>
           {!inspecting ? (
             <button className="btn serve big" autoFocus onClick={() => setInspecting(true)}>
-              INSPECT THE WELLINGTON <span className="kbd">I</span>
+              INSPECT IT <span className="kbd">I</span>
             </button>
           ) : (
             <>
@@ -630,7 +630,7 @@ function OpeningService() {
               </button>
               {openingTurned && fault && (
                 <button className="btn back" onClick={acknowledgeOpeningDefect}>
-                  I SEE THE FAULT — {CORRECTION_LABEL[fault].toUpperCase()}
+                  NAME IT: {CORRECTION_LABEL[fault].toUpperCase()}
                 </button>
               )}
             </>
@@ -1663,6 +1663,27 @@ export default function HUD() {
   const live = tickets.filter((t) => t.state === "rail" || t.state === "plating" || t.state === "ready");
   const railAll = live.filter((t) => t.state === "rail");
   const amped = serviceTime < adrenalineTil;
+  // one rail, one keyed card per order — rendered from the first ticket of
+  // the night, opening included, so the rail is there from the start.
+  // Active plates first so a ready is never clipped away, then the queued
+  // dockets. In first person the world's dockets hold the queue.
+  const railCards = (() => {
+    const active = live.filter((t) => t.state !== "rail");
+    const cards = firstPerson ? active : [...active, ...railAll];
+    const shown = cards.slice(0, 9);
+    if (shown.length === 0) return null;
+    return (
+      <div className="order-rail">
+        {shown.map((t) => (
+          <TicketCard
+            key={t.id}
+            t={t}
+            hotkey={t.state === "rail" ? railAll.indexOf(t) + 1 : undefined}
+          />
+        ))}
+      </div>
+    );
+  })();
 
   return (
     <div className="hud">
@@ -1728,7 +1749,7 @@ export default function HUD() {
       {/* rendered outside the overflowing title panel so the warning is always visible */}
       {phase === "title" && saveIssue && <p className="save-issue" role="alert">{saveIssue}</p>}
       {phase === "briefing" && <Briefing />}
-      {phase === "service" && openingStep && <OpeningService />}
+      {phase === "service" && openingStep && (<>{railCards}<OpeningService /></>)}
       {phase === "service" && !openingStep && (
         <>
           <ServiceTools />
@@ -1797,51 +1818,34 @@ export default function HUD() {
           ) : !criticFlagged && serviceTime < 100 ? (
             <div className="hint">Spot the inspector — click them.</div>
           ) : null}
-          {/* one rail, one keyed card per order: active plates first so a
-              ready is never clipped away, then the queued dockets. In first
-              person the world's dockets hold the queue — only work shows. */}
-          {(() => {
-            const active = live.filter((t) => t.state !== "rail");
-            const cards = firstPerson ? active : [...active, ...railAll];
-            const shown = cards.slice(0, 9);
-            if (shown.length === 0) return null;
-            return (
-              <div className="order-rail">
-                {shown.map((t) => (
-                  <TicketCard
-                    key={t.id}
-                    t={t}
-                    hotkey={t.state === "rail" ? railAll.indexOf(t) + 1 : undefined}
-                  />
-                ))}
-
-              </div>
-            );
-          })()}
+          {railCards}
           {atPass && <PassPanel plate={atPass} firstPerson={firstPerson} />}
-          <div className="status">
-            NIGHT {career.night} · SERVICE{" "}
-            <b>
-              {Math.floor(serviceTime / 60)}:
-              {String(Math.floor(serviceTime % 60)).padStart(2, "0")}
-            </b>
-            {amped && <span className="amped"> FIRED UP</span>}
-            <br />
-            SERVED <b>{served}</b> · BACK <b>{sentBack}</b> · SMASHED <b>{smashed}</b> · WALKED{" "}
-            <b>{misses}</b>
-            <br />
-            EGO <b>{Math.round(ego)}</b> · {tierName(ego)}
-            {streak >= 3 && <span className="amped"> · STREAK ×{streak}</span>}
-            {screams === 0 ? (
-              <span className="silent"> · SILENT — hold it for an accolade</span>
-            ) : (
-              <> · SCREAMS <b>{screams}</b></>
-            )}
+          <div className="house-left">
+            <div className="status">
+              NIGHT {career.night} ·{" "}
+              <b>
+                {Math.floor(serviceTime / 60)}:
+                {String(Math.floor(serviceTime % 60)).padStart(2, "0")}
+              </b>
+              {amped && <span className="amped"> FIRED UP</span>}
+              <br />
+              SERVED <b>{served}</b> · BACK <b>{sentBack}</b> · SMASHED <b>{smashed}</b> · WALKED{" "}
+              <b>{misses}</b>
+              <br />
+              EGO <b>{Math.round(ego)}</b> · {tierName(ego)}
+              {streak >= 3 && <span className="amped"> · ×{streak}</span>}
+              {screams === 0 ? (
+                <span className="silent"> · SILENT</span>
+              ) : (
+                <> · <b>{screams}</b> SCREAMS</>
+              )}
+            </div>
+            <Brigade />
+            {/* first person shouts the newest line into the room instead */}
+            {!firstPerson && <Ticker />}
           </div>
-          <Brigade />
+          <div className="house-actions">
           <StanceBar />
-          {/* first person shouts the newest line into the room instead */}
-          {!firstPerson && <Ticker />}
           <button
             className="btn scream"
             title="Hold Space to charge; costs morale"
@@ -1877,27 +1881,36 @@ export default function HUD() {
             </span>
           </button>
           <button
-            className="btn expedite"
+            className={`btn expedite${career.night < 2 ? " locked" : ""}`}
             title="Wave the next order through — +2 station pressure"
-            disabled={!!openingStep || nextTicketIn <= 0.5 || live.length >= 9}
+            disabled={career.night < 2 || !!openingStep || nextTicketIn <= 0.5 || live.length >= 9}
             onClick={() => expedite()}
           >
-            NEXT TICKET <span className="kbd">N</span>{" "}
-            <span className="cost">
-              {nextTicketIn > 0.5 ? `fire now · +2 pressure` : "printing…"}
-            </span>
+            NEXT <span className="kbd">N</span>{" "}
+            {career.night < 2 ? (
+              <span className="ntwo">NIGHT 2</span>
+            ) : (
+              <span className="cost">
+                {nextTicketIn > 0.5 ? `fire now · +2 pressure` : "printing…"}
+              </span>
+            )}
           </button>
           <button
-            className="btn comp"
+            className={`btn comp${career.night < 2 ? " locked" : ""}`}
             title="£20 · the room exhales"
-            disabled={comped || career.cash < 20}
+            disabled={career.night < 2 || comped || career.cash < 20}
             onClick={() => compTable()}
           >
-            COMP A TABLE <span className="kbd">C</span>{" "}
-            <span className="cost">
-              £20<span className="utility-explainer"> · the room exhales</span>
-            </span>
+            COMP <span className="kbd">C</span>{" "}
+            {career.night < 2 ? (
+              <span className="ntwo">NIGHT 2</span>
+            ) : (
+              <span className="cost">
+                £20<span className="utility-explainer"> · the room exhales</span>
+              </span>
+            )}
           </button>
+          </div>
           <VowRibbon />
           <FolkloreBar />
           <Chorus />

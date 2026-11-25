@@ -9,10 +9,9 @@ export const INTRO = {
   residencyLine: "NIGHT 1/9 · 5★ → LE MOSH · 10★ → MOSH & SON",
   n1Head: "NIGHT 1 — STALL 86 · a street stall with delusions",
   n1Why: "You're the chef because you're the only one who came back.",
-  beat1Head: "THE BRIGADE — first night, so: introductions",
+  beat1Head: "THE BRIGADE — say hello",
   beat2Head: "TONIGHT — EARN THE PASS",
-  beat2Body:
-    "Two Wellingtons. Turn the second. Name the fault. Petra will remember what you do.",
+  beat2Body: "Two Wellingtons. Turn one. Name what's wrong. Petra's watching.",
   bootLines: [
     "waking PETRA — grill, her tongs, her rules",
     "DIMITRI is holding a sauce — watch the pan, not the clock",
@@ -22,7 +21,7 @@ export const INTRO = {
   ],
   serviceChyrons: [
     { who: "PETRA", text: "Service, chef. First plate is honest." },
-    { who: "PETRA", text: "Second one — turn it. Look before you judge." },
-    { who: "THE ROOM", text: "Somewhere out there is the inspector. Feed them before they write." },
+    { who: "PETRA", text: "Second one — turn it. Then judge." },
+    { who: "THE ROOM", text: "The inspector's out there. Feed them first." },
   ],
 } as const;

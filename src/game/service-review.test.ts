@@ -650,7 +650,7 @@ describe("night-1 opening", () => {
     {
       const g = useGame.getState();
       expect(g.openingStep).toBe("inspect");
-      expect(g.feed.some((f) => f.text === "Second one — turn it. Look before you judge." && f.who === "PETRA")).toBe(true);
+      expect(g.feed.some((f) => f.text === "Second one — turn it. Then judge." && f.who === "PETRA")).toBe(true);
       g.setInspecting(true);
       g.turnPlate(Math.PI / 4);
       g.acknowledgeOpeningDefect();
@@ -658,7 +658,7 @@ describe("night-1 opening", () => {
     useGame.getState().judge("serve");
     const s = useGame.getState();
     expect(s.openingStep).toBeNull();
-    expect(s.feed.some((f) => f.text === "Somewhere out there is the inspector. Feed them before they write." && f.who === "THE ROOM")).toBe(true);
+    expect(s.feed.some((f) => f.text === "The inspector's out there. Feed them first." && f.who === "THE ROOM")).toBe(true);
   });
 
   it("the family meal records its choice for the morning", async () => {
@@ -899,6 +899,8 @@ describe("night-1 opening", () => {
     useGame.setState({
       tickets: [{ ...useGame.getState().tickets[0], id: 42, state: "rail" as const }],
       guests: [{ id: 1, kind: "regulars" as const, table: 42, isCritic: false, tells: 0, tellAt: -1, tellClock: 0, mercy: 0, tellKind: null }],
+      // champagne unlocks on night 2 — the opening teaches the pass first
+      career: { ...useGame.getState().career, night: 2 },
     } satisfies Partial<State>);
     useGame.getState().compTable();
     expect(useGame.getState().comped).toBe(true);

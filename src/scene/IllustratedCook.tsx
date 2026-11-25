@@ -426,22 +426,27 @@ export default function IllustratedCook({ cookId, x }: IllustratedCookProps): JS
       body.current.rotation.x = reduced ? 0 : pose.slump - pose.brace * 0.5 - 0.12 * wa;
     }
 
-    // --- head: turn toward the chef when a plate is ready; reactions on top
+    // --- head: turn toward the chef when a plate is ready; reactions on top.
+    // Idle is a wiggle, not a stare: a wander with a wobble and a lazy tilt.
     const screamRecent = s.screamAt && performance.now() - s.screamAt < 1200;
     let headYaw = ready
       ? -x * 0.06
       : watching && !reduced
         ? Math.sin(t * 0.21 + cookId * 2.3) * 0.3 // on the watch: a slow scan of the rail
-        : Math.sin(t * 0.33 + cookId * 1.7) * (reduced ? 0 : 0.05);
+        : Math.sin(t * 0.33 + cookId * 1.7) * (reduced ? 0 : 0.09) +
+          Math.sin(t * 0.93 + cookId * 2.9) * (reduced ? 0 : 0.06);
     let headPitch =
       (active ? 0.12 : 0) + (reacting?.kind === "sendback" ? 0.28 * (1 - rp) : 0) - (reduced ? 0 : 0.08 * wa);
+    if (!ready && !watching && !reduced) headPitch += Math.sin(t * 1.07 + cookId) * 0.035;
+    let headRoll = 0;
+    if (!ready && !watching && !reduced) headRoll = Math.sin(t * 0.71 + cookId * 1.3) * 0.05;
     if (reacting?.kind === "serve") headPitch -= 0.16 * Math.sin(rp * Math.PI);
     if (screamRecent && !reduced) headYaw += 0.3;
     if (reacting?.kind === "smash") headYaw += (cookId % 2 ? -1 : 1) * 0.3 * (1 - rp);
     if (head.current) {
       head.current.rotation.y = headYaw;
       head.current.rotation.x = headPitch;
-      head.current.rotation.z = reacting?.kind === "smash" ? 0.12 * (1 - rp) : 0;
+      head.current.rotation.z = reacting?.kind === "smash" ? 0.12 * (1 - rp) : headRoll;
     }
     // --- arms: rest at the bench, work loops per station, present when ready.
     // Left arm holds the pan/bowl steady; only the right arm works the tool.

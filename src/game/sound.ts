@@ -6,6 +6,7 @@ let master: GainNode | null = null;
 let sfxBus: GainNode | null = null;
 let ambienceBus: GainNode | null = null;
 let voiceBus: GainNode | null = null;
+let musicBus: GainNode | null = null;
 let masterMuted = false;
 
 // Vertical-slice mix hierarchy. Master stays conservative; the buses put
@@ -47,6 +48,13 @@ export function duckAmbience(seconds = 1.8) {
   g.cancelScheduledValues(now);
   g.setTargetAtTime(AMBIENCE_GAIN * 0.32, now, 0.045);
   g.setTargetAtTime(AMBIENCE_GAIN, now + Math.max(0.4, seconds), 0.35);
+  // the band steps back when the brigade talks, too
+  if (musicBus) {
+    const m = musicBus.gain;
+    m.cancelScheduledValues(now);
+    m.setTargetAtTime(MUSIC_GAIN * 0.4, now, 0.05);
+    m.setTargetAtTime(musicLevel, now + Math.max(0.4, seconds), 0.4);
+  }
 }
 
 export function unlockAudio() {
@@ -261,6 +269,100 @@ export function sfx(kind: Sfx, opts: SfxOpts = {}) {
       noise(t, 0.02, 0.12, 1500, bus);
       break;
   }
+}
+
+// ---------------------------------------------------------------------------
+// The house band: a two-bar walking-bass swing at 132, all synth, no assets.
+// Bass walks A minor with a turnaround, brushes tick the offbeats, a soft
+// kick keeps the quarters. It sits behind everything (see MUSIC_GAIN) and
+// swells a touch as the rail fills — energy you feel, not a song you notice.
+// ---------------------------------------------------------------------------
+
+const MUSIC_BPM = 132;
+const MUSIC_GAIN = 0.11;
+let musicLevel = 0;
+let musicTimer: number | null = null;
+let musicStep = 0;
+let nextStepAt = 0;
+
+// two bars of 8ths: A A A C | D D E D | C C B A | G G A (turnaround up)
+const BASS_LINE = [55, 55, 55, 65.41, 73.42, 73.42, 82.41, 73.42, 65.41, 65.41, 61.74, 55, 49, 49, 55, 65.41];
+
+function scheduleStep(step: number, t: number) {
+  if (!ctx || !musicBus) return;
+  // walking bass: round triangle through a lowpass so it stays felt, not heard
+  const b = ctx.createOscillator();
+  const bf = ctx.createBiquadFilter();
+  const bg = ctx.createGain();
+  b.type = "triangle";
+  b.frequency.value = BASS_LINE[step % BASS_LINE.length];
+  bf.type = "lowpass";
+  bf.frequency.value = 520;
+  bg.gain.setValueAtTime(0, t);
+  bg.gain.linearRampToValueAtTime(0.5, t + 0.012);
+  bg.gain.exponentialRampToValueAtTime(0.001, t + 0.21);
+  b.connect(bf).connect(bg).connect(musicBus);
+  b.start(t);
+  b.stop(t + 0.25);
+  // brushes on the offbeats — a short band of hiss, swung late
+  if (step % 2 === 1) {
+    const len = Math.ceil(ctx.sampleRate * 0.05);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 6500;
+    const hg = ctx.createGain();
+    hg.gain.value = 0.1;
+    src.connect(hp).connect(hg).connect(musicBus);
+    src.start(t + 0.055); // the swing: laid back, not on the grid
+  }
+  // a soft kick on the quarters so the room has a pulse
+  if (step % 4 === 0) {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(120, t);
+    o.frequency.exponentialRampToValueAtTime(42, t + 0.1);
+    g.gain.setValueAtTime(0.42, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+    o.connect(g).connect(musicBus);
+    o.start(t);
+    o.stop(t + 0.14);
+  }
+}
+
+function startMusic() {
+  if (!ctx || musicTimer !== null || typeof window === "undefined") return;
+  musicBus = ctx.createGain();
+  musicBus.gain.value = 0;
+  musicBus.connect(master!);
+  nextStepAt = ctx.currentTime + 0.1;
+  musicTimer = window.setInterval(() => {
+    if (!ctx || !musicBus || ctx.state !== "running") return;
+    const stepDur = 60 / MUSIC_BPM / 2;
+    while (nextStepAt < ctx.currentTime + 0.3) {
+      try {
+        scheduleStep(musicStep, Math.max(nextStepAt, ctx.currentTime + 0.01));
+      } catch {
+        /* the band never stops service */
+      }
+      musicStep = (musicStep + 1) % 16;
+      nextStepAt += stepDur;
+    }
+  }, 90);
+}
+
+/** Glide the band in and out with the service; intensity 0..1 = rail fullness. */
+export function updateMusic(intensity: number, audible: boolean) {
+  if (!ctx || ctx.state !== "running") return;
+  if (!musicBus) startMusic();
+  if (!musicBus) return;
+  musicLevel = audible ? MUSIC_GAIN * (0.7 + Math.min(1, Math.max(0, intensity)) * 0.6) : 0;
+  musicBus.gain.setTargetAtTime(musicLevel, ctx.currentTime, 0.6);
 }
 
 // ---------------------------------------------------------------------------

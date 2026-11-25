@@ -517,6 +517,17 @@ function finishPlating(
 
 let nextId = 1;
 let feedId = 1;
+
+/** the pass talks out loud, but never over itself — one shouted line per 4s.
+ *  The brigade answers fires and collections; celebration calls ride the
+ *  same throttle so a hot streak doesn't turn into a speech jam. */
+let lastShoutAt = 0;
+function shoutLine(text: string, seed = 1) {
+  const now = typeof performance !== "undefined" ? performance.now() : 0;
+  if (now - lastShoutAt < 4000) return;
+  lastShoutAt = now;
+  speakLine(text, seed);
+}
 /** transient UI intent from enterResidency({ prep: true }) — open the kitchen
  *  book on arrival. Never saved, consumed once by the briefing. */
 let briefingBookRequested = false;
@@ -2941,6 +2952,8 @@ export const useGame = create<GameState>((set, get) => ({
         cook?.name
       );
       sfx("sear", { pan: STATION_PAN[t.station] ?? 0 });
+      // the station calls it back — FIRING, by name, out loud
+      shoutLine(`Firing ${t.dish}!`, t.station + 1);
     } else {
       feed = pushFeed(
         feed,
@@ -2974,6 +2987,8 @@ export const useGame = create<GameState>((set, get) => ({
     const s = get();
     if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction || !canCollectOrder(s.tickets, id)) return;
     if (s.stance !== "pass") { set({ feed: pushFeed(s.feed, "Collecting happens at the pass. Press 0 — get back.", "info", "THE PASS") }); return; }
+    // hands on the plate, brigade answers — the baked YES CHEF where it exists
+    speakChorus(pick(s.rng, BRIGADE_RESPONSES), false);
     set({ tickets: s.tickets.map((t) => (t.id === id ? { ...t, state: "pass" as const } : t)), selectedTicketId: id, inspecting: false, inspectionTurn: 0 });
   },
 
@@ -3196,7 +3211,8 @@ export const useGame = create<GameState>((set, get) => ({
 
   compTable: () => {
     const s = get();
-    if (s.phase !== "service" || s.paused || s.comped || s.career.cash < 20 || s.openingStep) return;
+    // the house tools unlock as the chef earns them — champagne is a night-2 move
+    if (s.phase !== "service" || s.paused || s.comped || s.career.cash < 20 || s.openingStep || s.career.night < 2) return;
     const rail = s.tickets.filter((t) => t.state === "rail");
     // the table with the most hanging fire gets the champagne
     const counts = new Map<number, number>();
@@ -3261,7 +3277,8 @@ export const useGame = create<GameState>((set, get) => ({
 
   expedite: () => {
     const s = get();
-    if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction) return;
+    // waving orders in early is a night-2 move — night 1 learns the rail order
+    if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction || s.career.night < 2) return;
     const live = s.tickets.filter((t) => t.state !== "done").length;
     if (s.nextTicketIn <= 0.5 || live >= 9) return;
     set({
@@ -3404,6 +3421,8 @@ export const useGame = create<GameState>((set, get) => ({
       hospitalitySum += hospitality;
       hospitalityCount += 1;
       if (!options?.batch) sfx("slam");
+      // a clean plate going out gets the call — SERVICE, out loud
+      if (plate.quality >= 45) shoutLine("Service!", 3);
       if (plate.table === criticTable) {
         criticServed += 1;
         criticQ += foodQuality;

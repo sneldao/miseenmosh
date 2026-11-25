@@ -1,8 +1,9 @@
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import { useGame } from "../game/state";
 import { useReducedMotion } from "./artDirection";
-import { Group, Mesh, MeshStandardMaterial } from "three";
+import { AnimationAction, AnimationMixer, Bone, Group, LoopRepeat, Mesh, MeshStandardMaterial, SkinnedMesh } from "three";
 import CharacterGLB from "./CharacterGLB";
 import RodinProp from "./RodinProp";
 import PropBoundary from "./PropBoundary";
@@ -358,6 +359,54 @@ const VENUE_DRESS = [
   { wall: "#5f4a3a", floor: "#33262a", wash: "#ffd9a0" as const, washI: 46, sconce: 17, sconceC: "#ffd9a0" as const },
 ];
 
+const WALK_CLIP = "human_000089";
+const SERVE_CLIP = "human_000025";
+
+/** The waiter's own playback. The shared crossfader can't pin the hips, and
+ *  the generated serve clip carries root drift that walks the body off its
+ *  tray path until it reads as disappearing. Own mixer, strict order every
+ *  frame (update, then pin), hips locked to the bind pose, culling off — the
+ *  body stays where the tray says it is. */
+function WaiterBody({ moving }: { moving: boolean }) {
+  const { scene, animations } = useGLTF(modelUrl("characters/waiter.glb"));
+  const rig = useMemo(() => {
+    const mixer = new AnimationMixer(scene);
+    const actions = new Map<string, AnimationAction>();
+    for (const clip of animations) {
+      const a = mixer.clipAction(clip);
+      a.setLoop(LoopRepeat, Infinity);
+      actions.set(clip.name, a);
+    }
+    const found: { hips: Bone | null } = { hips: null };
+    scene.traverse((o) => {
+      if (!found.hips && (o as Bone).isBone && /hips/i.test(o.name)) found.hips = o as Bone;
+      if ((o as SkinnedMesh).isSkinnedMesh || (o as Mesh).isMesh) o.frustumCulled = false;
+    });
+    const hips = found.hips;
+    const bind = hips ? hips.position.clone() : null;
+    const first = actions.get(WALK_CLIP) ?? (animations[0] ? actions.get(animations[0].name) : undefined);
+    first?.reset().fadeIn(0.35).play();
+    return { mixer, actions, hips, bind };
+  }, [scene, animations]);
+  const current = useRef<string | null>(WALK_CLIP);
+  useEffect(() => {
+    const name = moving ? WALK_CLIP : SERVE_CLIP;
+    if (name === current.current) return;
+    rig.actions.get(current.current ?? "")?.fadeOut(0.35);
+    rig.actions.get(name)?.reset().fadeIn(0.35).play();
+    current.current = name;
+  }, [moving, rig]);
+  useEffect(() => () => { rig.mixer.stopAllAction(); }, [rig]);
+  useFrame((_, dt) => {
+    const st = useGame.getState();
+    if (st.paused || st.phase !== "service") return;
+    rig.mixer.update(Math.min(dt, 0.05));
+    // pin AFTER the mixer writes: the clip's root drift stays in the file
+    if (rig.hips && rig.bind) rig.hips.position.copy(rig.bind);
+  });
+  return <primitive object={scene} />;
+}
+
 /** The one body in the room that *moves through* space: a waiter crossing
  *  the floor between the tables and the far wall, tray up, pausing at
  *  tables. Guests breathe — but at 8 m their stillness is the read; a
@@ -408,17 +457,10 @@ function Waiter() {
   });
   return (
     <group ref={g} position={[-4.25, 0, -8.4]}>
-      {/* Rodin-pipeline body: walk clip between tables, standing idle during
-          the serve dwell. The tray arm and code-driven path stay — the GLB
-          replaces only the capsule body. */}
-      <CharacterGLB
-        url={modelUrl("characters/waiter.glb")}
-        clip={moving ? "human_000089" : "human_000025"}
-        fade={0.35}
-        position={[0, 0, 0]}
-        rotation={[0, 0, 0]}
-        scale={1.0}
-      />
+      {/* Pinned-hips body: walk clip between tables, standing serve during
+          the dwell. The tray arm and code-driven path stay — the body can
+          no longer drift off them. */}
+      <WaiterBody moving={moving} />
       {/* tray arm: raised, flat, carrying the room's proof of service */}
       <group ref={tray} position={[0.26, 1.18, 0.1]}>
         <mesh position={[0, -0.14, 0]} rotation={[0.9, 0, 0]}>

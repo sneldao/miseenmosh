@@ -267,7 +267,7 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
   const wasService = useRef(false);
   const current = useRef<AnimationAction | null>(null);
   const headRaw = useRef(rig.head.quaternion.clone());
-  const gaze = useRef({ yaw: 0, pitch: 0 });
+  const gaze = useRef({ yaw: 0, pitch: 0, roll: 0 });
   const time = useRef(0);
   const outElapsed = useRef(0);
   /** last strain-spike stamp consumed: a new one fires the flinch once */
@@ -309,6 +309,7 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
       idle.current = null;
       gaze.current.yaw = 0;
       gaze.current.pitch = 0;
+      gaze.current.roll = 0;
       g.visible = true;
       g.position.set(x, 0, -3.95);
       g.rotation.set(0, 0, 0);
@@ -468,14 +469,22 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     const damp = 1 - Math.exp(-delta / 0.12);
     let wantYaw = 0;
     let wantPitch = 0;
+    let wantRoll = 0;
     if (!reduced) {
       // a ready/pass plate pulls the cook's attention toward the chef
       if (readyTicket && !working) wantYaw = MathUtils.clamp(-x * 0.05, -0.2, 0.2);
       if (!working && !readyTicket) {
-        wantYaw = idle.current?.watching
-          ? Math.sin(t * 0.21 + cookId * 2.3) * 0.3 // on the watch: a slow scan of the rail
-          : Math.sin(t * 0.33 + cookId * 1.7) * 0.05;
-        if (idle.current?.watching) wantPitch -= 0.07; // head up toward the pass
+        if (idle.current?.watching) {
+          wantYaw = Math.sin(t * 0.21 + cookId * 2.3) * 0.3; // on the watch: a slow scan of the rail
+          wantPitch -= 0.07; // head up toward the pass
+        } else {
+          // the old wiggle: the head never sits straight — a slow wander
+          // with a wobble on top and a lazy tilt, so the brigade reads
+          // funny and alive instead of serious
+          wantYaw = Math.sin(t * 0.33 + cookId * 1.7) * 0.09 + Math.sin(t * 0.93 + cookId * 2.9) * 0.06;
+          wantPitch += Math.sin(t * 1.07 + cookId) * 0.035;
+          wantRoll = Math.sin(t * 0.71 + cookId * 1.3) * 0.05;
+        }
       }
       if (reacting?.kind === "serve" || reacting?.kind === "whisk") {
         wantPitch += 0.12 * Math.sin(rp * Math.PI);
@@ -485,9 +494,11 @@ export default function BrigadeCook({ x, cookId, gltf, config }: { x: number; co
     }
     gaze.current.yaw += (wantYaw - gaze.current.yaw) * damp;
     gaze.current.pitch += (wantPitch - gaze.current.pitch) * damp;
+    gaze.current.roll += (wantRoll - gaze.current.roll) * damp;
     const gy = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), gaze.current.yaw);
     const gp = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), gaze.current.pitch);
-    rig.head.quaternion.multiply(gy).multiply(gp);
+    const gr = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), gaze.current.roll);
+    rig.head.quaternion.multiply(gy).multiply(gp).multiply(gr);
 
     // --- the body carries the mood: additive offsets on top of the clip's
     // own pose, dropped entirely under reduced motion

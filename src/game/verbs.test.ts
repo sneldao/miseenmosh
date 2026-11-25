@@ -107,6 +107,8 @@ describe("expedite", () => {
     useGame.setState({
       phase: "service", paused: false, glossary: false, openingStep: null,
       serviceTime: 30, nextTicketIn: 6, tickets: [],
+      // waving orders in early unlocks on night 2
+      career: { ...useGame.getState().career, night: 2 },
     } satisfies Partial<State>);
   });
 
