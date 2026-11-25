@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build && cp opengame.json dist/",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:audio": "node scripts/check-audio-mix.mjs"
   },
   "dependencies": {
     "@opengamehq/sdk": "^0.5.1",

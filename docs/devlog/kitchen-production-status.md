@@ -1623,3 +1623,40 @@ player observation. Frame-time and draw-call targets still need a dedicated
 measurement pass before deploy. Audio already has the bounded vertical slice
 ingredients — baked brigade chorus MP3s, dynamic review read-out and synth
 service beds — but it still needs a human listen/mix pass before release.
+
+## Audio vertical-slice mix pass (25 Nov)
+
+Bounded mix work only; no new spend and no new generated takes.
+
+- The five shipped brigade chorus MP3s were re-measured after codec encoding and
+  gain-normalised as a voice family to the -19 LUFS target. `npm run check:audio`
+  now generates the measurement table from the files on disk and fails if a
+  shipped MP3 is missing or outside the gate. Current table: all 5/5 pass at
+  -18.9/-19.0 LUFS integrated, true peaks -1.4 to -4.9 dBTP, 11-13 KB each.
+- `src/game/sound.ts` now has a real bus hierarchy (master → sfx / ambience /
+  voice) instead of every cue and bed landing directly on master. The ambience
+  bed levels were pulled back (sizzle 0.16→0.13, murmur 0.15 max→0.12,
+  drone 0.30→0.22, simmer 0.09→0.07 before the bus) so the beds support the
+  service rather than masking calls and voices.
+- Baked brigade playback now routes through the WebAudio voice bus when the
+  browser allows media-element routing. Host mute therefore applies to the
+  baked chorus as well as synth cues; host mute also cancels active speech
+  synthesis. Spoken lines duck ambience and restore it afterward.
+- The critic/review read-out is deliberately separated from its sting: speech
+  starts 430 ms later, lower and slower (`pitch 0.86`, `rate 0.96`), so the
+  review is a room-owning moment rather than simultaneous arpeggio noise.
+- Browser validation used a temporary same-origin harness (removed afterward)
+  with a trusted click: `AudioContext` reached `running`, `chorus-0.mp3` was
+  fetched, one baked element played (`paused:false`, currentTime 0.747 of
+  1.555 s), speech synthesis stayed silent, and `voiceDiagnostics()` reported
+  no baked failure. After host mute, a repeated chorus produced
+  `lastBakedFailure:"master-muted"` with no replay and no synth fallback.
+
+NOT LISTENED TO BY A PERSON. These are meter and playback-mechanism results,
+not a taste pass. The remaining audio release gate is a human listen of one
+scream/chorus, one review read-out, and one busy-service ambience stretch on
+the deployed or locally served build.
+
+Post-pass verification: `npm test` 186/186, `npm run check:audio` 5/5,
+`npm run build` passing, `dist/` 26 MB uncompressed in 50 files. The remaining
+large-chunk warning is unchanged (about 1.5 MB minified / 429 KB gzip).

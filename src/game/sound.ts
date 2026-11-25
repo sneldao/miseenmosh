@@ -3,18 +3,70 @@
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
+let sfxBus: GainNode | null = null;
+let ambienceBus: GainNode | null = null;
+let voiceBus: GainNode | null = null;
+let masterMuted = false;
+
+// Vertical-slice mix hierarchy. Master stays conservative; the buses put
+// voice and playable consequences ahead of the room beds.
+const MASTER_GAIN = 0.24;
+const SFX_GAIN = 0.9;
+const AMBIENCE_GAIN = 0.78;
+const VOICE_GAIN = 1.0;
 
 /** Host mute (OpenGame page): silence the master bus, keep the graph. */
 export function setMasterMuted(muted: boolean) {
-  if (master && ctx) master.gain.setTargetAtTime(muted ? 0 : 0.22, ctx.currentTime, 0.02);
+  masterMuted = muted;
+  if (master && ctx) master.gain.setTargetAtTime(muted ? 0 : MASTER_GAIN, ctx.currentTime, 0.02);
+  if (muted && typeof window !== "undefined" && "speechSynthesis" in window) {
+    try {
+      window.speechSynthesis.cancel();
+    } catch {}
+  }
+}
+
+export function isMasterMuted(): boolean {
+  return masterMuted;
+}
+
+export function audioContext(): AudioContext | null {
+  return ctx;
+}
+
+/** Input for recorded brigade voice, already downstream of master/mute. */
+export function voiceOutput(): GainNode | null {
+  return voiceBus;
+}
+
+/** Give a spoken line the front of the room for its duration. */
+export function duckAmbience(seconds = 1.8) {
+  if (!ctx || !ambienceBus) return;
+  const now = ctx.currentTime;
+  const g = ambienceBus.gain;
+  g.cancelScheduledValues(now);
+  g.setTargetAtTime(AMBIENCE_GAIN * 0.32, now, 0.045);
+  g.setTargetAtTime(AMBIENCE_GAIN, now + Math.max(0.4, seconds), 0.35);
 }
 
 export function unlockAudio() {
   if (!ctx) {
     ctx = new AudioContext();
     master = ctx.createGain();
-    master.gain.value = 0.22;
+    master.gain.value = masterMuted ? 0 : MASTER_GAIN;
     master.connect(ctx.destination);
+
+    sfxBus = ctx.createGain();
+    sfxBus.gain.value = SFX_GAIN;
+    sfxBus.connect(master);
+
+    ambienceBus = ctx.createGain();
+    ambienceBus.gain.value = AMBIENCE_GAIN;
+    ambienceBus.connect(master);
+
+    voiceBus = ctx.createGain();
+    voiceBus.gain.value = VOICE_GAIN;
+    voiceBus.connect(master);
   }
   if (ctx.state === "suspended") void ctx.resume();
 }
@@ -95,7 +147,7 @@ function out(pan = 0, vol = 1): GainNode {
   g.gain.value = vol;
   const p = ctx!.createStereoPanner();
   p.pan.value = Math.max(-1, Math.min(1, pan));
-  g.connect(p).connect(master!);
+  g.connect(p).connect(sfxBus!);
   return g;
 }
 
@@ -167,7 +219,7 @@ export function sfx(kind: Sfx, opts: SfxOpts = {}) {
         m.cancelScheduledValues(t);
         m.setValueAtTime(Math.max(0.02, m.value), t);
         m.linearRampToValueAtTime(0.04, t + 0.08);
-        m.linearRampToValueAtTime(0.22, t + 0.6);
+        m.linearRampToValueAtTime(masterMuted ? 0 : MASTER_GAIN, t + 0.6);
       }
       break;
     case "rattle":
@@ -244,7 +296,7 @@ function loopNoise(hp: number, lp: number): { src: AudioBufferSourceNode; g: Gai
   lpF.frequency.value = lp;
   const g = ctx!.createGain();
   g.gain.value = 0;
-  src.connect(hpF).connect(lpF).connect(g).connect(master!);
+  src.connect(hpF).connect(lpF).connect(g).connect(ambienceBus!);
   src.start();
   return { src, g };
 }
@@ -259,7 +311,7 @@ export function startAmbience() {
     const p = ctx!.createStereoPanner();
     p.pan.value = pan;
     g.disconnect();
-    g.connect(p).connect(master!);
+    g.connect(p).connect(ambienceBus!);
     sizzle.push(g);
   });
   const { g: murmur } = loopNoise(300, 1200);
@@ -297,9 +349,9 @@ export function updateAmbience(lv: BedLevels, audible: boolean) {
   if (!beds) startAmbience();
   if (!beds) return;
   const m = audible ? 1 : 0;
-  beds.sizzle.forEach((g, i) => glide(g.gain, Math.min(1.4, lv.sizzle[i] ?? 0) * 0.16 * m));
-  glide(beds.murmur.gain, (0.05 + lv.murmur * 0.1) * m);
-  glide(beds.drone.gain, lv.drone * 0.3 * m);
-  glide(beds.simmer.gain, (lv.simmer ?? 0) * 0.09 * m);
+  beds.sizzle.forEach((g, i) => glide(g.gain, Math.min(1.4, lv.sizzle[i] ?? 0) * 0.13 * m));
+  glide(beds.murmur.gain, (0.04 + lv.murmur * 0.08) * m);
+  glide(beds.drone.gain, lv.drone * 0.22 * m);
+  glide(beds.simmer.gain, (lv.simmer ?? 0) * 0.07 * m);
   if (!beds.live) beds.live = true;
 }

@@ -5,6 +5,7 @@
 // no files, no voices, no problem — the game never waits on a voice.
 
 import { BRIGADE_RESPONSES } from "./barks";
+import { audioContext, duckAmbience, isMasterMuted, voiceOutput } from "./sound";
 
 const VOICE_KEY = "mem-voice";
 
@@ -28,7 +29,7 @@ export function setVoiceEnabled(on: boolean) {
 }
 
 function synth(): SpeechSynthesis | null {
-  if (!enabled) return null;
+  if (!enabled || isMasterMuted()) return null;
   try {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
     return window.speechSynthesis;
@@ -38,36 +39,81 @@ function synth(): SpeechSynthesis | null {
 }
 
 export function stopVoice() {
+  if (reviewTimer !== null && typeof window !== "undefined") window.clearTimeout(reviewTimer);
+  reviewTimer = null;
   try {
-    synth()?.cancel();
+    // Cancel even while disabled/muted; synth() deliberately refuses then.
+    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
   } catch {}
-  for (const a of Object.values(baked)) {
+  for (const v of Object.values(baked)) {
     try {
-      a.pause();
+      v.el.pause();
     } catch {}
   }
 }
 
 /** Baked chorus takes — one mp3 per BRIGADE_RESPONSES entry, mixed from
  *  per-cook fal stems. A file that 404s or won't decode marks itself dead
- *  and we fall back to the synth forever after. */
-const baked: Record<number, HTMLAudioElement> = {};
+ *  and we fall back to the synth forever after. Playback is routed through
+ *  the WebAudio voice bus where possible, so host mute and the mix apply. */
+interface BakedVoice {
+  el: HTMLAudioElement;
+  routed: boolean;
+  src?: MediaElementAudioSourceNode;
+}
+const baked: Record<number, BakedVoice> = {};
 const bakedDead = new Set<number>();
+let lastBakedFailure: string | null = null;
+
+/** Small meter/debug surface for browser QA; never used by gameplay. */
+export function voiceDiagnostics() {
+  return { enabled, bakedLoaded: Object.keys(baked).length, bakedDead: [...bakedDead], lastBakedFailure };
+}
+
+function routeBaked(v: BakedVoice) {
+  if (v.routed) return;
+  const ac = audioContext();
+  const out = voiceOutput();
+  if (!ac || !out) return;
+  try {
+    const src = ac.createMediaElementSource(v.el);
+    src.connect(out);
+    v.src = src;
+    v.routed = true;
+  } catch {
+    // A browser that refuses media-element routing still gets the direct tag.
+  }
+}
 
 function playBaked(idx: number): boolean {
-  if (!enabled || bakedDead.has(idx)) return false;
+  if (!enabled || isMasterMuted() || bakedDead.has(idx)) {
+    lastBakedFailure = !enabled ? "voice-disabled" : isMasterMuted() ? "master-muted" : `dead-${idx}`;
+    return false;
+  }
+  const ac = audioContext();
+  if (!ac) {
+    lastBakedFailure = "no-audio-context";
+    return false;
+  }
+  if (ac.state === "suspended") void ac.resume();
   try {
-    let a = baked[idx];
-    if (!a) {
-      a = new Audio(`${import.meta.env.BASE_URL}voice/chorus-${idx}.mp3`);
-      a.preload = "auto";
-      a.addEventListener("error", () => bakedDead.add(idx));
-      baked[idx] = a;
+    let v = baked[idx];
+    if (!v) {
+      const el = new Audio(`${import.meta.env.BASE_URL}voice/chorus-${idx}.mp3`);
+      el.preload = "auto";
+      v = { el, routed: false };
+      el.addEventListener("error", () => bakedDead.add(idx));
+      baked[idx] = v;
     }
-    a.currentTime = 0;
-    void a.play().catch(() => {});
+    routeBaked(v);
+    v.el.currentTime = 0;
+    const dur = Number.isFinite(v.el.duration) && v.el.duration > 0 ? v.el.duration : 1.65;
+    duckAmbience(dur + 0.35);
+    void v.el.play().catch(() => {});
+    lastBakedFailure = null;
     return true;
-  } catch {
+  } catch (err) {
+    lastBakedFailure = err instanceof Error ? err.message : "playback-error";
     bakedDead.add(idx);
     return false;
   }
@@ -92,6 +138,7 @@ function say(text: string, opts: { pitch?: number; rate?: number; seed?: number 
   try {
     // one line at a time — the pass talks over itself otherwise
     if (s.speaking) s.cancel();
+    duckAmbience(Math.min(4, 0.8 + text.length / 16));
     const u = new SpeechSynthesisUtterance(text);
     const v = pickVoice(s, opts.seed ?? 0);
     if (v) u.voice = v;
@@ -124,8 +171,20 @@ export function speakChorus(line: string, over: boolean) {
   say(clean, { pitch: 0.8 + Math.random() * 0.5, rate: 1.15, seed: Math.floor(Math.random() * 8) });
 }
 
-/** The review read-out: stars, then the quotable line. Biggest text first. */
+let reviewTimer: number | null = null;
+
+/** The review read-out: a beat after the sting, then stars and the quotable
+ *  line. Slower and lower than the brigade so the critic owns the room. */
 export function speakReview(stars: number, quote: string) {
   const starLine = stars >= 5 ? "Five stars." : stars >= 4 ? "Four stars." : stars === 3 ? "Three stars." : stars === 2 ? "Two stars." : stars === 1 ? "One star." : "No stars.";
-  say(`${starLine} ${quote.slice(0, 220)}`, { pitch: 0.9, rate: 1.0, seed: 3 });
+  const text = `${starLine} ${quote.slice(0, 220)}`;
+  if (reviewTimer !== null && typeof window !== "undefined") window.clearTimeout(reviewTimer);
+  if (typeof window === "undefined") {
+    say(text, { pitch: 0.86, rate: 0.96, seed: 3 });
+    return;
+  }
+  reviewTimer = window.setTimeout(() => {
+    reviewTimer = null;
+    say(text, { pitch: 0.86, rate: 0.96, seed: 3 });
+  }, 430);
 }
