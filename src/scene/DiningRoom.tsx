@@ -496,6 +496,26 @@ function FarWall({ venue = 0 }: { venue?: number }) {
   );
 }
 
+/** Rodin-pipeline guest body with state-driven clips: the base clip loops
+ *  normally; while this guest's tell is live the reaction clip crossfades in
+ *  (restless jiggle, nervous foot, dejected slump — whatever the cast sheet
+ *  picked for them). Reads the same guest state the capsule body uses. */
+function GuestGLB({
+  id, file, base, tell, ...props
+}: { id: number; file: string; base: string; tell: string } & Omit<React.ComponentProps<typeof CharacterGLB>, "url" | "clip">) {
+  const guest = useGame((s) => s.guests.find((g) => g.id === id));
+  const telling = !!guest && guest.tellAt >= 0
+    && useGame.getState().serviceTime - guest.tellAt < 3.5;
+  return (
+    <CharacterGLB
+      url={modelUrl(`characters/${file}.glb`)}
+      clip={telling ? tell : base}
+      fade={0.45}
+      {...props}
+    />
+  );
+}
+
 export default function DiningRoom() {
   const venue = useGame((s) => s.career.venue);
   const d = VENUE_DRESS[Math.min(2, venue)];
@@ -521,32 +541,25 @@ export default function DiningRoom() {
           tables are now set at intervals that do not repeat and at depths from
           6.0 to 7.9 m, so perspective alone gives three apparent sizes and the
           window stops looking like a second line-up. */}
-      {/* Guest 0 is the Rodin-pipeline pilot: generated → rigged → decimated
-          (scripts/rodin/). Plays the sitting clip; capsule guests remain for
-          1–4 until the full cast passes QA. */}
-      <group position={[-4.25, 0, -6.5]} scale={1.02}>
-        <CharacterGLB url={modelUrl("characters/guest-a.glb")} clip="human_000025" position={[0, 0.26, 0]} rotation={[0, Math.PI, 0]} scale={0.9} />
-      </group>
-      <Guest id={0} x={-4.25} z={-6.5} y={0} scale={1.02} venue={venue} visible={false} />
-      <Guest id={1} x={-1.7} z={-7.85} y={-0.3} scale={0.9} venue={venue} visible={false} />
       {/* Rodin-pipeline cast: generated → rigged → decimated (scripts/rodin/).
           Each guest plays a distinct clip set so the row reads as people, not
-          a chorus line. Capsule bodies stay mounted (hidden) for hit proxies
-          and per-guest state; only the visible body is swapped. */}
+          a chorus line, and crossfades to a reaction clip while their tell is
+          live. Capsule bodies stay mounted (hidden) for hit proxies and
+          per-guest state; only the visible body is swapped. */}
       <group position={[-4.25, 0, -6.5]} scale={1.02}>
-        <CharacterGLB url={modelUrl("characters/guest-a.glb")} clip="human_000025" position={[0, 0.26, 0]} rotation={[0, Math.PI, 0]} scale={0.9} />
+        <GuestGLB id={0} file="guest-a" base="human_000025" tell="human_000056" position={[0, 0.26, 0]} rotation={[0, Math.PI, 0]} scale={0.9} />
       </group>
       <group position={[-1.7, 0, -7.85]} scale={0.9}>
-        <CharacterGLB url={modelUrl("characters/guest-b.glb")} clip="human_000085" position={[0, 0.26, -0.3]} rotation={[0, Math.PI, 0]} scale={0.9} />
+        <GuestGLB id={1} file="guest-b" base="human_000085" tell="human_000080" position={[0, 0.26, -0.3]} rotation={[0, Math.PI, 0]} scale={0.9} />
       </group>
       <group position={[0.45, 0, -6.05]} scale={1.1}>
-        <CharacterGLB url={modelUrl("characters/guest-c.glb")} clip="human_000085" position={[0, 0.26, 0.06]} rotation={[0, Math.PI, 0]} scale={0.9} />
+        <GuestGLB id={2} file="guest-c" base="human_000085" tell="human_000080" position={[0, 0.26, 0.06]} rotation={[0, Math.PI, 0]} scale={0.9} />
       </group>
       <group position={[2.65, 0, -7.9]} scale={0.86}>
-        <CharacterGLB url={modelUrl("characters/guest-d.glb")} clip="human_000041" position={[0, 0.26, -0.34]} rotation={[0, Math.PI, 0]} scale={0.9} />
+        <GuestGLB id={3} file="guest-d" base="human_000041" tell="human_000025" position={[0, 0.26, -0.34]} rotation={[0, Math.PI, 0]} scale={0.9} />
       </group>
       <group position={[4.35, 0, -6.6]} scale={1.05}>
-        <CharacterGLB url={modelUrl("characters/guest-e.glb")} clip="human_000050" position={[0, 0.26, -0.12]} rotation={[0, Math.PI, 0]} scale={0.9} />
+        <GuestGLB id={4} file="guest-e" base="human_000085" tell="human_000050" position={[0, 0.26, -0.12]} rotation={[0, Math.PI, 0]} scale={0.9} />
       </group>
       <Guest id={0} x={-4.25} z={-6.5} y={0} scale={1.02} venue={venue} visible={false} />
       <Guest id={2} x={0.45} z={-6.05} y={0.06} scale={1.1} venue={venue} visible={false} />
