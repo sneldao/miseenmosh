@@ -1591,3 +1591,35 @@ blocked in service). Suite 182/182, build clean.
 guest-A's numbers as defaults), then brigade re-rig through Rodin
 (Phase 2 — accepts any mesh, contract preserved), then bespoke gestures
 via text-to-motion for the moments the 113 stock clips can't cover.
+
+## Compression and browser correction pass (25 Nov)
+
+Payload was the first release risk after the critique corrections: the working
+`dist/` was about 43 MB before final art/audio. The five imported brigade GLBs
+and Petra's three hero props were rebuilt with `gltf-transform optimize` using
+Meshopt compression, animation resampling, WebP textures capped at 512 px and
+simplification disabled. Source animation names were checked after compression
+(`PetraReady`, `PetraWork`, `DimitriPrep`, `AnwarPrep`, `Walkout`, `Flinch`,
+`Running`, `Walking`, `Work` where authored). The first aggressive attempt also
+flattened/joined skinned graphs; the browser frame was not accepted as proof,
+so the skinned cook files were regenerated with flattening and joining disabled.
+
+Measured after the pass:
+
+- `npm test`: **186/186 passing**.
+- `npm run build`: passing.
+- `dist/`: **26 MB uncompressed / 16 MB zip / 50 files** (down from about
+  43 MB uncompressed and the Nov 24 package's ~29 MB compressed upload).
+- Imported runtime brigade/props: about **2.1 MB total** in the build, down
+  from about **22.3 MB** for the same source files.
+- Browser route exercised with real clicks: title → first serve → call →
+  inspect → turn plate → acknowledge visible fault → send back → Petra's
+  immediate correction response. The compressed GLBs loaded and the canvas
+  booted (`window.__booted === true`).
+
+This closes the payload emergency, not the performance or human gates. The
+single meshopt/visual check was an agent-operated browser pass, not unfamiliar
+player observation. Frame-time and draw-call targets still need a dedicated
+measurement pass before deploy. Audio already has the bounded vertical slice
+ingredients — baked brigade chorus MP3s, dynamic review read-out and synth
+service beds — but it still needs a human listen/mix pass before release.
