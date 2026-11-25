@@ -28,6 +28,7 @@ import CommisRunner, { TrayBoard } from "./CommisRunner";
 import PorterRunner from "./PorterRunner";
 import PlateCorrection from "./PlateCorrection";
 import KitchenEquipment from "./equipment/KitchenEquipment";
+import StaticMerge from "./StaticMerge";
 import { COPPER, INK, LINE_SHIFT, LOOK, MUSTARD, PASS_Z, PETROL, STATION_X, VERMILION, signTexture, useReducedMotion } from "./artDirection";
 import { type DishCondition, dishProfile } from "../game/culinary";
 
@@ -75,6 +76,7 @@ function PassCounter() {
   });
   return (
     <group position={[0, 0, PASS_Z]}>
+      <StaticMerge>
       {/* petrol enamel fascia with cream inset panels */}
       <mesh position={[0, 0.55, 0]} castShadow receiveShadow>
         <boxGeometry args={[11, 1.1, 0.9]} />
@@ -154,7 +156,7 @@ function PassCounter() {
         </mesh>
       </group>
       {/* service bell — sways on every serve, idles otherwise */}
-      <group position={[-0.72, 1.16, 0.24]} ref={bell}>
+      <group position={[-0.72, 1.16, 0.24]} ref={bell} userData={{ staticMerge: false }}>
         <mesh position={[0, 0.006, 0]}>
           <cylinderGeometry args={[0.055, 0.062, 0.012, 16]} />
           <meshStandardMaterial color={STEEL_DARK} metalness={0.5} roughness={0.35} />
@@ -181,6 +183,7 @@ function PassCounter() {
           </mesh>
         </group>
       ))}
+      </StaticMerge>
     </group>
   );
 }
@@ -435,6 +438,7 @@ function Room() {
   useEffect(() => () => { tile.dispose(); floor.dispose(); sign.dispose(); }, [tile, floor, sign]);
   return (
     <group>
+      <StaticMerge>
       {/* floor: cream/petrol checker */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[20, 14]} />
@@ -500,6 +504,7 @@ function Room() {
       <Suspense fallback={null}>
         <PosterMesh />
       </Suspense>
+      </StaticMerge>
     </group>
   );
 }

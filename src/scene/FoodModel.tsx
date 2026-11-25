@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import { CanvasTexture, CapsuleGeometry, ExtrudeGeometry, InstancedMesh, LatheGeometry, Matrix4, Quaternion, Euler, RepeatWrapping, Shape, ShapeGeometry, SRGBColorSpace, Vector3, Vector2 } from "three";
 import { INK, VERMILION } from "./artDirection";
 import { type DishCondition, conditionFromCooking } from "../game/culinary";
+import StaticMerge from "./StaticMerge";
 
 export interface FoodModelProps {
   dish: string;
@@ -671,8 +672,10 @@ export default function FoodModel({
       <Fallback quality={quality} />
     );
   const hurried = eff.plating === "hurried";
+  const bakeKey = `${dish}|${quality}|${sauce ?? "-"}|${finish}|${scale}|${JSON.stringify(eff)}`;
   return (
     <group scale={scale}>
+      <StaticMerge key={bakeKey}>
       {/* a hurried plate lands off-centre, slightly turned, and leaves
           three honest smears/crumbs near the rim */}
       <group position={hurried ? [0.045, 0, -0.035] : [0, 0, 0]} rotation={hurried ? [0, 0.18, 0] : [0, 0, 0]}>
@@ -695,6 +698,7 @@ export default function FoodModel({
             </mesh>
           );
         })}
+      </StaticMerge>
     </group>
   );
 }

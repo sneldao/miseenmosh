@@ -8,6 +8,7 @@ import { useFrame } from "@react-three/fiber";
 import { CanvasTexture, Group, Mesh, MeshStandardMaterial, SRGBColorSpace } from "three";
 import { useGame } from "../../game/state";
 import { INK, useReducedMotion } from "../artDirection";
+import StaticMerge from "../StaticMerge";
 
 const STEEL = "#8f979c";
 const STEEL_DARK = "#4a4d52";
@@ -18,6 +19,7 @@ const STEEL_DARK = "#4a4d52";
 function Hood({ x }: { x: number }) {
   return (
     <group position={[x, 0, -3.6]}>
+      <StaticMerge>
       <mesh position={[0, 2.42, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
         <cylinderGeometry args={[0.32, 0.92, 0.62, 4]} />
         <meshStandardMaterial color={STEEL} metalness={0.6} roughness={0.45} />
@@ -59,6 +61,7 @@ function Hood({ x }: { x: number }) {
           </mesh>
         </group>
       ))}
+      </StaticMerge>
     </group>
   );
 }

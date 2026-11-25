@@ -11,6 +11,7 @@ import PetraCook from "./PetraCook";
 import { Flames, FallingPans, StationShelf } from "./Stations";
 import { useGame } from "../game/state";
 import { COPPER, INK, PETROL, VERMILION } from "./artDirection";
+import StaticMerge from "./StaticMerge";
 import bodyURL from "../../assets/meshy/petra-pilot/runtime-hold.glb?url";
 import tongsURL from "../../assets/props/tongs/prepared.glb?url";
 import panURL from "../../assets/props/skillet/prepared.glb?url";
@@ -108,6 +109,7 @@ function PetraStation({ x, pan, cooker }: { x: number; pan: GLTF; cooker: GLTF }
       </group>
       {/* prep trolley, not the old solid counter block */}
       <group position={[x + 1.05, 0, -3.0]}>
+        <StaticMerge>
         <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
           <boxGeometry args={[0.9, 0.04, 0.7]} />
           <meshStandardMaterial color="#e8dcbe" roughness={0.65} />
@@ -137,6 +139,7 @@ function PetraStation({ x, pan, cooker }: { x: number; pan: GLTF; cooker: GLTF }
             <meshStandardMaterial color={INK} roughness={1} />
           </mesh>
         </group>
+        </StaticMerge>
       </group>
     </>
   );

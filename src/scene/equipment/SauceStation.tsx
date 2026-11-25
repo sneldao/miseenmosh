@@ -57,7 +57,9 @@ export default function SauceStation() {
         </group>
       </group>
       {/* simmer steam — its share of the ≤12 ambient budget */}
-      <SteamField count={STEAM.bainMarie} position={[0.35, 1.3, -0.42]} rise={0.55} drift={0.07} size={0.09} level={level} />
+      <group userData={{ staticMerge: false }}>
+        <SteamField count={STEAM.bainMarie} position={[0.35, 1.3, -0.42]} rise={0.55} drift={0.07} size={0.09} level={level} />
+      </group>
       {/* the second pot — a sauce station never runs one pot */}
       <group position={[-0.95, 1.15, -0.4]}>
         <mesh position={[0, 0.07, 0]} castShadow>

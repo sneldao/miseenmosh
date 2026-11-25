@@ -18,6 +18,7 @@ import { sfx } from "../../game/sound";
 import { COPPER, INK, LINE_SHIFT, MUSTARD, PETROL, signTexture, useReducedMotion } from "../artDirection";
 import GrillLine from "./GrillLine";
 import SteamField, { STEAM } from "./Steam";
+import StaticMerge from "../StaticMerge";
 
 const STEEL = "#8f979c";
 const STEEL_DARK = "#4a4d52";
@@ -39,6 +40,7 @@ function Oven() {
   });
   return (
     <group position={[1.75, 0, -4.4]}>
+      <StaticMerge>
       {/* carcass */}
       {[0.32, -0.32].map((px, i) => (
         <mesh key={i} position={[px, 0.05, 0.22]}>
@@ -73,7 +75,7 @@ function Oven() {
         <planeGeometry args={[0.68, 0.78]} />
         <meshStandardMaterial color="#171512" roughness={0.3} metalness={0.2} />
       </mesh>
-      <mesh ref={glow} position={[0, 0.72, 0.306]}>
+      <mesh ref={glow} position={[0, 0.72, 0.306]} userData={{ staticMerge: false }}>
         <planeGeometry args={[0.56, 0.6]} />
         <meshStandardMaterial color="#3a2410" emissive="#ff9a3a" emissiveIntensity={0.12} />
       </mesh>
@@ -90,7 +92,10 @@ function Oven() {
         <meshStandardMaterial color={COPPER} metalness={0.7} roughness={0.35} />
       </mesh>
       {/* vent steam off the top rear — its budget share */}
-      <SteamField count={STEAM.ovenVent} position={[0.28, 1.56, -0.18]} rise={0.5} drift={0.06} size={0.08} level={souffle ? 1 : 0.3} opacity={0.2} />
+      <group userData={{ staticMerge: false }}>
+        <SteamField count={STEAM.ovenVent} position={[0.28, 1.56, -0.18]} rise={0.5} drift={0.06} size={0.08} level={souffle ? 1 : 0.3} opacity={0.2} />
+      </group>
+      </StaticMerge>
     </group>
   );
 }
@@ -137,6 +142,7 @@ function Stockpot() {
   });
   return (
     <group position={[-2.0, 0, -4.35]}>
+      <StaticMerge>
       {/* low burner block */}
       <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
         <boxGeometry args={[0.6, 0.4, 0.6]} />
@@ -154,7 +160,7 @@ function Stockpot() {
         </mesh>
       ))}
       {/* the lid that rattles on fire calls */}
-      <group ref={lid} position={[0, 0.89, 0]}>
+      <group ref={lid} position={[0, 0.89, 0]} userData={{ staticMerge: false }}>
         <mesh>
           <cylinderGeometry args={[0.29, 0.31, 0.035, 18]} />
           <meshStandardMaterial color={STEEL_DARK} metalness={0.6} roughness={0.45} />
@@ -165,7 +171,10 @@ function Stockpot() {
         </mesh>
       </group>
       {/* stock simmer — its budget share */}
-      <SteamField count={STEAM.stockpot} position={[0.1, 0.94, 0.05]} rise={0.7} drift={0.1} size={0.11} level={0.7} />
+      <group userData={{ staticMerge: false }}>
+        <SteamField count={STEAM.stockpot} position={[0.1, 0.94, 0.05]} rise={0.7} drift={0.1} size={0.11} level={0.7} />
+      </group>
+      </StaticMerge>
     </group>
   );
 }
@@ -178,6 +187,7 @@ function WashUp() {
   const sign = useMemo(() => signTexture("WASH-UP", { w: 384, h: 96, bg: INK, fg: "#f3e6c8", size: 52 }), []);
   return (
     <group position={[-6.0, 0, -4.3]}>
+      <StaticMerge>
       {/* the sign on the back wall above the station */}
       <mesh position={[0, 2.15, -0.52]}>
         <planeGeometry args={[1.5, 0.38]} />
@@ -237,6 +247,7 @@ function WashUp() {
         <planeGeometry args={[1.1, 0.7]} />
         <meshStandardMaterial color="#2c4a50" roughness={0.08} metalness={0.4} transparent opacity={0.35} depthWrite={false} />
       </mesh>
+      </StaticMerge>
     </group>
   );
 }
@@ -245,6 +256,7 @@ function WashUp() {
 function Crates() {
   return (
     <group>
+      <StaticMerge>
       {[[5.8, -4.3, 0], [5.75, -4.28, 1], [6.35, -3.8, 0.4]].map(([cx, cz, ry], i) => (
         <group key={i} position={[cx, i === 1 ? 0.34 : 0.17, cz]} rotation={[0, ry + i * 0.14, 0]}>
           {/* slatted crate: frame + darker hollow top */}
@@ -272,6 +284,7 @@ function Crates() {
           ))}
         </group>
       ))}
+      </StaticMerge>
     </group>
   );
 }

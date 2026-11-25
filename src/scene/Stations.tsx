@@ -6,6 +6,7 @@ import { COPPER, INK, MUSTARD, PETROL, STATION_X, VERMILION, signTexture, useRed
 import { MoodGlyph } from "./MoodGlyph";
 import SauceStation from "./equipment/SauceStation";
 import PastryStation from "./equipment/PastryStation";
+import StaticMerge from "./StaticMerge";
 
 const STONE = "#e8dcbe";
 const STONE_DARK = "#cbbd9c";
@@ -196,6 +197,7 @@ export function Station({ x, index, squash }: { x: number; index: number; squash
       {/* real bodies are anatomical — their benches drop to wrist height;
           squashed stations keep the counter and its props aligned to hands */}
       <group scale={[1, squash ?? (index === 0 ? 0.8 : 1), 1]}>
+      <StaticMerge key={squash ?? (index === 0 ? 0.8 : 1)}>
       {/* enamel counter front: painted panel + ink kick */}
       <mesh position={[0, 0.55, 0]} castShadow receiveShadow>
         <boxGeometry args={[3.2, 1.1, 1.2]} />
@@ -299,6 +301,7 @@ export function Station({ x, index, squash }: { x: number; index: number; squash
           <PastryStation />
         </group>
       )}
+      </StaticMerge>
       {cook?.burning && <Flames />}
       </group>
       {/* FallingPans stays world-scale: its shelf and drop use kitchen height */}
@@ -330,6 +333,7 @@ export function Station({ x, index, squash }: { x: number; index: number; squash
 export function StationShelf({ index }: { index: number }) {
   return (
     <group position={[0, 0, -1.4]}>
+      <StaticMerge>
       <mesh position={[0, 2.6, 0]}>
         <boxGeometry args={[3, 0.05, 0.4]} />
         <meshStandardMaterial color={STONE_DARK} roughness={0.7} />
@@ -364,6 +368,7 @@ export function StationShelf({ index }: { index: number }) {
       <HerbBunch x={1.1} y={2.5} z={0.1} hue="#4a7a3a" />
       {index === 1 && <GarlicBraid x={-0.6} y={2.5} z={0.1} />}
       {index !== 1 && <HerbBunch x={-0.55} y={2.45} z={0.08} hue="#6a8a3a" />}
+      </StaticMerge>
     </group>
   );
 }

@@ -70,6 +70,15 @@ interface Diagnostics {
    *  exact state for a screenshot (first person, a ticket mid-plate, a mood)
    *  instead of fishing for it through clicks. Absent from production builds. */
   act?: (patch: Record<string, unknown>) => string[];
+  /** DEV BUILDS ONLY — counts the live scene graph so draw-call work starts
+   *  from evidence rather than a guess. Read-only; absent from production. */
+  sceneStats?: () => {
+    totals: Record<string, number>;
+    geometries: Array<{ type: string; count: number; castShadow: number }>;
+    materials: { count: number; textured: number };
+    shadowCasters: Array<{ type: string; count: number }>;
+    clusters: Array<{ at: [number, number]; count: number; types: string[] }>;
+  };
   /** DEV BUILDS ONLY — projects world points through the live camera and
    *  returns CSS-pixel coordinates. This is how "it feels far away" becomes a
    *  number that can be argued with: where a cook's head sits, how many pixels
@@ -237,6 +246,91 @@ export default function Telemetry() {
               }
               useGame.setState(next as never);
               return Object.keys(patch);
+            },
+            sceneStats: () => {
+              const { scene } = live.current;
+              const totals: Record<string, number> = {
+                objects: 0, meshes: 0, skinnedMeshes: 0, instancedMeshes: 0,
+                visibleMeshes: 0, castShadow: 0, receiveShadow: 0, lights: 0,
+                points: 0, lines: 0, sprites: 0,
+              };
+              const geo = new Map<string, { type: string; count: number; castShadow: number }>();
+              const castType = new Map<string, number>();
+              const materials = new Set<string>();
+              const textured = new Set<string>();
+              const clusters = new Map<string, { at: [number, number]; count: number; types: Map<string, number> }>();
+              const world = new Vector3();
+              const effectivelyVisible = (node: unknown) => {
+                let n = node as { visible?: boolean; parent?: unknown } | null | undefined;
+                while (n) {
+                  if (n.visible === false) return false;
+                  n = n.parent as never;
+                }
+                return true;
+              };
+              scene.updateMatrixWorld(true);
+              scene.traverse((node) => {
+                totals.objects++;
+                const n = node as unknown as {
+                  isMesh?: boolean; isSkinnedMesh?: boolean; isInstancedMesh?: boolean;
+                  isPoints?: boolean; isLine?: boolean; isSprite?: boolean; isLight?: boolean;
+                  visible?: boolean; castShadow?: boolean; receiveShadow?: boolean;
+                  geometry?: { type?: string; uuid?: string };
+                  material?: unknown;
+                };
+                if (n.isLight) totals.lights++;
+                if (n.isPoints) totals.points++;
+                if (n.isLine) totals.lines++;
+                if (n.isSprite) totals.sprites++;
+                if (!n.isMesh) return;
+                totals.meshes++;
+                if ((node as unknown as { userData?: { staticMerged?: boolean } }).userData?.staticMerged) totals.mergedMeshes = (totals.mergedMeshes ?? 0) + 1;
+                if (n.isSkinnedMesh) totals.skinnedMeshes++;
+                if (n.isInstancedMesh) totals.instancedMeshes++;
+                const shown = effectivelyVisible(node);
+                if (shown) totals.visibleMeshes++;
+                if (n.castShadow) totals.castShadow++;
+                if (n.receiveShadow) totals.receiveShadow++;
+                const type = n.geometry?.type ?? "unknown";
+                const row = geo.get(type) ?? { type, count: 0, castShadow: 0 };
+                row.count++;
+                if (n.castShadow) row.castShadow++;
+                geo.set(type, row);
+                if (n.castShadow) castType.set(type, (castType.get(type) ?? 0) + 1);
+                if (shown) {
+                  node.getWorldPosition(world);
+                  const cx = Math.round(world.x);
+                  const cz = Math.round(world.z);
+                  const ck = `${cx},${cz}`;
+                  const cluster = clusters.get(ck) ?? { at: [cx, cz], count: 0, types: new Map<string, number>() };
+                  cluster.count++;
+                  cluster.types.set(type, (cluster.types.get(type) ?? 0) + 1);
+                  clusters.set(ck, cluster);
+                }
+                const mats = Array.isArray(n.material) ? n.material : [n.material];
+                for (const mat of mats) {
+                  const m = mat as { uuid?: string; map?: unknown } | null | undefined;
+                  if (!m?.uuid) continue;
+                  materials.add(m.uuid);
+                  if (m.map) textured.add(m.uuid);
+                }
+              });
+              return {
+                totals,
+                geometries: [...geo.values()].sort((a, b) => b.count - a.count),
+                materials: { count: materials.size, textured: textured.size },
+                shadowCasters: [...castType.entries()]
+                  .map(([type, count]) => ({ type, count }))
+                  .sort((a, b) => b.count - a.count),
+                clusters: [...clusters.values()]
+                  .map((cluster) => ({
+                    at: cluster.at,
+                    count: cluster.count,
+                    types: [...cluster.types.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([type]) => type),
+                  }))
+                  .sort((a, b) => b.count - a.count)
+                  .slice(0, 20),
+              };
             },
             probe: (points: Array<[number, number, number]>) => {
               const { camera: cam } = live.current;

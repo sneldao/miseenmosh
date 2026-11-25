@@ -5,6 +5,7 @@ import { useReducedMotion } from "./artDirection";
 import { Group, Mesh, MeshStandardMaterial } from "three";
 import CharacterGLB from "./CharacterGLB";
 import { modelUrl } from "./modelUrl";
+import StaticMerge from "./StaticMerge";
 
 /** Eveningwear: warm and cool so guests never read as brigade whites. */
 const COATS = ["#6e2f3a", "#33505f", "#6d5a2c", "#463463", "#2d5346"];
@@ -458,6 +459,7 @@ function FarWall({ venue = 0 }: { venue?: number }) {
   });
   return (
     <group position={[0, 0, -9.6]}>
+      <StaticMerge>
       <mesh position={[0, 2.4, 0]} receiveShadow>
         <boxGeometry args={[17, 5, 0.3]} />
         <meshStandardMaterial color={d.wall} roughness={0.92} />
@@ -481,7 +483,7 @@ function FarWall({ venue = 0 }: { venue?: number }) {
       ))}
       {/* sconces: warm points that tell you the room continues */}
       {[-4.2, 4.2].map((x, i) => (
-        <group key={x} position={[x, 2.5, 0.25]} ref={(g) => { sconces.current[i] = g; }}> 
+        <group key={x} position={[x, 2.5, 0.25]} ref={(g) => { sconces.current[i] = g; }} userData={{ staticMerge: false }}> 
           <mesh>
             <cylinderGeometry args={[0.04, 0.05, 0.24, 8]} />
             <meshStandardMaterial color="#c9a24a" metalness={0.5} roughness={0.35} />
@@ -492,6 +494,7 @@ function FarWall({ venue = 0 }: { venue?: number }) {
           </mesh>
         </group>
       ))}
+      </StaticMerge>
     </group>
   );
 }

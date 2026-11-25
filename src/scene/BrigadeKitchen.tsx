@@ -9,6 +9,7 @@ import { useGLTF } from "@react-three/drei";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import BrigadeCook, { BRIGADE } from "./BrigadeCook";
 import { COPPER, INK } from "./artDirection";
+import StaticMerge from "./StaticMerge";
 import dimitriURL from "../../assets/meshy/dimitri-pilot/runtime-dimitri.glb?url";
 import anwarURL from "../../assets/meshy/anwar-pilot/runtime-anwar.glb?url";
 
@@ -21,6 +22,7 @@ function SaucePot({ x }: { x: number }) {
   const px = x - 0.19, pz = -3.62;
   return (
     <group position={[px, 0, pz]}>
+      <StaticMerge>
       {/* low burner block lifting the pot to spoon height */}
       <mesh position={[0, 0.86, 0]} castShadow receiveShadow>
         <boxGeometry args={[0.5, 0.07, 0.5]} />
@@ -44,6 +46,7 @@ function SaucePot({ x }: { x: number }) {
         <cylinderGeometry args={[0.013, 0.013, 0.1, 6]} />
         <meshStandardMaterial color={COPPER} metalness={0.6} roughness={0.4} />
       </mesh>
+      </StaticMerge>
     </group>
   );
 }
@@ -53,6 +56,7 @@ function SaucePot({ x }: { x: number }) {
 function PastryScatter({ x }: { x: number }) {
   return (
     <group position={[x - 0.35, 0, -3.55]}>
+      <StaticMerge>
       {[0, 1, 2].map((i) => (
         <group key={i} position={[i * 0.16, 0.925, (i % 2) * 0.1]}>
           <mesh castShadow>
@@ -65,6 +69,7 @@ function PastryScatter({ x }: { x: number }) {
           </mesh>
         </group>
       ))}
+      </StaticMerge>
     </group>
   );
 }
