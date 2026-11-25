@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGame } from "../game/state";
 import { useReducedMotion } from "./artDirection";
@@ -367,6 +367,11 @@ function Waiter() {
   const tray = useRef<Group>(null);
   const clock = useRef(0);
   const reduced = useReducedMotion();
+  // motion state: walk clip between tables, standing idle during the serve
+  // dwell. Flips are edge-detected so setState fires twice per loop, not
+  // every frame.
+  const [moving, setMoving] = useState(true);
+  const movingRef = useRef(true);
   // waypoint walk: sweep the floor behind the seated row, pausing to serve
   // at whatever x the guests actually sit. The path returns on itself so
   // the loop wraps on the far side, never teleports across the window.
@@ -386,6 +391,10 @@ function Waiter() {
     const e = move * move * (3 - 2 * move);
     const x = stops[leg] + (stops[leg + 1] - stops[leg]) * e;
     const walking = frac < 0.8 && e > 0.02 && e < 0.98;
+    if (walking !== movingRef.current) {
+      movingRef.current = walking;
+      setMoving(walking);
+    }
     g.current.position.x = x;
     g.current.position.y = reduced ? 0 : Math.abs(Math.sin(t * 7)) * 0.035 * (walking ? 1 : 0);
     g.current.rotation.y = walking ? (stops[leg + 1] > stops[leg] ? Math.PI / 2 : -Math.PI / 2) * 0.9 : Math.PI;
@@ -398,27 +407,17 @@ function Waiter() {
   });
   return (
     <group ref={g} position={[-4.25, 0, -8.4]}>
-      {/* dark vest over white — staff, but unmistakably not brigade whites */}
-      <mesh position={[0, 1.05, 0]} castShadow>
-        <capsuleGeometry args={[0.16, 0.42, 6, 10]} />
-        <meshStandardMaterial color="#e8e2d4" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 1.02, 0.06]}>
-        <boxGeometry args={[0.3, 0.5, 0.14]} />
-        <meshStandardMaterial color="#241f28" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 0.55, 0]}>
-        <capsuleGeometry args={[0.14, 0.4, 6, 10]} />
-        <meshStandardMaterial color="#1c181f" roughness={0.95} />
-      </mesh>
-      <mesh position={[0, 1.52, 0]}>
-        <sphereGeometry args={[0.11, 14, 14]} />
-        <meshStandardMaterial color="#c08a62" emissive="#2a1c16" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 1.6, -0.02]}>
-        <sphereGeometry args={[0.108, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.55]} />
-        <meshStandardMaterial color="#241a18" roughness={0.95} />
-      </mesh>
+      {/* Rodin-pipeline body: walk clip between tables, standing idle during
+          the serve dwell. The tray arm and code-driven path stay — the GLB
+          replaces only the capsule body. */}
+      <CharacterGLB
+        url={modelUrl("characters/waiter.glb")}
+        clip={moving ? "human_000089" : "human_000090"}
+        fade={0.35}
+        position={[0, 0, 0]}
+        rotation={[0, 0, 0]}
+        scale={1.0}
+      />
       {/* tray arm: raised, flat, carrying the room's proof of service */}
       <group ref={tray} position={[0.26, 1.18, 0.1]}>
         <mesh position={[0, -0.14, 0]} rotation={[0.9, 0, 0]}>
