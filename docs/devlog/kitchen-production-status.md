@@ -1665,3 +1665,21 @@ Chrome (`window.__booted === true`) and a trusted TAKE THE PASS click reached th
 first service prompt. The only reported prop warnings were the pre-existing
 missing `PortraitSocket` nodes on the five runtime bodies; no new runtime fault
 appeared. Browser and preview-server sessions were closed after the check.
+
+## Deployment — 25 Nov audio/performance build
+
+`opengame check . --build --json` passed with no blockers in 49 files. Its two
+heuristic notes were reviewed rather than blindly fixed: Draco decoder references
+are library/decode-path dead weight for this meshopt build, and the waiter GLB is
+present at `dist/models/characters/waiter.glb` (the scanner misreads the
+relative `models/characters/waiter.glb` URL as `assets/characters/waiter.glb`).
+
+The first upload attempt hit a network failure; a later resume completed the
+same archive. Release `06b6b444-8e7b-4f50-82cf-b6c930a1904e` reached review and
+published automatically as jam submission `SUB-2292`. Live URL:
+https://opengame.io/g/9i7mjkmdx4
+
+Live smoke: Chrome opened the public page, Play now mounted the iframe, the
+title screen rendered, and a trusted TAKE THE PASS click reached the first
+`SERVE → TABLE 12` prompt. Browser session closed afterward. Nobody has yet
+listened to the deployed audio mix or completed an unfamiliar-player run.
