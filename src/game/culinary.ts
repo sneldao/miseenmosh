@@ -246,6 +246,7 @@ export interface RecipeRevision {
   finish: RecipeFinish;
   contributor: string;
   night: number;
+  credit?: "shared" | "house";
 }
 
 export const WELLINGTON_FINISHES = {
@@ -277,6 +278,7 @@ export function cleanRecipeHistory(value: unknown): RecipeRevision[] {
     byNight.set(entry.night, {
       dish: "Beef Wellington", finish: entry.finish,
       contributor: entry.contributor.trim(), night: entry.night,
+      ...(entry.credit === "shared" || entry.credit === "house" ? { credit: entry.credit } : {}),
     });
   }
   return [...byNight.values()].sort((a, b) => a.night - b.night).slice(-8);
@@ -294,9 +296,10 @@ export function reviseWellington(
   finish: RecipeFinish,
   contributor: string,
   night: number,
+  credit?: "shared" | "house",
 ): RecipeRevision[] {
   return cleanRecipeHistory([
     ...(history ?? []).filter((entry) => entry.night !== night),
-    { dish: "Beef Wellington", finish, contributor, night },
+    { dish: "Beef Wellington", finish, contributor, night, ...(credit ? { credit } : {}) },
   ]);
 }

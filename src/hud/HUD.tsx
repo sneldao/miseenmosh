@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends, Cook } from "../game/state";
+import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends, Cook, petraOpeningReply } from "../game/state";
 import { deriveMood } from "../game/mood";
 import { morningCards } from "../game/beats";
 import { dishProfile, plateObservations, correctionNeeded, CORRECTION_LABEL, currentWellingtonRecipe, WELLINGTON_FINISHES, type RecipeFinish } from "../game/culinary";
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
 import { reviewNarration } from "../game/serviceReview";
+import { nightContract, lowestMoraleCook } from "../game/nightArc";
+import { buildEnding } from "../game/ending";
 import { speakReview, voiceEnabled, setVoiceEnabled } from "../game/voice";
 import { preloadKitchenModels } from "../scene/preloadModels";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
@@ -157,8 +159,8 @@ function PassPanel({ plate, firstPerson }: { plate: Ticket; firstPerson: boolean
       )}
       <div className="plate-verbs">
         {peers > 0 && (
-          <button className="btn serve big" onClick={() => runTable()} disabled={!!correcting}>
-            RUN TABLE {plate.table} · {peers + 1} PLATES
+          <button className="btn serve big" onClick={() => runTable(true)} disabled={!!correcting}>
+            COMMIT TABLE {plate.table} · {peers + 1} PLATES
           </button>
         )}
         {split && (
@@ -180,7 +182,7 @@ function PassPanel({ plate, firstPerson }: { plate: Ticket; firstPerson: boolean
           className="btn back"
           onClick={() => judge("sendback")}
           disabled={!!correcting}
-          title={needed ? `Names the fault: ${CORRECTION_LABEL[needed]}` : "Nothing wrong with it — the kitchen will remember."}
+          title={needed ? `Names the fault: ${CORRECTION_LABEL[needed]}. The table keeps waiting; the remake must be cooked again.` : "Nothing wrong with it — the table keeps waiting and the kitchen will remember."}
         >
           SEND BACK <span className="kbd">B</span>
         </button>
@@ -535,18 +537,26 @@ function ServiceTools() {
 
 /** the quiet night-1 lesson: the action itself is the prompt — no tutorial text */
 function OpeningService() {
+  const career = useGame((s) => s.career);
   const openingStep = useGame((s) => s.openingStep);
   const tickets = useGame((s) => s.tickets);
   const serviceTime = useGame((s) => s.serviceTime);
   const judge = useGame((s) => s.judge);
   const plateToPass = useGame((s) => s.plateToPass);
   const paused = useGame((s) => s.paused);
+  const inspecting = useGame((s) => s.inspecting);
+  const openingTurned = useGame((s) => s.openingTurned);
+  const setInspecting = useGame((s) => s.setInspecting);
+  const turnPlate = useGame((s) => s.turnPlate);
+  const acknowledgeOpeningDefect = useGame((s) => s.acknowledgeOpeningDefect);
   const pass = tickets.find((t) => t.state === "pass");
   const rail = tickets.find((t) => t.state === "rail");
   const plating = tickets.find((t) => t.state === "plating");
+  const observations = pass?.condition ? plateObservations(pass.dish, pass.condition) : [];
+  const fault = pass?.condition ? correctionNeeded(pass.dish, pass.condition) : null;
+  const openingReply = career.openingMemory?.night === 1 ? petraOpeningReply(career.openingMemory.firstVerdict) : null;
   return (
     <>
-      <ServiceTools />
       {openingStep === "serve" && pass && (
         <div className="pass-actions opening-actions">
           <button className="btn serve big" autoFocus onClick={() => judge("serve")}>
@@ -575,11 +585,40 @@ function OpeningService() {
           <span className="oclabel">Cooking</span>
         </div>
       )}
-      {openingStep === "judge" && pass && (
+      {openingStep === "inspect" && pass && (
+        <div className="pass-actions opening-actions opening-inspect">
+          <div className="mhead">LOOK BEFORE YOU JUDGE</div>
+          {!inspecting ? (
+            <button className="btn serve big" autoFocus onClick={() => setInspecting(true)}>
+              INSPECT THE WELLINGTON <span className="kbd">I</span>
+            </button>
+          ) : (
+            <>
+              <div className="plate-std">{observations[0]}</div>
+              <div className="plate-std">House standard: {dishProfile(pass.dish).standard}</div>
+              <button className="btn" autoFocus onClick={() => turnPlate(Math.PI / 4)}>
+                TURN THE PLATE
+              </button>
+              {openingTurned && fault && (
+                <button className="btn back" onClick={acknowledgeOpeningDefect}>
+                  I SEE THE FAULT — {CORRECTION_LABEL[fault].toUpperCase()}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
+      {openingStep === "judge" && pass && !plating && (
         <div className="pass-actions opening-actions">
-          <button className="btn serve" autoFocus onClick={() => judge("serve")}>SERVE</button>
-          <button className="btn back" onClick={() => judge("sendback")}>SEND BACK</button>
-          <button className="btn smash" onClick={() => judge("smash")}>SMASH</button>
+          <button className="btn serve" autoFocus onClick={() => judge("serve")}>SERVE <span className="kbd">S</span></button>
+          <button className="btn back" onClick={() => judge("sendback")}>SEND BACK <span className="kbd">B</span></button>
+          <button className="btn smash" onClick={() => judge("smash")}>SMASH <span className="kbd">X</span></button>
+        </div>
+      )}
+      {openingStep === "call" && openingReply && (
+        <div className="opening-response" role="status">
+          <span>PETRA</span>
+          {openingReply}
         </div>
       )}
       <Stamp />
@@ -602,36 +641,173 @@ function Briefing() {
 }
 
 /** one screen, one decision, one big button — the reading lives in the book */
-/** Morning recipe call: the Wellington's finish for tonight — one row, optional. */
+/** Morning recipe call: one revision a night, with N3's credit decision explicit. */
 function RecipeRow() {
   const career = useGame((s) => s.career);
   const cooks = useGame((s) => s.cooks);
   const developWellington = useGame((s) => s.developWellington);
   const current = currentWellingtonRecipe(career.recipeHistory);
-  const contributor = cooks.find((c) => c.station === 0)?.name ?? "THE HOUSE";
-  const pick = (finish: RecipeFinish) => developWellington(finish);
+  const tonight = career.recipeHistory?.find((entry) => entry.night === career.night);
+  const stationCook = cooks.find((c) => c.station === 0 && !c.walkedOut);
+  const [credit, setCredit] = useState<"shared" | "house">("shared");
+  const pick = (finish: RecipeFinish) => developWellington(finish, credit);
   return (
     <div className="qrecipe">
-      <div className="mhead">{contributor}&rsquo;S WELLINGTON</div>
+      <div className="mhead">
+        {career.night === 3 ? "THE WELLINGTON — WHOSE VOICE?" : `${stationCook?.name ?? "THE HOUSE"}'S WELLINGTON`}
+      </div>
+      {career.night === 3 && !tonight && (
+        <div className="credit-choice">
+          <button
+            className={`btn lbtn ${credit === "shared" ? "picked" : ""}`}
+            disabled={!stationCook}
+            onClick={() => setCredit("shared")}
+          >
+            SHARE WITH {stationCook?.name ?? "THE GRILL"}
+            <span className="cost">+8 morale · grudge cleared</span>
+          </button>
+          <button
+            className={`btn lbtn ${credit === "house" ? "picked" : ""}`}
+            onClick={() => setCredit("house")}
+          >
+            THE HOUSE TAKES IT
+            <span className="cost">−10 morale · “credit taken”</span>
+          </button>
+        </div>
+      )}
       <div className="qmeal-row">
         {(Object.keys(WELLINGTON_FINISHES) as RecipeFinish[]).map((finish) => (
           <button
             key={finish}
-            className={`btn lbtn ${current?.finish === finish ? "picked" : ""}`}
+            className={`btn lbtn ${tonight?.finish === finish ? "picked" : ""}`}
+            disabled={!!tonight || (career.night === 3 && credit === "shared" && !stationCook)}
             onClick={() => pick(finish)}
           >
             {WELLINGTON_FINISHES[finish].name.toUpperCase()}
           </button>
         ))}
       </div>
-      {current && (
+      {tonight ? (
         <div className="ltaken">
-          {current.contributor} revised this — {WELLINGTON_FINISHES[current.finish].note}
+          {tonight.contributor} revised this — {WELLINGTON_FINISHES[tonight.finish].note}
         </div>
+      ) : current ? (
+        <div className="ltaken">
+          On the pass: {current.contributor}&rsquo;s {WELLINGTON_FINISHES[current.finish].name.toLowerCase()}.
+        </div>
+      ) : (
+        <div className="ltaken">No revision yet — the house standard remains.</div>
       )}
       {(career.lastSauceHelp?.night ?? -1) === career.night - 1 && (
         <div className="ltaken">You brought {career.lastSauceHelp!.cookName}&rsquo;s {career.lastSauceHelp!.dish} back together last night.</div>
       )}
+    </div>
+  );
+}
+
+function NightContractCard() {
+  const career = useGame((s) => s.career);
+  const cooks = useGame((s) => s.cooks);
+  const chooseAttention = useGame((s) => s.chooseAttention);
+  const chooseRecovery = useGame((s) => s.chooseRecovery);
+  const chooseSeating = useGame((s) => s.chooseSeating);
+  const contract = nightContract(career.night);
+  const weakest = lowestMoraleCook(cooks);
+  const recoveryTarget = career.recovery?.night === 6 ? career.recovery.cookName : weakest?.name;
+  return (
+    <div className="night-contract">
+      <div className="mhead">NIGHT {contract.night} — {contract.name.toUpperCase()}</div>
+      <div className="ndilemma">{contract.dilemma}</div>
+      <div className="ncondition">{contract.condition}</div>
+      {career.night === 4 && (
+        <div className="night-choice">
+          {career.attentionNight === 4 ? (
+            <div className="ltaken">Attention spent on {career.attention?.toUpperCase()}.</div>
+          ) : (
+            <>
+              <button className="btn lbtn" onClick={() => chooseAttention("regulars")}>
+                THE REGULARS<span className="cost">their request comes first</span>
+              </button>
+              <button className="btn lbtn" onClick={() => chooseAttention("critic")}>
+                THE CRITIC<span className="cost">their request comes first</span>
+              </button>
+              <button className="btn lbtn" onClick={() => chooseAttention("brigade")}>
+                THE BRIGADE<span className="cost">{weakest?.name ?? "the weakest cook"} steadies · +12 morale · trauma −1</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
+      {career.night === 6 && (
+        <div className="night-choice">
+          {career.recovery?.night === 6 ? (
+            <div className="ltaken">
+              {career.recovery.cookName}: {career.recovery.choice === "push" ? "pushed for skill, at a cost to morale" : "protected for morale and correction reliability"}.
+            </div>
+          ) : (
+            <>
+              <div className="ncondition">{recoveryTarget ?? "The weakest cook"} is running on empty.</div>
+              <button className="btn lbtn" onClick={() => chooseRecovery("push")}>
+                PUSH {recoveryTarget ?? "THEM"}<span className="cost">+4% skill · −12 morale</span>
+              </button>
+              <button className="btn lbtn" onClick={() => chooseRecovery("protect")}>
+                PROTECT {recoveryTarget ?? "THEM"}<span className="cost">+18 morale · trauma −1 · grudge cleared</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
+      {career.night === 7 && (
+        <div className="night-choice">
+          {career.seating101 ? (
+            <div className="ltaken">101: {career.seating101.toUpperCase()}.</div>
+          ) : (
+            <>
+              <button className="btn lbtn" onClick={() => chooseSeating("regulars")}>
+                REGULARS TO 101<span className="cost">keep the ritual · 50s fuse</span>
+              </button>
+              <button className="btn lbtn" onClick={() => chooseSeating("press")}>
+                PRESS TO 101<span className="cost">fast company · 40s fuse</span>
+              </button>
+              <button className="btn lbtn" onClick={() => chooseSeating("walkin")}>
+                WALK-INS TO 101<span className="cost">big spend · 42s fuse</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FeudPanel() {
+  const career = useGame((s) => s.career);
+  const feud = useGame((s) => s.feud);
+  const feudChoice = useGame((s) => s.feudChoice);
+  if (!feud) return null;
+  return (
+    <div className="night-feud">
+      <img className="feudface" src={FEUD_ART[feud.actor] ?? castBeefcakes} alt={FEUD_ALT[feud.actor] ?? "BEEFCAKES"} />
+      <div>
+        <div className="mhead">TONIGHT&rsquo;S PROBLEM</div>
+        <div className="ftext">{feud.text}</div>
+        {feud.resolved ? (
+          <div className="fout">{feud.outcome}</div>
+        ) : (
+          <div className="fbtns">
+            {feud.options.map((option, i) => (
+              <button
+                key={i}
+                className="btn fbtn"
+                disabled={i === 0 && career.cash < (feud.cost ?? 0)}
+                onClick={() => feudChoice(i)}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -670,6 +846,8 @@ function QuickBrief({ onBook }: { onBook: () => void }) {
           ))}
         </div>
         {career.night >= 2 && <RecipeRow />}
+        <NightContractCard />
+        <FeudPanel />
         <div className="qmeal">
           <div className="mhead">FAMILY MEAL</div>
           <div className="qmeal-row">
@@ -719,14 +897,12 @@ function PrepBook({ onBack }: { onBack: () => void }) {
   const borrow = useGame((s) => s.borrow);
   const repay = useGame((s) => s.repay);
   const ego = useGame((s) => s.ego);
-  const feudChoice = useGame((s) => s.feudChoice);
   const lots = useGame((s) => s.lots);
   const buyLot = useGame((s) => s.buyLot);
   const coach = useGame((s) => s.coach);
   const setMenu = useGame((s) => s.setMenu);
   const chooseVow = useGame((s) => s.chooseVow);
   const chooseMutator = useGame((s) => s.chooseMutator);
-  const chooseSeating = useGame((s) => s.chooseSeating);
   const meal = useGame((s) => s.meal);
   const mealDone = (career.mealNight ?? -1) >= career.night;
   const feed = useGame((s) => s.feed);
@@ -794,6 +970,7 @@ function PrepBook({ onBack }: { onBack: () => void }) {
             <div className="bconsequence">{career.lastReview.consequence}</div>
           </div>
         )}
+        <NightContractCard />
         {nightTake && (
           <div className="btake">
             Last night: £{nightTake.covers} covers − £{nightTake.wages} wages − £
@@ -994,7 +1171,7 @@ function PrepBook({ onBack }: { onBack: () => void }) {
                 <div className="ltaken">your name is above the door</div>
               ) : (
                 <button className="btn shop" disabled={ego < 40} onClick={() => clout("door")}>
-                  NAME ABOVE THE DOOR <span className="cost">40 ego to ask · 30 to buy · +1★, once ever</span>
+                  NAME ABOVE THE DOOR <span className="cost">40 ego to ask · 30 to buy · accolade, no star</span>
                 </button>
               )}
             </div>
@@ -1025,28 +1202,13 @@ function PrepBook({ onBack }: { onBack: () => void }) {
                 <div className="ltaken">vowed: {career.vow.toUpperCase()}</div>
               ) : (
                 <>
-                  <button className="btn shop" onClick={() => chooseVow("star")}>STAR VOW <span className="cost">no walks + clocked = +1★</span></button>
+                  <button className="btn shop" onClick={() => chooseVow("star")}>STAR VOW <span className="cost">no walks + clocked = +15 lifetime ego</span></button>
                   <button className="btn shop" onClick={() => chooseVow("house")}>HOUSE VOW <span className="cost">101 turns twice</span></button>
                   <button className="btn shop" onClick={() => chooseVow("brigade")}>BRIGADE VOW <span className="cost">zero walkouts, trauma −1</span></button>
                 </>
               )}
             </div>
             </>
-            )}
-            {career.night >= 7 && (
-            <div className="bshop slim">
-              <div className="mhead">MAITRE-D' — who gets 101 {(["(table 14, wobbly corner)", "(table 12, the window)", "(table 10, center stage)"] as const)[Math.min(2, career.venue)]}?</div>
-              {career.seating101 ? (
-                <div className="ltaken">101: {career.seating101.toUpperCase()} · window +patience for the rest</div>
-              ) : (
-                <>
-                  {career.night >= 8 && <div className="ltaken">No call? MARA &amp; JUNE take 101 without being asked. Override below.</div>}
-                  <button className="btn shop" onClick={() => chooseSeating("regulars")}>REGULARS TO 101 <span className="cost">they love it · +ego if honoured</span></button>
-                  <button className="btn shop" onClick={() => chooseSeating("press")}>PRESS TO WINDOW <span className="cost">fast, writes fast</span></button>
-                  <button className="btn shop" onClick={() => chooseSeating("walkin")}>WALK-INS TO 101 <span className="cost">impatient, big spend</span></button>
-                </>
-              )}
-            </div>
             )}
             <div className="bshop slim">
               <div className="mhead">A MAN WITH A VAN</div>
@@ -1062,30 +1224,7 @@ function PrepBook({ onBack }: { onBack: () => void }) {
             </div>
           </div>
         )}
-        {beat === 2 && feud && (
-          <div className="beat feudbeat">
-            <img className="feudface" src={FEUD_ART[feud.actor] ?? castBeefcakes} alt={FEUD_ALT[feud.actor] ?? "BEEFCAKES"} />
-            <div className="feud">
-              <div className="ftext">{feud.text}</div>
-              {feud.resolved ? (
-                <div className="fout">{feud.outcome}</div>
-              ) : (
-                <div className="fbtns">
-                  {feud.options.map((o, i) => (
-                    <button
-                      key={i}
-                      className="btn fbtn"
-                      disabled={i === 0 && career.cash < [90, 0, 50, 70][(career.night - 2) % 4]}
-                      onClick={() => feudChoice(i)}
-                    >
-                      {o}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {beat === 2 && <FeudPanel />}
         {feed.length > 0 && <div className="bfeed">{feed[feed.length - 1].text}</div>}
         {!canSave && <div className="bwarn">Progress won't persist — this browser blocks storage.</div>}
         <button className="btn serve big" onClick={go}>
@@ -1098,34 +1237,32 @@ function PrepBook({ onBack }: { onBack: () => void }) {
 
 function Ending() {
   const career = useGame((s) => s.career);
+  const cooks = useGame((s) => s.cooks);
   const enterResidency = useGame((s) => s.enterResidency);
-  const broke = career.cash < -60;
-  const won = career.stars >= 10;
-  const legend = !broke && won && (career.totalEgo ?? 0) >= 200;
+  const ending = buildEnding(career, cooks);
   return (
     <div className="review-wrap">
       <div className="review ending">
         <div className="rhead">THE RESIDENCY ENDS</div>
-        <div className="stars">
-          {"★".repeat(Math.min(5, Math.ceil(career.stars / 3)))}
-          <span className="dim">{"☆".repeat(5 - Math.min(5, Math.ceil(career.stars / 3)))}</span>
+        <div className={`ending-result ${ending.won ? "won" : ""}`}>
+          {ending.broke ? "THE HOUSE CLOSED" : ending.won ? "RESIDENCY WON" : "RESIDENCY UNFINISHED"}
         </div>
-        <div className="quote">
-          {broke
-            ? "The suppliers stopped answering. The lights stayed on out of pity. It's over."
-            : legend
-              ? "Three stars, a name above the door, and the alley chanting it. They'll name a heat after you — the one where the fat catches and nobody flinches."
-              : won
-                ? "Three stars. The room says YES, CHEF to itself. You are the venue now."
-                : "Nine nights of sweat and shouting. A footnote in the guide — but your brigade still calls you chef."}
+        <div className="ending-title">{ending.title}</div>
+        <div className="quote">{ending.quote}</div>
+        <div className="ending-ledger">
+          <p>{ending.signature}</p>
+          <p>{ending.brigade}</p>
+          {ending.memory && <p>{ending.memory}</p>}
+          <p>{ending.costs}</p>
         </div>
         <div className="rstats">
           <span>{career.stars}★ earned</span>
-          <span>£{career.cash} in the till</span>
+          <span>food {Math.round(ending.avgCulinary)}/100</span>
+          <span>hospitality {Math.round(ending.avgHospitality)}/100</span>
           <span>{career.defections} defections</span>
+          <span>{career.totalWalkouts ?? 0} walkouts</span>
           <span>{Math.round(career.totalEgo ?? 0)} lifetime ego</span>
           {(career.covers ?? []).length > 0 && <span>covers: {(career.covers ?? []).join(" · ")}</span>}
-          {(career.debt ?? 0) > 0 && <span>the man takes £{career.debt} off the top</span>}
         </div>
         <div className="rbtns">
           <button className="btn serve" onClick={() => enterResidency({ fresh: true })}>
@@ -1237,15 +1374,15 @@ function Glossary() {
     ["S / B / X", "serve · send back · smash the held plate"],
     ["F", "fire / collect the aimed ticket"],
     ["I", "inspect the held plate"],
-    ["E", "86 the dish (bin it, slate wiped)"],
+    ["E", "86 the dish — displaced covers count as misses"],
     ["M", "fix a split sauce — held plate or live pot"],
     ["T", "move 101 mid-rush"],
     ["H", "shoo BEEFCAKES' runner"],
     ["D", "refuse request · refuse-with-grace (cold plate)"],
     ["R", "fix the folklore (fork/glass/coat)"],
-    ["C", "comp the hanging table (champagne)"],
-    ["G", "bread service — settle the hanging table"],
-    ["N", "wave the next order in early"],
+    ["C", "comp the hanging table (£20 champagne)"],
+    ["G", "bread service (£3; buys patience, not quality)"],
+    ["N", "wave the next order in early (+2 station pressure)"],
     ["U", "brigade voices on/off"],
     ["click table", "flag the inspector (before dessert)"],
     ["P / Esc", "pause"],
@@ -1425,11 +1562,7 @@ export default function HUD() {
             </div>
           )}
           {firstPerson && !locked && !paused && (
-            <div className="lockhint">
-              CLICK TO TAKE THE PASS <span className="sep">·</span> MOUSE LOOKS
-              <span className="sep">·</span> ARROWS SHIMMY <span className="sep">·</span> HOLD
-              SPACE TO SCREAM <span className="sep">·</span> V CAMERA
-            </div>
+            <div className="lockhint">CLICK TO TAKE THE PASS</div>
           )}
           {charge > 0 && (
             <div className={`charge ${charge > 1.05 ? "over" : ""}`}>
@@ -1445,18 +1578,25 @@ export default function HUD() {
             <div className="hint">
               {atPass
                 ? "Hold right mouse to look at the plate."
-                : live.some((t) => t.state === "plating")
-                  ? "Plating… wait for the gold."
-                  : "Look at a docket on the rail and click."}{" "}
-              {criticFlagged
-                ? criticSpotted
-                  ? "Inspector clocked."
-                  : serviceTime < 100
-                    ? "Wrong guest flagged."
-                    : "Inspector slipped the net."
-                : serviceTime < 100
-                  ? "Spot the inspector — click them before dessert."
-                  : "DESSERT COURSE."}
+                : live.some((t) => t.state === "ready")
+                  ? "A plate is up — aim at it and click."
+                  : live.some((t) => t.state === "plating")
+                    ? "Aim at the cooking dish and click to fire; wait for the gold."
+                    : railAll.length > 0
+                      ? "Aim at a docket on the rail and click."
+                      : runner && !runner.fled
+                        ? "Runner on the floor — H shoos them."
+                        : request
+                          ? `Table ${request.table} wants it ${request.mod} — D refuses.`
+                          : sauce
+                            ? "The sauce is splitting — M whisks it."
+                            : serviceTime - breadAt >= 18
+                              ? "G — bread service settles a hanging table."
+                              : nextTicketIn > 6
+                                ? "N — call the next order in early."
+                                : !criticFlagged && serviceTime < 100
+                                  ? "Spot the inspector — aim and click."
+                                  : null}
             </div>
           ) : runner && !runner.fled ? (
             <div className="hint">Runner on the floor — SHOO HIM (H)!</div>
@@ -1513,7 +1653,7 @@ export default function HUD() {
             EGO <b>{Math.round(ego)}</b> · {tierName(ego)}
             {streak >= 3 && <span className="amped"> · STREAK ×{streak}</span>}
             {screams === 0 ? (
-              <span className="silent"> · SILENT — hold it for a ★</span>
+              <span className="silent"> · SILENT — hold it for an accolade</span>
             ) : (
               <> · SCREAMS <b>{screams}</b></>
             )}
@@ -1542,26 +1682,28 @@ export default function HUD() {
           </button>
           <button
             className="btn bread"
-            title="The commis walks a basket to the hanging table"
-            disabled={!!openingStep || serviceTime - breadAt < 18}
+            title="£3 · the commis walks a basket to the hanging table"
+            disabled={!!openingStep || career.cash < 3 || serviceTime - breadAt < 18}
             onClick={() => sendBread()}
           >
             BREAD <span className="kbd">G</span>{" "}
             <span className="cost">
-              {serviceTime - breadAt < 18
-                ? `basket out · ${Math.ceil(18 - (serviceTime - breadAt))}s`
-                : "the hanging table settles"}
+              {career.cash < 3
+                ? "need £3"
+                : serviceTime - breadAt < 18
+                  ? `basket out · ${Math.ceil(18 - (serviceTime - breadAt))}s`
+                  : "£3 · the hanging table settles"}
             </span>
           </button>
           <button
             className="btn expedite"
-            title="Wave the next order through — more rail pressure"
+            title="Wave the next order through — +2 station pressure"
             disabled={!!openingStep || nextTicketIn <= 0.5 || live.length >= 9}
             onClick={() => expedite()}
           >
             NEXT TICKET <span className="kbd">N</span>{" "}
             <span className="cost">
-              {nextTicketIn > 0.5 ? `printer fires in ${Math.ceil(nextTicketIn)}s` : "printing…"}
+              {nextTicketIn > 0.5 ? `fire now · +2 pressure` : "printing…"}
             </span>
           </button>
           <button

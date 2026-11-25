@@ -54,6 +54,9 @@ const baseFacts: ReviewFacts = {
   spotted: true,
   criticServed: 1,
   criticAvg: 60,
+  criticAvgHospitality: 70,
+  avgQuality: 70,
+  avgHospitality: 70,
   events: [],
   folkloreOutcome: null,
   persona: "gilliam",
@@ -110,10 +113,11 @@ describe("service story selection", () => {
     expect(story.headline).toBe("A SERVICE WITHOUT SHOUTING");
   });
 
-  it("screams break the quiet headline and cap Gilliam's assessment", () => {
+  it("screams break the quiet headline but do not cap culinary stars", () => {
     const story = buildServiceStory({ ...baseFacts, walkoutNames: [], smashed: 0, complaints: 0, screams: 2 });
     expect(story.headline).not.toBe("A SERVICE WITHOUT SHOUTING");
-    expect(story.criticVerdict).toContain("second scream");
+    expect(story.criticVerdict).toContain("2 shouts");
+    expect(story.criticVerdict).not.toContain("no higher than two stars");
   });
 
   it("unknown inspector and clocked-but-unfed read as their own failures", () => {
@@ -350,6 +354,39 @@ describe("store integration", () => {
     expect(useGame.getState().tickets).toBe(before.tickets);
   });
 
+  it("keeps coursing, requests, features and provenance out of culinary quality", () => {
+    const critic = { id: 0, kind: "critic" as const, table: 3, isCritic: true, tells: 0, tellAt: -1, tellClock: 99, mercy: 0, tellKind: null };
+    toService({
+      guests: [critic],
+      tickets: [passPlate({ quality: 80, age: 10 })],
+      tableServeAt: { 3: 9 },
+      request: { ticketId: 1, table: 3, dish: "Scallops", mod: "FAST", until: 20 },
+      career: { ...useGame.getState().career, featuredDish: "Scallops", stories: ["lorna"], criticPersona: "madameV" },
+    });
+    useGame.getState().judge("serve");
+    const s = useGame.getState();
+    expect(s.qualitySum).toBe(80);
+    expect(s.criticQ).toBe(80);
+    expect(s.hospitalitySum).toBe(93);
+    expect(s.hospitalityCount).toBe(1);
+    expect(s.criticHospitalityQ).toBe(93);
+    expect(s.events.find((e) => e.kind === "plate")).toMatchObject({ quality: 80, guestScore: 93 });
+  });
+
+  it("awards no direct stars for detection, silence or smashing", () => {
+    const cooks = useGame.getState().cooks.map((c) => ({ ...c, walkedOut: false, morale: 80 }));
+    useGame.setState({
+      phase: "service", paused: false, serviceTime: 149.9, guests: [], tickets: [], cooks,
+      served: 12, qualitySum: 12 * 88, hospitalitySum: 12 * 82, hospitalityCount: 12,
+      misses: 0, complaints: 0, screams: 0, smashed: 8, criticSpotted: true,
+      career: { ...useGame.getState().career, night: 2, criticPersona: "gilliam" },
+    } satisfies Partial<State>);
+    useGame.getState().tick(0.2);
+    expect(useGame.getState().review).toMatchObject({
+      stars: 5, foodStars: 3, hospitalityStars: 1, brigadeStars: 1,
+      penalties: 0, avgQuality: 88, avgHospitality: 82,
+    });
+  });
   it("scream records the event and keeps the chorus line", () => {
     toService();
     useGame.getState().scream(0.8);
@@ -437,6 +474,8 @@ describe("store integration", () => {
       events: [],
       folkloreOutcome: null,
       criticQ: 60,
+      criticHospitalityQ: 65,
+      criticHospitalityCount: 1,
       criticServed: 1,
       criticSpotted: true,
       cooks: [anwar],
@@ -446,9 +485,11 @@ describe("store integration", () => {
     const st = useGame.getState();
     expect(st.phase).toBe("review");
     expect(st.folkloreOutcome).toMatchObject({ test: "fork", result: "expired", table: 12 });
-    // the fork penalty resolved on this tick lands in stored criticQ AND the verdict
-    expect(st.criticQ).toBe(40);
-    expect(st.review?.criticVerdict).toContain("fell short");
+    // the fork penalty lands in hospitality, never in culinary quality
+    expect(st.criticQ).toBe(60);
+    expect(st.criticHospitalityQ).toBe(45);
+    expect(st.review?.criticVerdict).toContain("acceptable");
+    expect(st.review?.criticVerdict).toContain("neglected the room");
     expect(st.review?.folkloreLine).toContain("went unanswered");
     expect(st.review?.folkloreLine).not.toContain("test: answered");
     // the expired ticket counted in the review and in the store identically
@@ -500,8 +541,9 @@ describe("nightAccounts", () => {
 
 describe("critic assessment copy", () => {
   it("spotted and fed reads quality plus conduct", () => {
-    const v = criticAssessment("madameV", { spotted: true, criticServed: 2, criticAvg: 80, screams: 0, smashed: 0 });
+    const v = criticAssessment("madameV", { spotted: true, criticServed: 2, criticAvg: 80, criticAvgHospitality: 82, screams: 0, smashed: 0 });
     expect(v).toContain("excellent");
+    expect(v).toContain("attentive");
     expect(v).toContain("kept its voice down");
   });
 });
@@ -518,6 +560,16 @@ describe("night-1 opening", () => {
     useGame.setState({ phase: "title" } satisfies Partial<State>);
     useGame.getState().enterResidency(options);
     return useGame.getState();
+  };
+
+  const inspectReadyPlate = () => {
+    const g = useGame.getState();
+    expect(g.openingStep).toBe("inspect");
+    expect(g.tickets.some((ticket) => ticket.state === "pass")).toBe(true);
+    g.setInspecting(true);
+    g.turnPlate(Math.PI / 4);
+    g.acknowledgeOpeningDefect();
+    expect(useGame.getState().openingStep).toBe("judge");
   };
 
   it("enterResidency from title goes straight to service with one ready plate", () => {
@@ -991,19 +1043,26 @@ describe("flagship station and recipe flow", () => {
     expect(s.events.filter((e) => e.kind === "intervention" && e.action === "whisk")).toHaveLength(0);
   });
 
-  it("E: a truthful send-back names the fault; a free one earns the grudge", () => {
+  it("E: a truthful send-back names the fault, preserves age, and makes the cook work the remake", () => {
     const split = { ...pristine("Beef Wellington"), sauce: "split" as const };
-    toService({ tickets: [rail({ id: 1, state: "pass", readyAt: 10, condition: split, quality: 70 })] });
+    toService({ tickets: [rail({ id: 1, age: 27, state: "pass", readyAt: 10, condition: split, quality: 70 })] });
     useGame.getState().judge("sendback");
     let s = useGame.getState();
     expect(s.tickets[0].state).toBe("rail");
+    expect(s.tickets[0].age).toBe(27);
+    expect(s.tickets[0].plateAt).toBe(0);
     expect(s.tickets[0].requestedCorrection).toBe("sauce");
     expect(s.tickets[0].condition).toBeUndefined();
     expect(s.cooks[0].grudge).toBeNull();
-    // the remake honours the correction: the sauce comes back together
+    // the remake honours a capable cook's correction, but still consumes a full cook
+    useGame.setState({ rng: () => 0 } satisfies Partial<State>);
     useGame.getState().plateToPass(1);
+    expect(useGame.getState().tickets[0].state).toBe("plating");
+    expect(useGame.getState().tickets[0].plateDur).toBeGreaterThan(0);
     useGame.getState().tick(20);
-    expect(useGame.getState().tickets[0].condition!.sauce).toBe("smooth");
+    s = useGame.getState();
+    expect(s.tickets[0].age).toBe(47);
+    expect(s.tickets[0].condition!.sauce).toBe("smooth");
     // rejecting a perfect plate still earns the grudge — and never erases an old one
     toService({ tickets: [rail({ id: 2, state: "pass", readyAt: 10, condition: pristine(), quality: 88 })] });
     useGame.getState().judge("sendback");
@@ -1014,6 +1073,27 @@ describe("flagship station and recipe flow", () => {
     } satisfies Partial<State>);
     useGame.getState().judge("sendback");
     expect(useGame.getState().cooks[0].grudge).toBe("86ed");
+  });
+
+  it("a requested remake correction can survive or fail under the next cook's work", () => {
+    const weakCook = { ...useGame.getState().cooks[0], skill: 0, morale: 50, grudge: null, walkedOut: false };
+    toService({
+      rng: () => 0.99,
+      cooks: [weakCook, ...useGame.getState().cooks.slice(1)],
+      tickets: [rail({ id: 1, age: 30, requestedCorrection: "technique" })],
+    });
+    useGame.getState().plateToPass(1);
+    useGame.getState().firePlate();
+    expect(useGame.getState().tickets[0].condition!.technique).not.toBe("right");
+
+    toService({
+      rng: () => 0,
+      cooks: [weakCook, ...useGame.getState().cooks.slice(1)],
+      tickets: [rail({ id: 2, age: 30, requestedCorrection: "technique" })],
+    });
+    useGame.getState().plateToPass(2);
+    useGame.getState().firePlate();
+    expect(useGame.getState().tickets[0].condition!.technique).toBe("right");
   });
 
   it("F: a walkout returns unfinished work to the rail; the chef works one station", () => {
@@ -1052,23 +1132,41 @@ describe("flagship station and recipe flow", () => {
     expect(useGame.getState().tickets.filter((t) => t.state === "ready").map((t) => t.id).sort()).toEqual([10, 11]);
   });
 
-  it("G: runTable walks only the held plate and its same-table ready peers", () => {
-    toService({ tickets: [
+  it("G: runTable serves only the held plate unless ready peers are explicitly committed", () => {
+    const table = [
       rail({ id: 1, table: 12, dish: "Beef Wellington", state: "pass", readyAt: 10, condition: pristine(), quality: 88 }),
       rail({ id: 2, table: 12, dish: "Pommes purée", station: 1, state: "ready", readyAt: 10, condition: pristine("Pommes purée"), quality: 88 }),
       rail({ id: 3, table: 13, dish: "Soufflé (weeping)", station: 2, state: "ready", readyAt: 10, condition: pristine("Soufflé (weeping)"), quality: 88 }),
-    ]});
+    ];
+    toService({ tickets: table });
     useGame.getState().runTable();
-    const s = useGame.getState();
-    expect(s.served).toBe(2);
+    let s = useGame.getState();
+    expect(s.served).toBe(1);
+    expect(s.tickets.find((t) => t.id === 2)!.state).toBe("ready");
     expect(s.tickets.find((t) => t.id === 3)!.state).toBe("ready");
     expect(s.lastDelivery).toMatchObject({ table: 12 });
+    expect(s.lastDelivery!.plates.map((p) => p.dish)).toEqual(["Beef Wellington"]);
+    expect(s.events.filter((e) => e.kind === "plate" && e.verdict === "serve")).toHaveLength(1);
+
+    toService({ served: 0, tickets: table });
+    useGame.getState().runTable(true);
+    s = useGame.getState();
+    expect(s.served).toBe(2);
+    expect(s.tickets.find((t) => t.id === 2)!.state).toBe("done");
+    expect(s.tickets.find((t) => t.id === 3)!.state).toBe("ready");
     expect(s.lastDelivery!.plates.map((p) => p.dish).sort()).toEqual(["Beef Wellington", "Pommes purée"].sort());
     expect(s.events.filter((e) => e.kind === "plate" && e.verdict === "serve")).toHaveLength(2);
+
     // paused and correcting are hard no-ops
     toService({ served: 0, tickets: [rail({ id: 4, state: "pass", readyAt: 10, condition: pristine(), quality: 88 })] });
     useGame.setState({ paused: true } satisfies Partial<State>);
-    useGame.getState().runTable();
+    useGame.getState().runTable(true);
+    expect(useGame.getState().served).toBe(0);
+    useGame.setState({
+      paused: false,
+      correction: { ticketId: 4, startedAt: 10, endsAt: 12.4 },
+    } satisfies Partial<State>);
+    useGame.getState().runTable(true);
     expect(useGame.getState().served).toBe(0);
   });
 
@@ -1308,13 +1406,13 @@ describe("flagship station and recipe flow", () => {
     expect(useGame.getState().served).toBe(1);
   });
 
-  it("serve events keep food quality honest when context inflates the score", () => {
+  it("serve events keep food quality honest when coursing inflates hospitality", () => {
     toService({ serviceTime: 10, tableServeAt: { 11: 5 }, tickets: [
       rail({ id: 1, table: 11, state: "pass", readyAt: 10, condition: pristine(), quality: 88 }),
     ]});
     useGame.getState().judge("serve");
     const ev = useGame.getState().events.find((e) => e.kind === "plate") as Extract<ServiceEvent, { kind: "plate" }>;
     expect(ev.quality).toBe(88);
-    expect(ev.guestScore).toBe(94);
+    expect(ev.guestScore).toBe(71);
   });
 });

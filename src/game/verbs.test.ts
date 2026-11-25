@@ -52,30 +52,48 @@ describe("sendBread", () => {
     } satisfies Partial<State>);
   });
 
-  it("walks the basket to the most impatient table and settles it", () => {
+  it("walks the basket to the most impatient table, charges £3, and buys patience only", () => {
+    const cash = useGame.getState().career.cash;
+    const quality = useGame.getState().qualitySum;
     useGame.getState().sendBread();
     const s = useGame.getState();
     const hungriest = s.guests.find((g) => g.id === 2)!;
     expect(hungriest.tellClock).toBeCloseTo(19);
     expect(s.breadAt).toBe(30);
+    expect(s.career.cash).toBe(cash - 3);
+    expect(s.qualitySum).toBe(quality);
     expect(s.lastDelivery?.table).toBe(14);
     expect(s.lastDelivery?.plates[0].dish).toContain("Bread");
   });
 
-  it("respects the cooldown — a second press inside 18s does nothing", () => {
+  it("fails closed without £3 and charges nothing", () => {
+    useGame.setState({ career: { ...useGame.getState().career, cash: 2 } } satisfies Partial<State>);
     useGame.getState().sendBread();
+    const s = useGame.getState();
+    expect(s.breadAt).toBe(-999);
+    expect(s.career.cash).toBe(2);
+    expect(s.guests.find((g) => g.id === 2)!.tellClock).toBe(5);
+    expect(s.lastDelivery).toBeNull();
+  });
+
+  it("respects the cooldown — a second press inside 18s does nothing or charge again", () => {
+    useGame.getState().sendBread();
+    const cash = useGame.getState().career.cash;
     useGame.setState({ serviceTime: 38 } satisfies Partial<State>);
     useGame.getState().sendBread();
     expect(useGame.getState().guests.find((g) => g.id === 2)!.tellClock).toBeCloseTo(19);
+    expect(useGame.getState().career.cash).toBe(cash);
   });
 
   it("is gated during the opening teach and outside service", () => {
+    const cash = useGame.getState().career.cash;
     useGame.setState({ openingStep: "serve" } satisfies Partial<State>);
     useGame.getState().sendBread();
     expect(useGame.getState().breadAt).toBe(-999);
     useGame.setState({ openingStep: null, phase: "briefing" } satisfies Partial<State>);
     useGame.getState().sendBread();
     expect(useGame.getState().breadAt).toBe(-999);
+    expect(useGame.getState().career.cash).toBe(cash);
   });
 });
 
@@ -91,16 +109,21 @@ describe("expedite", () => {
     } satisfies Partial<State>);
   });
 
-  it("pulls the next order onto the rail immediately", () => {
+  it("pulls the next order onto the rail immediately and adds explicit station pressure", () => {
+    const before = useGame.getState().cooks.map((c) => c.overloadT);
     useGame.getState().expedite();
-    expect(useGame.getState().nextTicketIn).toBe(0);
+    const s = useGame.getState();
+    expect(s.nextTicketIn).toBe(0);
+    expect(s.cooks.map((c) => c.overloadT)).toEqual(before.map((n) => n + 2));
+    expect(s.feed.at(-1)!.text).toContain("+2 pressure");
   });
 
   it("is a no-op when the printer is already firing or the room is drowned", () => {
     useGame.setState({ nextTicketIn: 0.3 } satisfies Partial<State>);
-    const before = useGame.getState().feed.length;
+    const before = useGame.getState();
     useGame.getState().expedite();
-    expect(useGame.getState().feed.length).toBe(before);
+    expect(useGame.getState().feed.length).toBe(before.feed.length);
+    expect(useGame.getState().cooks).toBe(before.cooks);
     // nine live tickets = the rail cap; expedite must not overfill it
     const rail = Array.from({ length: 9 }, (_, i) => ({
       id: i + 1, table: 10 + i, dish: "Beef Wellington", station: 0,
@@ -108,7 +131,69 @@ describe("expedite", () => {
       age: 0, quality: -1, sear: null,
     }));
     useGame.setState({ nextTicketIn: 8, tickets: rail as State["tickets"] } satisfies Partial<State>);
+    const capped = useGame.getState();
     useGame.getState().expedite();
     expect(useGame.getState().nextTicketIn).toBe(8);
+    expect(useGame.getState().cooks).toBe(capped.cooks);
+  });
+});
+
+describe("eightySix", () => {
+  let useGame: Game;
+  const ticket = (over: Partial<State["tickets"][number]>): State["tickets"][number] => ({
+    id: 1, dish: "Beef Wellington", table: 11, station: 0, age: 10,
+    state: "rail", plateAt: 0, plateDur: 0, byChef: false,
+    quality: -1, verdict: null, sear: null, sauce: null, ...over,
+  });
+  beforeEach(async () => {
+    storage.clear();
+    useGame = await freshGame();
+    useGame.getState().resetCareer();
+    useGame.setState({
+      phase: "service", paused: false, glossary: false, openingStep: null, correction: null,
+      serviceTime: 30, misses: 0,
+      career: { ...useGame.getState().career, night: 5 },
+      tickets: [
+        ticket({ id: 1, age: 12 }),
+        ticket({ id: 2, table: 12, age: 20 }),
+        ticket({ id: 3, dish: "Pommes purée", station: 1, age: 7 }),
+        ticket({ id: 4, state: "plating", plateAt: 34, plateDur: 4 }),
+        ticket({ id: 5, table: 14, state: "pass", quality: 88 }),
+        ticket({ id: 6, dish: "Soufflé (weeping)", station: 2, table: 13 }),
+      ],
+    } satisfies Partial<State>);
+  });
+
+  it("resolves only the binned dockets, counts their covers as misses, and leaves held or cooking work alone", () => {
+    useGame.getState().eightySix();
+    const s = useGame.getState();
+    expect(s.tickets.find((t) => t.id === 1)!.state).toBe("done");
+    expect(s.tickets.find((t) => t.id === 2)!.state).toBe("done");
+    expect(s.misses).toBe(2);
+    expect(s.tickets.find((t) => t.id === 3)).toMatchObject({ state: "rail", age: 15 });
+    expect(s.tickets.find((t) => t.id === 4)!.state).toBe("plating");
+    expect(s.tickets.find((t) => t.id === 5)!.state).toBe("pass");
+    expect(s.tickets.find((t) => t.id === 6)).toMatchObject({ state: "rail", age: 10 });
+    expect(s.feed.some((item) => item.text.includes("2 missed covers"))).toBe(true);
+  });
+
+  it("is unavailable before night five, under no-bin, and with an empty rail", () => {
+    useGame.setState({ career: { ...useGame.getState().career, night: 4 } } satisfies Partial<State>);
+    useGame.getState().eightySix();
+    expect(useGame.getState().misses).toBe(0);
+    expect(useGame.getState().tickets[0].state).toBe("rail");
+
+    useGame.setState({ career: { ...useGame.getState().career, night: 5, mutator: "no_bin" } } satisfies Partial<State>);
+    useGame.getState().eightySix();
+    expect(useGame.getState().misses).toBe(0);
+    expect(useGame.getState().tickets[0].state).toBe("rail");
+
+    useGame.setState({
+      career: { ...useGame.getState().career, mutator: undefined },
+      tickets: [ticket({ id: 9, state: "pass", quality: 88 })],
+    } satisfies Partial<State>);
+    useGame.getState().eightySix();
+    expect(useGame.getState().misses).toBe(0);
+    expect(useGame.getState().tickets[0].state).toBe("pass");
   });
 });

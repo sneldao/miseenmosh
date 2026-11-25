@@ -1,6 +1,6 @@
 # Player attachment implementation plan
 
-Status: active. Original plan agreed 21 November 2026; expanded flagship scope approved for implementation. On 22 November the bounded service → morning → next-service route was verified locally. Visual, performance and human acceptance remain open.
+Status: active. Original plan agreed 21 November 2026; expanded flagship scope approved for implementation. On 22 November the bounded service → morning → next-service route was verified locally. On 24 November the critical game-design review added an active correction contract for scoring, consequences, the nine-night arc and judgment-led onboarding. Visual, performance and human acceptance remain open.
 
 ## Outcome
 
@@ -60,6 +60,71 @@ The milestones are a sequence, not a new delivery-date estimate.
 | M1 — Flagship service and carryover | Complete service → morning → next service with physical judgment, real station coordination, a consequential intervention, a character response and one recipe revision visibly carried forward | Route verified locally; human/visual/performance gates open | M0; stages 1–5; bounded stage-6 memory |
 | M2 — A restaurant with a history | Extend dish development, suppliers, regulars, physical memories and branching dilemmas through all nine nights; contrasting full playthroughs show different histories | Pending | M1 human playtest and stable persistence |
 | M3 — Delivery proof | Performance, input, saves, audio, reduced-effects readability and published-frame checks on the intended build; human validation and publication tracked separately | Partial local checks; not release proof | M1/M2 integrated; relevant release authorization |
+
+## Critique response implementation register (24 Nov)
+
+This is the active correction plan from the critical design review. It takes
+precedence over historical feature checkboxes and contradictory scoring prose.
+The governing acceptance contract is in
+[design.md](design.md#critique-response--active-acceptance-contract-24-nov).
+
+| ID | Correction | Closing evidence | Status |
+| --- | --- | --- | --- |
+| C1 | Stars start at zero and primarily reward culinary quality; food, hospitality and brigade axes are visible | Scoring tests prove identical food with different detection/noise produces identical culinary stars; review shows the axes | In progress |
+| C2 | Nine authored nights change a dilemma, condition and relationship payoff | Pure arc tests plus complete seeded playthroughs prove distinct conditions and reachable payoffs | Pending |
+| C3 | Send-back, table run, 86, bread and expedite have explicit costs | Action tests prove age/workload/selection/miss/cash/pressure consequences and guard rails | Pending |
+| C4 | Culinary condition and hospitality are independently recorded and reviewed | Critic and review tests distinguish good food/poor service from poor food/good service | Pending |
+| C5 | Opening requires reading a visible defect before judgment and discloses controls contextually | State tests block premature verdicts; browser observation shows inspection, consequence and reduced utility clutter | Pending |
+| C6 | New systems are frozen; retained systems must create a core decision, relationship memory or ending payoff | Every active service verb maps to a decision and consequence in `design.md`; no scope expansion in this pass | In progress |
+| C7 | Walkout facts survive until the morning character response | Service → morning test proves a walked-out cook speaks before the next-service reset | Pending |
+| C8 | Ending remembers authorship and relationships, not only stars and cash | Alternate seeded endings differ in signature contributor, honors, grudges, losses and cost | Pending |
+
+### Scoring acceptance
+
+- A service starts at 0 stars; the maximum is 5.
+- Culinary quality gives 0–3 stars at average condition quality thresholds of
+  58 / 72 / 85. Hospitality gives 1 star at an average of 75. A completed,
+  well-held service gives 1 brigade star. Misses plus walkouts remove at most
+  two stars, with the total clamped to 0–5.
+- Coursing, requests, refusals, comps, featured-dish context and critic attention
+  are hospitality/context, never mutations of plate condition or `qualitySum`.
+- Detection, silence and smashing cannot directly add stars. Ego, accolades and
+  review prose can still acknowledge them.
+- The review card exposes food / hospitality / brigade stars and the reason for
+  a lost brigade point. The copied and spoken review use the same facts.
+
+### Service-consequence acceptance
+
+| Action | Required consequence |
+| --- | --- |
+| SEND BACK | Preserves order age; the table continues waiting; the cook remembers justified correction versus rejection; a remake remains subject to normal cooking and condition rules |
+| RUN TABLE | Serves the held plate by default; ready peers require a separate explicit commitment and their exact count is shown |
+| 86 | Resolves only affected orders; displaced covers count as misses; a held plate cannot disappear through an unrelated table's 86 |
+| BREAD | Costs £3, fails closed without cash, buys patience only, retains its 18-second cooldown |
+| EXPEDITE | Advances the next ticket immediately as a deliberate pressure choice, but cannot bypass an active printer or a full rail |
+
+### Critique-response night-arc contract
+
+Each entry must produce a different playable service condition and a fact-gated
+morning response. A text-only hook does not pass.
+
+| Night | Central dilemma | Changed condition and relationship payoff |
+| --- | --- | --- |
+| 1 — Earn the pass | Trust the evidence, or protect Petra from a truthful correction? | Inspection-led Wellington judgment; Petra's response and the first sauce-help memory shape tomorrow |
+| 2 — Standard under pace | Correct the sauce, or save the table's remaining patience? | Sauce correction has a real time/work cost; Dimitri's response distinguishes help from humiliation |
+| 3 — Own the signature | Share credit for the Wellington, or make the house voice entirely yours? | Menu/recipe revision changes the next service; contributor credit and grudge/honor persist |
+| 4 — The room outside | Spend attention on regulars, the critic or the failing brigade? | Table requests and coursing now affect hospitality independently of food quality |
+| 5 — Rival terms | Buy peace with Beefcakes, or buy momentum and accept the runners? | Existing détente/rivalry choice changes tonight's theft pressure and later morning memory |
+| 6 — Recovery | Push an exhausted cook, or protect the person needed tomorrow? | Trauma, morale and available help govern correction/cover capacity; Madame V judges food and care separately |
+| 7 — A place at the table | Keep Table 101's ritual, or make the room easier to run? | Wobble/seating/move choice changes patience and regular memory; Anwar's family story can inform the menu |
+| 8 — Who stays | Keep a trusted cook or take the rival's offer and the safer numbers? | Vow, honors, grudges and defections determine the final brigade and who can cover a station |
+| 9 — Open the doors | Protect the signature, the people, or the room's reputation? | The final service combines actual recipe lineage, regulars and brigade state; ending names contributors and costs |
+
+Nights 1–3 are standards/trust; 4–6 are outside pressure; 7–9 are accumulated
+relationships and cost. Reaching ten stars remains a venue milestone, not an
+automatic victory.
+
+
 
 ### M0: visible identity and production proof
 
@@ -337,11 +402,17 @@ pending; this is the onboarding slice of stage 3 only.
   No splash carousel, cast bios, rules, stats or control paragraph by default.
 - [x] `enterResidency` is the single entry for mouse and keyboard; it refuses a
   duplicate start while playing and keeps newer-save blocking.
-- [x] Night 1 goes straight into the kitchen. A two-action introduction teaches
-  the loop through play: one honest plate (quality 80) to SERVE, one fresh
-  ticket to CALL, Petra cooks (quality 76), then SERVE or SEND BACK returns to
-  CALL while SERVE or SMASH finishes the introduction — after which ordinary
-  service resumes.
+- [x] Night 1 goes straight into the kitchen. The action-led entry remains:
+  serve an honest Wellington, call a fresh ticket, and judge Petra's second
+  plate before ordinary pressure resumes.
+- [ ] Replace button sequencing with inspection-led judgment: the second plate's
+  verdict controls unlock only after the player turns it, reads an observed
+  defect and sees the house standard.
+- [ ] Give each second-plate verdict an immediate, factual Petra response and a
+  consequence that can be recalled the next morning.
+- [ ] Keep the permanent utility rail off the first judgment; disclose service
+  controls with the relevant object or event while retaining the on-demand
+  Controls book.
 - [x] While `openingStep` is non-null, waiting costs nothing: no service time,
   ticket aging, morale drain, misses, spawns, hazards or tells, and no
   unsolicited events — the player's own actions still record real events.
@@ -358,16 +429,17 @@ pending; this is the onboarding slice of stage 3 only.
 
 ### Status
 
-**Verified locally** — `src/game/service-review.test.ts` 44/44 (14 opening
-cases incl. freeze, guards, send-back/smash exits, paused no-ops + 3 glossary
-modal cases); `npm run build` clean; browser-verified on the rebuilt preview at
-1280×720 and 1024×600 with real mouse/keyboard input (evidence + receipt in
-`docs/devlog/media/opening/`).
+**Historical verification (21 Nov)** — the direct-entry slice passed 44
+`service-review.test.ts` cases and a production build; the rebuilt preview was
+exercised with real mouse/keyboard input at 1280×720 and 1024×600. This proves
+the earlier route, not the inspection-led correction now in progress. Evidence
+from that build remains in `docs/devlog/media/opening/`.
 
 ### Limitations
 
-- The opening plates are deliberately consistent (80 → 76). They teach the
-  verbs; they are not a judgment model — that remains stage 2.
+- The earlier opening plates were deliberately consistent (80 → 76) and taught
+  verbs. The active correction replaces that sequence with an observable defect
+  and an inspection gate.
 - Meal timing/onboarding is in; character branching payoff and the scream
   incentive redesign in stage 3 are still pending.
 - No claim of emotional attachment solved; no human playtest yet; no deployment.
@@ -398,6 +470,14 @@ cast/material richness and motion need more work. The independent source review
 could not judge images. No public deployment was performed.
 
 ## Next action
+
+**Active correction (24 Nov):** implement C1–C8 from the
+[critique-response register](#critique-response-implementation-register-24-nov)
+before expanding scope. Work in this order: scoring/hospitality and tests;
+service consequences; walkout continuity; inspection-led opening and contextual
+controls; nine-night conditions and relationship-aware ending; full regression,
+build and browser verification. No new verbs, generation jobs or deployments
+are authorized by this plan.
 
 The owner has now praised the collage faces and reiterated the need for a busy,
 immersive kitchen, with generation credits available. Preserve those faces and

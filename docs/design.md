@@ -1,4 +1,4 @@
-# MISE EN MOSH — Design Doc (living spec, updated 22 Nov 2026)
+# MISE EN MOSH — Design Doc (living spec, updated 24 Nov 2026)
 
 ## Fantasy
 
@@ -37,6 +37,86 @@ defines the image, animation, sound and performance contract. The
 milestones. The existing loop below remains the baseline; this section
 describes the intended transformation. Only the bounded implementation identified
 in the tracker should be read as present.
+
+### Critique response — active acceptance contract (24 Nov)
+
+The critical review found five failures in the current rules: stars can reward
+side games more than cooking; the nine nights repeat pressure rather than
+escalating it; several rescue verbs are too cheap; food quality and hospitality
+are mixed into one number; and the opening teaches a sequence before judgment,
+then reveals the whole control surface. These are design defects, not a request
+for more content. The following contract supersedes contradictory baseline rules.
+
+**1. Stars measure the restaurant, not the meta-game.**
+
+- Services begin at zero stars. Culinary quality contributes 0–3 stars;
+  hospitality contributes 0–1; holding the brigade and completing the service
+  contributes 0–1. Misses and walkouts can remove at most two stars. The review
+  shows each axis and the arithmetic so a player can explain the result.
+- Critic detection, silence, smashing, folklore and bets never award a star
+  directly. They may affect ego, an accolade, dialogue or the critic's memory.
+  A destructive action only improves the score indirectly by preventing a worse
+  plate or loss from reaching the dining room.
+- Reaching ten stars does not guarantee the final victory. Venue upgrades and
+  the ending also consider culinary standard, hospitality, brigade continuity
+  and the player's restaurant history.
+
+**2. Food and hospitality have separate evidence.**
+
+- `qualitySum` is culinary only and derives from the same `DishCondition` the
+  player can inspect. Coursing, requests, refusals, comps and critic attention
+  never alter plate quality.
+- `hospitalitySum` records the social outcome: timely courses, requests answered
+  or refused, room care and a fed critic. The review reports average food and
+  hospitality separately; critic copy names each independently.
+- Physical condition, pass judgment, HUD feedback and review cannot disagree.
+
+**3. Every service verb has a price and an honest consequence.**
+
+- Send-back preserves the order's age and the cook's workload. A remake can
+  repair a real fault, but cannot refund the table's patience or guarantee that
+  the correction survives the next cook's work.
+- RUN TABLE serves only the held plate unless the player deliberately commits
+  the ready peers shown by the action. No hidden batch action.
+- Eighty-six resolves only the affected orders and records the displaced covers
+  as misses (or an equivalent explicit service loss). It cannot erase work.
+- Bread costs £3, is unavailable without that cash, and buys patience rather
+  than quality. Expedite deliberately advances pressure and cannot bypass the
+  rail cap or spawn a ticket while the printer is already firing.
+
+**4. Nine nights means nine different decisions.**
+
+Each night declares one central dilemma, one changed service condition, one
+brigade opportunity and one grounded next-morning payoff. Nights 1–3 establish
+standards and trust; 4–6 introduce outside pressure; 7–9 make accumulated
+relationships determine available help and the cost of success. The final
+service uses the actual menu, recipe contributors, honors, grudges, trauma,
+defections and regulars. Two play styles must change who helps, what can be
+served and what the ending remembers—not just the total stars.
+
+**5. The opening teaches observation before command.**
+
+The approved direct entry remains. Petra presents the first plate and the player
+serves it; the second plate must be turned and its observed defect understood
+before SERVE / SEND BACK / SMASH is enabled. The action produces an immediate
+character response and a visible consequence. Waiting remains free during this
+lesson. Ordinary controls are disclosed when their object or situation becomes
+relevant; the permanent utility rail is reduced to the current decision.
+
+**6. Scope is earned.**
+
+No new verbs are added during this correction. A retained system must either
+create a memorable core-service decision, deepen a named relationship, or pay
+off in the ending. “Attaches to a key” is not sufficient. Anything that only
+multiplies numbers, hides behind a modal, or repeats another system is demoted
+to presentation or removed from the critical path.
+
+**Acceptance:** targeted rules tests cover every bullet above; the production
+build passes; the real entry route is exercised in a browser; and unfamiliar
+player observation remains a separate human gate. Automated reachability is
+not evidence of fun, readability or emotional attachment.
+
+
 
 ### The signature experience
 
@@ -240,7 +320,8 @@ cannot establish that these experiences are fun.
    (F) for +8 quality, or fire early to free the slot at −6 — waiting is
    playing. Escalating disasters: fires, equipment failure, walk-in
    shortages, staff tilting. Zero screams across a real service (8+ covers)
-   earns the SILENT SERVICE star — the food shouted instead.
+   earns a SILENT SERVICE accolade and a quieter critic response; it does not
+   award a star directly.
    Tables course: plates for one table landing within 20s of each other
    ride the heat (+6 each). Mid-rush you can 86 a dish (E) — dockets binned,
    tables wait, the cook takes it personally. Tables send requests (FAST /
@@ -301,10 +382,17 @@ cannot establish that these experiences are fun.
    off a critic, steal your reservation book, talk trash in the food press.
    You answer with choices that cost ego, money or favors. Ego itself is
    spendable clout in the back office (comp the inspector's champagne,
-   dessert on the house, your name above the door for +1★) — it doesn't
+   dessert on the house, an accolade for your name above the door) — it doesn't
    keep, so spend it or sober up. Lifetime ego gates the LEGEND ending.
 6. **ROLE (stay the chef)** — every verb is a pass verb; a commis mode would need a different keyboard. The rise is the room, not the rank (stall → flagship), and the underdog position is economic (debt, van, stall). N1 briefing: "You're the chef because you're the only one who came back." The receiving end is critic mode (hidden NG+): same systems, reversed lens — not a new game.
-7. **SCOPE GATES (system vs hint)** — a thing becomes a system only if (a) it attaches to an existing key, (b) it resolves within a night or pays off across the arc, (c) the player has agency. Everything else is a hint: bark, feed, feud card, folklore, review tail. Fatigue/joy/communication are already simulated — name their thresholds. Cleanliness, inspections, sickness, vermin, covers, TV: events and textures, never meters. No system punishes curiosity.
+7. **SCOPE GATES (system vs hint)** — a retained system must create a memorable
+   core-service decision, deepen a named relationship, or pay off in the ending.
+   It must resolve within a night or across the arc and give the player agency.
+   Everything else is a hint: bark, feed, feud card, folklore, review tail.
+   Fatigue/joy/communication are already simulated — name their thresholds.
+   Cleanliness, inspections, sickness, vermin, covers, TV: events and textures,
+   never meters. No system punishes curiosity. Adding another keybinding is not
+   a scope justification; no new verbs are part of the current correction.
 8. **FLYWHEEL (adaptable × adaptive × retained)** — adaptable: loadout (menu, vows, seating, bets, one HOUSE RULE per residency: DOUBLE SHIFT / NO BIN / SHORT FUSE, chosen N1) plus cross-night combos the feed acknowledges. Adaptive: the game remembers (grudges, press, BEEFCAKES, truce) and says so every morning (morningPaper line). Retained across runs: legends on the title card, daily shared seed, covers collected per ending, critic mode as NG+ (shipped P0–P4; P5 sketched in [archive/scope-flywheel-plan.md](archive/scope-flywheel-plan.md)).
    Ego wears tiers (COMMIS → LEGEND); the room says the new name out loud.
    Call the board: one wager a night (covers / no walks / clock the
@@ -315,9 +403,13 @@ cannot establish that these experiences are fun.
 
 ## Progression
 
-Street stall → bistro → flagship → empire. Stars 0→3 (the mystery critic
-gates them). Black-spoon energy to white-spoon polish. Each venue = new
-ticket pressure, new disasters, fancier critics with subtler tells.
+Street stall → bistro → flagship → empire. Stars come from food, hospitality and
+a brigade that finishes the work; venues rise at five and ten earned stars.
+Passing ten stars opens the final venue but no longer guarantees victory: the
+ending also reads the player's culinary record and what the restaurant cost its
+people. Each venue adds ticket pressure, new service conditions and critics with
+subtler tells. The [night-arc contract](player-attachment-plan.md#critique-response-night-arc-contract-24-nov)
+defines the distinct escalation through all nine services.
 
 ## Brigade sim (the heart of depth)
 
@@ -382,8 +474,8 @@ game here:
 - ONE core room per venue; camera mostly fixed (ticket rail + pass +
   dining-room window). No open world, no multiplayer, no runtime AI calls.
 - Scripted+baked dialogue trees, not runtime LLM (offline review).
-- Systems attach to keys; everything else ships as a hint (see §7).
-  No simulated meters without verbs.
+- Systems create a core-service decision, relationship memory or ending payoff;
+  everything else ships as a hint (see §7). No simulated meters without verbs.
 - 8–12 voices, ~20–30 generated characters/props max, curated hand-fixes.
 - Complete game = 3 venues, ~15 services, feuds, ending (3rd star or
   flame-out epilogue). Short and polished > long and thin.
@@ -655,12 +747,12 @@ Adopted rules:
   NEW RESIDENCY, cast bios, records — lives in a Menu disclosure that
   never starts a run by keyboard.
 - **Night 1 skips the briefing.** `enterResidency` (the only start route
-  for mouse and keys) drops straight into service. The opening is two
-  real actions, not a tutorial: a good Wellington waits at the pass
-  (`openingStep: "serve"`), serving it deals one fresh rail ticket
-  (`"call"`), calling it lets Petra cook (`"judge"`), and judging that
-  plate — serve / send back / smash all work — releases ordinary
-  service.
+  for mouse and keys) drops straight into service. The opening teaches
+  handle → read → decide through one real plate: serve Petra's sound Wellington,
+  call the next order, then turn and inspect the second plate before its verdict
+  controls unlock. Plate observations and the house standard explain what the
+  player is looking for; SERVE / SEND BACK / SMASH each produces an immediate
+  consequence and Petra response before ordinary service begins.
 - **Waiting is free while learning.** Until `openingStep` clears, no
   service time, ticket aging, morale drain, misses, spawns, hazards,
   tells or events — only the active cook progresses. Scream, flag,
@@ -668,6 +760,11 @@ Adopted rules:
 - **The mouse stays free.** Night 1 runs the cinematic/clickable camera
   (`firstPerson: false`); the V first-person view unlocks as usual once
   the opening is done. Pointer lock is never demanded.
+- **Controls arrive with their decision.** The HUD foregrounds the current
+  plate, station or guest. Scream, voice, bread, expedite and comp remain
+  available from the on-demand Controls book, but their permanent service
+  buttons appear only when relevant; no simultaneous utility rail competes with
+  a first verdict.
 - **Prep is a book, not a gate.** Returning nights show a compact
   brigade card (cash/stars/services, names + mood, optional family
   meal) with OPEN THE DOORS and KITCHEN BOOK — the latter holding the

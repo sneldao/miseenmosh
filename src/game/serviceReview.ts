@@ -14,6 +14,9 @@ export interface ReviewFacts {
   spotted: boolean;
   criticServed: number;
   criticAvg: number;
+  criticAvgHospitality: number;
+  avgQuality: number;
+  avgHospitality: number;
   events: readonly ServiceEvent[];
   folkloreOutcome: FolkloreOutcome | null;
   persona: CriticPersona;
@@ -126,11 +129,21 @@ export function reviewNarration(review: {
   folkloreLine?: string;
   vowLine?: string;
   betLine?: string;
+  avgQuality?: number;
+  avgHospitality?: number;
+  foodStars?: number;
+  hospitalityStars?: number;
+  brigadeStars?: number;
+  penalties?: number;
 }): string {
+  const score = review.avgQuality === undefined || review.avgHospitality === undefined
+    ? undefined
+    : `Food ${Math.round(review.avgQuality)} (${review.foodStars ?? 0}/3 stars); hospitality ${Math.round(review.avgHospitality)} (${review.hospitalityStars ?? 0}/1); brigade ${review.brigadeStars ?? 0}/1; penalties ${review.penalties ?? 0}.`;
   return [
     review.headline,
     review.incident,
     review.consequence,
+    score,
     review.criticVerdict,
     review.folkloreLine,
     review.vowLine,
