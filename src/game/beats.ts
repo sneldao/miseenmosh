@@ -153,6 +153,59 @@ const hospitality: Rule = (f) => {
   return card(f, `${lead} Hospitality averaged ${score.toFixed(1)}.`, "hospitality");
 };
 
+// Dimitri carries the house rule: Petra's N2 card is always the opening
+// verdict, so the rule echo needs a cook with no competing N1 payoff.
+const houseRule: Rule = (f) => {
+  if (f.cook.name !== "DIMITRI" || f.lastNight !== 1 || !f.career.mutator) return null;
+  const line = f.career.mutator === "double_runners"
+    ? "Double shift. You chose it, chef. Broom's by the door."
+    : f.career.mutator === "no_bin"
+      ? "No bin. You chose it. Everything gets cooked."
+      : "Short fuse. You chose it. We move.";
+  return card(f, line, "houseRule");
+};
+
+// the meal echo goes to whoever felt it most — never Petra, whose N2 card
+// is always the opening verdict when she cooked the first plate.
+const firstMeal: Rule = (f) => {
+  const meal = f.career.lastMeal;
+  if (f.lastNight !== 1 || meal?.night !== 1) return null;
+  if (meal.choice === 1 && meal.lowName) {
+    return f.cook.name === meal.lowName
+      ? card(f, "The crispy bit came to me last night. I won't forget who passed it.", "firstMeal")
+      : null;
+  }
+  const candidates = f.cooks.filter((c) => c.name !== "PETRA" && !c.walkedOut);
+  const speaker = lowestMoraleCook(candidates.length ? candidates : f.cooks);
+  if (speaker !== f.cook) return null;
+  return card(
+    f,
+    meal.choice === 2
+      ? "Eaten standing up, in silence. Yesterday stays yesterday."
+      : "You called us the best kitchen you'll ever run. We almost believed you.",
+    "firstMeal",
+  );
+};
+
+// the walk echo: only when nobody has anything sharper — presence, not praise
+const walkedLine: Rule = (f) => {
+  const walk = f.career.lastWalk;
+  if (walk?.night !== f.lastNight) return null;
+  const candidates = f.cooks.filter((c) => c.name !== "PETRA" && !c.walkedOut);
+  const speaker = lowestMoraleCook(candidates.length ? candidates : f.cooks);
+  if (speaker !== f.cook) return null;
+  const furthest = walk.stops.includes("room") ? "room" : walk.stops.includes("sinks") ? "sinks" : "sauce";
+  return card(
+    f,
+    furthest === "room"
+      ? "You came out to the room. We saw your shoes."
+      : furthest === "sinks"
+        ? "You took the tubs with the porter. Hands, chef."
+        : "You took the pan yourself. Noted.",
+    "walkedLine",
+  );
+};
+
 const PAYOFFS: Rule[] = [
   openingMemory,
   sauceOutcome,
@@ -162,6 +215,9 @@ const PAYOFFS: Rule[] = [
   table101Memory,
   rivalOffer,
   hospitality,
+  firstMeal,
+  houseRule,
+  walkedLine,
 ];
 
 const morale = (low: string, mid: string): Rule => (f) =>

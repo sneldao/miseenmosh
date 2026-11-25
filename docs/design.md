@@ -746,8 +746,10 @@ Adopted rules:
   CONTINUE on a save). Everything else — controls, voice, PREP FIRST,
   NEW RESIDENCY, cast bios, records — lives in a Menu disclosure that
   never starts a run by keyboard.
-- **Night 1 skips the briefing.** `enterResidency` (the only start route
-  for mouse and keys) drops straight into service. The opening teaches
+- **Night 1 stages the briefing.** `enterResidency` (the only start route
+  for mouse and keys) lands on a two-beat intro — the brigade + family meal,
+  then the contract + house rule (doors gated on the rule, KITCHEN BOOK one
+  click away). Only OPEN THE DOORS drops into service. The opening teaches
   handle → read → decide through one real plate: serve Petra's sound Wellington,
   call the next order, then turn and inspect the second plate before its verdict
   controls unlock. Plate observations and the house standard explain what the
@@ -769,3 +771,24 @@ Adopted rules:
   brigade card (cash/stars/services, names + mood, optional family
   meal) with OPEN THE DOORS and KITCHEN BOOK — the latter holding the
   full market/coaching/feud/vow/house-rule/last-night prep, optional.
+
+## Walking the line — stance (25 Nov)
+
+- **The chef has a body.** `stance` (sinks ↔ sauce ↔ pass ↔ room) moves
+  the chef and both cameras to a real location in the already-built
+  restaurant. Night 1 the pass holds you (the opening stays a pure
+  pass tutorial); from night 2, Q/W walk the line, 0 returns, HUD
+  buttons and glossary match.
+- **No new verbs — verbs gain a location.** The pass loop
+  (call/collect/fire/judge/run/inspect) only runs at the pass and says
+  so when tried elsewhere. Everything else is voice and carries:
+  correction is twice as fast at the sauce station, arriving mid-split
+  buys the pan +4s, overload accrues half as fast at the sinks, comp
+  lands harder from your hands in the room.
+- **Absence is the cost.** The sim never pauses for travel: tickets age,
+  sauce windows expire, shoo windows close while you're gone. A fire
+  drags the chef home from the room; sauce and sinks already face the
+  flames. Veterans collapse nothing — travel is one keypress home.
+- **The morning remembers the walk.** `lastWalk` stamps each night's
+  stops; the lowest-priority payoff card echoes the furthest (room >
+  sinks > sauce) only when no sharper fact claims the cook.

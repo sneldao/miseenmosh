@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { mulberry32, daySeed } from "./seed";
 import { sfx, unlockAudio, setMasterMuted } from "./sound";
-import { speakChorus, speakReview } from "./voice";
+import { speakChorus, speakLine, speakReview } from "./voice";
 import { initOg, submitBoard, unlockAch, trackEvent } from "./og";
 import {
   CHEF_BARKS, STATION_BARKS, BRIGADE_RESPONSES, GUEST_HECKLES, RIVAL_LINES, pick,
@@ -24,6 +24,7 @@ import { buildServiceStory, nightAccounts, reviewNarration } from "./serviceRevi
 import { scoreService } from "./serviceScore";
 import { nightContract, lowestMoraleCook, retentionTarget, chefCoverMultiplier, recoveryCorrectionBonus } from "./nightArc";
 import { buildEnding } from "./ending";
+import { INTRO } from "./introCopy";
 import {
   type DishCondition, type Correction, type RecipeFinish, type RecipeRevision,
   type OrderState, conditionFromCooking, qualityOfCondition, coolCondition,
@@ -89,6 +90,10 @@ export interface Cook {
 }
 
 export type GuestKind = "critic" | "press" | "regulars" | "couple" | "walkin";
+/** where the chef's body is — sinks ↔ sauce ↔ pass ↔ room, walked with Q/W */
+export type Stance = "sinks" | "sauce" | "pass" | "room";
+/** the line, left to right: pot-wash, the pan, the pass, the door */
+export const STANCE_ORDER: Stance[] = ["sinks", "sauce", "pass", "room"];
 
 export interface Guest {
   id: number;
@@ -205,6 +210,10 @@ export interface Career {
   feudDone?: number; // night the feud card was answered
   feudOutcome?: string;
   mealNight?: number; // night the family meal was eaten
+  /** which family meal was chosen + who got the crispy bit — the N2 morning remembers */
+  lastMeal?: { night: number; choice: number; lowName?: string };
+  /** where the chef's body went last night — the morning remembers the furthest stop */
+  lastWalk?: { night: number; stops: Stance[] };
   champagneNight?: number; // clout: inspector's table comped tonight
   dessertNight?: number; // clout: regulars forgive twice tonight
   doorNamed?: boolean; // clout: name above the door, accolade banked
@@ -508,6 +517,35 @@ function finishPlating(
 
 let nextId = 1;
 let feedId = 1;
+/** transient UI intent from enterResidency({ prep: true }) — open the kitchen
+ *  book on arrival. Never saved, consumed once by the briefing. */
+let briefingBookRequested = false;
+export function consumeBriefingBookRequest(): boolean {
+  const v = briefingBookRequested;
+  briefingBookRequested = false;
+  return v;
+}
+/** night 1 doors stay shut until a house rule is chosen (UI gate). */
+export function n1NeedsHouseRule(career: Career): boolean {
+  return career.night === 1 && !career.mutator;
+}
+
+const INTRO_SEEN_KEY = "mem-intro-seen";
+/** a finished N1 intro collapses the briefing to one beat for veterans. Best-effort. */
+export function introSeen(): boolean {
+  try {
+    return localStorage.getItem(INTRO_SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function markIntroSeen() {
+  try {
+    localStorage.setItem(INTRO_SEEN_KEY, "1");
+  } catch {
+    /* private mode — veterans just get the full intro again */
+  }
+}
 
 interface GameState {
   phase: Phase;
@@ -677,6 +715,11 @@ interface GameState {
   toggleGlossary: () => void;
   /** platform: handshake, host pause/mute — safe anywhere, game never waits */
   initPlatform: () => void;
+  /** where the chef's body is — the pass loop only runs at the pass */
+  stance: Stance;
+  setStance: (s: Stance) => void;
+  /** walk the line one stop, clamping at the ends */
+  stepStance: (dir: 1 | -1) => void;
   toggleFirstPerson: () => void;
   setAim: (aim: GameState["aim"]) => void;
   smotherFire: (station: number) => void;
@@ -1121,6 +1164,7 @@ export const useGame = create<GameState>((set, get) => ({
   stampText: "",
   stampAt: 0,
   paused: false,
+  stance: "pass",
   firstPerson: true,
   aim: null,
   rivalIdx: 0,
@@ -1189,9 +1233,10 @@ export const useGame = create<GameState>((set, get) => ({
   enterResidency: ({ fresh = false, prep = false } = {}) => {
     const before = get();
     if (before.phase !== "title" && before.phase !== "ending") return;
+    // HOW IT WORKS (PREP) opens the kitchen book on arrival — it no longer
+    // skips anything. Transient UI intent only, never saved.
+    briefingBookRequested = prep;
     if (fresh) get().resetCareer(); else get().start();
-    const s = get();
-    if (!s.saveIssue && !prep && s.phase === "briefing" && s.career.night === 1) s.startService();
   },
 
   resetCareer: () => {
@@ -1245,6 +1290,12 @@ export const useGame = create<GameState>((set, get) => ({
     const s = get();
     if (s.phase !== "briefing" || s.saveIssue) return;
     const career = s.career;
+    // the doors slam every night; night 1 also banks the intro and says it
+    sfx("slam");
+    if (career.night === 1) {
+      markIntroSeen();
+      speakLine(INTRO.serviceChyrons[0].text);
+    }
     const v = VENUES[career.venue];
     const rng = mulberry32(daySeed() + career.night * 104729);
     const criticId = Math.floor(rng() * 5);
@@ -1326,7 +1377,7 @@ export const useGame = create<GameState>((set, get) => ({
       cooks: s.cooks.map((c) => withFreshNight({ ...c, morale: Math.min(85, c.morale + 20) })),
       tickets: opening,
       feed: coldOpen
-        ? [{ id: feedId++, text: "Service, chef.", kind: "info" as const, who: "PETRA" }]
+        ? [{ id: feedId++, text: INTRO.serviceChyrons[0].text, kind: "info" as const, who: INTRO.serviceChyrons[0].who }]
         : [
         { id: feedId++, text: `Night ${career.night} — ${v.name}. ${v.sub}.`, kind: "drama" },
         { id: feedId++, text: `${nightContract(career.night).name}: ${nightContract(career.night).dilemma}`, kind: "info" },
@@ -1352,6 +1403,8 @@ export const useGame = create<GameState>((set, get) => ({
           : []),
       ],
       nextTicketIn: coldOpen ? 4 : 1.5,
+      // the body comes home every night — nobody starts service at the sinks
+      stance: "pass",
       openingStep: coldOpen ? "serve" : null,
       openingTurned: false,
       selectedTicketId: null,
@@ -1551,6 +1604,7 @@ export const useGame = create<GameState>((set, get) => ({
     const rng = s.rng;
     let cooks = s.cooks.map((k) => ({ ...k }));
     let line: string;
+    let lowName: string | undefined;
     if (i === 0) {
       // praise: everybody stands taller, nobody lets go
       cooks = cooks.map((k) => ({ ...k, morale: Math.min(100, k.morale + 12), grudge: null }));
@@ -1558,6 +1612,7 @@ export const useGame = create<GameState>((set, get) => ({
     } else if (i === 1) {
       // the crispy bit goes to whoever needs it most
       const low = cooks.reduce((a, b) => (a.morale <= b.morale ? a : b), cooks[0]);
+      lowName = low?.name;
       cooks = cooks.map((k) =>
         k === low
           ? { ...k, morale: Math.min(100, k.morale + 25), grudge: null }
@@ -1579,7 +1634,7 @@ export const useGame = create<GameState>((set, get) => ({
     const craft = FAMILY_CRAFT[(s.career.night - 1) % FAMILY_CRAFT.length];
     sfx("applause", { vol: 0.5 });
     set({
-      career: { ...s.career, mealNight: s.career.night },
+      career: { ...s.career, mealNight: s.career.night, lastMeal: { night: s.career.night, choice: i, lowName } },
       cooks,
       feed: pushFeed(
         pushFeed(
@@ -1771,6 +1826,10 @@ export const useGame = create<GameState>((set, get) => ({
           ? "HOUSE RULE: NO BIN — 86 is off all residency. Cook everything."
           : "HOUSE RULE: SHORT FUSE — tickets walk 20% faster all residency. Streaks still pay.";
     set({ career, feed: pushFeed(s.feed, line, "drama") });
+    speakLine(
+      m === "double_runners" ? "Double shift. Bring a broom." : m === "no_bin" ? "No bin. Cook everything." : "Short fuse. Move.",
+      2,
+    );
   },
 
   unlockCriticCam: () => {
@@ -1953,6 +2012,7 @@ export const useGame = create<GameState>((set, get) => ({
     const liveEarly = s.cooks.filter((c) => !c.walkedOut);
     const flying = liveEarly.length > 0 && liveEarly.reduce((t, c) => t + c.morale, 0) / liveEarly.length > 80 && streak >= 5;
     let nextTicketIn = s.nextTicketIn - dt;
+    let stance = s.stance;
     let dessertDone = s.dessertDone;
     let sauce = s.sauce;
     let request = s.request;
@@ -1981,7 +2041,7 @@ export const useGame = create<GameState>((set, get) => ({
                 readyAt: ready ? t.plateAt : x.readyAt }
             : x
         ),
-        feed: ready ? pushFeed([], "Order up. Look at the plate before you judge it.", "info", "PETRA") : s.feed,
+        feed: ready ? pushFeed([], INTRO.serviceChyrons[1].text, "info", INTRO.serviceChyrons[1].who) : s.feed,
         openingStep: ready ? "inspect" : s.openingStep,
         openingTurned: ready ? false : s.openingTurned,
       });
@@ -2359,7 +2419,10 @@ export const useGame = create<GameState>((set, get) => ({
       const load = tickets.filter((t) => t.station === c.station && t.state !== "done").length;
       // drowning stations ignite — 3+ live tickets for 8s and the grease goes up.
       // at 5s the fat starts smoking: one warning hiss, then no more excuses.
-      let overloadT = load >= 3 ? c.overloadT + dt : Math.max(0, c.overloadT - 2 * dt);
+      // at the sinks you're an extra pair of hands on the wash — overload accrues half as fast
+      let overloadT = load >= 3
+        ? c.overloadT + dt * (s.stance === "sinks" ? 0.5 : 1)
+        : Math.max(0, c.overloadT - 2 * dt);
       let smoked = c.smoked;
       if (!c.burning && !smoked && overloadT > 5) {
         smoked = true;
@@ -2379,6 +2442,12 @@ export const useGame = create<GameState>((set, get) => ({
           c.name
         );
         sfx("sting");
+        // smoke in the doorway: a fire drags the chef home from the room —
+        // the sauce and sinks stances already face the flames
+        if (s.stance === "room") {
+          stance = "pass";
+          feed = pushFeed(feed, "Smoke — back to the pass.", "drama", "THE PASS");
+        }
       }
       // idle stations recover; loaded stations drain — drowning is what kills.
       // trauma from past walkouts makes them fragile forever; fire is worse.
@@ -2708,6 +2777,8 @@ export const useGame = create<GameState>((set, get) => ({
         correction: null,
         inspecting: false,
         selectedTicketId: null,
+        // the body comes home — nobody starts the review at the sinks
+        stance: "pass",
       });
       // platform: nightly boards, achievements, events — fire and forget
       trackEvent("night_completed", { level: String(s.career.night), score: stars });
@@ -2748,13 +2819,14 @@ export const useGame = create<GameState>((set, get) => ({
       kidNoticed,
       madameNodded,
       flyingAnnounced,
-      correction, selectedTicketId, inspecting, inspectionTurn,
+      correction, selectedTicketId, inspecting, inspectionTurn, stance,
     });
   },
 
   plateToPass: (id) => {
     const s = get();
     if (s.phase !== "service" || s.paused || s.glossary) return;
+    if (s.stance !== "pass") { set({ feed: pushFeed(s.feed, "Calling happens at the pass. Press 0 — get back.", "info", "THE PASS") }); return; }
     // during the opening only the call exists — nothing else may start cooking
     if (s.openingStep && s.openingStep !== "call") return;
     if (!canStartOrder(s.tickets, id)) return;
@@ -2801,6 +2873,7 @@ export const useGame = create<GameState>((set, get) => ({
   firePlate: (id?: number) => {
     const s = get();
     if (s.phase !== "service" || s.paused || s.glossary || s.openingStep) return;
+    if (s.stance !== "pass") { set({ feed: pushFeed(s.feed, "Firing happens at the pass. Press 0 — get back.", "info", "THE PASS") }); return; }
     const target = id ?? s.selectedTicketId;
     if (target == null) return;
     const t = s.tickets.find((t) => t.id === target && t.state === "plating");
@@ -2900,6 +2973,7 @@ export const useGame = create<GameState>((set, get) => ({
   collectPlate: (id) => {
     const s = get();
     if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction || !canCollectOrder(s.tickets, id)) return;
+    if (s.stance !== "pass") { set({ feed: pushFeed(s.feed, "Collecting happens at the pass. Press 0 — get back.", "info", "THE PASS") }); return; }
     set({ tickets: s.tickets.map((t) => (t.id === id ? { ...t, state: "pass" as const } : t)), selectedTicketId: id, inspecting: false, inspectionTurn: 0 });
   },
 
@@ -2910,6 +2984,7 @@ export const useGame = create<GameState>((set, get) => ({
       return;
     }
     if (s.phase !== "service" || s.paused || s.glossary || !s.tickets.some((t) => t.state === "pass")) return;
+    if (s.stance !== "pass") { set({ feed: pushFeed(s.feed, "Inspecting happens at the pass. Press 0 — get back.", "info", "THE PASS") }); return; }
     set({ inspecting: true });
   },
 
@@ -2935,13 +3010,21 @@ export const useGame = create<GameState>((set, get) => ({
     const s = get();
     const p = s.tickets.find((t) => t.state === "pass");
     if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction || p?.condition?.sauce !== "split") return;
-    set({ inspecting: true, correction: { ticketId: p.id, startedAt: s.serviceTime, endsAt: s.serviceTime + SAUCE_CORRECTION_SECONDS } });
+    // your own hands on the whisk: twice as fast at the sauce station
+    const atSauce = s.stance === "sauce";
+    const cook = s.cooks.find((c) => c.station === p.station);
+    set({
+      inspecting: true,
+      correction: { ticketId: p.id, startedAt: s.serviceTime, endsAt: s.serviceTime + SAUCE_CORRECTION_SECONDS * (atSauce ? 0.5 : 1) },
+      ...(atSauce ? { feed: pushFeed(s.feed, "Your hands on the whisk — twice as fast.", "good", cook?.name ?? "THE LINE") } : {}),
+    });
     sfx("whisk", { pan: STATION_PAN[p.station] ?? 0 });
   },
 
   runTable: (includePeers = false) => {
     const s = get();
     if (s.phase !== "service" || s.paused || s.glossary || s.openingStep || s.correction) return;
+    if (s.stance !== "pass") { set({ feed: pushFeed(s.feed, "Running happens at the pass. Press 0 — get back.", "info", "THE PASS") }); return; }
     const held = s.tickets.find((t) => t.state === "pass");
     if (!held) return;
     // the default call sends only what the chef is holding; a course is an explicit commitment
@@ -3122,9 +3205,11 @@ export const useGame = create<GameState>((set, get) => ({
     let best = 0;
     for (const [table, n] of counts) if (n > best) { best = n; target = table; }
     if (target < 0) return;
+    // carried out there yourself it lands harder — from your hands, not the pass
+    const atRoom = s.stance === "room";
     const guests = s.guests.map((g) => ({
       ...g,
-      tellClock: g.tellClock + 20, // the room exhales
+      tellClock: g.tellClock + (atRoom ? 30 : 20), // the room exhales
       mercy: g.kind === "regulars" && g.table === target ? Math.min(2, g.mercy + 1) : g.mercy,
     }));
     sfx("applause", { pan: tablePan(target) });
@@ -3134,9 +3219,14 @@ export const useGame = create<GameState>((set, get) => ({
       hospitalityCount: s.hospitalityCount + 1,
       guests,
       career: { ...s.career, cash: s.career.cash - 20 },
-      feed: pushFeed(s.feed, `Champagne on the house. The room exhales.`, "good", "THE REGULARS"),
+      feed: pushFeed(
+        s.feed,
+        atRoom ? `Champagne on the house — from your hands. The room exhales.` : `Champagne on the house. The room exhales.`,
+        "good",
+        "THE REGULARS"
+      ),
       tickets: s.tickets.map((t) =>
-        t.state === "rail" && t.table === target ? { ...t, age: Math.max(0, t.age - 10) } : t
+        t.state === "rail" && t.table === target ? { ...t, age: Math.max(0, t.age - (atRoom ? 15 : 10)) } : t
       ),
     });
   },
@@ -3251,6 +3341,7 @@ export const useGame = create<GameState>((set, get) => ({
   judge: (v, options) => {
     const s = get();
     if (s.phase !== "service" || s.paused || s.glossary || s.correction) return;
+    if (s.stance !== "pass") { set({ feed: pushFeed(s.feed, "Judgment happens at the pass. Press 0 — get back.", "info", "THE PASS") }); return; }
     // the opening's two plates only accept what they're teaching
     if (s.openingStep === "serve" && v !== "serve") return;
     if (s.openingStep === "call" || s.openingStep === "inspect") return;
@@ -3388,9 +3479,18 @@ export const useGame = create<GameState>((set, get) => ({
         );
       }
       const feedNext = s.openingStep === "serve"
-        ? pushFeed([], "One more, chef.", "info", "PETRA")
+        ? pushFeed(
+          pushFeed([], "One more, chef.", "info", "PETRA"),
+          "Across the street, BEEFCAKES rattles your bins. “Nice pass. Shame if—”", "drama", "BEEFCAKES",
+        )
         : s.openingStep === "judge"
-          ? pushFeed(feed, `Table ${s.guests.find((g) => g.kind === "couple")?.table ?? plate.table}: Wellington and purée. Together.`, "info")
+          ? pushFeed(
+            pushFeed(
+              pushFeed(feed, `Table ${s.guests.find((g) => g.kind === "couple")?.table ?? plate.table}: Wellington and purée. Together.`, "info"),
+              INTRO.serviceChyrons[2].text, "info", INTRO.serviceChyrons[2].who,
+            ),
+            pick(s.rng, REGULARS_KIND), "good", "THE REGULARS",
+          )
           : feed;
       set({
         tickets: ticketsNext,
@@ -3652,6 +3752,50 @@ export const useGame = create<GameState>((set, get) => ({
 
   setAim: (aim) => {
     if (get().aim !== aim) set({ aim });
+  },
+
+  setStance: (to) => {
+    const s = get();
+    if (s.phase !== "service" || s.paused || s.glossary || s.openingStep) return;
+    if (s.stance === to) return;
+    // the pass holds you on night 1 — from night 2, you walk the line
+    if (s.career.night < 2) {
+      set({ feed: pushFeed(s.feed, "The pass holds you tonight. From night 2, you walk the line.", "info", "THE PASS") });
+      return;
+    }
+    const cook0 = s.cooks.find((c) => c.station === 0 && !c.walkedOut)?.name ?? "THE LINE";
+    const line = to === "pass"
+      ? { text: "Back on the pass. Hands on the steel.", who: "THE PASS" }
+      : to === "sauce"
+        ? { text: "On the pan. The line leans in.", who: cook0 }
+        : to === "sinks"
+          ? { text: "Into the steam. The porter shifts over.", who: "THE PORTER" }
+          : { text: "Through the door. The room turns.", who: "THE REGULARS" };
+    // the morning remembers the walk — coming home is not a stop
+    const lastWalk = to === "pass" ? s.career.lastWalk : {
+      night: s.career.night,
+      stops: s.career.lastWalk?.night === s.career.night && s.career.lastWalk.stops.includes(to)
+        ? s.career.lastWalk.stops
+        : [...(s.career.lastWalk?.night === s.career.night ? s.career.lastWalk.stops : []), to],
+    };
+    // arriving mid-split with your own hands buys the pan four seconds
+    let sauce = s.sauce;
+    let feed = pushFeed(s.feed, line.text, "info", line.who);
+    if (to === "sauce" && sauce) {
+      const t = s.tickets.find((x) => x.id === sauce!.ticketId && x.state === "plating");
+      if (t) {
+        sauce = { ...sauce, until: sauce.until + 4 };
+        const cook = s.cooks.find((c) => c.station === t.station);
+        feed = pushFeed(feed, "Four more seconds — you're on the pan.", "good", cook?.name ?? "THE LINE");
+      }
+    }
+    set({ stance: to, inspecting: false, sauce, feed, career: { ...s.career, lastWalk } });
+  },
+
+  stepStance: (dir) => {
+    const s = get();
+    const next = STANCE_ORDER[Math.min(3, Math.max(0, STANCE_ORDER.indexOf(s.stance) + dir))];
+    if (next && next !== s.stance) get().setStance(next);
   },
 
   smotherFire: (station) => {

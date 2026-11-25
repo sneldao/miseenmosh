@@ -8,6 +8,9 @@ const PROPS = [
   "seabass.glb",
   "lamb.glb",
   "shaker.glb",
+  "bustub.glb",
+  "tablesetting.glb",
+  "wellington.glb",
 ];
 
 /** Warm the prop cache the moment the player commits (BEGIN RESIDENCY),

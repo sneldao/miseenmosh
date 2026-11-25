@@ -7,6 +7,7 @@ vi.mock("./sound", () => ({
 }));
 vi.mock("./voice", () => ({
   speakChorus: vi.fn(),
+  speakLine: vi.fn(),
   speakReview: vi.fn(),
 }));
 vi.mock("./og", () => ({

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends, Cook, petraOpeningReply } from "../game/state";
+import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends, Cook, petraOpeningReply, consumeBriefingBookRequest, n1NeedsHouseRule, introSeen, Stance, STANCE_ORDER } from "../game/state";
 import { deriveMood } from "../game/mood";
 import { morningCards } from "../game/beats";
 import { dishProfile, plateObservations, correctionNeeded, CORRECTION_LABEL, currentWellingtonRecipe, WELLINGTON_FINISHES, type RecipeFinish } from "../game/culinary";
@@ -9,6 +9,7 @@ import { nightContract, lowestMoraleCook } from "../game/nightArc";
 import { buildEnding } from "../game/ending";
 import { speakReview, voiceEnabled, setVoiceEnabled } from "../game/voice";
 import { preloadKitchenModels } from "../scene/preloadModels";
+import { INTRO } from "../game/introCopy";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
 import stampBack from "../../assets/recraft/vector/stamp-send-back.svg";
 import stampSmash from "../../assets/recraft/vector/stamp-smash.svg";
@@ -432,6 +433,34 @@ function Brigade() {
   );
 }
 
+const STANCE_LABEL: Record<Stance, string> = { sinks: "SINKS", sauce: "SAUCE", pass: "PASS", room: "ROOM" };
+
+/** Walk the line: where the chef's body is. Night 1 the pass holds you. */
+function StanceBar() {
+  const stance = useGame((s) => s.stance);
+  const setStance = useGame((s) => s.setStance);
+  const night = useGame((s) => s.career.night);
+  const openingStep = useGame((s) => s.openingStep);
+  const locked = night < 2 || !!openingStep;
+  return (
+    <div className="stancebar" title="Q / W walks the line · 0 back to the pass">
+      <span className="slabel">CHEF</span>
+      {STANCE_ORDER.map((id) => (
+        <button
+          key={id}
+          className={`btn sm ${stance === id ? "picked" : ""}`}
+          disabled={locked || stance === id}
+          onClick={() => setStance(id)}
+          title={locked ? "the pass holds you tonight — from night 2, you walk" : id === "pass" ? "back to the pass (0)" : `walk to ${id} (Q / W)`}
+        >
+          {STANCE_LABEL[id]}
+        </button>
+      ))}
+      {locked && <span className="scost">NIGHT 2</span>}
+    </div>
+  );
+}
+
 function ReviewCard() {
   const review = useGame((s) => s.review);
   const career = useGame((s) => s.career);
@@ -630,14 +659,156 @@ function OpeningService() {
 function Briefing() {
   const career = useGame((s) => s.career);
   const cooks = useGame((s) => s.cooks);
-  // PREP FIRST lands here from night 1: open the book straight away. After
-  // that, an unread morning of confessionals auto-opens it too — beats
-  // hidden in a closed book are beats nobody sees.
+  // Night 1 has its own staged intro — the brigade, the contract, the house
+  // rule — before the doors. After that, an unread morning of confessionals
+  // auto-opens the book too — beats hidden in a closed book are beats nobody sees.
   const [bookOpen, setBookOpen] = useState(
-    career.night === 1 || ((career.bookSeenNight ?? 0) < career.night && morningCards(career, cooks).length > 0),
+    (career.bookSeenNight ?? 0) < career.night && morningCards(career, cooks).length > 0,
   );
+  if (career.night === 1) return <NightOneBrief />;
   if (bookOpen) return <PrepBook onBack={() => setBookOpen(false)} />;
   return <QuickBrief onBook={() => setBookOpen(true)} />;
+}
+
+/** Night 1 staged intro: who we are + family meal, then tonight + house rule.
+ *  Two beats, two decisions max, doors gated on the house rule. The full
+ *  prep book stays one click away the whole time. */
+function NightOneBrief() {
+  const career = useGame((s) => s.career);
+  const cooks = useGame((s) => s.cooks);
+  const meal = useGame((s) => s.meal);
+  const chooseMutator = useGame((s) => s.chooseMutator);
+  const startService = useGame((s) => s.startService);
+  const canSave = useGame((s) => s.canSave);
+  const mealDone = (career.mealNight ?? -1) >= career.night;
+  // veterans who finished an intro before collapse to one beat — contract +
+  // rule + doors, with the meal kept inline so the buff isn't lost
+  const [veteran] = useState(() => introSeen());
+  const [beat, setBeat] = useState(() => (veteran ? 1 : 0));
+  // HOW IT WORKS (PREP) opens the book on arrival instead of skipping anything
+  const [bookOpen, setBookOpen] = useState(() => consumeBriefingBookRequest());
+  const [picked, setPicked] = useState<number | null>(null);
+  const locked = n1NeedsHouseRule(career);
+  const FamilyMeal = (
+    <div className="qmeal">
+      <div className="mhead">FAMILY MEAL — eaten standing up</div>
+      <div className="qmeal-row">
+        {[
+          { label: "RAISE A TOAST", i: 0 },
+          { label: "SHARE THE CRISPY BIT", i: 1 },
+          { label: "EAT QUIETLY", i: 2 },
+        ].map(({ label, i }) => (
+          <button
+            key={i}
+            className={`btn lbtn ${picked === i ? "picked" : ""}`}
+            disabled={mealDone || picked !== null}
+            onClick={() => { meal(i); setPicked(i); }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {mealDone && picked === null && <div className="ltaken">bowls licked. yesterday stays yesterday.</div>}
+    </div>
+  );
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      // a focused button/summary owns its activation — don't steal it
+      if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
+      e.preventDefault();
+      if (beat === 0) setBeat(1);
+      else if (!n1NeedsHouseRule(useGame.getState().career)) startService();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [beat, startService]);
+  if (bookOpen) return <PrepBook onBack={() => setBookOpen(false)} />;
+  return (
+    <div className="brief-wrap">
+      <div className="brief quick-brief">
+        <div className="bhead">{INTRO.n1Head}</div>
+        <div className="bsub">{INTRO.n1Why}</div>
+        <div className="title-residency">{INTRO.residencyLine}</div>
+        <div className="bstats">
+          <span>£{career.cash}</span>
+          <span>★ {career.stars}</span>
+        </div>
+        {beat === 0 && (
+          <>
+            <div className="mhead">{INTRO.beat1Head}</div>
+            <div className="cast row qcast">
+              {cooks.map((c) => (
+                <div
+                  key={c.id}
+                  className={`ccard qcook ${c.walkedOut ? "gone" : ""}`}
+                  title={`${c.name} — morale ${Math.round(c.morale)} · skill ${Math.round(c.skill * 100)}`}
+                >
+                  <img src={CAST_IMG[c.name] ?? castCommis} alt={c.name} />
+                  <span className="cname">{c.name}</span>
+                  {CAST_INTRO[c.name] && <span className="intro">{CAST_INTRO[c.name]}</span>}
+                  <span className="mood">{moodOf(c)}</span>
+                </div>
+              ))}
+            </div>
+            {FamilyMeal}
+            <div className="qbtns">
+              <button className="btn serve big" autoFocus onClick={() => setBeat(1)}>
+                TONIGHT →
+              </button>
+              <button className="btn ghost" onClick={() => setBookOpen(true)}>
+                KITCHEN BOOK
+              </button>
+            </div>
+          </>
+        )}
+        {beat === 1 && (
+          <>
+            <div className="mhead">{INTRO.beat2Head}</div>
+            <div className="n1body">{INTRO.beat2Body}</div>
+            <NightContractCard />
+            {veteran && FamilyMeal}
+            <div className="qmeal">
+              <div className="mhead">HOUSE RULE — one twist, all residency</div>
+              {career.mutator ? (
+                <div className="ltaken">
+                  rule set: {career.mutator === "double_runners" ? "DOUBLE SHIFT" : career.mutator === "no_bin" ? "NO BIN" : "SHORT FUSE"}. no take-backs.
+                </div>
+              ) : (
+                <div className="qmeal-row">
+                  <button className="btn lbtn" onClick={() => chooseMutator("double_runners")}>
+                    DOUBLE SHIFT<span className="cost">BEEFCAKES doubles runners · all 9 nights</span>
+                  </button>
+                  <button className="btn lbtn" onClick={() => chooseMutator("no_bin")}>
+                    NO BIN<span className="cost">86 off · cook everything · all 9 nights</span>
+                  </button>
+                  <button className="btn lbtn dim" onClick={() => chooseMutator("short_fuse")}>
+                    SHORT FUSE<span className="cost">tables walk 20% faster · all 9 nights</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {!canSave && <div className="bwarn">Progress won't persist — this browser blocks storage.</div>}
+            <div className="qbtns">
+              <button
+                className="btn serve big"
+                autoFocus
+                disabled={locked}
+                title={locked ? "Choose a house rule first" : undefined}
+                onClick={startService}
+              >
+                OPEN THE DOORS
+              </button>
+              <button className="btn ghost" onClick={() => setBookOpen(true)}>
+                KITCHEN BOOK
+              </button>
+            </div>
+            {locked && <div className="ltaken">pick a house rule and the doors open.</div>}
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /** one screen, one decision, one big button — the reading lives in the book */
@@ -1329,6 +1500,10 @@ function useHotkeys() {
       }
       if (s.paused) return;
       const k = e.key.toLowerCase();
+      // walk the line: Q toward the sinks, W toward the room, 0 back to the pass
+      if (k === "0") { s.setStance("pass"); return; }
+      if (k === "q") { s.stepStance(-1); return; }
+      if (k === "w") { s.stepStance(1); return; }
       if (k === "s") return s.judge("serve");
       if (k === "b") return s.judge("sendback");
       if (k === "x") return s.judge("smash");
@@ -1385,6 +1560,8 @@ function Glossary() {
     ["N", "wave the next order in early (+2 station pressure)"],
     ["U", "brigade voices on/off"],
     ["click table", "flag the inspector (before dessert)"],
+    ["Q / W", "walk the line, night 2+ — sinks · sauce · pass · room"],
+    ["0", "back to the pass"],
     ["P / Esc", "pause"],
     ["V", "first-person pass view"],
     ["?", "this card"],
@@ -1493,9 +1670,12 @@ export default function HUD() {
       {phase === "title" && (
         <div className="title-card title-simple">
           <img className="hero-lineup" src={lineupArt} alt="MISE EN MOSH — the brigade at the pass" fetchPriority="high" loading="eager" decoding="async" />
+          <div className="title-promise">{INTRO.titleSub}</div>
           <button className="btn title-play" autoFocus disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency(); }}>
             {hasSave ? `CONTINUE — NIGHT ${career.night}` : "TAKE THE PASS"}
           </button>
+          {!hasSave && <div className="title-hint">{INTRO.titleHint}</div>}
+          {!hasSave && <div className="title-residency">{INTRO.residencyLine}</div>}
           <details className="title-menu">
             <summary>Menu</summary>
             <div className="title-menu-panel">
@@ -1504,7 +1684,7 @@ export default function HUD() {
                 VOICE {voiceOn ? "ON" : "OFF"}
               </button>
               <button className="btn" disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency({ prep: true }); }}>
-                PREP FIRST
+                HOW IT WORKS (PREP)
               </button>
               {hasSave && (
                 <button className="btn ghost" disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency({ fresh: true }); }}>
@@ -1659,6 +1839,7 @@ export default function HUD() {
             )}
           </div>
           <Brigade />
+          <StanceBar />
           {/* first person shouts the newest line into the room instead */}
           {!firstPerson && <Ticker />}
           <button

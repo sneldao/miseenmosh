@@ -35,6 +35,7 @@ const STAND_Z = 3.0;
 const MENU_Y = 3.6;
 const MENU_Z = 7.3;
 const YAW_MAX = 1.15; // ~66° each way — the room, not a free-look camera
+const ROOM_YAW_MAX = 2.8; // in the room you can turn and see the pass burning
 const PITCH_MIN = -0.82;
 const PITCH_MAX = 0.55;
 const FOV_MENU = 40;
@@ -68,6 +69,7 @@ export default function FirstPerson() {
   const lean = useRef(0);
   const blend = useRef(0);
   const inspBlend = useRef(0);
+  const stanceW = useRef(0);
   const introFocus = useRef(0);
   const lift = useRef(0);
   const locked = useRef(false);
@@ -78,6 +80,8 @@ export default function FirstPerson() {
   const scratch = useRef({
     inspPos: new Vector3(0, 2.6, 3.7),
     qInsp: new Quaternion(),
+    stancePos: new Vector3(),
+    qStance: new Quaternion(),
     menuPos: new Vector3(),
     fpPos: new Vector3(),
     camPos: new Vector3(),
@@ -110,7 +114,9 @@ export default function FirstPerson() {
         g.turnPlate(e.movementX * 0.015);
         return;
       }
-      yaw.current = clamp(yaw.current - e.movementX * 0.0022, -YAW_MAX, YAW_MAX);
+      // in the room the head turns all the way — check on the pass you left
+      const yawMax = g.stance === "room" ? ROOM_YAW_MAX : YAW_MAX;
+      yaw.current = clamp(yaw.current - e.movementX * 0.0022, -yawMax, yawMax);
       pitch.current = clamp(pitch.current - e.movementY * 0.002, PITCH_MIN, PITCH_MAX);
     };
 
@@ -293,6 +299,32 @@ export default function FirstPerson() {
     const roll = Math.sin(t * 61) * shake * 0.5;
     sc.euler.set(pitch.current, yaw.current, roll);
     sc.qFp.setFromEuler(sc.euler);
+
+    // --- stance: the body walks the line; the pass loop only runs at home.
+    // measured against the built geometry: station 0 at x -3.6, the pot-wash
+    // bay at (-6.0, -4.3), the guests at z -6..-8 past the line.
+    const STANCE_VIEW = {
+      sauce: { p: [-2.4, 2.2, 2.6] as const, l: [-3.6, 1.1, 0.1] as const, s: [-3.0, -1.5] as const },
+      sinks: { p: [-3.6, 2.2, -0.6] as const, l: [-6.0, 1.0, -4.0] as const, s: [-4.6, -4.4] as const },
+      room: { p: [1.2, 1.9, -3.2] as const, l: [0.6, 1.2, -6.8] as const, s: [1.6, -5.6] as const },
+      pass: { p: [0, MENU_Y, MENU_Z] as const, l: [0, 1.35, -1.4] as const, s: [0, 0] as const },
+    };
+    const stanceOn = s.phase === "service" && s.stance !== "pass" ? 1 : 0;
+    stanceW.current = reduced
+      ? stanceOn
+      : stanceW.current + (stanceOn - stanceW.current) * (1 - Math.exp(-d * 3.2));
+    if (Math.abs(stanceW.current) < 0.002) stanceW.current = 0;
+    const sw = stanceW.current;
+    const sv = STANCE_VIEW[s.stance];
+    sc.dummy.position.set(sv.p[0], sv.p[1], sv.p[2]);
+    sc.dummy.lookAt(sv.l[0], sv.l[1], sv.l[2]);
+    sc.qStance.copy(sc.dummy.quaternion);
+    sc.stancePos.copy(sc.dummy.position);
+    // the stand moves with the stance; the head still looks where it looks
+    sc.fpPos.x += sv.s[0] * sw;
+    sc.fpPos.z += sv.s[1] * sw;
+    sc.menuPos.lerp(sc.stancePos, sw);
+    sc.qMenu.slerp(sc.qStance, sw);
 
     // --- inspection framing: over the shoulder, down at the held plate
     inspBlend.current += ((s.inspecting ? 1 : 0) - inspBlend.current) * (1 - Math.exp(-d * 6));

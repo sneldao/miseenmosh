@@ -5,11 +5,70 @@
  *  draws from the shared ambient budget (Steam.tsx) and swells with
  *  how hard Dimitri is actually working. */
 
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 import { useGame } from "../../game/state";
-import { COPPER, INK } from "../artDirection";
+import { COPPER, INK, useReducedMotion } from "../artDirection";
 import SteamField, { STEAM } from "./Steam";
 
 const STEEL = "#8f979c";
+
+/** A sauce surface that simmers: fragment-level bubble speckle + edge ring
+ *  patched into the standard material, so PBR lighting stays untouched.
+ *  uSimmer rides the same working/hot level as the steam — the pan and its
+ *  breath never disagree. CircleGeometry has no interior verts, so the
+ *  motion lives in the fragment: speckle crawl + a slow highlight drift.
+ *  Zero bytes of new geometry, zero new textures. */
+function SimmerDisc({ color, level }: { color: string; level: number }) {
+  const reduced = useReducedMotion();
+  const shader = useRef<THREE.WebGLProgramParametersWithUniforms | null>(null);
+  const mat = useMemo(() => {
+    const m = new THREE.MeshStandardMaterial({ color, roughness: 0.3 });
+    m.onBeforeCompile = (s) => {
+      s.uniforms.uTime = { value: 0 };
+      s.uniforms.uSimmer = { value: 0.35 };
+      s.vertexShader = s.vertexShader
+        .replace("#include <common>", "#include <common>\nvarying vec2 vSimmerUv;")
+        .replace("#include <uv_vertex>", "#include <uv_vertex>\nvSimmerUv = uv;");
+      s.fragmentShader = s.fragmentShader
+        .replace(
+          "#include <common>",
+          "#include <common>\nvarying vec2 vSimmerUv;\nuniform float uTime;\nuniform float uSimmer;",
+        )
+        .replace(
+          "#include <color_fragment>",
+          `#include <color_fragment>
+          {
+            vec2 c = (vSimmerUv - 0.5) * 2.0;
+            float r = length(c);
+            // bubble speckle: two crawling interference fields, thresholded hard
+            float b1 = sin(vSimmerUv.x * 46.0 + uTime * 2.6) * sin(vSimmerUv.y * 41.0 - uTime * 2.1);
+            float b2 = sin((vSimmerUv.x + vSimmerUv.y) * 31.0 - uTime * 1.7) * sin(vSimmerUv.x * 23.0 + uTime * 3.1);
+            float bub = smoothstep(0.72, 0.98, b1 * b2) * uSimmer * step(r, 1.0);
+            // edge ring: the simmer climbs the wall of the pot
+            float ring = smoothstep(0.78, 1.0, r) * uSimmer;
+            // slow highlight drift: the surface never sits still
+            float drift = (sin(vSimmerUv.x * 9.0 + uTime * 0.8) * 0.5 + 0.5) * 0.08 * uSimmer;
+            diffuseColor.rgb += bub * vec3(0.28, 0.2, 0.1) + ring * vec3(0.14, 0.09, 0.04) + drift * vec3(0.2, 0.14, 0.08);
+          }`,
+        );
+      shader.current = s;
+    };
+    return m;
+  }, [color]);
+  useFrame(({ clock }) => {
+    const sh = shader.current;
+    if (!sh) return;
+    (sh.uniforms.uTime as THREE.IUniform).value = reduced ? 0 : clock.elapsedTime;
+    (sh.uniforms.uSimmer as THREE.IUniform).value = level;
+  });
+  return (
+    <mesh position={[0, 0.062, 0]} rotation={[-Math.PI / 2, 0, 0]} material={mat}>
+      <circleGeometry args={[0.082, 24]} />
+    </mesh>
+  );
+}
 
 export default function SauceStation() {
   // equipment reads state through cheap boolean selectors — steam level
@@ -38,10 +97,7 @@ export default function SauceStation() {
               <cylinderGeometry args={[0.095, 0.085, 0.12, 16]} />
               <meshStandardMaterial color={STEEL} metalness={0.7} roughness={0.35} />
             </mesh>
-            <mesh position={[0, 0.062, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <circleGeometry args={[0.082, 16]} />
-              <meshStandardMaterial color={sauce as string} roughness={0.3} />
-            </mesh>
+            <SimmerDisc color={sauce as string} level={level} />
           </group>
         ))}
         {/* the ladle, resting across the rim */}

@@ -380,4 +380,71 @@ describe("morningCards — fact-gated confessionals", () => {
     expect(cards).toHaveLength(1);
     expect(cards[0].speaker).toBe("ODILE");
   });
+
+  it("Dimitri names the night-1 house rule on the N2 morning", () => {
+    const cards = morningCards(career({ night: 2, mutator: "no_bin" }), brigade());
+    expect(cards[1]).toMatchObject({ speaker: "DIMITRI", fact: "houseRule" });
+    expect(cards[1].line).toContain("No bin");
+  });
+
+  it("the house rule loses to a sharper personal fact", () => {
+    const cards = morningCards(career({
+      night: 2,
+      mutator: "short_fuse",
+      lastSauceOutcome: { night: 1, cookName: "DIMITRI", dish: "jus", result: "saved" },
+    }), brigade());
+    expect(cards[1].fact).toBe("lastSauceOutcome");
+  });
+
+  it("the crispy-bit cook thanks the chef by name", () => {
+    const cards = morningCards(
+      career({ night: 2, lastMeal: { night: 1, choice: 1, lowName: "ANWAR" } }),
+      brigade(),
+    );
+    expect(cards[2]).toMatchObject({ speaker: "ANWAR", fact: "firstMeal" });
+    expect(cards[2].line).toContain("crispy bit");
+  });
+
+  it("praise and silence are remembered by whoever felt them most", () => {
+    const praised = morningCards(
+      career({ night: 2, lastMeal: { night: 1, choice: 0 } }),
+      brigade(),
+    );
+    expect(praised[1]).toMatchObject({ speaker: "DIMITRI", fact: "firstMeal" });
+    expect(praised[1].line).toContain("best kitchen");
+    const silent = morningCards(
+      career({ night: 2, lastMeal: { night: 1, choice: 2 } }),
+      brigade(),
+    );
+    expect(silent[1].fact).toBe("firstMeal");
+    expect(silent[1].line).toContain("silence");
+  });
+
+  it("the morning remembers the furthest stop walked", () => {
+    const cards = morningCards(
+      career({ night: 2, lastWalk: { night: 1, stops: ["sauce", "room"] } }),
+      brigade(),
+    );
+    expect(cards[1]).toMatchObject({ speaker: "DIMITRI", fact: "walkedLine" });
+    expect(cards[1].line).toContain("shoes");
+  });
+
+  it("the walk echo loses to a sharper personal fact", () => {
+    const cards = morningCards(career({
+      night: 2,
+      mutator: "no_bin",
+      lastWalk: { night: 1, stops: ["sinks"] },
+    }), brigade());
+    expect(cards[1].fact).toBe("houseRule");
+    expect(cards.some((c) => c.fact === "walkedLine")).toBe(false);
+  });
+
+  it("Petra keeps the opening verdict over the meal echo", () => {
+    const cards = morningCards(career({
+      night: 2,
+      openingMemory: { night: 1, firstVerdict: "serve", faultUnderstood: true, quality: 80 },
+      lastMeal: { night: 1, choice: 1, lowName: "PETRA" },
+    }), brigade());
+    expect(cards[0].fact).toBe("openingMemory");
+  });
 });

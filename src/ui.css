@@ -372,6 +372,15 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 }
 .comp .cost { font-size: .6rem; opacity: .7; letter-spacing: .04em; }
 .bread .cost, .expedite .cost { font-size: .6rem; opacity: .7; letter-spacing: .04em; }
+/* ---- stance: where the chef's body is ---- */
+.stancebar {
+  position: absolute; right: 1rem; bottom: 14.6rem;
+  display: flex; gap: .35rem; align-items: center;
+  font-size: .62rem; letter-spacing: .08em; opacity: .95;
+}
+.stancebar .slabel { opacity: .7; }
+.stancebar .scost { opacity: .65; font-size: .6rem; }
+.stancebar .btn.picked { border-color: #4d7030; box-shadow: inset 0 0 0 1px #4d7030; }
 
 /* ---- streak ceremony: the room leans in ---- */
 .milestone {
@@ -747,6 +756,7 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   .scream { right: .5rem; }
   .comp { right: .5rem; }
   .voice { right: .5rem; }
+  .stancebar { right: .5rem; bottom: 14.2rem; }
   .folklore-bar { font-size: .62rem; max-width: 94vw; flex-wrap: wrap; justify-content: center; }
   .vow-ribbon { font-size: .6rem; max-width: 94vw; white-space: normal; text-align: center; }
   .stamp img { width: 10rem; }
@@ -781,6 +791,9 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   width: auto; height: auto; object-fit: contain; margin: 0;
 }
 .title-play { font-size: 1.2rem; padding: .9rem 2.8rem; }
+.title-promise { font-size: .85rem; font-style: italic; letter-spacing: .04em; color: #ffd9a0; text-align: center; max-width: min(90vw, 34rem); line-height: 1.4; }
+.title-hint { font-size: .68rem; letter-spacing: .08em; color: #c9b48a; text-align: center; }
+.title-residency { font-size: .68rem; letter-spacing: .14em; color: #e8c33a; text-align: center; }
 .title-menu { position: absolute; top: 1rem; right: 1rem; text-align: right; z-index: 40; }
 .title-menu > summary {
   cursor: pointer; list-style: none;
@@ -884,6 +897,7 @@ button.ticket:disabled:hover { transform: none; }
 .night-choice .cost { display: block; font-size: .64rem; line-height: 1.35; opacity: .7; margin-top: .18rem; }
 .night-contract { border-top: 1px dashed #a8874f; border-bottom: 1px dashed #a8874f; padding: .7rem 0; margin: .7rem 0; }
 .ndilemma { font-size: .86rem; line-height: 1.45; font-style: italic; color: #4a2c10; margin-bottom: .35rem; }
+.n1body { font-size: .86rem; line-height: 1.45; font-style: italic; color: #4a2c10; margin: .1rem 0 .5rem; }
 .ncondition { font-size: .72rem; line-height: 1.45; color: #6a552e; }
 .night-feud { display: flex; gap: .8rem; align-items: flex-start; border: 1px solid #8a6230; background: rgba(120,80,40,.12); padding: .65rem .75rem; margin: .7rem 0; border-radius: 3px; }
 .night-feud .feudface { max-width: 6.5rem; max-height: 18vh; }

@@ -8,6 +8,7 @@ import BackgroundCrew from "./BackgroundCrew";
 import Steam from "./Steam";
 import HangingPans from "./HangingPans";
 import MeshyProp from "./MeshyProp";
+import RodinProp from "./RodinProp";
 import { useTexture } from "@react-three/drei";
 import { PMREMGenerator } from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
@@ -846,6 +847,13 @@ export default function KitchenScene() {
           <PropBoundary>
             <Suspense fallback={null}>
               <Cloche />
+            </Suspense>
+          </PropBoundary>
+          {/* tonight's signature under no cloche: the Wellington display
+              plate on the pass, the dish the whole residency is about */}
+          <PropBoundary fallback={null}>
+            <Suspense fallback={null}>
+              <RodinProp url={modelUrl("wellington.glb")} size={0.34} position={[1.85, 1.15, PASS_Z]} rotation={0.5} />
             </Suspense>
           </PropBoundary>
           {/* Meshy prop batch — sill + pass (see docs/meshy-pipeline.md) */}

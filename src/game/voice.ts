@@ -171,6 +171,12 @@ export function speakChorus(line: string, over: boolean) {
   say(clean, { pitch: 0.8 + Math.random() * 0.5, rate: 1.15, seed: Math.floor(Math.random() * 8) });
 }
 
+/** One scripted line in a cook's voice — hinge moments only (first plate,
+ *  house rule), never the running commentary. Best-effort like the rest. */
+export function speakLine(text: string, seed = 1) {
+  say(text.slice(0, 140), { pitch: 0.9, rate: 1.0, seed });
+}
+
 let reviewTimer: number | null = null;
 
 /** The review read-out: a beat after the sting, then stars and the quotable

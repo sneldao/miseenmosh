@@ -10,7 +10,7 @@
  *  is one draw each), flame/shimmer emissive-only — zero dynamic lights,
  *  no per-frame allocation, reduced-motion suppresses every animation. */
 
-import { useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { CanvasTexture, Group, Mesh, MeshStandardMaterial, SRGBColorSpace } from "three";
 import { useGame } from "../../game/state";
@@ -18,6 +18,9 @@ import { sfx } from "../../game/sound";
 import { COPPER, INK, LINE_SHIFT, MUSTARD, PETROL, signTexture, useReducedMotion } from "../artDirection";
 import GrillLine from "./GrillLine";
 import SteamField, { STEAM } from "./Steam";
+import RodinProp from "../RodinProp";
+import PropBoundary from "../PropBoundary";
+import { modelUrl } from "../modelUrl";
 import StaticMerge from "../StaticMerge";
 
 const STEEL = "#8f979c";
@@ -248,6 +251,15 @@ function WashUp() {
         <meshStandardMaterial color="#2c4a50" roughness={0.08} metalness={0.4} transparent opacity={0.35} depthWrite={false} />
       </mesh>
       </StaticMerge>
+      {/* the porter's backlog: two hauled-in bus tubs stacked on the floor
+          beside the sink table, waiting their turn. Real Rodin geometry —
+          the procedural rack tubs below stay, these are the dirty arrivals. */}
+      <PropBoundary fallback={null}>
+        <Suspense fallback={null}>
+          <RodinProp url={modelUrl("bustub.glb")} size={0.5} position={[1.0, 0, 0.35]} rotation={0.25} />
+          <RodinProp url={modelUrl("bustub.glb")} size={0.5} position={[1.0, 0.21, 0.35]} rotation={-0.12} />
+        </Suspense>
+      </PropBoundary>
     </group>
   );
 }

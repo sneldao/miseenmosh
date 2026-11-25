@@ -13,6 +13,7 @@ vi.mock("./sound", () => ({
 }));
 vi.mock("./voice", () => ({
   speakChorus: vi.fn(),
+  speakLine: vi.fn(),
   speakReview: vi.fn(),
 }));
 vi.mock("./og", () => ({
@@ -591,6 +592,8 @@ describe("night-1 opening", () => {
   const enterFromTitle = (options?: { fresh?: boolean; prep?: boolean }) => {
     useGame.setState({ phase: "title" } satisfies Partial<State>);
     useGame.getState().enterResidency(options);
+    // night 1 now stages a briefing first — the tests drive past it
+    if (useGame.getState().phase === "briefing") useGame.getState().startService();
     return useGame.getState();
   };
 
@@ -604,14 +607,74 @@ describe("night-1 opening", () => {
     expect(useGame.getState().openingStep).toBe("judge");
   };
 
-  it("enterResidency from title goes straight to service with one ready plate", () => {
-    const s = enterFromTitle();
-    expect(s.phase).toBe("service");
-    expect(s.openingStep).toBe("serve");
-    expect(s.firstPerson).toBe(false);
-    expect(s.tickets).toHaveLength(1);
-    expect(s.tickets[0]).toMatchObject({ state: "pass", quality: 88, dish: "Beef Wellington" });
-    expect(s.feed.some((f) => f.text === "Service, chef." && f.who === "PETRA")).toBe(true);
+  it("enterResidency from title lands in the night-1 briefing; startService opens with one ready plate", () => {
+    useGame.setState({ phase: "title" } satisfies Partial<State>);
+    useGame.getState().enterResidency();
+    const s = useGame.getState();
+    expect(s.phase).toBe("briefing");
+    expect(s.career.night).toBe(1);
+    expect(s.openingStep).toBeNull();
+    useGame.getState().startService();
+    const t = useGame.getState();
+    expect(t.phase).toBe("service");
+    expect(t.openingStep).toBe("serve");
+    expect(t.firstPerson).toBe(false);
+    expect(t.tickets).toHaveLength(1);
+    expect(t.tickets[0]).toMatchObject({ state: "pass", quality: 88, dish: "Beef Wellington" });
+    expect(t.feed.some((f) => f.text === "Service, chef. First plate is honest." && f.who === "PETRA")).toBe(true);
+  });
+
+  it("prep requests the kitchen book instead of skipping the briefing", async () => {
+    const mod = await import("./state");
+    useGame.setState({ phase: "title" } satisfies Partial<State>);
+    useGame.getState().enterResidency({ prep: true });
+    const s = useGame.getState();
+    expect(s.phase).toBe("briefing");
+    expect(mod.consumeBriefingBookRequest()).toBe(true);
+    expect(mod.consumeBriefingBookRequest()).toBe(false);
+  });
+
+  it("night-1 doors stay shut until a house rule is chosen", async () => {
+    const mod = await import("./state");
+    expect(mod.n1NeedsHouseRule(useGame.getState().career)).toBe(true);
+    useGame.getState().chooseMutator("no_bin");
+    expect(mod.n1NeedsHouseRule(useGame.getState().career)).toBe(false);
+  });
+
+  it("the opening stages Petra's chyrons from inspect to the inspector line", () => {
+    enterFromTitle();
+    useGame.getState().startService();
+    useGame.getState().judge("serve");
+    useGame.getState().plateToPass(useGame.getState().tickets[0].id);
+    useGame.getState().tick(120);
+    {
+      const g = useGame.getState();
+      expect(g.openingStep).toBe("inspect");
+      expect(g.feed.some((f) => f.text === "Second one — turn it. Look before you judge." && f.who === "PETRA")).toBe(true);
+      g.setInspecting(true);
+      g.turnPlate(Math.PI / 4);
+      g.acknowledgeOpeningDefect();
+    }
+    useGame.getState().judge("serve");
+    const s = useGame.getState();
+    expect(s.openingStep).toBeNull();
+    expect(s.feed.some((f) => f.text === "Somewhere out there is the inspector. Feed them before they write." && f.who === "THE ROOM")).toBe(true);
+  });
+
+  it("the family meal records its choice for the morning", async () => {
+    useGame.setState({ phase: "title" } satisfies Partial<State>);
+    useGame.getState().enterResidency();
+    useGame.getState().meal(1);
+    const meal = useGame.getState().career.lastMeal;
+    expect(meal).toMatchObject({ night: 1, choice: 1 });
+    expect(typeof meal?.lowName).toBe("string");
+  });
+
+  it("opening the N1 doors banks the intro for veterans", async () => {
+    const mod = await import("./state");
+    expect(mod.introSeen()).toBe(false);
+    enterFromTitle();
+    expect(mod.introSeen()).toBe(true);
   });
 
   it("a newer-version save still blocks entry and stays untouched", () => {
@@ -627,6 +690,7 @@ describe("night-1 opening", () => {
 
   it("calling enterResidency while already in service does not reset the run", () => {
     enterFromTitle();
+    useGame.getState().startService();
     const before = useGame.getState();
     useGame.getState().judge("serve");
     const servedEvents = useGame.getState().events;
@@ -643,14 +707,18 @@ describe("night-1 opening", () => {
   it("a legacy night-2 save enters briefing with no opening step", () => {
     const cur = useGame.getState();
     storage.set("mem-career", JSON.stringify({ career: { ...cur.career, night: 2, cash: 80 }, cooks: cur.cooks }));
-    const s = enterFromTitle();
+    useGame.setState({ phase: "title" } satisfies Partial<State>);
+    useGame.getState().enterResidency();
+    const s = useGame.getState();
     expect(s.phase).toBe("briefing");
     expect(s.career.night).toBe(2);
     expect(s.openingStep).toBeNull();
   });
 
   it("explicit prep on night 1 enters briefing instead of service", () => {
-    const s = enterFromTitle({ prep: true });
+    useGame.setState({ phase: "title" } satisfies Partial<State>);
+    useGame.getState().enterResidency({ prep: true });
+    const s = useGame.getState();
     expect(s.phase).toBe("briefing");
     expect(s.openingStep).toBeNull();
   });
@@ -837,6 +905,219 @@ describe("night-1 opening", () => {
   });
 });
 
+describe("walking the line (stance)", () => {
+  let useGame: Game;
+  beforeEach(async () => {
+    storage.clear();
+    useGame = await freshGame();
+    useGame.getState().resetCareer();
+  });
+
+  const toNight2Service = () => {
+    useGame.setState({ phase: "title" } satisfies Partial<State>);
+    useGame.getState().enterResidency();
+    if (useGame.getState().phase === "briefing") useGame.getState().startService();
+    useGame.setState({
+      career: { ...useGame.getState().career, night: 2 },
+      // the opening tutorial is over — the line is walkable
+      openingStep: null,
+    } satisfies Partial<State>);
+    return useGame.getState();
+  };
+
+  it("night 1 holds the chef at the pass", () => {
+    useGame.setState({ phase: "title" } satisfies Partial<State>);
+    useGame.getState().enterResidency();
+    if (useGame.getState().phase === "briefing") useGame.getState().startService();
+    // past the tutorial plates: night 1 service proper still holds the pass
+    useGame.setState({ openingStep: null } satisfies Partial<State>);
+    useGame.getState().setStance("sauce");
+    expect(useGame.getState().stance).toBe("pass");
+    expect(useGame.getState().feed.at(-1)?.text).toContain("From night 2");
+  });
+
+  it("walks sinks ↔ sauce ↔ pass ↔ room and back", () => {
+    toNight2Service();
+    const g = () => useGame.getState();
+    g().setStance("sauce");
+    expect(g().stance).toBe("sauce");
+    expect(g().feed.at(-1)).toMatchObject({ text: "On the pan. The line leans in." });
+    g().stepStance(-1);
+    expect(g().stance).toBe("sinks");
+    expect(g().feed.at(-1)).toMatchObject({ who: "THE PORTER" });
+    g().stepStance(-1); // clamped at the pot-wash end
+    expect(g().stance).toBe("sinks");
+    g().stepStance(1);
+    expect(g().stance).toBe("sauce");
+    g().stepStance(1);
+    expect(g().stance).toBe("pass");
+    expect(g().feed.at(-1)).toMatchObject({ who: "THE PASS" });
+    g().stepStance(1);
+    expect(g().stance).toBe("room");
+    expect(g().feed.at(-1)).toMatchObject({ who: "THE REGULARS" });
+    g().stepStance(1); // clamped at the door
+    expect(g().stance).toBe("room");
+  });
+
+  it("pass verbs refuse off the pass and name the way back", () => {
+    toNight2Service();
+    useGame.setState({
+      tickets: [{
+        id: 7, dish: "Beef Wellington", station: 0, table: 10, state: "pass",
+        age: 1, plateAt: 0, plateDur: 1, byChef: false,
+        quality: 80, verdict: null, sear: null, sauce: null,
+      }],
+    } satisfies Partial<State>);
+    useGame.getState().setStance("sauce");
+    const served = useGame.getState().served;
+    useGame.getState().judge("serve");
+    expect(useGame.getState().served).toBe(served);
+    expect(useGame.getState().feed.at(-1)?.text).toContain("Press 0");
+    useGame.getState().collectPlate(7);
+    useGame.getState().plateToPass(7);
+    useGame.getState().firePlate(7);
+    useGame.getState().runTable();
+    expect(useGame.getState().served).toBe(served);
+    expect(useGame.getState().tickets[0].state).toBe("pass");
+    // home again: the same judgment lands
+    useGame.getState().setStance("pass");
+    useGame.getState().judge("serve");
+    expect(useGame.getState().served).toBe(served + 1);
+  });
+
+  it("a fire drags the chef home from the room", () => {
+    toNight2Service();
+    const cooks = useGame.getState().cooks.map((c) =>
+      c.station === 0 ? { ...c, overloadT: 7.9 } : c
+    );
+    const plating = (id: number) => ({
+      id, dish: "Beef Wellington", station: 0, table: 10, state: "plating" as const,
+      age: 1, plateAt: 100, plateDur: 60, byChef: false,
+      quality: -1, verdict: null, sear: null, sauce: null,
+    });
+    useGame.setState({
+      serviceTime: 10, cooks,
+      tickets: [plating(1), plating(2), plating(3)],
+    } satisfies Partial<State>);
+    useGame.getState().setStance("room");
+    expect(useGame.getState().stance).toBe("room");
+    useGame.getState().tick(0.5);
+    expect(useGame.getState().cooks[0].burning).toBe(true);
+    expect(useGame.getState().stance).toBe("pass");
+    expect(useGame.getState().feed.some((f) => f.text === "Smoke — back to the pass.")).toBe(true);
+  });
+
+  it("the walk is stamped for the morning", () => {
+    toNight2Service();
+    useGame.getState().setStance("sauce");
+    useGame.getState().setStance("room");
+    expect(useGame.getState().career.lastWalk).toEqual({ night: 2, stops: ["sauce", "room"] });
+    useGame.getState().setStance("pass"); // coming home is not a stop
+    expect(useGame.getState().career.lastWalk).toEqual({ night: 2, stops: ["sauce", "room"] });
+  });
+
+  it("at the sauce station the whisk is twice as fast", () => {
+    toNight2Service();
+    useGame.setState({
+      tickets: [{
+        id: 7, dish: "Lamb sauce (missing)", station: 1, table: 10, state: "pass",
+        age: 1, plateAt: 0, plateDur: 1, byChef: false,
+        quality: 40, verdict: null, sear: null, sauce: null,
+        condition: conditionFromCooking("Lamb sauce (missing)", 88, { sauce: "split" }),
+      }],
+    } satisfies Partial<State>);
+    useGame.getState().correctPlate();
+    const atPass = useGame.getState().correction;
+    expect(atPass!.endsAt - atPass!.startedAt).toBeCloseTo(2.4);
+    useGame.setState({ correction: null } satisfies Partial<State>);
+    useGame.getState().setStance("sauce");
+    useGame.getState().correctPlate();
+    const atSauce = useGame.getState().correction;
+    expect(atSauce!.endsAt - atSauce!.startedAt).toBeCloseTo(1.2);
+    expect(useGame.getState().feed.some((f) => f.text === "Your hands on the whisk — twice as fast.")).toBe(true);
+  });
+
+  it("arriving at the sauce mid-split buys the pan four seconds", () => {
+    toNight2Service();
+    useGame.setState({
+      tickets: [{
+        id: 9, dish: "Lamb sauce (missing)", station: 1, table: 10, state: "plating",
+        age: 1, plateAt: 100, plateDur: 60, byChef: false,
+        quality: -1, verdict: null, sear: null, sauce: null,
+      }],
+      sauce: { ticketId: 9, until: 20 },
+    } satisfies Partial<State>);
+    useGame.getState().setStance("sauce");
+    expect(useGame.getState().sauce).toMatchObject({ ticketId: 9, until: 24 });
+    expect(useGame.getState().feed.some((f) => f.text === "Four more seconds — you're on the pan.")).toBe(true);
+  });
+
+  it("at the sinks overload accrues half as fast", () => {
+    toNight2Service();
+    const plating = (id: number) => ({
+      id, dish: "Beef Wellington", station: 0, table: 10, state: "plating" as const,
+      age: 1, plateAt: 100, plateDur: 60, byChef: false,
+      quality: -1, verdict: null, sear: null, sauce: null,
+    });
+    const cooks = () => useGame.getState().cooks.map((c) =>
+      c.station === 0 ? { ...c, overloadT: 0, smoked: true } : c
+    );
+    useGame.setState({ serviceTime: 10, cooks: cooks(), tickets: [plating(1), plating(2), plating(3)] } satisfies Partial<State>);
+    useGame.getState().tick(2);
+    const atPass = useGame.getState().cooks[0].overloadT;
+    expect(atPass).toBeCloseTo(2);
+    useGame.setState({ serviceTime: 10, cooks: cooks() } satisfies Partial<State>);
+    useGame.getState().setStance("sinks");
+    useGame.getState().tick(2);
+    expect(useGame.getState().cooks[0].overloadT).toBeCloseTo(1);
+  });
+
+  it("champagne carried out there lands harder", () => {
+    const guest = {
+      id: 1, kind: "regulars" as const, table: 10, isCritic: false,
+      tells: 0, tellAt: -1, tellClock: 40, mercy: 0, tellKind: null,
+    };
+    const rail = (id: number) => ({
+      id, dish: "Beef Wellington", station: 0, table: 10, state: "rail" as const,
+      age: 20, plateAt: 0, plateDur: 0, byChef: false,
+      quality: -1, verdict: null, sear: null, sauce: null,
+    });
+    toNight2Service();
+    useGame.setState({ serviceTime: 10, guests: [{ ...guest }], tickets: [rail(1), rail(2)] } satisfies Partial<State>);
+    useGame.getState().compTable();
+    expect(useGame.getState().tickets[0].age).toBe(10);
+    expect(useGame.getState().guests[0].tellClock).toBe(60);
+    // second night out, from your hands
+    toNight2Service();
+    useGame.setState({ serviceTime: 10, guests: [{ ...guest }], tickets: [rail(1), rail(2)] } satisfies Partial<State>);
+    useGame.getState().setStance("room");
+    useGame.getState().compTable();
+    expect(useGame.getState().tickets[0].age).toBe(5);
+    expect(useGame.getState().guests[0].tellClock).toBe(70);
+    expect(useGame.getState().feed.some((f) => f.text.includes("from your hands"))).toBe(true);
+  });
+
+  it("sauce and sinks stances face the flames — no recall", () => {
+    toNight2Service();
+    const cooks = useGame.getState().cooks.map((c) =>
+      c.station === 0 ? { ...c, overloadT: 7.9 } : c
+    );
+    const plating = (id: number) => ({
+      id, dish: "Beef Wellington", station: 0, table: 10, state: "plating" as const,
+      age: 1, plateAt: 100, plateDur: 60, byChef: false,
+      quality: -1, verdict: null, sear: null, sauce: null,
+    });
+    useGame.setState({
+      serviceTime: 10, cooks,
+      tickets: [plating(1), plating(2), plating(3)],
+    } satisfies Partial<State>);
+    useGame.getState().setStance("sauce");
+    useGame.getState().tick(0.5);
+    expect(useGame.getState().cooks[0].burning).toBe(true);
+    expect(useGame.getState().stance).toBe("sauce");
+  });
+});
+
 describe("controls glossary modal", () => {
   let useGame: Game;
   beforeEach(async () => {
@@ -848,6 +1129,7 @@ describe("controls glossary modal", () => {
   it("opening mid-cooking: glossary pauses the lesson, nothing passes through, close resumes", () => {
     useGame.setState({ phase: "title" } satisfies Partial<State>);
     useGame.getState().enterResidency();
+    useGame.getState().startService();
     useGame.getState().judge("serve");
     useGame.getState().plateToPass(useGame.getState().tickets[0].id);
     expect(useGame.getState().openingStep).toBe("judge");
@@ -1212,6 +1494,7 @@ describe("flagship station and recipe flow", () => {
   it("H: the second teaching plate opens a real, authored rush", () => {
     useGame.setState({ phase: "title" } satisfies Partial<State>);
     useGame.getState().enterResidency();
+    useGame.getState().startService();
     expect(useGame.getState().openingStep).toBe("serve");
     useGame.getState().judge("serve");
     useGame.getState().plateToPass(useGame.getState().tickets[0].id);

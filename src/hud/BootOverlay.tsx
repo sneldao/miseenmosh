@@ -2,13 +2,9 @@ import { useEffect } from "react";
 import { useProgress } from "@react-three/drei";
 import { useGame } from "../game/state";
 
-const LINES = [
-  "warming the room",
-  "sharpening knives",
-  "seating tables",
-  "tempering chocolate",
-  "waking the brigade",
-];
+import { INTRO } from "../game/introCopy";
+
+const LINES: readonly string[] = INTRO.bootLines;
 
 /** Thin top progress bar + staged copy while 3D streams in.
  *  Only visible before the player commits — after that, props

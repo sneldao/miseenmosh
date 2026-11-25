@@ -1683,3 +1683,45 @@ Live smoke: Chrome opened the public page, Play now mounted the iframe, the
 title screen rendered, and a trusted TAKE THE PASS click reached the first
 `SERVE → TABLE 12` prompt. Browser session closed afterward. Nobody has yet
 listened to the deployed audio mix or completed an unfamiliar-player run.
+
+## Fidelity + motion wave (25 Nov)
+
+Rodin Gen-2.5-Low throughout (no Meshy key in this environment; Low's
+purpose-built low-poly output fit the budget better anyway). All gens
+pruned + webp-512 + simplified via the existing gltf-transform chain;
+raws stay gitignored in `assets/rodin/`. New batch drivers:
+`scripts/rodin/batch-props.mjs` (statics) and `scripts/rodin/batch-ux-cast.mjs`
+(crew gens + guest re-rigs).
+
+Shipped, verified in-file (no WebGL on this machine — human eyeball still
+wanted in a real browser for plating angle and crossfade staging):
+
+- Simmer hero (zero MB): `SauceStation.tsx` gains a `SimmerDisc` — fragment-level
+  bubble speckle + edge ring + highlight drift injected via onBeforeCompile so PBR
+  lighting is untouched. `uSimmer` rides the same working/hot level as the steam.
+  CircleGeometry has no interior verts, so vertex displacement was rejected.
+- Sink-bay dressing (498 KB): two generated bus tubs floor-stacked beside the sink
+  table (`bustub.glb`, new `RodinProp.tsx` which keeps baked PBR — MeshyProp's
+  grade tint would trash the maps). Procedural rack tubs stay.
+- Table settings (401 KB): one generated cover instanced on all four dining
+  tables (`tablesetting.glb`, lay-flat orientation math in `RodinProp`), replacing
+  the flat circle + dark stub. Per-table yaw so the row doesn't read stamped.
+- Hero Wellington (1.87 MB): signature display plate on the pass next to the
+  cloche. `FoodModel` correctly stays per-plate (dish/quality/condition variants),
+  so the hero lives beside the working plates, not instead of them.
+- Motion pack (credits + ~0.2 MB): re-rigged guest-c/d/e + waiter from existing
+  raws with expanded stock-clip sets (all clip names verified in output JSON).
+  The couple's fight/made-up beats now crossfade sad/warm clips read off their
+  own Table-N feed lines; the waiter's serve dwell plays happy-idle.
+
+Cut on cost grounds, raws parked (range/produce/bread are single-primitive
+500k-tri displacement soups — the simplifier bottoms out regardless of ratio,
+so 2.4/3.6/4.2 MB for occluded/dressing roles failed cost-to-attention).
+The three rigged background-crew bodies verified clean but were parked as
+future flagship-venue cast: `BackgroundCrew.tsx` is a measured single-draw
+merged-vertex system with coprime cadences, and skinned GLBs would cost draws,
+megabytes, and the motion design.
+
+Verification: `tsc` clean, `npm test` 208/208, `npm run build` clean,
+`dist/` 27 → 29 MB (50 MB fence). New GLBs preloaded on BEGIN RESIDENCY and
+wrapped in `PropBoundary` + `Suspense fallback=null` per the Cloche pattern.

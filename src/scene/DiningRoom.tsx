@@ -1,9 +1,11 @@
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGame } from "../game/state";
 import { useReducedMotion } from "./artDirection";
 import { Group, Mesh, MeshStandardMaterial } from "three";
 import CharacterGLB from "./CharacterGLB";
+import RodinProp from "./RodinProp";
+import PropBoundary from "./PropBoundary";
 import { modelUrl } from "./modelUrl";
 import StaticMerge from "./StaticMerge";
 
@@ -338,15 +340,13 @@ function Guest({
           <meshStandardMaterial color="#7a2a1a" roughness={0.9} />
         </mesh>
       )}
-      {/* plate + glass, read as table setting at a glance */}
-      <mesh position={[-0.14, 0.828, 0.66]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.1, 16]} />
-        <meshStandardMaterial color="#efe9dd" roughness={0.5} />
-      </mesh>
-      <mesh position={[-0.3, 0.87, 0.5]}>
-        <cylinderGeometry args={[0.028, 0.02, 0.1, 8]} />
-        <meshStandardMaterial color="#3a1a20" roughness={0.3} metalness={0.1} />
-      </mesh>
+      {/* the setting: a real generated cover — plate, cutlery, bottle —
+          laid on the cloth where the flat circle + dark stub used to be */}
+      <PropBoundary fallback={null}>
+        <Suspense fallback={null}>
+          <RodinProp url={modelUrl("tablesetting.glb")} size={0.55} position={[0, 0.825, 0.62]} rotation={id * 1.7} flat />
+        </Suspense>
+      </PropBoundary>
     </group>
   );
 }
@@ -413,7 +413,7 @@ function Waiter() {
           replaces only the capsule body. */}
       <CharacterGLB
         url={modelUrl("characters/waiter.glb")}
-        clip={moving ? "human_000089" : "human_000090"}
+        clip={moving ? "human_000089" : "human_000025"}
         fade={0.35}
         position={[0, 0, 0]}
         rotation={[0, 0, 0]}
@@ -504,15 +504,33 @@ function FarWall({ venue = 0 }: { venue?: number }) {
  *  (restless jiggle, nervous foot, dejected slump — whatever the cast sheet
  *  picked for them). Reads the same guest state the capsule body uses. */
 function GuestGLB({
-  id, file, base, tell, ...props
-}: { id: number; file: string; base: string; tell: string } & Omit<React.ComponentProps<typeof CharacterGLB>, "url" | "clip">) {
+  id, file, base, tell, fight, makeup, ...props
+}: { id: number; file: string; base: string; tell: string; fight?: string; makeup?: string } & Omit<React.ComponentProps<typeof CharacterGLB>, "url" | "clip">) {
   const guest = useGame((s) => s.guests.find((g) => g.id === id));
+  const feed = useGame((s) => s.feed);
   const telling = !!guest && guest.tellAt >= 0
     && useGame.getState().serviceTime - guest.tellAt < 3.5;
+  // the couple's arc, read off their own beat lines like the capsule body
+  // does: a fight pulls the sad clip, making up pulls the warm one
+  let clip = telling ? tell : base;
+  if (telling && guest && (fight || makeup)) {
+    for (let i = feed.length - 1; i >= 0; i--) {
+      const f = feed[i].text;
+      if (!f.startsWith(`Table ${guest.table} `)) continue;
+      if (f.includes("fighting") || f.includes("crying")) {
+        if (fight) clip = fight;
+        break;
+      }
+      if (f.includes("made up")) {
+        if (makeup) clip = makeup;
+        break;
+      }
+    }
+  }
   return (
     <CharacterGLB
       url={modelUrl(`characters/${file}.glb`)}
-      clip={telling ? tell : base}
+      clip={clip}
       fade={0.45}
       {...props}
     />
@@ -556,10 +574,10 @@ export default function DiningRoom() {
         <GuestGLB id={1} file="guest-b" base="human_000085" tell="human_000080" position={[0, 0.26, -0.3]} rotation={[0, Math.PI, 0]} scale={0.9} />
       </group>
       <group position={[0.45, 0, -6.05]} scale={1.1}>
-        <GuestGLB id={2} file="guest-c" base="human_000085" tell="human_000080" position={[0, 0.26, 0.06]} rotation={[0, Math.PI, 0]} scale={0.9} />
+        <GuestGLB id={2} file="guest-c" base="human_000085" tell="human_000080" fight="human_000050" makeup="human_000025" position={[0, 0.26, 0.06]} rotation={[0, Math.PI, 0]} scale={0.9} />
       </group>
       <group position={[2.65, 0, -7.9]} scale={0.86}>
-        <GuestGLB id={3} file="guest-d" base="human_000041" tell="human_000025" position={[0, 0.26, -0.34]} rotation={[0, Math.PI, 0]} scale={0.9} />
+        <GuestGLB id={3} file="guest-d" base="human_000041" tell="human_000025" fight="human_000050" makeup="human_000085" position={[0, 0.26, -0.34]} rotation={[0, Math.PI, 0]} scale={0.9} />
       </group>
       <group position={[4.35, 0, -6.6]} scale={1.05}>
         <GuestGLB id={4} file="guest-e" base="human_000085" tell="human_000050" position={[0, 0.26, -0.12]} rotation={[0, Math.PI, 0]} scale={0.9} />
