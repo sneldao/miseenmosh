@@ -70,14 +70,14 @@ The governing acceptance contract is in
 
 | ID | Correction | Closing evidence | Status |
 | --- | --- | --- | --- |
-| C1 | Stars start at zero and primarily reward culinary quality; food, hospitality and brigade axes are visible | Scoring tests prove identical food with different detection/noise produces identical culinary stars; review shows the axes | In progress |
-| C2 | Nine authored nights change a dilemma, condition and relationship payoff | Pure arc tests plus complete seeded playthroughs prove distinct conditions and reachable payoffs | Pending |
-| C3 | Send-back, table run, 86, bread and expedite have explicit costs | Action tests prove age/workload/selection/miss/cash/pressure consequences and guard rails | Pending |
-| C4 | Culinary condition and hospitality are independently recorded and reviewed | Critic and review tests distinguish good food/poor service from poor food/good service | Pending |
-| C5 | Opening requires reading a visible defect before judgment and discloses controls contextually | State tests block premature verdicts; browser observation shows inspection, consequence and reduced utility clutter | Pending |
-| C6 | New systems are frozen; retained systems must create a core decision, relationship memory or ending payoff | Every active service verb maps to a decision and consequence in `design.md`; no scope expansion in this pass | In progress |
-| C7 | Walkout facts survive until the morning character response | Service → morning test proves a walked-out cook speaks before the next-service reset | Pending |
-| C8 | Ending remembers authorship and relationships, not only stars and cash | Alternate seeded endings differ in signature contributor, honors, grudges, losses and cost | Pending |
+| C1 | Stars start at zero and primarily reward culinary quality; food, hospitality and brigade axes are visible | Scoring tests prove detection/noise/smashing do not mutate culinary stars; review card, copied review and narration expose food / hospitality / brigade axes | Verified locally |
+| C2 | Nine authored nights change a dilemma, condition and relationship payoff | Nine distinct contracts plus targeted rules/morning/ending tests prove the authored conditions and payoffs are reachable. **Re-scoped 25 Nov:** complete seeded nine-night playthroughs are deferred to M2; they are not claimed as jam-correction evidence | Implemented; partial evidence |
+| C3 | Send-back, table run, 86, bread and expedite have explicit costs | Action tests prove age preservation, remake workload, truthful-versus-free rejection, explicit peer commitment, affected-order-only 86, bread cash/cooldown/quality separation and expedite pressure/rail guards | Verified locally |
+| C4 | Culinary condition and hospitality are independently recorded and reviewed | Critic/review tests distinguish food from room care; coursing, requests, features and folklore never mutate `qualitySum` or plate-event quality | Verified locally |
+| C5 | Opening requires reading a visible defect before judgment and discloses controls contextually | State tests block premature verdicts and prove the inspect → turn → acknowledge → judge route. Browser observation of readability and reduced utility clutter remains open | Implemented; browser gate open |
+| C6 | New systems are frozen; retained systems must create a core decision, relationship memory or ending payoff | Active verbs are mapped in `design.md`; the correction pass is a scope freeze. This is a standing process gate, not a permanent achievement | In force |
+| C7 | Walkout facts survive until the morning character response | Integrated service → review → morning test proves a walked-out cook speaks before `startService` resets the nightly flag | Verified locally |
+| C8 | Ending remembers authorship and relationships, not only stars and cash | Alternate ending-input tests differ in signature contributor/credit, honors, grudges, scars, departures, rival/recovery/Table 101 memory and cost. **Re-scoped 25 Nov:** full alternate seeded playthroughs remain M2 evidence | Verified locally at ending-contract level |
 
 ### Scoring acceptance
 

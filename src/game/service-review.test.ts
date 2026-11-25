@@ -3,6 +3,7 @@ import { criticForNight, criticTell, criticAssessment, CRITICS } from "./critics
 import { appendServiceEvent, MAX_SERVICE_EVENTS, type ServiceEvent } from "./serviceEvents";
 import { buildServiceStory, nightAccounts, type ReviewFacts } from "./serviceReview";
 import { conditionFromCooking } from "./culinary";
+import { morningCards } from "./beats";
 import { speakChorus } from "./voice";
 
 vi.mock("./sound", () => ({
@@ -457,6 +458,37 @@ describe("store integration", () => {
     expect(c.cash).toBe(acc.nextCash);
     expect(c.lastReview?.night).toBe(1);
     expect(c.lastReview?.incident).toBe(st.review!.incident);
+  });
+
+  it("a service walkout speaks on the morning before the next-service reset", () => {
+    const cooks = useGame.getState().cooks.map((cook, i) => (
+      i === 0 ? { ...cook, morale: 0 } : { ...cook, morale: 90 }
+    ));
+    useGame.setState({
+      phase: "service",
+      paused: false,
+      serviceTime: 149.9,
+      guests: [],
+      tickets: [],
+      cooks,
+      career: { ...useGame.getState().career, night: 1, venue: 0, cash: 50, criticPersona: "gilliam" },
+    } satisfies Partial<State>);
+    useGame.getState().tick(0.2);
+    expect(useGame.getState().phase).toBe("review");
+    expect(useGame.getState().cooks[0]).toMatchObject({ name: "PETRA", walkedOut: true });
+
+    useGame.getState().continueNext();
+    const morning = useGame.getState();
+    expect(morning.phase).toBe("briefing");
+    expect(morning.cooks[0].walkedOut).toBe(true);
+    expect(morningCards(morning.career, morning.cooks).find((card) => card.cookId === 0)).toMatchObject({
+      speaker: "PETRA",
+      fact: "walkedOut",
+    });
+
+    useGame.getState().startService();
+    expect(useGame.getState().phase).toBe("service");
+    expect(useGame.getState().cooks[0].walkedOut).toBe(false);
   });
 
   it("folklore expiry and ticket miss on the closing tick reach the review", () => {

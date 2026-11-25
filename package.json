@@ -7,7 +7,6 @@
     "dev": "vite",
     "build": "tsc -b && vite build && cp opengame.json dist/",
     "preview": "vite preview",
-    "lint": "eslint .",
     "test": "vitest run"
   },
   "dependencies": {
