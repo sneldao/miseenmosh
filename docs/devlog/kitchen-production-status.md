@@ -1540,3 +1540,54 @@ butter on table 10", cooldown countdown on the button; NEXT TICKET fed
 "You wave the next order through" and the rail filled to six dockets.
 `src/game/verbs.test.ts`: 5 tests — target pick, cooldown, phase gates,
 printer pull, rail-cap guard. 131 tests green, tsc + build clean.
+
+## Dining-room cast: the Rodin pipeline, end to end (Nov 25)
+
+The fidelity complaint is closed for the dining room. All seven figures —
+five guests, the waiter, the second-row diner — are now Rodin-pipeline
+GLBs: generated (Gen-2.5-Low, text-to-3D from the cast prompt sheet),
+rigged (52-bone human skeleton, core skinning), decimated to web budget
+(0.95–3.2 MB each), and wired into `DiningRoom.tsx` through
+`CharacterGLB.tsx`. The capsule bodies stay mounted but hidden, keeping
+the hit proxies and per-guest state; only the visible body swapped.
+
+**The pipeline bug worth writing down:** the rigging API's stock-clip
+field is `animation_preset`, not `animations`. The wrong field name is
+silently ignored — HTTP 201, a successful rig, zero clips. Three rigs
+were lost to this before the docs check. `rig-character.mjs` is fixed,
+and `batch-cast.mjs` now guards the output (fails loudly if the GLB
+carries no animations).
+
+**Motion identity, not a chorus line.** Each guest plays a distinct
+base clip (restless jiggle, upright stillness, pointing gesture, slumped
+read), and `GuestGLB` crossfades to a per-guest reaction clip while a
+tell is live — the same `tellAt`/`tellKind` state the capsule bodies
+used. The waiter's waypoint path is unchanged but his body now flips
+between the walk clip and standing idle with an edge-detected crossfade
+(twice per 45s loop, not per frame); the tray arm and serve-dip logic
+are untouched.
+
+**Foundation work that rode along:**
+- `CharacterGLB` takes a runtime-switchable `clip` with proper
+  crossfade — the primitive every state-driven character needs.
+- `scripts/rodin/batch-cast.mjs`: generate → rig → clip-guard →
+  optimize → install in one command.
+- `scripts/rodin/animation-catalog-human.md`: the live 113-clip human
+  catalog, so clip picks reference real IDs.
+
+**Also landed (the C1–C8 critique-response work, committed from the
+24 Nov tree):** serviceScore (food/hospitality/brigade stars split with
+penalties), nightArc (nine-night contracts + recovery bonuses), ending
+(won/broke/legend), the authored night-1 opening (two teaching plates,
+inspect → turn → acknowledge before judging), and the score-breakdown
+review card. The 8 tests that still asserted the old opening flow were
+re-aligned — they now walk the inspect step and expect the authored
+overdone second plate (58, the lesson). One real bug fell out:
+`developWellington`'s same-night guard made revision impossible after
+the first pick; dropped (the contract is revisable within the night,
+blocked in service). Suite 182/182, build clean.
+
+**Still open:** visual QA of the new cast (seat heights/rotations are
+guest-A's numbers as defaults), then brigade re-rig through Rodin
+(Phase 2 — accepts any mesh, contract preserved), then bespoke gestures
+via text-to-motion for the moments the 113 stock clips can't cover.

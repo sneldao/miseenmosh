@@ -179,3 +179,33 @@ gitignored `.env.local`). Live smoke test on the real API:
 Conclusion: the full generate → rig → decimate → three.js pipeline is live
 today on the existing Creator plan. Business only adds higher Gen-2.5 tiers
 and the 5x/10x batch modes.
+
+## Update — 2026-11-25 (Phase 1 shipped)
+
+The dining-room cast is fully through the pipeline: guests A–E, the
+waiter and the second-row diner are rigged Rodin GLBs in the scene, each
+with a distinct base clip and a tell-driven reaction clip (GuestGLB
+crossfade). The waiter flips walk/idle on his waypoint state.
+
+Corrections to the API notes above, learned live:
+
+- The stock-clip multipart field is **`animation_preset`** (IDs like
+  `human_000025`), NOT `animations` — the wrong name is silently ignored
+  (HTTP 201, rigged GLB, zero clips). The README's `--clips` flag now
+  maps to the right field.
+- The download response carries `list`, not `result` (older docs said
+  result); both are accepted in the scripts.
+- `GET /api/v2/rigging_animations?category=human` returns 113 clips with
+  `animation_id`/`display_name`/`content_description` — dumped to
+  `scripts/rodin/animation-catalog-human.md`. Seated-relevant picks:
+  000085 (sitting, hands on legs), 000056 (sitting, jiggling legs),
+  000080 (sit shake foot), 000050 (sad idle), 000090 (standing idle),
+  000089 (walking), 000088 (elegant walk), 000041 (pointing forward).
+  No seated talking/toasting/eating clips — those need the Kimodo path.
+- `scripts/rodin/batch-cast.mjs` runs the whole chain per character with
+  a clip-guard that fails loudly on a clip-less output.
+- Web budget: `optimize --texture-compress webp --texture-size 512
+  --simplify-ratio 0.01` lands 44 MB rigged output at 1–3.2 MB.
+
+Phase 2 (brigade re-rig through the same endpoint) is next; Phase 3
+(bespoke gestures) is gated on the seated-clip gaps above.
