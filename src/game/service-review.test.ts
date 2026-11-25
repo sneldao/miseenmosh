@@ -692,7 +692,8 @@ describe("night-1 opening", () => {
     useGame.getState().tick(120); // crosses readiness however long the cook takes
     const t = useGame.getState().tickets;
     expect(t).toHaveLength(1);
-    expect(t[0]).toMatchObject({ state: "pass", quality: 78 });
+    // the second teaching plate is observably overdone — that's the lesson
+    expect(t[0]).toMatchObject({ state: "pass", quality: 58 });
     expect(useGame.getState().events.length).toBe(evCount);
     expect(useGame.getState().misses).toBe(0);
   });
@@ -702,6 +703,7 @@ describe("night-1 opening", () => {
     useGame.getState().judge("serve");
     useGame.getState().plateToPass(useGame.getState().tickets[0].id);
     useGame.getState().tick(120);
+    inspectReadyPlate();
     useGame.getState().judge("serve");
     const s = useGame.getState();
     expect(s.openingStep).toBeNull();
@@ -719,12 +721,14 @@ describe("night-1 opening", () => {
     useGame.getState().judge("serve");
     useGame.getState().plateToPass(useGame.getState().tickets[0].id);
     useGame.getState().tick(120);
+    inspectReadyPlate();
     useGame.getState().judge("sendback");
     let s = useGame.getState();
     expect(s.openingStep).toBe("call");
     expect(s.tickets[0].state).toBe("rail");
     useGame.getState().plateToPass(s.tickets[0].id);
     useGame.getState().tick(120);
+    inspectReadyPlate();
     useGame.getState().judge("serve");
     s = useGame.getState();
     expect(s.openingStep).toBeNull();
@@ -738,6 +742,7 @@ describe("night-1 opening", () => {
     useGame.getState().judge("serve");
     useGame.getState().plateToPass(useGame.getState().tickets[0].id);
     useGame.getState().tick(120);
+    inspectReadyPlate();
     useGame.getState().judge("smash");
     const s = useGame.getState();
     expect(s.openingStep).toBeNull();
@@ -783,6 +788,7 @@ describe("night-1 opening", () => {
     // finish the opening, then the same verbs land normally
     useGame.getState().plateToPass(s1.tickets[0].id);
     useGame.getState().tick(120);
+    inspectReadyPlate();
     useGame.getState().judge("serve");
     expect(useGame.getState().openingStep).toBeNull();
     useGame.getState().scream(1);
@@ -841,7 +847,8 @@ describe("controls glossary modal", () => {
     useGame.getState().tick(120);
     s = useGame.getState();
     expect(s.tickets[0].state).toBe("pass");
-    expect(s.tickets[0].quality).toBe(78);
+    // the authored second plate is overdone — that's the lesson
+    expect(s.tickets[0].quality).toBe(58);
   });
 
   it("an already-paused service stays paused after open/close", () => {
@@ -1177,6 +1184,14 @@ describe("flagship station and recipe flow", () => {
     useGame.getState().judge("serve");
     useGame.getState().plateToPass(useGame.getState().tickets[0].id);
     useGame.getState().tick(120);
+    {
+      // the opening's inspect step: look, turn, acknowledge, then judge
+      const g = useGame.getState();
+      expect(g.openingStep).toBe("inspect");
+      g.setInspecting(true);
+      g.turnPlate(Math.PI / 4);
+      g.acknowledgeOpeningDefect();
+    }
     useGame.getState().judge("serve");
     const s = useGame.getState();
     expect(s.openingStep).toBeNull();

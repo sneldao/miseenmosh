@@ -2976,7 +2976,8 @@ export const useGame = create<GameState>((set, get) => ({
     if (s.phase !== "briefing" || s.career.night < 2) return;
     if (finish !== "classic" && finish !== "herb") return;
     if (credit !== "shared" && credit !== "house") return;
-    if (s.career.recipeHistory?.some((entry) => entry.night === s.career.night)) return;
+    // revisable within the night (reviseWellington replaces the same-night
+    // entry); the phase guard above is what stops in-service revision.
     const stationCook = s.cooks.find((c) => c.station === 0 && !c.walkedOut);
     const contributor = credit === "shared" ? stationCook?.name ?? "THE HOUSE" : "THE HOUSE";
     const career: Career = {
