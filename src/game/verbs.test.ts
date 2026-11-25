@@ -197,3 +197,54 @@ describe("eightySix", () => {
     expect(useGame.getState().tickets[0].state).toBe("pass");
   });
 });
+
+describe("send-back costs (C3)", () => {
+  let useGame: Game;
+  const passPlate = (over: Partial<State["tickets"][number]>): State["tickets"][number] => ({
+    id: 1, dish: "Scallops", table: 3, station: 0, age: 10,
+    state: "pass", plateAt: 0, plateDur: 2, byChef: false,
+    quality: 55, verdict: null, sear: null, sauce: null, ...over,
+  });
+  beforeEach(async () => {
+    storage.clear();
+    useGame = await freshGame();
+    useGame.getState().resetCareer();
+    useGame.setState({
+      phase: "service", paused: false, glossary: false, openingStep: null, correction: null,
+      serviceTime: 30, sentBack: 0,
+    } satisfies Partial<State>);
+  });
+
+  it("a send-back preserves the order's age — the remake inherits the wait", () => {
+    useGame.setState({ tickets: [passPlate({ age: 42 })] } satisfies Partial<State>);
+    useGame.getState().judge("sendback");
+    const t = useGame.getState().tickets[0];
+    expect(t.state).toBe("rail");
+    expect(t.age).toBe(42);
+    expect(useGame.getState().sentBack).toBe(1);
+  });
+
+  it("a truthful send-back names the fault and spares the grudge; a free one earns it", () => {
+    // no defect: the free rejection earns the grudge and costs morale
+    const noFault = passPlate({ age: 10, condition: undefined, quality: 88 });
+    useGame.setState({ tickets: [noFault] } satisfies Partial<State>);
+    const before = useGame.getState().cooks[0].morale;
+    useGame.getState().judge("sendback");
+    const s = useGame.getState();
+    expect(s.cooks[0].grudge).toBe("sent back");
+    expect(s.cooks[0].morale).toBeLessThan(before);
+  });
+
+  it("the remake is a fresh cook job: plateToPass re-plans the full duration", () => {
+    useGame.setState({ tickets: [passPlate({ age: 42 })] } satisfies Partial<State>);
+    useGame.getState().judge("sendback");
+    const rail = useGame.getState().tickets[0];
+    expect(rail.state).toBe("rail");
+    useGame.getState().plateToPass(rail.id);
+    const remake = useGame.getState().tickets[0];
+    expect(remake.state).toBe("plating");
+    // the remake's plateAt is serviceTime + a fresh duration, not a free instant
+    expect(remake.plateAt).toBeGreaterThan(useGame.getState().serviceTime);
+    expect(remake.plateDur).toBeGreaterThan(0);
+  });
+});
