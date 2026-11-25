@@ -1660,3 +1660,8 @@ the deployed or locally served build.
 Post-pass verification: `npm test` 186/186, `npm run check:audio` 5/5,
 `npm run build` passing, `dist/` 26 MB uncompressed in 50 files. The remaining
 large-chunk warning is unchanged (about 1.5 MB minified / 429 KB gzip).
+Production preview smoke after the audio pass: the built `dist/` game booted in
+Chrome (`window.__booted === true`) and a trusted TAKE THE PASS click reached the
+first service prompt. The only reported prop warnings were the pre-existing
+missing `PortraitSocket` nodes on the five runtime bodies; no new runtime fault
+appeared. Browser and preview-server sessions were closed after the check.
