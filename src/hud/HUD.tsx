@@ -8,6 +8,7 @@ import { petraCoachingNote, reviewNarration } from "../game/serviceReview";
 import { nightContract, lowestMoraleCook } from "../game/nightArc";
 import { buildEnding } from "../game/ending";
 import { speakReview, voiceEnabled, setVoiceEnabled } from "../game/voice";
+import { sfx } from "../game/sound";
 import { preloadKitchenModels } from "../scene/preloadModels";
 import { INTRO } from "../game/introCopy";
 import stampServe from "../../assets/recraft/vector/stamp-serve.svg";
@@ -713,6 +714,9 @@ function NightOneBrief() {
   // rule + doors, with the meal kept inline so the buff isn't lost
   const [veteran] = useState(() => introSeen());
   const [beat, setBeat] = useState(() => (veteran ? 1 : 0));
+  // the night-one opener plays in three moments — the room, the brigade,
+  // the work — each one landing before the next is offered
+  const nextBeat = () => { sfx("bell"); setBeat((b) => Math.min(2, b + 1)); };
   // HOW IT WORKS (PREP) opens the book on arrival instead of skipping anything
   const [bookOpen, setBookOpen] = useState(() => consumeBriefingBookRequest());
   const [picked, setPicked] = useState<number | null>(null);
@@ -745,7 +749,7 @@ function NightOneBrief() {
       // a focused button/summary owns its activation — don't steal it
       if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
       e.preventDefault();
-      if (beat === 0) setBeat(1);
+      if (beat < 2) nextBeat();
       else if (!n1NeedsHouseRule(useGame.getState().career)) startService();
     };
     window.addEventListener("keydown", h);
@@ -764,6 +768,20 @@ function NightOneBrief() {
         </div>
         {beat === 0 && (
           <>
+            <div className="mhead">DOORS OPEN AT SEVEN. IT IS FIVE PAST.</div>
+            <div className="n1body">Three cooks came back. One rival wants your ticket rail. Somewhere in the room sits tonight's inspector, notebook closed, waiting.</div>
+            <div className="qbtns">
+              <button className="btn serve big" autoFocus onClick={nextBeat}>
+                MEET THE BRIGADE <span className="kbd">↵</span>
+              </button>
+              <button className="btn ghost" onClick={() => setBookOpen(true)}>
+                KITCHEN BOOK
+              </button>
+            </div>
+          </>
+        )}
+        {beat === 1 && (
+          <>
             <div className="mhead">{INTRO.beat1Head}</div>
             <div className="cast row qcast">
               {cooks.map((c) => (
@@ -781,7 +799,7 @@ function NightOneBrief() {
             </div>
             {FamilyMeal}
             <div className="qbtns">
-              <button className="btn serve big" autoFocus onClick={() => setBeat(1)}>
+              <button className="btn serve big" autoFocus onClick={nextBeat}>
                 TONIGHT →
               </button>
               <button className="btn ghost" onClick={() => setBookOpen(true)}>
@@ -790,9 +808,9 @@ function NightOneBrief() {
             </div>
           </>
         )}
-        {beat === 1 && (
+        {beat === 2 && (
           <>
-            <div className="n1body">{INTRO.beat2Body}</div>
+            <div className="mission">{INTRO.beat2Body}</div>
             <NightContractCard />
             {veteran && FamilyMeal}
             <div className="qmeal">
