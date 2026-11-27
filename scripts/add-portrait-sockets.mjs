@@ -19,6 +19,8 @@ const TARGETS = [
   "assets/meshy/anwar-pilot/runtime-anwar.glb",
   "assets/meshy/commis-pilot/runtime-commis.glb",
   "assets/meshy/porter-pilot/runtime-porter.glb",
+  // Petra's own in-service body — runtime-hold ships without the socket too
+  "assets/meshy/petra-pilot/runtime-hold.glb",
 ];
 
 await MeshoptDecoder.ready;
