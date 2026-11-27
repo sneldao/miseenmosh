@@ -37,7 +37,7 @@ gestures name Mara & June.**
    (`idleLoops.ts` / `makeIdleDrive`): neutral prep segments with phase
    offsets, tempo jitter and seam blends, three generated prep clips, and a
    strain flinch; `Ready` survives as the frozen fallback. Off-work beats fire
-   their own `sfx` calls from the loop. Motion is no longer *missing* between
+   their own `sfx` calls from the loop. Motion is no longer _missing_ between
    tickets — it is a budget question and a seam-quality question, both
    measured in the status doc.
 3. **Equipment is procedural on all three stations.**
@@ -67,7 +67,7 @@ gestures name Mara & June.**
    calls fire from the idle loops on their own beat times.
 8. **Pacing has a floor.** `SERVICE_LEN` 150 s with the same spawn ramp
    (`7.5 − serviceTime/25`), plus a no-empty guard in the tick: while more
-   than 40 s remain and fewer than two *work-bearing* tickets (rail or
+   than 40 s remain and fewer than two _work-bearing_ tickets (rail or
    plating) are live, `nextTicketIn` is clamped to 1.2 s. It guarantees work
    exists; it does not call the ticket — that stays the player's verb. Pinned
    by tests in `mood.test.ts`.
@@ -82,7 +82,7 @@ gestures name Mara & June.**
 
 **A. Idle content — the biggest lever, and the spec that keeps it honest.**
 
-*Phase A (free):* loop **neutral Work segments only** — Dimitri's stir,
+_Phase A (free):_ loop **neutral Work segments only** — Dimitri's stir,
 Anwar's whisk, Petra's turn/sear — never the present/taste/lift gestures.
 Three hard requirements beyond loop variety:
 
@@ -95,7 +95,7 @@ Three hard requirements beyond loop variety:
   plating.
 
 - **Signal preservation.** Players have learned "moving cook = my ticket
-  is cooking." Idle motion must read as *background work*: slightly hunched,
+  is cooking." Idle motion must read as _background work_: slightly hunched,
   slower tempo, facing the prop rather than the pass. Plating stays the
   full-speed full-clip event. If a blind viewer can't tell "cooking an
   order" from "doing prep," the spec failed — check it in QA.
@@ -105,7 +105,7 @@ Three hard requirements beyond loop variety:
   if its segment is periodic (stir, whisk — yes; taste-pause — no); check
   first/last-frame proximity and blend the seam if it pops.
 
-*Phase B (optional spend):* one true Motion Prime prep clip per cook
+_Phase B (optional spend):_ one true Motion Prime prep clip per cook
 (Petra: brush the grill / check the bone; Dimitri: taste the simmering
 pot; Anwar: tap ramekins / roll dough) — 30 cr against 15 remaining, only
 if the cap extends AND the free route proves insufficient.
@@ -121,16 +121,16 @@ texture + splash pan), crates, flour dust. All pooled, capped, authored
 paths, suppressed under reduced motion.
 
 **C. Pacing floor (Phase A, `state.ts`) — a no-empty guard, not a
-busyness generator.** When *work-bearing* tickets — **rail + plating
+busyness generator.** When _work-bearing_ tickets — **rail + plating
 only** — drop below 2 mid-service, `nextTicketIn` shrinks. `ready` and
 `pass` plates are already cooked and must not count (two plates idling on
 the counter with an empty rail is exactly the failure this exists to
 prevent). Excluded: `openingStep` (inviolate) and the finale (last 40 s).
-Framing matters: the floor spawns *pending* tickets — a `rail` ticket only
+Framing matters: the floor spawns _pending_ tickets — a `rail` ticket only
 becomes work when the player calls it (`rail→plating` stays gated by
 `plateToPass`; **do not auto-call, that steals the player's verb**). So
 the floor guarantees "there is always something to do" but it cannot make
-the kitchen *look* busy on its own. Visual busyness during the player's
+the kitchen _look_ busy on its own. Visual busyness during the player's
 decisions comes from Dev 1's idle loop and Dev 2's living equipment —
 this section is the anti-empty guard, not the anti-static fix. Second-
 order effect to watch in QA: more pending tickets feeds misses/walkouts —
@@ -181,14 +181,14 @@ morale/trauma/grudge).
   (sharp/tired/dangerous/feral) map in and get replaced — one language
   across HUD, body, barks (owner-visible copy change, see decisions).
 - **Expressed three ways:**
-  - *Body* — additive bone offsets (the mechanism gaze already uses):
+  - _Body_ — additive bone offsets (the mechanism gaze already uses):
     STRAINED slumps + faster breathing; ANGRY braces + faster work (time
     scale keyed to mood, not only `plateDur`); EDGE trembles + hand-on-hip
     idle; CALM gets full breathing. Reduced motion drops offsets.
     ANGRY vs EDGE must never blur at camera distance — braced-and-faster
     vs trembling-and-darting are different silhouettes; verify in the
     blind check.
-  - *Glyph* — small ink word **at the station top (y ≈ 2.3, above the
+  - _Glyph_ — small ink word **at the station top (y ≈ 2.3, above the
     cook, facing the pass)** — not on the head, so it decouples from
     Dev 1's motion (breathing/slump/tremble can't drift it) and reads at
     both camera distances. Rendered via the existing `signTexture` canvas
@@ -197,7 +197,7 @@ morale/trauma/grudge).
     `s.cooks[i].mood` — this closes the v4 ownership gap (the glyph was
     assigned to Dev 3, but its mount point lives in a Dev 1 or Dev 2
     file).
-  - *Bark gate* — existing `barkAt` pools get mood gating; no new text
+  - _Bark gate_ — existing `barkAt` pools get mood gating; no new text
     banks.
 - The HUD mood word remains the detail view; **the body is the gauge.**
 
@@ -372,12 +372,40 @@ master bus.
 
 ### Phase B — generated assets (separate job approvals)
 
-| Job | Tool | Cost | Gate |
-| --- | --- | --- | --- |
-| 3 true prep motion clips | Meshy Motion Prime | 30 cr | **Spent (23 Nov)** — Petra/Dimitri/Anwar prep clips live as third idle variants, 9/9 seam-clean |
-| walkout + flinch clips | Meshy Motion Prime | 20 cr | **Spent (23 Nov, second account)** — apron-rip walkout + strain-flinch baked into all three rigs; ledger total 50 cr |
-| 3–5 confessional stills | Recraft | ~10 cr each | Balance authorised — quote first |
-| Beat voice lines | ElevenLabs | unquoted | **Key-blocked** — needs credentials from owner |
+| Job                      | Tool               | Cost        | Gate                                                                                                                 |
+| ------------------------ | ------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| 3 true prep motion clips | Meshy Motion Prime | 30 cr       | **Spent (23 Nov)** — Petra/Dimitri/Anwar prep clips live as third idle variants, 9/9 seam-clean                      |
+| walkout + flinch clips   | Meshy Motion Prime | 20 cr       | **Spent (23 Nov, second account)** — apron-rip walkout + strain-flinch baked into all three rigs; ledger total 50 cr |
+| 3–5 confessional stills  | Recraft            | ~10 cr each | Balance authorised — quote first                                                                                     |
+| Beat voice lines         | ElevenLabs         | unquoted    | **Key-blocked** — needs credentials from owner                                                                       |
+
+### Tripo supplement note
+
+Tripo is a narrow supplement to the prop pipeline, never a replacement.
+The account balance was verified healthy in late Nov 2026 — re-check it at
+quote time, because the number goes stale. That does not change the
+generation rule above: every job still needs its own owner approval.
+
+Access stays private and offline: use `TRIPO_API_KEY` only in a local shell
+or a generation script. Ask the owner for the key (or create one in Tripo
+Console) — do not hunt through local config for it. Never prefix it with
+`VITE_`, never commit it, and never ship browser code that calls Tripo;
+generated GLBs must be baked into the bundle before deploy.
+
+Use Tripo only as a narrow supplement when Meshy is the wrong tool:
+
+- complex kitchen equipment or a hero prop that needs cleaner topology than
+  the current Meshy previews provide;
+- a rigged body/character experiment where Tripo rigging is materially
+  better than the existing route;
+- one pilot asset first, then batch only if the pilot survives the game's
+  re-material pass, scale normalization, offline packaging, and frame budget.
+
+Do **not** replace the Meshy prop pipeline wholesale. The untextured Meshy
+previews plus hand-tinted materials are part of the kitchen's art direction
+and the Z-Axis/sponsor evidence. Any Tripo GLB must be re-materialed into
+the same grade, checked into the bundle, and documented as a supplement —
+not implied to be Meshy output.
 
 ### Phase C — nine-night beat script
 
@@ -406,11 +434,11 @@ Each names its owner and what would actually close it.
    and netted **10 draws cheaper**; the instruments say it is cheap and moving.
    **None of that answers the note.** The only thing that closes it is that
    person playing one service and saying it again — in the same words or not.
-   Until then the hive is *measured* busy, not *reads* busy, and the difference
+   Until then the hive is _measured_ busy, not _reads_ busy, and the difference
    is the entire complaint.
 2. **Dining-row furniture — owner: Dev 2.** Five seated busts behind barely
    visible tables. Intervals and depths no longer form a grid, but the row needs
-   *furniture*, not more motion: a bar, a standing guest, a booth divider. This
+   _furniture_, not more motion: a bar, a standing guest, a booth divider. This
    is the plane the eye compares the pass against, so it does more for the
    perceived distance between us and the chefs than anything added behind them.
    Recorded here rather than edited into Dev 2's scope above, so their spec
