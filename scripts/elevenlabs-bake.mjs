@@ -91,7 +91,7 @@ for (const line of CHORUS) {
   const out = join(OUT, `${name}.mp3`);
   const inputs = files.flatMap((f) => ["-i", f.path]);
   const filters = files.map((f, i) => `[${i}:a]adelay=${i * 90}|${i * 90},volume=${line.gain ?? 1}[a${i}]`);
-  filters.push(`${files.map((_, i) => `[a${i}]`).join("")}amix=inputs=${files.length}:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11`);
+  filters.push(`${files.map((_, i) => `[a${i}]`).join("")}amix=inputs=${files.length}:normalize=0,loudnorm=I=-19:TP=-1.5:LRA=11`);
   execFileSync("ffmpeg", ["-y", ...inputs, "-filter_complex", filters.join(";"), "-c:a", "libmp3lame", "-q:a", "4", out], { stdio: "pipe" });
   console.log(`  → public/voice/${name}.mp3 (${files.map((f) => f.who).join("+")})`);
 }
@@ -103,7 +103,7 @@ for (const line of LINES) {
     console.log(`gen ${line.key}: "${line.text}"`);
     writeFileSync(path, await tts(line.text, "petra"));
   }
-  execFileSync("ffmpeg", ["-y", "-i", path, "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-c:a", "libmp3lame", "-q:a", "4", join(OUT, `${line.key}.mp3`)], { stdio: "pipe" });
+  execFileSync("ffmpeg", ["-y", "-i", path, "-af", "loudnorm=I=-19:TP=-1.5:LRA=11", "-c:a", "libmp3lame", "-q:a", "4", join(OUT, `${line.key}.mp3`)], { stdio: "pipe" });
   named[line.key] = `${line.key}.mp3`;
   console.log(`  → public/voice/${line.key}.mp3 (petra)`);
 }

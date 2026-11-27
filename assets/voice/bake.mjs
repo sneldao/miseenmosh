@@ -68,7 +68,7 @@ for (const line of LINES) {
   // ensemble: tiny start offsets make three voices read as a shouted chorus
   const inputs = wavs.flatMap((w, i) => ["-i", w.path]);
   const filters = wavs.map((w, i) => `[${i}:a]adelay=${i * 90}|${i * 90},volume=${line.gain ?? 1}[a${i}]`);
-  filters.push(`${wavs.map((_, i) => `[a${i}]`).join("")}amix=inputs=${wavs.length}:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11`);
+  filters.push(`${wavs.map((_, i) => `[a${i}]`).join("")}amix=inputs=${wavs.length}:normalize=0,loudnorm=I=-19:TP=-1.5:LRA=11`);
   execFileSync("ffmpeg", ["-y", ...inputs, "-filter_complex", filters.join(";"), "-c:a", "libmp3lame", "-q:a", "4", out], { stdio: "pipe" });
   console.log(`  → public/voice/chorus-${line.idx}.mp3 (${speakers.join("+")})`);
 }

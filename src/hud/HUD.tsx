@@ -1,8 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends, Cook, petraOpeningReply, consumeBriefingBookRequest, n1NeedsHouseRule, introSeen, Stance, STANCE_ORDER } from "../game/state";
+import {
+  useGame,
+  tierName,
+  BOARD,
+  Ticket,
+  VENUES,
+  loadLegends,
+  Cook,
+  petraOpeningReply,
+  consumeBriefingBookRequest,
+  n1NeedsHouseRule,
+  introSeen,
+  Stance,
+  STANCE_ORDER,
+} from "../game/state";
 import { deriveMood } from "../game/mood";
 import { morningCards } from "../game/beats";
-import { dishProfile, plateObservations, correctionNeeded, CORRECTION_LABEL, currentWellingtonRecipe, WELLINGTON_FINISHES, type RecipeFinish } from "../game/culinary";
+import {
+  dishProfile,
+  plateObservations,
+  correctionNeeded,
+  CORRECTION_LABEL,
+  currentWellingtonRecipe,
+  WELLINGTON_FINISHES,
+  type RecipeFinish,
+} from "../game/culinary";
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
 import { petraCoachingNote, reviewNarration } from "../game/serviceReview";
 import { nightContract, lowestMoraleCook } from "../game/nightArc";
@@ -25,8 +47,16 @@ import castFishmonger from "../../assets/recraft/cast-gilliam/fishmonger-512.web
 import castCommis from "../../assets/recraft/cast-gilliam/commis-512.webp";
 import marketSign from "../../assets/recraft/paper-cookery/market-sign-512.webp";
 
-const CAST_IMG: Record<string, string> = { PETRA: castPetra, DIMITRI: castDimitri, ANWAR: castAnwar };
-const FEUD_ART: Record<string, string> = { beefcakes: castBeefcakes, critic: castCritic, fishmonger: castFishmonger };
+const CAST_IMG: Record<string, string> = {
+  PETRA: castPetra,
+  DIMITRI: castDimitri,
+  ANWAR: castAnwar,
+};
+const FEUD_ART: Record<string, string> = {
+  beefcakes: castBeefcakes,
+  critic: castCritic,
+  fishmonger: castFishmonger,
+};
 const FEUD_ALT: Record<string, string> = {
   beefcakes: "BEEFCAKES — protein dealer",
   critic: "THE PRESS — hungry for the best",
@@ -46,12 +76,20 @@ const moodOf = (c: Cook) =>
  *  Reduced motion reads the number straight away. */
 function CountUp({ value }: { value: number }) {
   const [shown, setShown] = useState(() =>
-    typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? value : 0,
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+      ? value
+      : 0,
   );
   const raf = useRef(0);
   useEffect(() => {
-    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduced || value === 0) { setShown(value); return; }
+    const reduced = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduced || value === 0) {
+      setShown(value);
+      return;
+    }
     const t0 = performance.now();
     const dur = 700;
     const step = (t: number) => {
@@ -80,7 +118,8 @@ function useScreamCharge() {
     const down = (e: KeyboardEvent) => {
       if (e.key !== " " || e.repeat) return;
       const s = useGame.getState();
-      if (s.phase !== "service" || s.paused || s.openingStep || s.glossary) return;
+      if (s.phase !== "service" || s.paused || s.openingStep || s.glossary)
+        return;
       e.preventDefault();
       if (on.current) return;
       on.current = true;
@@ -93,7 +132,10 @@ function useScreamCharge() {
       on.current = false;
       cancelAnimationFrame(raf);
       const s = useGame.getState();
-      const p = Math.max(0.2, Math.min(1.4, (performance.now() - start.current) / 900));
+      const p = Math.max(
+        0.2,
+        Math.min(1.4, (performance.now() - start.current) / 900),
+      );
       setCharge(0);
       if (s.phase === "service" && !s.paused && !s.glossary) s.scream(p);
     };
@@ -131,7 +173,6 @@ function usePointerLocked() {
   return locked;
 }
 
-
 const STAMP_IMG: Record<string, string> = {
   SERVED: stampServe,
   "SENT BACK": stampBack,
@@ -143,7 +184,13 @@ const STATION_NAME = ["GRILL", "SAUTÉ", "PASTRY"];
 
 /** The held plate: physical evidence + the calls on it. No tier labels —
  *  observations come from the plate's actual condition. */
-function PassPanel({ plate, firstPerson }: { plate: Ticket; firstPerson: boolean }) {
+function PassPanel({
+  plate,
+  firstPerson,
+}: {
+  plate: Ticket;
+  firstPerson: boolean;
+}) {
   const judge = useGame((s) => s.judge);
   const runTable = useGame((s) => s.runTable);
   const correctPlate = useGame((s) => s.correctPlate);
@@ -153,19 +200,32 @@ function PassPanel({ plate, firstPerson }: { plate: Ticket; firstPerson: boolean
   const correction = useGame((s) => s.correction);
   const serviceTime = useGame((s) => s.serviceTime);
   const tickets = useGame((s) => s.tickets);
-  const peers = tickets.filter((t) => t.state === "ready" && t.table === plate.table).length;
+  const peers = tickets.filter(
+    (t) => t.state === "ready" && t.table === plate.table,
+  ).length;
   const correcting = correction?.ticketId === plate.id ? correction : null;
   const progress = correcting
-    ? Math.max(0, Math.min(1, (serviceTime - correcting.startedAt) / Math.max(0.01, correcting.endsAt - correcting.startedAt)))
+    ? Math.max(
+        0,
+        Math.min(
+          1,
+          (serviceTime - correcting.startedAt) /
+            Math.max(0.01, correcting.endsAt - correcting.startedAt),
+        ),
+      )
     : 0;
   const condition = plate.condition;
-  const observations = condition ? plateObservations(plate.dish, condition) : [];
+  const observations = condition
+    ? plateObservations(plate.dish, condition)
+    : [];
   const split = condition?.sauce === "split";
   const contributor = plate.recipeContributor;
   const finish = condition?.recipeFinish ?? plate.recipeFinish;
   const needed = condition ? correctionNeeded(plate.dish, condition) : null;
   return (
-    <div className={`pass-actions pass-panel${inspecting ? " inspecting" : ""}${firstPerson ? " fp" : ""}`}>
+    <div
+      className={`pass-actions pass-panel${inspecting ? " inspecting" : ""}${firstPerson ? " fp" : ""}`}
+    >
       <div className="pp-info">
         <div className="plate-note">
           {plate.dish}
@@ -177,22 +237,47 @@ function PassPanel({ plate, firstPerson }: { plate: Ticket; firstPerson: boolean
       {inspecting && (
         <div className="plate-inspect">
           {observations.slice(1).map((o) => (
-            <div key={o} className="plate-obs">{o}</div>
+            <div key={o} className="plate-obs">
+              {o}
+            </div>
           ))}
-          <div className="plate-std">House standard: {dishProfile(plate.dish).standard}</div>
-          <button className="btn ghost sm" onClick={() => turnPlate(Math.PI / 4)}>TURN</button>
+          <div className="plate-std">
+            House standard: {dishProfile(plate.dish).standard}
+          </div>
+          <button
+            className="btn ghost sm"
+            onClick={() => turnPlate(Math.PI / 4)}
+          >
+            TURN
+          </button>
         </div>
       )}
       <div className="plate-verbs">
         {peers > 0 && (
-          <button className="btn serve big" onClick={() => runTable(true)} disabled={!!correcting}>
+          <button
+            className="btn serve big"
+            onClick={() => runTable(true)}
+            disabled={!!correcting}
+          >
             COMMIT TABLE {plate.table} · {peers + 1} PLATES
           </button>
         )}
         {split && (
-          <button className="btn whisk" onClick={correctPlate} disabled={!!correcting}>
+          <button
+            className="btn whisk"
+            onClick={correctPlate}
+            disabled={!!correcting}
+          >
             {correcting ? (
-              <>WHISKING… <span className="corrbar"><span className="corrfill" style={{ width: `${progress * 100}%` }} /></span></>
+              <>
+                WHISKING…{" "}
+                <span className="corrbar">
+                  <span
+                    className="corrfill"
+                    style={{ width: `${progress * 100}%` }}
+                  />
+                </span>
+              </>
             ) : (
               "BRING SAUCE TOGETHER"
             )}
@@ -201,18 +286,30 @@ function PassPanel({ plate, firstPerson }: { plate: Ticket; firstPerson: boolean
         <button className="btn" onClick={() => setInspecting(!inspecting)}>
           {inspecting ? "CLOSE" : "INSPECT"} <span className="kbd">I</span>
         </button>
-        <button className="btn serve" onClick={() => judge("serve")} disabled={!!correcting}>
+        <button
+          className="btn serve"
+          onClick={() => judge("serve")}
+          disabled={!!correcting}
+        >
           SERVE <span className="kbd">S</span>
         </button>
         <button
           className="btn back"
           onClick={() => judge("sendback")}
           disabled={!!correcting}
-          title={needed ? `Names the fault: ${CORRECTION_LABEL[needed]}. The table keeps waiting; the remake must be cooked again.` : "Nothing wrong with it — the table keeps waiting and the kitchen will remember."}
+          title={
+            needed
+              ? `Names the fault: ${CORRECTION_LABEL[needed]}. The table keeps waiting; the remake must be cooked again.`
+              : "Nothing wrong with it — the table keeps waiting and the kitchen will remember."
+          }
         >
           SEND BACK <span className="kbd">B</span>
         </button>
-        <button className="btn smash" onClick={() => judge("smash")} disabled={!!correcting}>
+        <button
+          className="btn smash"
+          onClick={() => judge("smash")}
+          disabled={!!correcting}
+        >
           SMASH <span className="kbd">X</span>
         </button>
       </div>
@@ -235,21 +332,35 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
   const plating = t.state === "plating";
   const ready = t.state === "ready";
   // the sear: the last 30% of the cook glows gold — fire inside it (F or click)
-  const searFrac = plating && t.plateDur > 0
-    ? Math.max(0, Math.min(1, 1 - (t.plateAt - serviceTime) / t.plateDur))
-    : 0;
+  const searFrac =
+    plating && t.plateDur > 0
+      ? Math.max(0, Math.min(1, 1 - (t.plateAt - serviceTime) / t.plateDur))
+      : 0;
   const golden = searFrac >= 0.7;
   const myReq = request?.ticketId === t.id ? request : null;
   const splitting = plating && sauce?.ticketId === t.id;
   // capacity gates, same as the actions enforce
-  const stationBusy = t.state === "rail" && tickets.some(
-    (x) => x.station === t.station && (x.state === "plating" || x.state === "ready")
-  );
+  const stationBusy =
+    t.state === "rail" &&
+    tickets.some(
+      (x) =>
+        x.station === t.station &&
+        (x.state === "plating" || x.state === "ready"),
+    );
   const handsBusy = ready && tickets.some((x) => x.state === "pass");
-  const action = ready ? "COLLECT" : plating ? (golden ? "FIRE — SEAR" : "FIRE EARLY") : "CALL";
+  const action = ready
+    ? "COLLECT"
+    : plating
+      ? golden
+        ? "FIRE — SEAR"
+        : "FIRE EARLY"
+      : "CALL";
   const disabled = stationBusy || handsBusy;
   const cook = cooks.find((c) => c.station === t.station);
-  const temp = ready && t.condition?.temperature && dishProfile(t.dish).servedHot ? t.condition.temperature : null;
+  const temp =
+    ready && t.condition?.temperature && dishProfile(t.dish).servedHot
+      ? t.condition.temperature
+      : null;
   return (
     <button
       type="button"
@@ -270,12 +381,14 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
       <div className="dish">{t.dish}</div>
       {myReq && (
         <div className="modline">
-          {myReq.mod} T{myReq.table} · {myReq.mod === "FAST" ? "<30s" : "GOLDEN"}
+          {myReq.mod} T{myReq.table} ·{" "}
+          {myReq.mod === "FAST" ? "<30s" : "GOLDEN"}
         </div>
       )}
       <div className="trow">
         <span className="chip" style={{ background: STATION_COLOR[t.station] }}>
-          {STATION_NAME[t.station]}{cook ? ` · ${cook.name}` : ""}
+          {STATION_NAME[t.station]}
+          {cook ? ` · ${cook.name}` : ""}
         </span>
         <span className="tstate">
           {plating
@@ -292,7 +405,10 @@ function TicketCard({ t, hotkey }: { t: Ticket; hotkey?: number }) {
       {plating ? (
         <div className="searbar">
           <div className="sear-goldzone" />
-          <div className={`searfill${golden ? " gold" : ""}`} style={{ width: `${searFrac * 100}%` }} />
+          <div
+            className={`searfill${golden ? " gold" : ""}`}
+            style={{ width: `${searFrac * 100}%` }}
+          />
         </div>
       ) : (
         <div className="agebar" style={{ width: `${frac * 100}%` }} />
@@ -336,19 +452,39 @@ function Stamp() {
   const stampText = useGame((s) => s.stampText);
   const stampAt = useGame((s) => s.stampAt);
   if (!stampAt || !stampText) return null;
-  const cls = stampText === "SERVED" ? "ok" : stampText === "SENT BACK" ? "warn" : "violent";
+  const cls =
+    stampText === "SERVED"
+      ? "ok"
+      : stampText === "SENT BACK"
+        ? "warn"
+        : "violent";
   return (
     <div className={`stamp ${cls}`} key={stampAt}>
-      {STAMP_IMG[stampText] ? <img src={STAMP_IMG[stampText]} alt={stampText} /> : stampText}
+      {STAMP_IMG[stampText] ? (
+        <img src={STAMP_IMG[stampText]} alt={stampText} />
+      ) : (
+        stampText
+      )}
     </div>
   );
 }
 
-const VERB_RE = /(\([A-Z]\)|\bCORNER\b|\bFIRE\w*|\bWHISK\w*|\bSHOO\w*|\bSMASH\w*|\bJUDG\w*|\bCLOCK\w*|\bSPOT\w*|\bHANDS\b|\bREFUS\w*|\bCOMP\w*|(?<!STALL )86\w*)/i;
+const VERB_RE =
+  /(\([A-Z]\)|\bCORNER\b|\bFIRE\w*|\bWHISK\w*|\bSHOO\w*|\bSMASH\w*|\bJUDG\w*|\bCLOCK\w*|\bSPOT\w*|\bHANDS\b|\bREFUS\w*|\bCOMP\w*|(?<!STALL )86\w*)/i;
 function rich(text: string) {
   return text.split(VERB_RE).map((part, i) => {
-    if (/^\([A-Z]\)$/.test(part)) return <span key={i} className="kbd">{part}</span>;
-    if (VERB_RE.test(part)) return <b key={i} className="verb">{part}</b>;
+    if (/^\([A-Z]\)$/.test(part))
+      return (
+        <span key={i} className="kbd">
+          {part}
+        </span>
+      );
+    if (VERB_RE.test(part))
+      return (
+        <b key={i} className="verb">
+          {part}
+        </b>
+      );
     return <span key={i}>{part}</span>;
   });
 }
@@ -365,22 +501,51 @@ function Ticker() {
   );
 }
 
-const MENU_DISHES = ["Scallop, one", "Beef Wellington", "Red mullet, crying", "Risotto (stood up)", "Lamb sauce (missing)", "Pommes purée", "Foie torchon", "Soufflé (weeping)", "Tart of the day"];
+const MENU_DISHES = [
+  "Scallop, one",
+  "Beef Wellington",
+  "Red mullet, crying",
+  "Risotto (stood up)",
+  "Lamb sauce (missing)",
+  "Pommes purée",
+  "Foie torchon",
+  "Soufflé (weeping)",
+  "Tart of the day",
+];
 
-function MenuPicker({ onPick }: { featured?: string | null; onPick: (f: string, r: string) => void }) {
+function MenuPicker({
+  onPick,
+}: {
+  featured?: string | null;
+  onPick: (f: string, r: string) => void;
+}) {
   const [f, setF] = useState(MENU_DISHES[1]);
   const [r, setR] = useState(MENU_DISHES[4]);
   return (
     <div className="lot">
       <span className="lname">FEATURE</span>
       <select value={f} onChange={(e) => setF(e.target.value)}>
-        {MENU_DISHES.map((d) => <option key={d} value={d}>{d}</option>)}
+        {MENU_DISHES.map((d) => (
+          <option key={d} value={d}>
+            {d}
+          </option>
+        ))}
       </select>
       <span className="lname">REST</span>
       <select value={r} onChange={(e) => setR(e.target.value)}>
-        {MENU_DISHES.map((d) => <option key={d} value={d}>{d}</option>)}
+        {MENU_DISHES.map((d) => (
+          <option key={d} value={d}>
+            {d}
+          </option>
+        ))}
       </select>
-      <button className="btn lbtn" disabled={f === r} onClick={() => onPick(f, r)}>SET MENU <span className="cost">feature +6 · rest off rail</span></button>
+      <button
+        className="btn lbtn"
+        disabled={f === r}
+        onClick={() => onPick(f, r)}
+      >
+        SET MENU <span className="cost">feature +6 · rest off rail</span>
+      </button>
     </div>
   );
 }
@@ -395,12 +560,18 @@ function CriticCam() {
   const kidNoticed = useGame((s) => s.kidNoticed);
   const cg = guests.find((g) => g.isCritic);
   if (!cg) return null;
-  const ago = cg.tellAt >= 0 ? Math.max(0, Math.round(serviceTime - cg.tellAt)) : -1;
+  const ago =
+    cg.tellAt >= 0 ? Math.max(0, Math.round(serviceTime - cg.tellAt)) : -1;
   const status = criticLeft ? "GONE" : criticServed > 0 ? "FED" : "EATING";
   return (
-    <div className="critic-cam" title="A little red eye above the pass. Tell no one.">
+    <div
+      className="critic-cam"
+      title="A little red eye above the pass. Tell no one."
+    >
       <span className="cam-dot" />
-      CAM 3{kidNoticed ? " · NOTICED" : ""} · TABLE {criticFlagged && criticSpotted ? cg.table : "???"} · {cg.tells} TELL{cg.tells === 1 ? "" : "S"} ·{" "}
+      CAM 3{kidNoticed ? " · NOTICED" : ""} · TABLE{" "}
+      {criticFlagged && criticSpotted ? cg.table : "???"} · {cg.tells} TELL
+      {cg.tells === 1 ? "" : "S"} ·{" "}
       {ago < 0 ? "QUIET" : ago < 5 ? "TELL!" : `LAST TELL ${ago}s`} · {status}
     </div>
   );
@@ -412,7 +583,11 @@ function VowRibbon() {
   if (!vow) return null;
   return (
     <div className="vow-ribbon">
-      {vow === "star" ? "STAR VOW — no walks, clock them" : vow === "house" ? `HOUSE VOW — 101 turns ${turns101}/2` : "BRIGADE VOW — nobody walks"}
+      {vow === "star"
+        ? "STAR VOW — no walks, clock them"
+        : vow === "house"
+          ? `HOUSE VOW — 101 turns ${turns101}/2`
+          : "BRIGADE VOW — nobody walks"}
     </div>
   );
 }
@@ -423,12 +598,27 @@ function FolkloreBar() {
   const move101 = useGame((s) => s.move101);
   const moved101 = useGame((s) => s.moved101);
   if (!folklore) return null;
-  const label = folklore.kind === "return" ? "REFUSE WITH GRACE (D) / RE-FIRE (F)" : folklore.kind === "flash" ? "LET THEM POST — do nothing" : "FIX IT (R)";
+  const label =
+    folklore.kind === "return"
+      ? "REFUSE WITH GRACE (D) / RE-FIRE (F)"
+      : folklore.kind === "flash"
+        ? "LET THEM POST — do nothing"
+        : "FIX IT (R)";
   return (
     <div className="folklore-bar">
-      <span>TABLE {folklore.table} — {label}</span>
-      {folklore.kind !== "flash" && <button className="btn" onClick={() => answer(true)}>ANSWER</button>}
-      {!moved101 && <button className="btn ghost" onClick={move101}>MOVE 101 (T)</button>}
+      <span>
+        TABLE {folklore.table} — {label}
+      </span>
+      {folklore.kind !== "flash" && (
+        <button className="btn" onClick={() => answer(true)}>
+          ANSWER
+        </button>
+      )}
+      {!moved101 && (
+        <button className="btn ghost" onClick={move101}>
+          MOVE 101 (T)
+        </button>
+      )}
     </div>
   );
 }
@@ -438,7 +628,10 @@ function Brigade() {
   return (
     <div className="brigade">
       {cooks.map((c) => (
-        <div key={c.id} className={`cook ${c.walkedOut ? "out" : ""} ${!c.walkedOut && c.morale < 25 ? "low" : ""}`}>
+        <div
+          key={c.id}
+          className={`cook ${c.walkedOut ? "out" : ""} ${!c.walkedOut && c.morale < 25 ? "low" : ""}`}
+        >
           <span className="cname">{c.name}</span>
           <div className="mbar">
             <div
@@ -451,14 +644,23 @@ function Brigade() {
           </div>
           {c.walkedOut && <span className="out-tag">WALKED</span>}
           {c.burning && <span className="out-tag fire">FIRE</span>}
-          {!c.walkedOut && c.grudge && <span className="out-tag grudge" title={c.grudge}>HOLDING ONE</span>}
+          {!c.walkedOut && c.grudge && (
+            <span className="out-tag grudge" title={c.grudge}>
+              HOLDING ONE
+            </span>
+          )}
         </div>
       ))}
     </div>
   );
 }
 
-const STANCE_LABEL: Record<Stance, string> = { sinks: "SINKS", sauce: "SAUCE", pass: "PASS", room: "ROOM" };
+const STANCE_LABEL: Record<Stance, string> = {
+  sinks: "SINKS",
+  sauce: "SAUCE",
+  pass: "PASS",
+  room: "ROOM",
+};
 
 /** Walk the line: where the chef's body is. Night 1 the pass holds you. */
 function StanceBar() {
@@ -468,7 +670,10 @@ function StanceBar() {
   const openingStep = useGame((s) => s.openingStep);
   const locked = night < 2 || !!openingStep;
   return (
-    <div className="stancebar" title="Q / W walks the line · 0 back to the pass">
+    <div
+      className="stancebar"
+      title="Q / W walks the line · 0 back to the pass"
+    >
       <span className="slabel">CHEF</span>
       {STANCE_ORDER.map((id) => (
         <button
@@ -476,7 +681,13 @@ function StanceBar() {
           className={`btn sm ${stance === id ? "picked" : ""}`}
           disabled={locked || stance === id}
           onClick={() => setStance(id)}
-          title={locked ? "the pass holds you tonight — from night 2, you walk" : id === "pass" ? "back to the pass (0)" : `walk to ${id} (Q / W)`}
+          title={
+            locked
+              ? "the pass holds you tonight — from night 2, you walk"
+              : id === "pass"
+                ? "back to the pass (0)"
+                : `walk to ${id} (Q / W)`
+          }
         >
           {STANCE_LABEL[id]}
         </button>
@@ -528,20 +739,35 @@ function ReviewCard() {
           <span className="dim">{"☆".repeat(5 - review.stars)}</span>
         </div>
         <div className="score-breakdown">
-          <span>FOOD {Math.round(review.avgQuality)} · {review.foodStars}/3</span>
-          <span>SERVICE {Math.round(review.avgHospitality)} · {review.hospitalityStars}/1</span>
+          <span>
+            FOOD {Math.round(review.avgQuality)} · {review.foodStars}/3
+          </span>
+          <span>
+            SERVICE {Math.round(review.avgHospitality)} ·{" "}
+            {review.hospitalityStars}/1
+          </span>
           <span>BRIGADE {review.brigadeStars}/1</span>
           {review.penalties > 0 && <span>LOSSES −{review.penalties}</span>}
         </div>
         {(() => {
           const nm = nearMissLine(
-            { served: review.covers, avgQuality: review.avgQuality, avgHospitality: review.avgHospitality, misses: review.misses, complaints: review.complaints, walkouts: review.walkouts },
+            {
+              served: review.covers,
+              avgQuality: review.avgQuality,
+              avgHospitality: review.avgHospitality,
+              misses: review.misses,
+              complaints: review.complaints,
+              walkouts: review.walkouts,
+            },
             review,
           );
           const l = loadLegends();
-          const record = review.bestStreak > 0 && l.bestStreak > review.bestStreak && l.bestStreak - review.bestStreak <= 2
-            ? `Your record ×${l.bestStreak} stands. Tonight ×${review.bestStreak}.`
-            : null;
+          const record =
+            review.bestStreak > 0 &&
+            l.bestStreak > review.bestStreak &&
+            l.bestStreak - review.bestStreak <= 2
+              ? `Your record ×${l.bestStreak} stands. Tonight ×${review.bestStreak}.`
+              : null;
           if (!nm && !record) return null;
           return (
             <>
@@ -552,9 +778,22 @@ function ReviewCard() {
         })()}
         {review.headline && <div className="headline">{review.headline}</div>}
         <p className="incident">{review.incident}</p>
-        {petraCoachingNote({ stars: review.stars, walkouts: review.walkouts, misses: review.misses, smashed: review.smashed, served: review.covers }) && (
+        {petraCoachingNote({
+          stars: review.stars,
+          walkouts: review.walkouts,
+          misses: review.misses,
+          smashed: review.smashed,
+          served: review.covers,
+        }) && (
           <p className="incident petra-note">
-            PETRA'S NOTE — {petraCoachingNote({ stars: review.stars, walkouts: review.walkouts, misses: review.misses, smashed: review.smashed, served: review.covers })}
+            PETRA'S NOTE —{" "}
+            {petraCoachingNote({
+              stars: review.stars,
+              walkouts: review.walkouts,
+              misses: review.misses,
+              smashed: review.smashed,
+              served: review.covers,
+            })}
           </p>
         )}
         <div className="rlabel">WHAT FOLLOWS</div>
@@ -567,8 +806,12 @@ function ReviewCard() {
         <details className="review-details">
           <summary>Service details</summary>
           <div className="critic-line">{review.criticVerdict}</div>
-          {review.folkloreLine && <div className="critic-line">{review.folkloreLine}</div>}
-          {review.sideLine && <div className="board-line">{review.sideLine}</div>}
+          {review.folkloreLine && (
+            <div className="critic-line">{review.folkloreLine}</div>
+          )}
+          {review.sideLine && (
+            <div className="board-line">{review.sideLine}</div>
+          )}
           {review.vowLine && <div className="board-line">{review.vowLine}</div>}
           {review.betLine && <div className="board-line">{review.betLine}</div>}
           {review.cover && <div className="cover-line">{review.cover}</div>}
@@ -584,16 +827,24 @@ function ReviewCard() {
             {review.silent && <span>SILENT SERVICE ACCOLADE</span>}
             <span>inspector {review.spotted ? "CLOCKED" : "missed"}</span>
           </div>
-          <div className="rfoot">EGO {Math.round(review.ego)} · {tierName(review.ego)}</div>
+          <div className="rfoot">
+            EGO {Math.round(review.ego)} · {tierName(review.ego)}
+          </div>
           <div className="rbtns">
             <button className="btn" onClick={copy}>
               {copied ? "COPIED" : "COPY REVIEW"}
             </button>
-            <button className="btn" onClick={() => speakReview(review.stars, narration)} title="The critic reads it back">
+            <button
+              className="btn"
+              onClick={() => speakReview(review.stars, narration)}
+              title="The critic reads it back"
+            >
               READ IT ALOUD
             </button>
           </div>
-          {copyFailed && <div className="bwarn">Clipboard unavailable — copy failed.</div>}
+          {copyFailed && (
+            <div className="bwarn">Clipboard unavailable — copy failed.</div>
+          )}
         </details>
       </div>
     </div>
@@ -606,8 +857,20 @@ function ServiceTools() {
   const paused = useGame((s) => s.paused);
   return (
     <div className="opening-tools">
-      <button className="btn ghost" aria-label="Controls" onClick={toggleGlossary}>?</button>
-      <button className="btn ghost" aria-label={paused ? "Resume" : "Pause"} onClick={togglePause}>{paused ? "RESUME" : "PAUSE"}</button>
+      <button
+        className="btn ghost"
+        aria-label="Controls"
+        onClick={toggleGlossary}
+      >
+        ?
+      </button>
+      <button
+        className="btn ghost"
+        aria-label={paused ? "Resume" : "Pause"}
+        onClick={togglePause}
+      >
+        {paused ? "RESUME" : "PAUSE"}
+      </button>
     </div>
   );
 }
@@ -629,21 +892,36 @@ function OpeningService() {
   const pass = tickets.find((t) => t.state === "pass");
   const rail = tickets.find((t) => t.state === "rail");
   const plating = tickets.find((t) => t.state === "plating");
-  const observations = pass?.condition ? plateObservations(pass.dish, pass.condition) : [];
-  const fault = pass?.condition ? correctionNeeded(pass.dish, pass.condition) : null;
-  const openingReply = career.openingMemory?.night === 1 ? petraOpeningReply(career.openingMemory.firstVerdict) : null;
+  const observations = pass?.condition
+    ? plateObservations(pass.dish, pass.condition)
+    : [];
+  const fault = pass?.condition
+    ? correctionNeeded(pass.dish, pass.condition)
+    : null;
+  const openingReply =
+    career.openingMemory?.night === 1
+      ? petraOpeningReply(career.openingMemory.firstVerdict)
+      : null;
   return (
     <>
       {openingStep === "serve" && pass && (
         <div className="pass-actions opening-actions">
-          <button className="btn serve big" autoFocus onClick={() => judge("serve")}>
+          <button
+            className="btn serve big"
+            autoFocus
+            onClick={() => judge("serve")}
+          >
             SERVE → TABLE {pass.table}
           </button>
         </div>
       )}
       {openingStep === "call" && rail && (
         <div className="pass-actions opening-actions">
-          <button className="btn docket-call" autoFocus onClick={() => plateToPass(rail.id)}>
+          <button
+            className="btn docket-call"
+            autoFocus
+            onClick={() => plateToPass(rail.id)}
+          >
             <span className="dtable">TABLE {rail.table}</span>
             <span className="ddish">{rail.dish}</span>
             <span className="daction">CALL</span>
@@ -656,7 +934,9 @@ function OpeningService() {
           <div className="ocbar">
             <div
               className="ocfill"
-              style={{ width: `${plating.plateDur > 0 ? Math.min(100, Math.max(0, (1 - (plating.plateAt - serviceTime) / plating.plateDur) * 100)) : 0}%` }}
+              style={{
+                width: `${plating.plateDur > 0 ? Math.min(100, Math.max(0, (1 - (plating.plateAt - serviceTime) / plating.plateDur) * 100)) : 0}%`,
+              }}
             />
           </div>
           <span className="oclabel">Cooking</span>
@@ -666,14 +946,24 @@ function OpeningService() {
         <div className="pass-actions opening-actions opening-inspect">
           <div className="mhead">TURN IT. NAME IT.</div>
           {!inspecting ? (
-            <button className="btn serve big" autoFocus onClick={() => setInspecting(true)}>
+            <button
+              className="btn serve big"
+              autoFocus
+              onClick={() => setInspecting(true)}
+            >
               INSPECT IT <span className="kbd">I</span>
             </button>
           ) : (
             <>
               <div className="plate-std">{observations[0]}</div>
-              <div className="plate-std">House standard: {dishProfile(pass.dish).standard}</div>
-              <button className="btn" autoFocus onClick={() => turnPlate(Math.PI / 4)}>
+              <div className="plate-std">
+                House standard: {dishProfile(pass.dish).standard}
+              </div>
+              <button
+                className="btn"
+                autoFocus
+                onClick={() => turnPlate(Math.PI / 4)}
+              >
                 TURN THE PLATE
               </button>
               {openingTurned && fault && (
@@ -687,9 +977,19 @@ function OpeningService() {
       )}
       {openingStep === "judge" && pass && !plating && (
         <div className="pass-actions opening-actions">
-          <button className="btn serve" autoFocus onClick={() => judge("serve")}>SERVE <span className="kbd">S</span></button>
-          <button className="btn back" onClick={() => judge("sendback")}>SEND BACK <span className="kbd">B</span></button>
-          <button className="btn smash" onClick={() => judge("smash")}>SMASH <span className="kbd">X</span></button>
+          <button
+            className="btn serve"
+            autoFocus
+            onClick={() => judge("serve")}
+          >
+            SERVE <span className="kbd">S</span>
+          </button>
+          <button className="btn back" onClick={() => judge("sendback")}>
+            SEND BACK <span className="kbd">B</span>
+          </button>
+          <button className="btn smash" onClick={() => judge("smash")}>
+            SMASH <span className="kbd">X</span>
+          </button>
         </div>
       )}
       {openingStep === "call" && openingReply && (
@@ -711,7 +1011,8 @@ function Briefing() {
   // rule — before the doors. After that, an unread morning of confessionals
   // auto-opens the book too — beats hidden in a closed book are beats nobody sees.
   const [bookOpen, setBookOpen] = useState(
-    (career.bookSeenNight ?? 0) < career.night && morningCards(career, cooks).length > 0,
+    (career.bookSeenNight ?? 0) < career.night &&
+      morningCards(career, cooks).length > 0,
   );
   if (career.night === 1) return <NightOneBrief />;
   if (bookOpen) return <PrepBook onBack={() => setBookOpen(false)} />;
@@ -735,7 +1036,10 @@ function NightOneBrief() {
   const [beat, setBeat] = useState(() => (veteran ? 1 : 0));
   // the night-one opener plays in three moments — the room, the brigade,
   // the work — each one landing before the next is offered
-  const nextBeat = () => { sfx("bell"); setBeat((b) => Math.min(2, b + 1)); };
+  const nextBeat = () => {
+    sfx("bell");
+    setBeat((b) => Math.min(2, b + 1));
+  };
   // HOW IT WORKS (PREP) opens the book on arrival instead of skipping anything
   const [bookOpen, setBookOpen] = useState(() => consumeBriefingBookRequest());
   const [picked, setPicked] = useState<number | null>(null);
@@ -748,28 +1052,54 @@ function NightOneBrief() {
           { label: "RAISE A TOAST", i: 0 },
           { label: "SHARE THE CRISPY BIT", i: 1 },
           { label: "EAT QUIETLY", i: 2 },
-          ...((career.lastReview?.avgQuality ?? 100) < 58 && (career.lastReview?.walkoutNames?.length ?? 0) === 0
-            ? [{ label: "EAT THE CRISPY BIT YOURSELF", i: 3, chefEatsFirst: true }]
+          ...((career.lastReview?.avgQuality ?? 100) < 58 &&
+          (career.lastReview?.walkoutNames?.length ?? 0) === 0
+            ? [
+                {
+                  label: "EAT THE CRISPY BIT YOURSELF",
+                  i: 3,
+                  chefEatsFirst: true,
+                },
+              ]
             : []),
-        ].map(({ label, i, chefEatsFirst }: { label: string; i: number; chefEatsFirst?: boolean }) => (
-          <button
-            key={i}
-            className={`btn lbtn ${picked === i ? "picked" : ""}${chefEatsFirst ? " chef-eats" : ""}`}
-            disabled={mealDone || picked !== null}
-            onClick={() => { meal(i); setPicked(i); }}
-          >
-            {label}
-          </button>
-        ))}
+        ].map(
+          ({
+            label,
+            i,
+            chefEatsFirst,
+          }: {
+            label: string;
+            i: number;
+            chefEatsFirst?: boolean;
+          }) => (
+            <button
+              key={i}
+              className={`btn lbtn ${picked === i ? "picked" : ""}${chefEatsFirst ? " chef-eats" : ""}`}
+              disabled={mealDone || picked !== null}
+              onClick={() => {
+                meal(i);
+                setPicked(i);
+              }}
+            >
+              {label}
+            </button>
+          ),
+        )}
       </div>
-      {mealDone && picked === null && <div className="ltaken">bowls licked. yesterday stays yesterday.</div>}
+      {mealDone && picked === null && (
+        <div className="ltaken">bowls licked. yesterday stays yesterday.</div>
+      )}
     </div>
   );
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
       // a focused button/summary owns its activation — don't steal it
-      if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
+      if (
+        e.target instanceof Element &&
+        e.target.closest("button, summary, input, select, textarea, a")
+      )
+        return;
       e.preventDefault();
       if (beat < 2) nextBeat();
       else if (!n1NeedsHouseRule(useGame.getState().career)) startService();
@@ -785,13 +1115,20 @@ function NightOneBrief() {
         <div className="bsub">{INTRO.n1Why}</div>
         <div className="title-residency">{INTRO.residencyLine}</div>
         <div className="bstats">
-          <span>£<CountUp value={career.cash} /></span>
-          <span>★ <CountUp value={career.stars} /></span>
+          <span>
+            £<CountUp value={career.cash} />
+          </span>
+          <span>
+            ★ <CountUp value={career.stars} />
+          </span>
         </div>
         {beat === 0 && (
           <>
             <div className="mhead">DOORS OPEN AT SEVEN. IT IS FIVE PAST.</div>
-            <div className="n1body">Three cooks came back. One rival wants your ticket rail. Somewhere in the room sits tonight's inspector, notebook closed, waiting.</div>
+            <div className="n1body">
+              Three cooks came back. One rival wants your ticket rail. Somewhere
+              in the room sits tonight's inspector, notebook closed, waiting.
+            </div>
             <div className="qbtns">
               <button className="btn serve big" autoFocus onClick={nextBeat}>
                 MEET THE BRIGADE <span className="kbd">↵</span>
@@ -814,7 +1151,9 @@ function NightOneBrief() {
                 >
                   <img src={CAST_IMG[c.name] ?? castCommis} alt={c.name} />
                   <span className="cname">{c.name}</span>
-                  {CAST_INTRO[c.name] && <span className="intro">{CAST_INTRO[c.name]}</span>}
+                  {CAST_INTRO[c.name] && (
+                    <span className="intro">{CAST_INTRO[c.name]}</span>
+                  )}
                   <span className="mood">{moodOf(c)}</span>
                 </div>
               ))}
@@ -839,7 +1178,8 @@ function NightOneBrief() {
               return side ? (
                 <div className="side-order">
                   <div className="mhead">TONIGHT'S SIDE ORDER</div>
-                  {side.text}<span className="cost"> · +{side.pay} ego if it lands</span>
+                  {side.text}
+                  <span className="cost"> · +{side.pay} ego if it lands</span>
                 </div>
               ) : null;
             })()}
@@ -848,26 +1188,62 @@ function NightOneBrief() {
               <div className="mhead">HOUSE RULE — one twist, all residency</div>
               {career.mutator ? (
                 <div className="ltaken">
-                  rule set: {career.mutator === "double_runners" ? "DOUBLE SHIFT" : career.mutator === "no_bin" ? "NO BIN" : career.mutator === "short_fuse" ? "SHORT FUSE" : "NONE"}. no take-backs.
+                  rule set:{" "}
+                  {career.mutator === "double_runners"
+                    ? "DOUBLE SHIFT"
+                    : career.mutator === "no_bin"
+                      ? "NO BIN"
+                      : career.mutator === "short_fuse"
+                        ? "SHORT FUSE"
+                        : "NONE"}
+                  . no take-backs.
                 </div>
               ) : (
                 <div className="qmeal-row">
-                  <button className="btn lbtn" onClick={() => chooseMutator("double_runners")}>
-                    DOUBLE SHIFT<span className="cost">BEEFCAKES doubles runners · all 9 nights</span>
+                  <button
+                    className="btn lbtn"
+                    onClick={() => chooseMutator("double_runners")}
+                  >
+                    DOUBLE SHIFT
+                    <span className="cost">
+                      BEEFCAKES doubles runners · all 9 nights
+                    </span>
                   </button>
-                  <button className="btn lbtn" onClick={() => chooseMutator("no_bin")}>
-                    NO BIN<span className="cost">86 off · cook everything · all 9 nights</span>
+                  <button
+                    className="btn lbtn"
+                    onClick={() => chooseMutator("no_bin")}
+                  >
+                    NO BIN
+                    <span className="cost">
+                      86 off · cook everything · all 9 nights
+                    </span>
                   </button>
-                  <button className="btn lbtn dim" onClick={() => chooseMutator("short_fuse")}>
-                    SHORT FUSE<span className="cost">tables walk 20% faster · all 9 nights</span>
+                  <button
+                    className="btn lbtn dim"
+                    onClick={() => chooseMutator("short_fuse")}
+                  >
+                    SHORT FUSE
+                    <span className="cost">
+                      tables walk 20% faster · all 9 nights
+                    </span>
                   </button>
-                  <button className="btn lbtn" onClick={() => chooseMutator("none")}>
-                    NO HOUSE RULE<span className="cost">play it straight · all 9 nights</span>
+                  <button
+                    className="btn lbtn"
+                    onClick={() => chooseMutator("none")}
+                  >
+                    NO HOUSE RULE
+                    <span className="cost">
+                      play it straight · all 9 nights
+                    </span>
                   </button>
                 </div>
               )}
             </div>
-            {!canSave && <div className="bwarn">Progress won't persist — this browser blocks storage.</div>}
+            {!canSave && (
+              <div className="bwarn">
+                Progress won't persist — this browser blocks storage.
+              </div>
+            )}
             <div className="qbtns">
               <button
                 className="btn serve big"
@@ -882,7 +1258,11 @@ function NightOneBrief() {
                 KITCHEN BOOK
               </button>
             </div>
-            {locked && <div className="ltaken">pick a house rule and the doors open.</div>}
+            {locked && (
+              <div className="ltaken">
+                pick a house rule and the doors open.
+              </div>
+            )}
           </>
         )}
       </div>
@@ -897,14 +1277,18 @@ function RecipeRow() {
   const cooks = useGame((s) => s.cooks);
   const developWellington = useGame((s) => s.developWellington);
   const current = currentWellingtonRecipe(career.recipeHistory);
-  const tonight = career.recipeHistory?.find((entry) => entry.night === career.night);
+  const tonight = career.recipeHistory?.find(
+    (entry) => entry.night === career.night,
+  );
   const stationCook = cooks.find((c) => c.station === 0 && !c.walkedOut);
   const [credit, setCredit] = useState<"shared" | "house">("shared");
   const pick = (finish: RecipeFinish) => developWellington(finish, credit);
   return (
     <div className="qrecipe">
       <div className="mhead">
-        {career.night === 3 ? "THE WELLINGTON — WHOSE VOICE?" : `${stationCook?.name ?? "THE HOUSE"}'S WELLINGTON`}
+        {career.night === 3
+          ? "THE WELLINGTON — WHOSE VOICE?"
+          : `${stationCook?.name ?? "THE HOUSE"}'S WELLINGTON`}
       </div>
       {career.night === 3 && !tonight && (
         <div className="credit-choice">
@@ -930,7 +1314,10 @@ function RecipeRow() {
           <button
             key={finish}
             className={`btn lbtn ${tonight?.finish === finish ? "picked" : ""}`}
-            disabled={!!tonight || (career.night === 3 && credit === "shared" && !stationCook)}
+            disabled={
+              !!tonight ||
+              (career.night === 3 && credit === "shared" && !stationCook)
+            }
             onClick={() => pick(finish)}
           >
             {WELLINGTON_FINISHES[finish].name.toUpperCase()}
@@ -939,17 +1326,24 @@ function RecipeRow() {
       </div>
       {tonight ? (
         <div className="ltaken">
-          {tonight.contributor} revised this — {WELLINGTON_FINISHES[tonight.finish].note}
+          {tonight.contributor} revised this —{" "}
+          {WELLINGTON_FINISHES[tonight.finish].note}
         </div>
       ) : current ? (
         <div className="ltaken">
-          On the pass: {current.contributor}&rsquo;s {WELLINGTON_FINISHES[current.finish].name.toLowerCase()}.
+          On the pass: {current.contributor}&rsquo;s{" "}
+          {WELLINGTON_FINISHES[current.finish].name.toLowerCase()}.
         </div>
       ) : (
-        <div className="ltaken">No revision yet — the house standard remains.</div>
+        <div className="ltaken">
+          No revision yet — the house standard remains.
+        </div>
       )}
       {(career.lastSauceHelp?.night ?? -1) === career.night - 1 && (
-        <div className="ltaken">You brought {career.lastSauceHelp!.cookName}&rsquo;s {career.lastSauceHelp!.dish} back together last night.</div>
+        <div className="ltaken">
+          You brought {career.lastSauceHelp!.cookName}&rsquo;s{" "}
+          {career.lastSauceHelp!.dish} back together last night.
+        </div>
       )}
     </div>
   );
@@ -963,26 +1357,46 @@ function NightContractCard() {
   const chooseSeating = useGame((s) => s.chooseSeating);
   const contract = nightContract(career.night);
   const weakest = lowestMoraleCook(cooks);
-  const recoveryTarget = career.recovery?.night === 6 ? career.recovery.cookName : weakest?.name;
+  const recoveryTarget =
+    career.recovery?.night === 6 ? career.recovery.cookName : weakest?.name;
   return (
     <div className="night-contract">
-      <div className="mhead">NIGHT {contract.night} — {contract.name.toUpperCase()}</div>
+      <div className="mhead">
+        NIGHT {contract.night} — {contract.name.toUpperCase()}
+      </div>
       <div className="ndilemma">{contract.dilemma}</div>
       <div className="ncondition">{contract.condition}</div>
       {career.night === 4 && (
         <div className="night-choice">
           {career.attentionNight === 4 ? (
-            <div className="ltaken">Attention spent on {career.attention?.toUpperCase()}.</div>
+            <div className="ltaken">
+              Attention spent on {career.attention?.toUpperCase()}.
+            </div>
           ) : (
             <>
-              <button className="btn lbtn" onClick={() => chooseAttention("regulars")}>
-                THE REGULARS<span className="cost">their request comes first</span>
+              <button
+                className="btn lbtn"
+                onClick={() => chooseAttention("regulars")}
+              >
+                THE REGULARS
+                <span className="cost">their request comes first</span>
               </button>
-              <button className="btn lbtn" onClick={() => chooseAttention("critic")}>
-                THE CRITIC<span className="cost">their request comes first</span>
+              <button
+                className="btn lbtn"
+                onClick={() => chooseAttention("critic")}
+              >
+                THE CRITIC
+                <span className="cost">their request comes first</span>
               </button>
-              <button className="btn lbtn" onClick={() => chooseAttention("brigade")}>
-                THE BRIGADE<span className="cost">{weakest?.name ?? "the weakest cook"} steadies · +12 morale · trauma −1</span>
+              <button
+                className="btn lbtn"
+                onClick={() => chooseAttention("brigade")}
+              >
+                THE BRIGADE
+                <span className="cost">
+                  {weakest?.name ?? "the weakest cook"} steadies · +12 morale ·
+                  trauma −1
+                </span>
               </button>
             </>
           )}
@@ -992,16 +1406,32 @@ function NightContractCard() {
         <div className="night-choice">
           {career.recovery?.night === 6 ? (
             <div className="ltaken">
-              {career.recovery.cookName}: {career.recovery.choice === "push" ? "pushed for skill, at a cost to morale" : "protected for morale and correction reliability"}.
+              {career.recovery.cookName}:{" "}
+              {career.recovery.choice === "push"
+                ? "pushed for skill, at a cost to morale"
+                : "protected for morale and correction reliability"}
+              .
             </div>
           ) : (
             <>
-              <div className="ncondition">{recoveryTarget ?? "The weakest cook"} is running on empty.</div>
-              <button className="btn lbtn" onClick={() => chooseRecovery("push")}>
-                PUSH {recoveryTarget ?? "THEM"}<span className="cost">+4% skill · −12 morale</span>
+              <div className="ncondition">
+                {recoveryTarget ?? "The weakest cook"} is running on empty.
+              </div>
+              <button
+                className="btn lbtn"
+                onClick={() => chooseRecovery("push")}
+              >
+                PUSH {recoveryTarget ?? "THEM"}
+                <span className="cost">+4% skill · −12 morale</span>
               </button>
-              <button className="btn lbtn" onClick={() => chooseRecovery("protect")}>
-                PROTECT {recoveryTarget ?? "THEM"}<span className="cost">+18 morale · trauma −1 · grudge cleared</span>
+              <button
+                className="btn lbtn"
+                onClick={() => chooseRecovery("protect")}
+              >
+                PROTECT {recoveryTarget ?? "THEM"}
+                <span className="cost">
+                  +18 morale · trauma −1 · grudge cleared
+                </span>
               </button>
             </>
           )}
@@ -1010,17 +1440,31 @@ function NightContractCard() {
       {career.night === 7 && (
         <div className="night-choice">
           {career.seating101 ? (
-            <div className="ltaken">101: {career.seating101.toUpperCase()}.</div>
+            <div className="ltaken">
+              101: {career.seating101.toUpperCase()}.
+            </div>
           ) : (
             <>
-              <button className="btn lbtn" onClick={() => chooseSeating("regulars")}>
-                REGULARS TO 101<span className="cost">keep the ritual · 50s fuse</span>
+              <button
+                className="btn lbtn"
+                onClick={() => chooseSeating("regulars")}
+              >
+                REGULARS TO 101
+                <span className="cost">keep the ritual · 50s fuse</span>
               </button>
-              <button className="btn lbtn" onClick={() => chooseSeating("press")}>
-                PRESS TO 101<span className="cost">fast company · 40s fuse</span>
+              <button
+                className="btn lbtn"
+                onClick={() => chooseSeating("press")}
+              >
+                PRESS TO 101
+                <span className="cost">fast company · 40s fuse</span>
               </button>
-              <button className="btn lbtn" onClick={() => chooseSeating("walkin")}>
-                WALK-INS TO 101<span className="cost">big spend · 42s fuse</span>
+              <button
+                className="btn lbtn"
+                onClick={() => chooseSeating("walkin")}
+              >
+                WALK-INS TO 101
+                <span className="cost">big spend · 42s fuse</span>
               </button>
             </>
           )}
@@ -1037,7 +1481,11 @@ function FeudPanel() {
   if (!feud) return null;
   return (
     <div className="night-feud">
-      <img className="feudface" src={FEUD_ART[feud.actor] ?? castBeefcakes} alt={FEUD_ALT[feud.actor] ?? "BEEFCAKES"} />
+      <img
+        className="feudface"
+        src={FEUD_ART[feud.actor] ?? castBeefcakes}
+        alt={FEUD_ALT[feud.actor] ?? "BEEFCAKES"}
+      />
       <div>
         <div className="mhead">TONIGHT&rsquo;S PROBLEM</div>
         <div className="ftext">{feud.text}</div>
@@ -1074,10 +1522,16 @@ function QuickBrief({ onBook }: { onBook: () => void }) {
   return (
     <div className="brief-wrap">
       <div className="brief quick-brief">
-        <div className="bhead">NIGHT {career.night} — {v.name}</div>
+        <div className="bhead">
+          NIGHT {career.night} — {v.name}
+        </div>
         <div className="bstats">
-          <span>£<CountUp value={career.cash} /></span>
-          <span>★ <CountUp value={career.stars} /></span>
+          <span>
+            £<CountUp value={career.cash} />
+          </span>
+          <span>
+            ★ <CountUp value={career.stars} />
+          </span>
         </div>
         <div className="cast row qcast">
           {cooks.map((c) => (
@@ -1089,7 +1543,11 @@ function QuickBrief({ onBook }: { onBook: () => void }) {
               <img src={CAST_IMG[c.name] ?? castCommis} alt={c.name} />
               <span className="cname">
                 {c.name}
-                {c.trauma > 0 && <span className="scar">{" ✕".repeat(Math.min(3, c.trauma))}</span>}
+                {c.trauma > 0 && (
+                  <span className="scar">
+                    {" ✕".repeat(Math.min(3, c.trauma))}
+                  </span>
+                )}
               </span>
               <span className="mood">{moodOf(c)}</span>
             </div>
@@ -1102,7 +1560,8 @@ function QuickBrief({ onBook }: { onBook: () => void }) {
           return side ? (
             <div className="side-order">
               <div className="mhead">TONIGHT'S SIDE ORDER</div>
-              {side.text}<span className="cost"> · +{side.pay} ego if it lands</span>
+              {side.text}
+              <span className="cost"> · +{side.pay} ego if it lands</span>
             </div>
           ) : null;
         })()}
@@ -1114,29 +1573,59 @@ function QuickBrief({ onBook }: { onBook: () => void }) {
               { label: "RAISE A TOAST", i: 0 },
               { label: "SHARE THE CRISPY BIT", i: 1 },
               { label: "EAT QUIETLY", i: 2 },
-            ].map(({ label, i }) => (
-              <button
-                key={i}
-                className={`btn lbtn ${picked === i ? "picked" : ""}`}
-                disabled={mealDone || picked !== null}
-                onClick={() => { meal(i); setPicked(i); }}
-              >
-                {label}
-              </button>
-            ))}
+              ...((career.lastReview?.avgQuality ?? 100) < 58 &&
+              (career.lastReview?.walkoutNames?.length ?? 0) === 0
+                ? [
+                    {
+                      label: "EAT THE CRISPY BIT YOURSELF",
+                      i: 3,
+                      chefEatsFirst: true,
+                    },
+                  ]
+                : []),
+            ].map(
+              ({
+                label,
+                i,
+                chefEatsFirst,
+              }: {
+                label: string;
+                i: number;
+                chefEatsFirst?: boolean;
+              }) => (
+                <button
+                  key={i}
+                  className={`btn lbtn ${picked === i ? "picked" : ""}${chefEatsFirst ? " chef-eats" : ""}`}
+                  disabled={mealDone || picked !== null}
+                  onClick={() => {
+                    meal(i);
+                    setPicked(i);
+                  }}
+                >
+                  {label}
+                </button>
+              ),
+            )}
           </div>
-          {mealDone && picked === null && <div className="ltaken">Meal shared.</div>}
+          {mealDone && picked === null && (
+            <div className="ltaken">Meal shared.</div>
+          )}
         </div>
-        {!canSave && <div className="bwarn">Progress won't persist — this browser blocks storage.</div>}
+        {!canSave && (
+          <div className="bwarn">
+            Progress won't persist — this browser blocks storage.
+          </div>
+        )}
         <div className="qbtns">
           <button className="btn serve big" autoFocus onClick={startService}>
             OPEN THE DOORS
           </button>
           <button className="btn ghost" onClick={onBook}>
             KITCHEN BOOK
-            {(career.bookSeenNight ?? 0) < career.night && morningCards(career, cooks).length > 0 && (
-              <span className="bnew">new entry</span>
-            )}
+            {(career.bookSeenNight ?? 0) < career.night &&
+              morningCards(career, cooks).length > 0 && (
+                <span className="bnew">new entry</span>
+              )}
           </button>
         </div>
       </div>
@@ -1172,14 +1661,20 @@ function PrepBook({ onBack }: { onBack: () => void }) {
   const [beat, setBeat] = useState(0);
   // this morning's confessionals — the reason the book carries the badge
   const cards = morningCards(career, cooks);
-  useEffect(() => { markBookSeen(); }, [markBookSeen]);
+  useEffect(() => {
+    markBookSeen();
+  }, [markBookSeen]);
   // N1 cold open: one beat (brigade + house rule), then doors. Market N2+, shop N3+, feud N4+.
   const lastBeat = career.night === 1 ? 0 : feud ? 2 : 1;
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
       // a focused button/summary owns its activation — don't steal it
-      if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
+      if (
+        e.target instanceof Element &&
+        e.target.closest("button, summary, input, select, textarea, a")
+      )
+        return;
       e.preventDefault();
       if (beat < lastBeat) setBeat(beat + 1);
       else startService();
@@ -1187,7 +1682,14 @@ function PrepBook({ onBack }: { onBack: () => void }) {
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
   }, [beat, lastBeat, startService]);
-  const fwdLabel = beat < lastBeat ? (beat === 0 ? "TO THE MARKET →" : "TONIGHT'S PROBLEM →") : career.night === 1 ? "OPEN THE DOORS ↵" : "RUN SERVICE ↵";
+  const fwdLabel =
+    beat < lastBeat
+      ? beat === 0
+        ? "TO THE MARKET →"
+        : "TONIGHT'S PROBLEM →"
+      : career.night === 1
+        ? "OPEN THE DOORS ↵"
+        : "RUN SERVICE ↵";
   const go = () => {
     if (beat < lastBeat) {
       setBeat(beat + 1);
@@ -1198,7 +1700,8 @@ function PrepBook({ onBack }: { onBack: () => void }) {
     if (useGame.getState().firstPerson) {
       const c = document.querySelector("canvas") as HTMLCanvasElement | null;
       try {
-        const lock = c?.requestPointerLock?.() as unknown as Promise<void> | undefined;
+        const lock = c?.requestPointerLock?.() as unknown as
+          Promise<void> | undefined;
         lock?.catch?.(() => {
           // pointer lock blocked (e.g. sandboxed iframe) — stay playable
           const g = useGame.getState();
@@ -1215,16 +1718,25 @@ function PrepBook({ onBack }: { onBack: () => void }) {
         <div className="bhead">
           NIGHT {career.night} — {v.name}
           <div className="bsub">{v.sub}</div>
-          <button className="btn ghost bookback" onClick={onBack}>← BACK TO THE DOORS</button>
+          <button className="btn ghost bookback" onClick={onBack}>
+            ← BACK TO THE DOORS
+          </button>
         </div>
         <div className="bstats">
-          <span>£<CountUp value={career.cash} /></span>
-          <span>{"★".repeat(Math.min(12, career.stars)) || "☆"} {career.stars}★ total</span>
+          <span>
+            £<CountUp value={career.cash} />
+          </span>
+          <span>
+            {"★".repeat(Math.min(12, career.stars)) || "☆"} {career.stars}★
+            total
+          </span>
           <span>{9 - career.night + 1} services left</span>
         </div>
         {career.lastReview && (
           <div className="blast">
-            <div className="rlabel">LAST NIGHT — {career.lastReview.headline}</div>
+            <div className="rlabel">
+              LAST NIGHT — {career.lastReview.headline}
+            </div>
             <div className="bincident">{career.lastReview.incident}</div>
             <div className="bconsequence">{career.lastReview.consequence}</div>
           </div>
@@ -1232,8 +1744,8 @@ function PrepBook({ onBack }: { onBack: () => void }) {
         <NightContractCard />
         {nightTake && (
           <div className="btake">
-            Last night: £{nightTake.covers} covers − £{nightTake.wages} wages − £
-            {nightTake.breakage} breakage ={" "}
+            Last night: £{nightTake.covers} covers − £{nightTake.wages} wages −
+            £{nightTake.breakage} breakage ={" "}
             <b className={nightTake.net >= 0 ? "up" : "down"}>
               {nightTake.net >= 0 ? "+" : ""}£{nightTake.net}
             </b>
@@ -1260,16 +1772,26 @@ function PrepBook({ onBack }: { onBack: () => void }) {
         {beat === 0 && (
           <div className="beat">
             <div className="mhead">
-              THE BRIGADE{career.night === 1 ? " — first night, so: introductions" : ""}
+              THE BRIGADE
+              {career.night === 1 ? " — first night, so: introductions" : ""}
             </div>
             <div className="cast row">
               {cooks.map((c) => (
-                <div key={c.id} className={`ccard tall ${c.walkedOut ? "gone" : ""}`}>
+                <div
+                  key={c.id}
+                  className={`ccard tall ${c.walkedOut ? "gone" : ""}`}
+                >
                   <img src={CAST_IMG[c.name] ?? castCommis} alt={c.name} />
-                  {!CAST_IMG[c.name] && <span className="freshmeat">FRESH MEAT — first night</span>}
+                  {!CAST_IMG[c.name] && (
+                    <span className="freshmeat">FRESH MEAT — first night</span>
+                  )}
                   <span className="cname">
                     {c.name}
-                    {c.trauma > 0 && <span className="scar">{" ✕".repeat(Math.min(3, c.trauma))}</span>}
+                    {c.trauma > 0 && (
+                      <span className="scar">
+                        {" ✕".repeat(Math.min(3, c.trauma))}
+                      </span>
+                    )}
                   </span>
                   <span className="mood">
                     {moodOf(c)} · skill {Math.round(c.skill * 100)}
@@ -1284,211 +1806,413 @@ function PrepBook({ onBack }: { onBack: () => void }) {
             <div className="market">
               <div className="mhead">FAMILY MEAL — eaten standing up</div>
               {mealDone ? (
-                <div className="ltaken">bowls licked. yesterday stays yesterday.</div>
+                <div className="ltaken">
+                  bowls licked. yesterday stays yesterday.
+                </div>
               ) : (
                 <>
                   <button className="btn lbtn" onClick={() => meal(0)}>
-                    PRAISE THEM <span className="cost">+12 morale all · clears grudges</span>
+                    PRAISE THEM{" "}
+                    <span className="cost">
+                      +12 morale all · clears grudges
+                    </span>
                   </button>
                   <button className="btn lbtn" onClick={() => meal(1)}>
-                    THE CRISPY BIT GOES TO THE LOWEST <span className="cost">+25 them, +6 rest · clears grudges</span>
+                    THE CRISPY BIT GOES TO THE LOWEST{" "}
+                    <span className="cost">
+                      +25 them, +6 rest · clears grudges
+                    </span>
                   </button>
                   <button className="btn lbtn dim" onClick={() => meal(2)}>
-                    EAT IN SILENCE <span className="cost">−1 trauma where it hurts · clears grudges</span>
+                    EAT IN SILENCE{" "}
+                    <span className="cost">
+                      −1 trauma where it hurts · clears grudges
+                    </span>
                   </button>
+                  {(career.lastReview?.avgQuality ?? 100) < 58 &&
+                    (career.lastReview?.walkoutNames?.length ?? 0) === 0 && (
+                      <button
+                        className="btn lbtn chef-eats"
+                        onClick={() => meal(3)}
+                      >
+                        EAT THE CRISPY BIT YOURSELF{" "}
+                        <span className="cost">
+                          +10 morale all · the pass holds its head up
+                        </span>
+                      </button>
+                    )}
                 </>
               )}
             </div>
             {career.night === 1 && (
-            <div className="market">
-              <div className="mhead">HOUSE RULE — one twist, all residency</div>
-              {career.mutator ? (
-                <div className="ltaken">rule set: {career.mutator === "double_runners" ? "DOUBLE SHIFT" : career.mutator === "no_bin" ? "NO BIN" : career.mutator === "short_fuse" ? "SHORT FUSE" : "NONE"}. no take-backs.</div>
-              ) : (
-                <>
-                  <button className="btn lbtn" onClick={() => chooseMutator("double_runners")}>
-                    DOUBLE SHIFT <span className="cost">BEEFCAKES doubles runners · all 9 nights</span>
-                  </button>
-                  <button className="btn lbtn" onClick={() => chooseMutator("no_bin")}>
-                    NO BIN <span className="cost">86 off · cook everything · all 9 nights</span>
-                  </button>
-                  <button className="btn lbtn dim" onClick={() => chooseMutator("short_fuse")}>
-                    SHORT FUSE <span className="cost">tables walk 20% faster · all 9 nights</span>
-                  </button>
-                  <button className="btn lbtn" onClick={() => chooseMutator("none")}>
-                    NO HOUSE RULE <span className="cost">play it straight · all 9 nights</span>
-                  </button>
-                </>
-              )}
-            </div>
+              <div className="market">
+                <div className="mhead">
+                  HOUSE RULE — one twist, all residency
+                </div>
+                {career.mutator ? (
+                  <div className="ltaken">
+                    rule set:{" "}
+                    {career.mutator === "double_runners"
+                      ? "DOUBLE SHIFT"
+                      : career.mutator === "no_bin"
+                        ? "NO BIN"
+                        : career.mutator === "short_fuse"
+                          ? "SHORT FUSE"
+                          : "NONE"}
+                    . no take-backs.
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      className="btn lbtn"
+                      onClick={() => chooseMutator("double_runners")}
+                    >
+                      DOUBLE SHIFT{" "}
+                      <span className="cost">
+                        BEEFCAKES doubles runners · all 9 nights
+                      </span>
+                    </button>
+                    <button
+                      className="btn lbtn"
+                      onClick={() => chooseMutator("no_bin")}
+                    >
+                      NO BIN{" "}
+                      <span className="cost">
+                        86 off · cook everything · all 9 nights
+                      </span>
+                    </button>
+                    <button
+                      className="btn lbtn dim"
+                      onClick={() => chooseMutator("short_fuse")}
+                    >
+                      SHORT FUSE{" "}
+                      <span className="cost">
+                        tables walk 20% faster · all 9 nights
+                      </span>
+                    </button>
+                    <button
+                      className="btn lbtn"
+                      onClick={() => chooseMutator("none")}
+                    >
+                      NO HOUSE RULE{" "}
+                      <span className="cost">
+                        play it straight · all 9 nights
+                      </span>
+                    </button>
+                  </>
+                )}
+              </div>
             )}
             {career.night >= 2 && (
-            <div className="market">
-              <div className="mhead">COACHING — one session a night</div>
-              {(career.coachNight ?? -1) >= career.night ? (
-                <div className="ltaken">session done. let it simmer.</div>
-              ) : (
-                <>
-                  {cooks.map((c) => (
-                    <div key={c.id} className="lot">
-                      <span className="lname">{c.name}</span>
-                      <span className="ldesc">skill {Math.round(c.skill * 100)}{c.grudge ? ` · holding: ${c.grudge}` : ""}{c.honored ? " · ✦ keepsake" : ""}</span>
-                      <span className="lbtns">
-                        <button className="btn lbtn" disabled={c.walkedOut} onClick={() => coach(c.id, "praise")}>PRAISE</button>
-                        <button className="btn lbtn" disabled={c.walkedOut} onClick={() => coach(c.id, "drill")}>DRILL <span className="cost">+3 skill, −8 morale</span></button>
-                        <button className="btn lbtn dim" disabled={c.walkedOut} onClick={() => coach(c.id, "rest")}>REST <span className="cost">−1 trauma</span></button>
-                      </span>
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
+              <div className="market">
+                <div className="mhead">COACHING — one session a night</div>
+                {(career.coachNight ?? -1) >= career.night ? (
+                  <div className="ltaken">session done. let it simmer.</div>
+                ) : (
+                  <>
+                    {cooks.map((c) => (
+                      <div key={c.id} className="lot">
+                        <span className="lname">{c.name}</span>
+                        <span className="ldesc">
+                          skill {Math.round(c.skill * 100)}
+                          {c.grudge ? ` · holding: ${c.grudge}` : ""}
+                          {c.honored ? " · ✦ keepsake" : ""}
+                        </span>
+                        <span className="lbtns">
+                          <button
+                            className="btn lbtn"
+                            disabled={c.walkedOut}
+                            onClick={() => coach(c.id, "praise")}
+                          >
+                            PRAISE
+                          </button>
+                          <button
+                            className="btn lbtn"
+                            disabled={c.walkedOut}
+                            onClick={() => coach(c.id, "drill")}
+                          >
+                            DRILL{" "}
+                            <span className="cost">+3 skill, −8 morale</span>
+                          </button>
+                          <button
+                            className="btn lbtn dim"
+                            disabled={c.walkedOut}
+                            onClick={() => coach(c.id, "rest")}
+                          >
+                            REST <span className="cost">−1 trauma</span>
+                          </button>
+                        </span>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
             )}
           </div>
         )}
         {beat === 1 && (
           <div className="beat">
             <div className="market-head">
-              <img className="fishmonger" src={castFishmonger} alt="The fishmonger — what the sea surrendered" />
-              <img className="market-sign" src={marketSign} alt="MORNING MARKET — what the sea surrendered" />
+              <img
+                className="fishmonger"
+                src={castFishmonger}
+                alt="The fishmonger — what the sea surrendered"
+              />
+              <img
+                className="market-sign"
+                src={marketSign}
+                alt="MORNING MARKET — what the sea surrendered"
+              />
             </div>
             {career.night >= 3 && (
-            <div className="market">
-              <div className="mhead">MENU — feature one, rest one</div>
-              {(career.menuNight ?? -1) >= career.night ? (
-                <div className="ltaken">feature: {career.featuredDish} · resting: {career.restedDish}</div>
-              ) : (
-                <MenuPicker featured={career.featuredDish} onPick={(f, r) => setMenu(f, r)} />
-              )}
-            </div>
+              <div className="market">
+                <div className="mhead">MENU — feature one, rest one</div>
+                {(career.menuNight ?? -1) >= career.night ? (
+                  <div className="ltaken">
+                    feature: {career.featuredDish} · resting:{" "}
+                    {career.restedDish}
+                  </div>
+                ) : (
+                  <MenuPicker
+                    featured={career.featuredDish}
+                    onPick={(f, r) => setMenu(f, r)}
+                  />
+                )}
+              </div>
             )}
             {career.night >= 2 && lots.length > 0 && (
-          <div className="market">
-            <div className="mhead">MORNING MARKET — what the sea surrendered</div>
-            {lots.map((l, i) => (
-              <div key={i} className={`lot ${l.bought ? "gone" : ""}`}>
-                <span className="lname">{l.name}</span>
-                <span className="ldesc">{l.desc}{l.note && <em className="lnote">{l.note} — {l.voice}</em>}</span>
-                {l.bought ? (
-                  <span className="ltaken">in the walk-in</span>
-                ) : l.contested ? (
-                  <span className="lbtns">
-                    <span className="lwants">BEEFCAKES wants it too.</span>
-                    <button
-                      className="btn lbtn"
-                      disabled={career.cash < l.cost + 20}
-                      onClick={() => buyLot(i, true)}
-                    >
-                      OUTBID HIM £{l.cost + 20}
-                    </button>
-                    <button className="btn lbtn dim" onClick={() => buyLot(i, false)}>
-                      LET HIM HAVE IT
-                    </button>
+              <div className="market">
+                <div className="mhead">
+                  MORNING MARKET — what the sea surrendered
+                </div>
+                {lots.map((l, i) => (
+                  <div key={i} className={`lot ${l.bought ? "gone" : ""}`}>
+                    <span className="lname">{l.name}</span>
+                    <span className="ldesc">
+                      {l.desc}
+                      {l.note && (
+                        <em className="lnote">
+                          {l.note} — {l.voice}
+                        </em>
+                      )}
+                    </span>
+                    {l.bought ? (
+                      <span className="ltaken">in the walk-in</span>
+                    ) : l.contested ? (
+                      <span className="lbtns">
+                        <span className="lwants">BEEFCAKES wants it too.</span>
+                        <button
+                          className="btn lbtn"
+                          disabled={career.cash < l.cost + 20}
+                          onClick={() => buyLot(i, true)}
+                        >
+                          OUTBID HIM £{l.cost + 20}
+                        </button>
+                        <button
+                          className="btn lbtn dim"
+                          onClick={() => buyLot(i, false)}
+                        >
+                          LET HIM HAVE IT
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        className="btn lbtn"
+                        disabled={career.cash < l.cost}
+                        onClick={() => buyLot(i, true)}
+                      >
+                        £{l.cost}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            {career.night >= 3 && (
+              <div className="bshop slim">
+                <div className="mhead">BACK OFFICE</div>
+                <button
+                  className="btn shop"
+                  disabled={career.cash < 40}
+                  onClick={() => briefAction("drinks")}
+                >
+                  TAKE THEM FOR DRINKS{" "}
+                  <span className="cost">£40 · +25 morale</span>
+                </button>
+                <button
+                  className="btn shop"
+                  disabled={career.cash < 80 || career.gear >= 3}
+                  onClick={() => briefAction("gear")}
+                >
+                  BETTER PANS{" "}
+                  <span className="cost">
+                    £80 · quality floor {career.gear}/3
                   </span>
+                </button>
+                <button
+                  className="btn shop"
+                  disabled={career.cash < 60}
+                  onClick={() => briefAction("press")}
+                >
+                  COMP THE FOOD PRESS{" "}
+                  <span className="cost">£60 · −heat, +5 morale</span>
+                </button>
+              </div>
+            )}
+            {career.night >= 4 && (
+              <div className="bshop slim">
+                <div className="mhead">
+                  CLOUT — EGO {Math.round(ego)} · spend it tonight
+                </div>
+                {(career.champagneNight ?? -1) >= career.night ? (
+                  <div className="ltaken">
+                    champagne on ice for the inspector
+                  </div>
                 ) : (
-                  <button className="btn lbtn" disabled={career.cash < l.cost} onClick={() => buyLot(i, true)}>
-                    £{l.cost}
+                  <button
+                    className="btn shop"
+                    disabled={ego < 15}
+                    onClick={() => clout("champagne")}
+                  >
+                    COMP CHAMPAGNE FOR THE INSPECTOR{" "}
+                    <span className="cost">15 ego · +10 on their plates</span>
+                  </button>
+                )}
+                {(career.dessertNight ?? -1) >= career.night ? (
+                  <div className="ltaken">
+                    dessert on the house for the regulars
+                  </div>
+                ) : (
+                  <button
+                    className="btn shop"
+                    disabled={ego < 20}
+                    onClick={() => clout("dessert")}
+                  >
+                    DESSERT ON THE HOUSE{" "}
+                    <span className="cost">
+                      20 ego · regulars forgive twice
+                    </span>
+                  </button>
+                )}
+                {career.doorNamed ? (
+                  <div className="ltaken">your name is above the door</div>
+                ) : (
+                  <button
+                    className="btn shop"
+                    disabled={ego < 40}
+                    onClick={() => clout("door")}
+                  >
+                    NAME ABOVE THE DOOR{" "}
+                    <span className="cost">
+                      40 ego to ask · 30 to buy · accolade, no star
+                    </span>
                   </button>
                 )}
               </div>
-            ))}
-          </div>
-        )}
-            {career.night >= 3 && (
-            <div className="bshop slim">
-              <div className="mhead">BACK OFFICE</div>
-              <button className="btn shop" disabled={career.cash < 40} onClick={() => briefAction("drinks")}>
-                TAKE THEM FOR DRINKS <span className="cost">£40 · +25 morale</span>
-              </button>
-              <button
-                className="btn shop"
-                disabled={career.cash < 80 || career.gear >= 3}
-                onClick={() => briefAction("gear")}
-              >
-                BETTER PANS <span className="cost">£80 · quality floor {career.gear}/3</span>
-              </button>
-              <button className="btn shop" disabled={career.cash < 60} onClick={() => briefAction("press")}>
-                COMP THE FOOD PRESS <span className="cost">£60 · −heat, +5 morale</span>
-              </button>
-            </div>
-            )}
-            {career.night >= 4 && (
-            <div className="bshop slim">
-              <div className="mhead">CLOUT — EGO {Math.round(ego)} · spend it tonight</div>
-              {(career.champagneNight ?? -1) >= career.night ? (
-                <div className="ltaken">champagne on ice for the inspector</div>
-              ) : (
-                <button className="btn shop" disabled={ego < 15} onClick={() => clout("champagne")}>
-                  COMP CHAMPAGNE FOR THE INSPECTOR <span className="cost">15 ego · +10 on their plates</span>
-                </button>
-              )}
-              {(career.dessertNight ?? -1) >= career.night ? (
-                <div className="ltaken">dessert on the house for the regulars</div>
-              ) : (
-                <button className="btn shop" disabled={ego < 20} onClick={() => clout("dessert")}>
-                  DESSERT ON THE HOUSE <span className="cost">20 ego · regulars forgive twice</span>
-                </button>
-              )}
-              {career.doorNamed ? (
-                <div className="ltaken">your name is above the door</div>
-              ) : (
-                <button className="btn shop" disabled={ego < 40} onClick={() => clout("door")}>
-                  NAME ABOVE THE DOOR <span className="cost">40 ego to ask · 30 to buy · accolade, no star</span>
-                </button>
-              )}
-            </div>
             )}
             {career.night >= 8 && (
-            <>
-            <div className="bshop slim">
-              <div className="mhead">CALL THE BOARD — one wager</div>
-              {career.bet ? (
-                <div className="ltaken">board called: {BOARD[career.bet.kind].label}</div>
-              ) : (
-                <>
-                  <button className="btn shop" disabled={career.cash < BOARD.covers.stake} onClick={() => bet("covers")}>
-                    8+ COVERS <span className="cost">{BOARD.covers.blurb}</span>
-                  </button>
-                  <button className="btn shop" disabled={career.cash < BOARD.walks.stake} onClick={() => bet("walks")}>
-                    NO WALKS <span className="cost">{BOARD.walks.blurb}</span>
-                  </button>
-                  <button className="btn shop" disabled={ego < BOARD.spot.stakeEgo} onClick={() => bet("spot")}>
-                    CLOCK THE INSPECTOR <span className="cost">{BOARD.spot.blurb}</span>
-                  </button>
-                </>
-              )}
-            </div>
-            <div className="bshop slim">
-              <div className="mhead">TONIGHT'S VOW — judged first on the card</div>
-              {career.vow ? (
-                <div className="ltaken">vowed: {career.vow.toUpperCase()}</div>
-              ) : (
-                <>
-                  <button className="btn shop" onClick={() => chooseVow("star")}>STAR VOW <span className="cost">no walks + clocked = +15 lifetime ego</span></button>
-                  <button className="btn shop" onClick={() => chooseVow("house")}>HOUSE VOW <span className="cost">101 turns twice</span></button>
-                  <button className="btn shop" onClick={() => chooseVow("brigade")}>BRIGADE VOW <span className="cost">zero walkouts, trauma −1</span></button>
-                </>
-              )}
-            </div>
-            </>
+              <>
+                <div className="bshop slim">
+                  <div className="mhead">CALL THE BOARD — one wager</div>
+                  {career.bet ? (
+                    <div className="ltaken">
+                      board called: {BOARD[career.bet.kind].label}
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        className="btn shop"
+                        disabled={career.cash < BOARD.covers.stake}
+                        onClick={() => bet("covers")}
+                      >
+                        8+ COVERS{" "}
+                        <span className="cost">{BOARD.covers.blurb}</span>
+                      </button>
+                      <button
+                        className="btn shop"
+                        disabled={career.cash < BOARD.walks.stake}
+                        onClick={() => bet("walks")}
+                      >
+                        NO WALKS{" "}
+                        <span className="cost">{BOARD.walks.blurb}</span>
+                      </button>
+                      <button
+                        className="btn shop"
+                        disabled={ego < BOARD.spot.stakeEgo}
+                        onClick={() => bet("spot")}
+                      >
+                        CLOCK THE INSPECTOR{" "}
+                        <span className="cost">{BOARD.spot.blurb}</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div className="bshop slim">
+                  <div className="mhead">
+                    TONIGHT'S VOW — judged first on the card
+                  </div>
+                  {career.vow ? (
+                    <div className="ltaken">
+                      vowed: {career.vow.toUpperCase()}
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        className="btn shop"
+                        onClick={() => chooseVow("star")}
+                      >
+                        STAR VOW{" "}
+                        <span className="cost">
+                          no walks + clocked = +15 lifetime ego
+                        </span>
+                      </button>
+                      <button
+                        className="btn shop"
+                        onClick={() => chooseVow("house")}
+                      >
+                        HOUSE VOW <span className="cost">101 turns twice</span>
+                      </button>
+                      <button
+                        className="btn shop"
+                        onClick={() => chooseVow("brigade")}
+                      >
+                        BRIGADE VOW{" "}
+                        <span className="cost">zero walkouts, trauma −1</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
             )}
             <div className="bshop slim">
               <div className="mhead">A MAN WITH A VAN</div>
               {(career.debt ?? 0) > 0 ? (
-                <button className="btn shop" disabled={career.cash < (career.debt ?? 0) + 30} onClick={repay}>
-                  PAY THE MAN £{(career.debt ?? 0) + 30} <span className="cost">before the residency ends</span>
+                <button
+                  className="btn shop"
+                  disabled={career.cash < (career.debt ?? 0) + 30}
+                  onClick={repay}
+                >
+                  PAY THE MAN £{(career.debt ?? 0) + 30}{" "}
+                  <span className="cost">before the residency ends</span>
                 </button>
               ) : (
                 <button className="btn shop" onClick={borrow}>
-                  BORROW £100 <span className="cost">he&apos;ll want £130 back</span>
+                  BORROW £100{" "}
+                  <span className="cost">he&apos;ll want £130 back</span>
                 </button>
               )}
             </div>
           </div>
         )}
         {beat === 2 && <FeudPanel />}
-        {feed.length > 0 && <div className="bfeed">{feed[feed.length - 1].text}</div>}
-        {!canSave && <div className="bwarn">Progress won't persist — this browser blocks storage.</div>}
+        {feed.length > 0 && (
+          <div className="bfeed">{feed[feed.length - 1].text}</div>
+        )}
+        {!canSave && (
+          <div className="bwarn">
+            Progress won't persist — this browser blocks storage.
+          </div>
+        )}
         <button className="btn serve big" onClick={go}>
           {fwdLabel}
         </button>
@@ -1515,14 +2239,22 @@ function Ending() {
             <div className="ending-title">CURTAIN CALL</div>
             <div className="rollcall">
               {ending.rollCall.map((entry, i) => (
-                <div key={entry.name} className={`roll-line ${entry.gone ? "gone" : ""}`} style={{ animationDelay: `${0.15 + i * 0.55}s` }}>
+                <div
+                  key={`${entry.name}-${i}`}
+                  className={`roll-line ${entry.gone ? "gone" : ""}`}
+                  style={{ animationDelay: `${0.15 + i * 0.55}s` }}
+                >
                   <span className="roll-name">{entry.name}</span>
                   <span className="roll-fate">{entry.line}</span>
                 </div>
               ))}
             </div>
             <div className="rbtns main-action">
-              <button className="btn serve" autoFocus onClick={dismissEndingCurtain}>
+              <button
+                className="btn serve"
+                autoFocus
+                onClick={dismissEndingCurtain}
+              >
                 THE VERDICT <span className="kbd">↵</span>
               </button>
             </div>
@@ -1530,7 +2262,11 @@ function Ending() {
         ) : (
           <>
             <div className={`ending-result ${ending.won ? "won" : ""}`}>
-              {ending.broke ? "THE HOUSE CLOSED" : ending.won ? "RESIDENCY WON" : "RESIDENCY UNFINISHED"}
+              {ending.broke
+                ? "THE HOUSE CLOSED"
+                : ending.won
+                  ? "RESIDENCY WON"
+                  : "RESIDENCY UNFINISHED"}
             </div>
             <div className="ending-title">{ending.title}</div>
             <div className="quote">{ending.quote}</div>
@@ -1547,10 +2283,15 @@ function Ending() {
               <span>{career.defections} defections</span>
               <span>{career.totalWalkouts ?? 0} walkouts</span>
               <span>{Math.round(career.totalEgo ?? 0)} lifetime ego</span>
-              {(career.covers ?? []).length > 0 && <span>covers: {(career.covers ?? []).join(" · ")}</span>}
+              {(career.covers ?? []).length > 0 && (
+                <span>covers: {(career.covers ?? []).join(" · ")}</span>
+              )}
             </div>
             <div className="rbtns">
-              <button className="btn serve" onClick={() => enterResidency({ fresh: true })}>
+              <button
+                className="btn serve"
+                onClick={() => enterResidency({ fresh: true })}
+              >
                 NEW RESIDENCY <span className="kbd">↵</span>
               </button>
             </div>
@@ -1568,29 +2309,51 @@ function useHotkeys() {
       const s = useGame.getState();
       // the controls modal owns input entirely — Escape/? close it, nothing else passes
       if (s.glossary) {
-        if (e.key === "Escape" || e.key === "?") { e.preventDefault(); s.toggleGlossary(); }
+        if (e.key === "Escape" || e.key === "?") {
+          e.preventDefault();
+          s.toggleGlossary();
+        }
         return;
       }
-      if (e.key === "?") { e.preventDefault(); s.toggleGlossary(); return; }
+      if (e.key === "?") {
+        e.preventDefault();
+        s.toggleGlossary();
+        return;
+      }
       if (s.phase === "title" && (e.key === " " || e.key === "Enter")) {
         // buttons, the Menu summary and links own their own activation
-        if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
+        if (
+          e.target instanceof Element &&
+          e.target.closest("button, summary, input, select, textarea, a")
+        )
+          return;
         e.preventDefault();
         s.enterResidency();
         return;
       }
       if (s.phase === "briefing" && e.key === "Enter") return; // briefing components own Enter
-      if (s.phase === "ending") {
-        if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
+      if (s.phase === "ending" && (e.key === " " || e.key === "Enter")) {
+        if (
+          e.target instanceof Element &&
+          e.target.closest("button, summary, input, select, textarea, a")
+        )
+          return;
         e.preventDefault();
-        if (s.endingCurtain) { s.dismissEndingCurtain(); return; }
+        if (s.endingCurtain) {
+          s.dismissEndingCurtain();
+          return;
+        }
         s.enterResidency({ fresh: true });
         return;
       }
       if (s.phase === "review" && (e.key === " " || e.key === "Enter")) {
         // a focused button, summary or link owns its own activation — don't
         // let the global advance steal it (details must be keyboard-expandable)
-        if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
+        if (
+          e.target instanceof Element &&
+          e.target.closest("button, summary, input, select, textarea, a")
+        )
+          return;
         e.preventDefault();
         s.continueNext();
         return;
@@ -1607,7 +2370,10 @@ function useHotkeys() {
       }
       if (e.key === "Escape") {
         // inspection closes before the pause overlay takes the key
-        if (s.inspecting) { s.setInspecting(false); return; }
+        if (s.inspecting) {
+          s.setInspecting(false);
+          return;
+        }
         s.togglePause();
         return;
       }
@@ -1618,16 +2384,28 @@ function useHotkeys() {
       if (s.paused) return;
       const k = e.key.toLowerCase();
       // walk the line: Q toward the sinks, W toward the room, 0 back to the pass
-      if (k === "0") { s.setStance("pass"); return; }
-      if (k === "q") { s.stepStance(-1); return; }
-      if (k === "w") { s.stepStance(1); return; }
+      if (k === "0") {
+        s.setStance("pass");
+        return;
+      }
+      if (k === "q") {
+        s.stepStance(-1);
+        return;
+      }
+      if (k === "w") {
+        s.stepStance(1);
+        return;
+      }
       if (k === "s") return s.smartServe();
       if (k === "b") return s.judge("sendback");
       if (k === "x") return s.judge("smash");
       if (k === "f") {
         if (s.folklore?.kind === "return") return s.answerFolklore(false);
         // F aims at the selected ticket: ready → collect, cooking → fire
-        const sel = s.selectedTicketId != null ? s.tickets.find((t) => t.id === s.selectedTicketId) : null;
+        const sel =
+          s.selectedTicketId != null
+            ? s.tickets.find((t) => t.id === s.selectedTicketId)
+            : null;
         if (sel?.state === "ready") return s.collectPlate(sel.id);
         return s.firePlate(sel?.id);
       }
@@ -1640,8 +2418,15 @@ function useHotkeys() {
         return s.whisk();
       }
       if (k === "t") return s.move101();
-      if (k === "r" && s.folklore && s.folklore.kind !== "flash" && s.folklore.kind !== "return") return s.answerFolklore(true);
-      if (k === "d" && s.folklore?.kind === "return") return s.answerFolklore(true);
+      if (
+        k === "r" &&
+        s.folklore &&
+        s.folklore.kind !== "flash" &&
+        s.folklore.kind !== "return"
+      )
+        return s.answerFolklore(true);
+      if (k === "d" && s.folklore?.kind === "return")
+        return s.answerFolklore(true);
       if (k === "h") return s.shooRunner();
       if (k === "d") return s.declineRequest();
       if (k === "c") return s.compTable();
@@ -1663,7 +2448,10 @@ function Glossary() {
   const toggleGlossary = useGame((s) => s.toggleGlossary);
   const rows: [string, string][] = [
     ["1–9", "plate rail ticket to pass"],
-    ["S / B / X", "serve (collects a ready plate if the pass is empty) · send back · smash the held plate"],
+    [
+      "S / B / X",
+      "serve (collects a ready plate if the pass is empty) · send back · smash the held plate",
+    ],
     ["F", "fire / collect the aimed ticket"],
     ["I", "inspect the held plate"],
     ["E", "86 the dish — displaced covers count as misses"],
@@ -1701,12 +2489,25 @@ function Glossary() {
   }, []);
   return (
     <div className="glossary" onClick={toggleGlossary}>
-      <div className="gcard" role="dialog" aria-modal="true" aria-labelledby="controls-title" onClick={(e) => e.stopPropagation()}>
-        <div className="ghead" id="controls-title">HOUSE MANUAL — ? to close</div>
+      <div
+        className="gcard"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="controls-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="ghead" id="controls-title">
+          HOUSE MANUAL — ? to close
+        </div>
         {rows.map(([k, v]) => (
-          <div key={k} className="grow"><span className="gkey">{k}</span><span>{v}</span></div>
+          <div key={k} className="grow">
+            <span className="gkey">{k}</span>
+            <span>{v}</span>
+          </div>
         ))}
-        <button className="btn" ref={closeBtn} onClick={toggleGlossary}>BACK TO WORK</button>
+        <button className="btn" ref={closeBtn} onClick={toggleGlossary}>
+          BACK TO WORK
+        </button>
       </div>
     </div>
   );
@@ -1778,7 +2579,10 @@ export default function HUD() {
   // the back door: type 8-6 at the title and sixty quid sits under the mat
   const knockBuffer = useRef("");
   useEffect(() => {
-    if (phase !== "title") { knockBuffer.current = ""; return; }
+    if (phase !== "title") {
+      knockBuffer.current = "";
+      return;
+    }
     const h = (e: KeyboardEvent) => {
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
       if (!/^[0-9]$/.test(e.key)) return;
@@ -1804,7 +2608,9 @@ export default function HUD() {
     }
   };
   const atPass = tickets.find((t) => t.state === "pass");
-  const live = tickets.filter((t) => t.state === "rail" || t.state === "plating" || t.state === "ready");
+  const live = tickets.filter(
+    (t) => t.state === "rail" || t.state === "plating" || t.state === "ready",
+  );
   const railAll = live.filter((t) => t.state === "rail");
   const amped = serviceTime < adrenalineTil;
   // one rail, one keyed card per order — rendered from the first ticket of
@@ -1834,26 +2640,71 @@ export default function HUD() {
       {glossary && <Glossary />}
       {phase === "title" && (
         <div className="title-card title-simple">
-          <img className="hero-lineup" src={lineupArt} alt="MISE EN MOSH — the brigade at the pass" fetchPriority="high" loading="eager" decoding="async" />
+          <img
+            className="hero-lineup"
+            src={lineupArt}
+            alt="MISE EN MOSH — the brigade at the pass"
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
+          />
           <div className="title-promise">{INTRO.titleSub}</div>
-          <button className="btn title-play" autoFocus disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency(); }}>
+          <button
+            className="btn title-play"
+            autoFocus
+            disabled={!!saveIssue}
+            onClick={() => {
+              preloadKitchenModels();
+              enterResidency();
+            }}
+          >
             {hasSave ? `CONTINUE — NIGHT ${career.night}` : "TAKE THE PASS"}
           </button>
-          {matVisible && <div className="mat-drop" role="status">THE BACK DOOR — sixty quid under the mat. £{useGame.getState().career.cash} in the pocket.</div>}
+          {matVisible && (
+            <div className="mat-drop" role="status">
+              THE BACK DOOR — sixty quid under the mat. £
+              {useGame.getState().career.cash} in the pocket.
+            </div>
+          )}
           {!hasSave && <div className="title-hint">{INTRO.titleHint}</div>}
-          {!hasSave && <div className="title-residency">{INTRO.residencyLine}</div>}
+          {!hasSave && (
+            <div className="title-residency">{INTRO.residencyLine}</div>
+          )}
           <details className="title-menu">
             <summary>Menu</summary>
             <div className="title-menu-panel">
-              <button className="btn" onClick={toggleGlossary}>CONTROLS</button>
-              <button className="btn" onClick={() => { const next = !voiceOn; setVoiceEnabled(next); setVoiceOn(next); }}>
+              <button className="btn" onClick={toggleGlossary}>
+                CONTROLS
+              </button>
+              <button
+                className="btn"
+                onClick={() => {
+                  const next = !voiceOn;
+                  setVoiceEnabled(next);
+                  setVoiceOn(next);
+                }}
+              >
                 VOICE {voiceOn ? "ON" : "OFF"}
               </button>
-              <button className="btn" disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency({ prep: true }); }}>
+              <button
+                className="btn"
+                disabled={!!saveIssue}
+                onClick={() => {
+                  preloadKitchenModels();
+                  enterResidency({ prep: true });
+                }}
+              >
                 HOW IT WORKS (PREP)
               </button>
               {hasSave && (
-                <button className="btn ghost" disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency({ fresh: true }); }}>
+                <button
+                  className="btn ghost"
+                  disabled={!!saveIssue}
+                  onClick={() => {
+                    preloadKitchenModels();
+                    enterResidency({ fresh: true });
+                  }}
+                >
                   NEW RESIDENCY
                 </button>
               )}
@@ -1862,39 +2713,90 @@ export default function HUD() {
                 <div className="cast">
                   <div className="ccard">
                     <img src={castPetra} alt="PETRA" />
-                    <span>PETRA — grill.<br />Do not touch her tongs.</span>
+                    <span>
+                      PETRA — grill.
+                      <br />
+                      Do not touch her tongs.
+                    </span>
                   </div>
                   <div className="ccard">
                     <img src={castDimitri} alt="DIMITRI" />
-                    <span>DIMITRI — sauté.<br />He's seen things.</span>
+                    <span>
+                      DIMITRI — sauté.
+                      <br />
+                      He's seen things.
+                    </span>
                   </div>
                   <div className="ccard">
                     <img src={castAnwar} alt="ANWAR" />
-                    <span>ANWAR — pastry.<br />Fragile. Handle with care.</span>
+                    <span>
+                      ANWAR — pastry.
+                      <br />
+                      Fragile. Handle with care.
+                    </span>
                   </div>
-                  <button type="button" className={`ccard wanted${pokes > 0 && !career.criticCam ? " poked" : ""}`} onClick={pokeBeefcakes} title="WANTED for ticket theft.">
+                  <button
+                    type="button"
+                    className={`ccard wanted${pokes > 0 && !career.criticCam ? " poked" : ""}`}
+                    onClick={pokeBeefcakes}
+                    title="WANTED for ticket theft."
+                  >
                     <img src={castBeefcakes} alt="BEEFCAKES" />
-                    <span>BEEFCAKES<br />WANTED for ticket theft.</span>
-                    {pokes === 1 && !career.criticCam && <span className="poke">BEEFCAKES eyes your tickets.</span>}
-                    {pokes >= 2 && !career.criticCam && <span className="poke">BEEFCAKES mouths: “nice pass. shame if—”</span>}
-                    {career.criticCam && <span className="poke wired">CRITIC CAM WIRED — a red eye blinks above the pass. Tell no one.</span>}
+                    <span>
+                      BEEFCAKES
+                      <br />
+                      WANTED for ticket theft.
+                    </span>
+                    {pokes === 1 && !career.criticCam && (
+                      <span className="poke">BEEFCAKES eyes your tickets.</span>
+                    )}
+                    {pokes >= 2 && !career.criticCam && (
+                      <span className="poke">
+                        BEEFCAKES mouths: “nice pass. shame if—”
+                      </span>
+                    )}
+                    {career.criticCam && (
+                      <span className="poke wired">
+                        CRITIC CAM WIRED — a red eye blinks above the pass. Tell
+                        no one.
+                      </span>
+                    )}
                   </button>
                 </div>
               </details>
               {(() => {
                 const l = loadLegends();
                 if (!l.residencies && !l.bestStreak) return null;
-                return <div className="legends-line">HOUSE LEGENDS — best streak ×{l.bestStreak} · silent fives {l.silentFives} · covers {l.covers.length} · residencies {l.residencies}</div>;
+                return (
+                  <div className="legends-line">
+                    HOUSE LEGENDS — best streak ×{l.bestStreak} · silent fives{" "}
+                    {l.silentFives} · covers {l.covers.length} · residencies{" "}
+                    {l.residencies}
+                  </div>
+                );
               })()}
-              {ogHandle && <div className="legends-line">CHEF {ogHandle.toUpperCase()} IS ON THE PASS.</div>}
+              {ogHandle && (
+                <div className="legends-line">
+                  CHEF {ogHandle.toUpperCase()} IS ON THE PASS.
+                </div>
+              )}
             </div>
           </details>
         </div>
       )}
       {/* rendered outside the overflowing title panel so the warning is always visible */}
-      {phase === "title" && saveIssue && <p className="save-issue" role="alert">{saveIssue}</p>}
+      {phase === "title" && saveIssue && (
+        <p className="save-issue" role="alert">
+          {saveIssue}
+        </p>
+      )}
       {phase === "briefing" && <Briefing />}
-      {phase === "service" && openingStep && (<>{railCards}<OpeningService /></>)}
+      {phase === "service" && openingStep && (
+        <>
+          {railCards}
+          <OpeningService />
+        </>
+      )}
       {phase === "service" && !openingStep && (
         <>
           <ServiceTools />
@@ -1904,7 +2806,17 @@ export default function HUD() {
           )}
           {firstPerson && aim && aim !== "station" && (
             <div className={`aimtag ${aim}`}>
-              {aim === "fire" ? "SMOTHER" : aim === "ticket" ? "CALL" : aim === "ready" ? "COLLECT" : aim === "held" ? "INSPECT" : aim === "cooking" ? "FIRE" : "FLAG THEM"}
+              {aim === "fire"
+                ? "SMOTHER"
+                : aim === "ticket"
+                  ? "CALL"
+                  : aim === "ready"
+                    ? "COLLECT"
+                    : aim === "held"
+                      ? "INSPECT"
+                      : aim === "cooking"
+                        ? "FIRE"
+                        : "FLAG THEM"}
             </div>
           )}
           {firstPerson && !locked && !paused && (
@@ -1920,7 +2832,8 @@ export default function HUD() {
                 {charge > 1.05 ? "TOO LONG" : charge > 0.75 ? "ROAR" : "INHALE"}
               </span>
             </div>
-          )}          {firstPerson ? (
+          )}{" "}
+          {firstPerson ? (
             <div className="hint">
               {atPass
                 ? "Hold right mouse to look at the plate."
@@ -1944,22 +2857,37 @@ export default function HUD() {
                                   ? "Spot the inspector — aim and click."
                                   : null}
             </div>
-          ) : (() => {
-            // two hands, two problems: the top two live hints stack instead of
-            // one evicting the other mid-rush
-            const hints = [
-              runner && !runner.fled && "Runner on the floor — SHOO HIM (H)!",
-              request && `Table ${request.table} wants it ${request.mod} — D to refuse.`,
-              sauce && "That sauce is splitting — WHISK it (M)!",
-              !atPass && live.some((t) => t.state === "ready") && "A plate is up — F collects it.",
-              live.some((t) => t.state === "plating") && "Plating… F fires it early — wait for the gold.",
-              railAll.length > 0 && `Orders on the rail — keys 1–${Math.min(9, railAll.length)} call them in.`,
-              serviceTime - breadAt >= 18 && "Bread service (G) — a basket settles the hanging table.",
-              nextTicketIn > 6 && "Quiet pass — N waves the next order in early.",
-              !criticFlagged && serviceTime < 100 && "Spot the inspector — click them.",
-            ].filter((h): h is string => !!h);
-            return hints.slice(0, 2).map((h) => <div key={h} className="hint">{h}</div>);
-          })()}
+          ) : (
+            (() => {
+              // two hands, two problems: the top two live hints stack instead of
+              // one evicting the other mid-rush
+              const hints = [
+                runner && !runner.fled && "Runner on the floor — SHOO HIM (H)!",
+                request &&
+                  `Table ${request.table} wants it ${request.mod} — D to refuse.`,
+                sauce && "That sauce is splitting — WHISK it (M)!",
+                !atPass &&
+                  live.some((t) => t.state === "ready") &&
+                  "A plate is up — F collects it.",
+                live.some((t) => t.state === "plating") &&
+                  "Plating… F fires it early — wait for the gold.",
+                railAll.length > 0 &&
+                  `Orders on the rail — keys 1–${Math.min(9, railAll.length)} call them in.`,
+                serviceTime - breadAt >= 18 &&
+                  "Bread service (G) — a basket settles the hanging table.",
+                nextTicketIn > 6 &&
+                  "Quiet pass — N waves the next order in early.",
+                !criticFlagged &&
+                  serviceTime < 100 &&
+                  "Spot the inspector — click them.",
+              ].filter((h): h is string => !!h);
+              return hints.slice(0, 2).map((h) => (
+                <div key={h} className="hint">
+                  {h}
+                </div>
+              ));
+            })()
+          )}
           {railCards}
           {atPass && <PassPanel plate={atPass} firstPerson={firstPerson} />}
           <div className="house-left">
@@ -1971,26 +2899,34 @@ export default function HUD() {
               </b>
               {amped && <span className="amped"> FIRED UP</span>}
               <br />
-              SERVED <b>{served}</b> · BACK <b>{sentBack}</b> · SMASHED <b>{smashed}</b> · WALKED{" "}
-              <b>{misses}</b>
+              SERVED <b>{served}</b> · BACK <b>{sentBack}</b> · SMASHED{" "}
+              <b>{smashed}</b> · WALKED <b>{misses}</b>
               <br />
               EGO <b>{Math.round(ego)}</b> · {tierName(ego)}
               {streak >= 3 && <span className="amped"> · ×{streak}</span>}
               {(() => {
                 if (streak < 3) return null;
                 const best = legendsBest;
-                if (best > 0 && streak > best) return <span className="amped"> · NEW HOUSE BEST</span>;
-                if (best >= 3) return <span className="ghost-target"> · best ×{best}</span>;
+                if (best > 0 && streak > best)
+                  return <span className="amped"> · NEW HOUSE BEST</span>;
+                if (best >= 3)
+                  return <span className="ghost-target"> · best ×{best}</span>;
                 return null;
               })()}
               {screams === 0 ? (
                 <span className="silent"> · SILENT</span>
               ) : (
-                <> · <b>{screams}</b> SCREAMS</>
+                <>
+                  {" "}
+                  · <b>{screams}</b> SCREAMS
+                </>
               )}
             </div>
             {served > 0 && (
-              <div className="qmeter" title="Tonight's food average — 72 earns the second food star, 85 the third">
+              <div
+                className="qmeter"
+                title="Tonight's food average — 72 earns the second food star, 85 the third"
+              >
                 <span className="qmeter-label">TONIGHT</span>
                 <div className="qmeter-track">
                   <div
@@ -2009,71 +2945,79 @@ export default function HUD() {
             {!firstPerson && <Ticker />}
           </div>
           <div className="house-actions">
-          <StanceBar />
-          <button
-            className="btn scream"
-            title="Hold Space to charge; costs morale"
-            onClick={() => scream(1)}
-          >
-            SCREAM <span className="kbd">SPACE</span>{" "}
-            <span className="cost">hold to charge · costs morale</span>
-          </button>
-          <button
-            className="btn voice"
-            title="Brigade voices + review read-out (U)"
-            onClick={() => {
-              const next = !voiceOn;
-              setVoiceEnabled(next);
-              setVoiceOn(next);
-            }}
-          >
-            VOICE {voiceOn ? "ON" : "OFF"} <span className="kbd">U</span>
-          </button>
-          <button
-            className="btn bread"
-            title="£3 · the commis walks a basket to the hanging table"
-            disabled={!!openingStep || career.cash < 3 || serviceTime - breadAt < 18}
-            onClick={() => sendBread()}
-          >
-            BREAD <span className="kbd">G</span>{" "}
-            <span className="cost">
-              {career.cash < 3
-                ? "need £3"
-                : serviceTime - breadAt < 18
-                  ? `basket out · ${Math.ceil(18 - (serviceTime - breadAt))}s`
-                  : "£3 · the hanging table settles"}
-            </span>
-          </button>
-          <button
-            className={`btn expedite${career.night < 2 ? " locked" : ""}`}
-            title="Wave the next order through — +2 station pressure"
-            disabled={career.night < 2 || !!openingStep || nextTicketIn <= 0.5 || live.length >= 9}
-            onClick={() => expedite()}
-          >
-            NEXT <span className="kbd">N</span>{" "}
-            {career.night < 2 ? (
-              <span className="ntwo">NIGHT 2</span>
-            ) : (
+            <StanceBar />
+            <button
+              className="btn scream"
+              title="Hold Space to charge; costs morale"
+              onClick={() => scream(1)}
+            >
+              SCREAM <span className="kbd">SPACE</span>{" "}
+              <span className="cost">hold to charge · costs morale</span>
+            </button>
+            <button
+              className="btn voice"
+              title="Brigade voices + review read-out (U)"
+              onClick={() => {
+                const next = !voiceOn;
+                setVoiceEnabled(next);
+                setVoiceOn(next);
+              }}
+            >
+              VOICE {voiceOn ? "ON" : "OFF"} <span className="kbd">U</span>
+            </button>
+            <button
+              className="btn bread"
+              title="£3 · the commis walks a basket to the hanging table"
+              disabled={
+                !!openingStep || career.cash < 3 || serviceTime - breadAt < 18
+              }
+              onClick={() => sendBread()}
+            >
+              BREAD <span className="kbd">G</span>{" "}
               <span className="cost">
-                {nextTicketIn > 0.5 ? `fire now · +2 pressure` : "printing…"}
+                {career.cash < 3
+                  ? "need £3"
+                  : serviceTime - breadAt < 18
+                    ? `basket out · ${Math.ceil(18 - (serviceTime - breadAt))}s`
+                    : "£3 · the hanging table settles"}
               </span>
-            )}
-          </button>
-          <button
-            className={`btn comp${career.night < 2 ? " locked" : ""}`}
-            title="£20 · the room exhales"
-            disabled={career.night < 2 || comped || career.cash < 20}
-            onClick={() => compTable()}
-          >
-            COMP <span className="kbd">C</span>{" "}
-            {career.night < 2 ? (
-              <span className="ntwo">NIGHT 2</span>
-            ) : (
-              <span className="cost">
-                £20<span className="utility-explainer"> · the room exhales</span>
-              </span>
-            )}
-          </button>
+            </button>
+            <button
+              className={`btn expedite${career.night < 2 ? " locked" : ""}`}
+              title="Wave the next order through — +2 station pressure"
+              disabled={
+                career.night < 2 ||
+                !!openingStep ||
+                nextTicketIn <= 0.5 ||
+                live.length >= 9
+              }
+              onClick={() => expedite()}
+            >
+              NEXT <span className="kbd">N</span>{" "}
+              {career.night < 2 ? (
+                <span className="ntwo">NIGHT 2</span>
+              ) : (
+                <span className="cost">
+                  {nextTicketIn > 0.5 ? `fire now · +2 pressure` : "printing…"}
+                </span>
+              )}
+            </button>
+            <button
+              className={`btn comp${career.night < 2 ? " locked" : ""}`}
+              title="£20 · the room exhales"
+              disabled={career.night < 2 || comped || career.cash < 20}
+              onClick={() => compTable()}
+            >
+              COMP <span className="kbd">C</span>{" "}
+              {career.night < 2 ? (
+                <span className="ntwo">NIGHT 2</span>
+              ) : (
+                <span className="cost">
+                  £20
+                  <span className="utility-explainer"> · the room exhales</span>
+                </span>
+              )}
+            </button>
           </div>
           <VowRibbon />
           <FolkloreBar />
