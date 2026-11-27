@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { residencyWon, resolveSideOrder, scoreService } from "./serviceScore";
+import { nearMissLine, residencyWon, resolveSideOrder, scoreService } from "./serviceScore";
 
 const solid = {
   served: 12,
@@ -62,5 +62,41 @@ describe("nightly side orders", () => {
   it("stays quiet when the ask wasn't met", () => {
     expect(resolveSideOrder(6, { walkouts: 0, sauceOutcomeSaved: false, goldenServed: false, requestFastLanded: false, runnerShooed: false, anyBurned: true, moved101: false, table101Turns: 0, comped: false, served: 6, screams: 0 })).toBeNull();
     expect(resolveSideOrder(9, { walkouts: 0, sauceOutcomeSaved: false, goldenServed: false, requestFastLanded: false, runnerShooed: false, anyBurned: false, moved101: false, table101Turns: 0, comped: false, served: 7, screams: 0 })).toBeNull();
+  });
+});
+
+describe("the near-miss line", () => {
+  it("names the closest path to the next star when the gap is small", () => {
+    const s = scoreService({ ...solid, avgQuality: 83 });
+    expect(nearMissLine({ ...solid, avgQuality: 83 }, s)).toContain("third food star");
+    expect(nearMissLine({ ...solid, avgQuality: 83 }, s)).toContain("83 on the pass");
+  });
+
+  it("picks the smallest gap among food, service and brigade", () => {
+    // hospitality 74 is one point away; food 80 is five; brigade needs three covers
+    const facts = { ...solid, avgQuality: 80, avgHospitality: 74, served: 5 };
+    const line = nearMissLine(facts, scoreService(facts))!;
+    expect(line).toContain("warmth");
+  });
+
+  it("stays silent when the gap is a chasm, not a sting", () => {
+    const facts = { ...solid, avgQuality: 40, avgHospitality: 50, served: 2 };
+    expect(nearMissLine(facts, scoreService(facts))).toBeNull();
+  });
+
+  it("says nothing when the night was perfect", () => {
+    expect(nearMissLine(solid, scoreService(solid))).toBeNull();
+  });
+
+  it("pins the single blemish that cost the brigade star", () => {
+    const facts = { ...solid, misses: 1 };
+    const line = nearMissLine(facts, scoreService(facts))!;
+    expect(line).toContain("One ticket");
+  });
+
+  it("counts the cover that was missing from a clean service", () => {
+    const facts = { ...solid, served: 7 };
+    const line = nearMissLine(facts, scoreService(facts))!;
+    expect(line).toContain("One more cover");
   });
 });

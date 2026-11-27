@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGame, tierName, BOARD, Ticket, VENUES, loadLegends, Cook, petraOpeningReply, consumeBriefingBookRequest, n1NeedsHouseRule, introSeen, Stance, STANCE_ORDER } from "../game/state";
 import { deriveMood } from "../game/mood";
 import { morningCards } from "../game/beats";
@@ -6,7 +6,7 @@ import { dishProfile, plateObservations, correctionNeeded, CORRECTION_LABEL, cur
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
 import { petraCoachingNote, reviewNarration } from "../game/serviceReview";
 import { nightContract, lowestMoraleCook } from "../game/nightArc";
-import { sideOrderFor } from "../game/serviceScore";
+import { sideOrderFor, nearMissLine } from "../game/serviceScore";
 import { buildEnding } from "../game/ending";
 import { speakReview, voiceEnabled, setVoiceEnabled } from "../game/voice";
 import { sfx } from "../game/sound";
@@ -533,6 +533,23 @@ function ReviewCard() {
           <span>BRIGADE {review.brigadeStars}/1</span>
           {review.penalties > 0 && <span>LOSSES −{review.penalties}</span>}
         </div>
+        {(() => {
+          const nm = nearMissLine(
+            { served: review.covers, avgQuality: review.avgQuality, avgHospitality: review.avgHospitality, misses: review.misses, complaints: review.complaints, walkouts: review.walkouts },
+            review,
+          );
+          const l = loadLegends();
+          const record = review.bestStreak > 0 && l.bestStreak > review.bestStreak && l.bestStreak - review.bestStreak <= 2
+            ? `Your record ×${l.bestStreak} stands. Tonight ×${review.bestStreak}.`
+            : null;
+          if (!nm && !record) return null;
+          return (
+            <>
+              {nm && <div className="nearmiss">{nm}</div>}
+              {record && <div className="nearmiss record">{record}</div>}
+            </>
+          );
+        })()}
         {review.headline && <div className="headline">{review.headline}</div>}
         <p className="incident">{review.incident}</p>
         {petraCoachingNote({ stars: review.stars, walkouts: review.walkouts, misses: review.misses, smashed: review.smashed, served: review.covers }) && (
@@ -1710,6 +1727,9 @@ export default function HUD() {
   const hasSave = useGame((s) => s.hasSave);
   const saveIssue = useGame((s) => s.saveIssue);
   const career = useGame((s) => s.career);
+  // the ghost target: the house best lives in legends, refreshed per night —
+  // a record is only a target when the number is on the wall during service
+  const legendsBest = useMemo(() => loadLegends().bestStreak, [career.night]);
   const tickets = useGame((s) => s.tickets);
   const judge = useGame((s) => s.judge);
   const scream = useGame((s) => s.scream);
@@ -1956,6 +1976,13 @@ export default function HUD() {
               <br />
               EGO <b>{Math.round(ego)}</b> · {tierName(ego)}
               {streak >= 3 && <span className="amped"> · ×{streak}</span>}
+              {(() => {
+                if (streak < 3) return null;
+                const best = legendsBest;
+                if (best > 0 && streak > best) return <span className="amped"> · NEW HOUSE BEST</span>;
+                if (best >= 3) return <span className="ghost-target"> · best ×{best}</span>;
+                return null;
+              })()}
               {screams === 0 ? (
                 <span className="silent"> · SILENT</span>
               ) : (

@@ -37,6 +37,38 @@ export function runningAverage(total: number, count: number): number {
   return count > 0 ? total / count : 0;
 }
 
+/** The near-miss line: the closest path to one more star, in kitchen voice.
+ *  The endless-runner lesson — a death that says "you were basically there"
+ *  is a targeting signal, and it belongs exactly where the next-night
+ *  decision happens. Fires only when the gap is small enough to sting;
+ *  a blowout gets silence, not a lecture. */
+export function nearMissLine(f: ServiceScoreFacts, s: ServiceScore): string | null {
+  if (s.stars >= 5) return null;
+  const cands: { gap: number; line: string }[] = [];
+  if (f.served > 0 && f.avgQuality < 85) {
+    const next = f.avgQuality >= 72 ? 85 : f.avgQuality >= 58 ? 72 : 58;
+    const gap = next - f.avgQuality;
+    if (gap <= 5) {
+      const star = next === 58 ? "first food star" : next === 72 ? "second food star" : "third food star";
+      cands.push({ gap, line: `${Math.ceil(gap)} point${Math.ceil(gap) === 1 ? "" : "s"} of heat from the ${star} — ${next} needed, ${Math.round(f.avgQuality)} on the pass.` });
+    }
+  }
+  if (f.served > 0 && f.avgHospitality < 75) {
+    const gap = 75 - f.avgHospitality;
+    if (gap <= 5) cands.push({ gap, line: `${Math.ceil(gap)} point${Math.ceil(gap) === 1 ? "" : "s"} of warmth from the service star — 75 needed, ${Math.round(f.avgHospitality)} on the floor.` });
+  }
+  const blemishes = f.misses + f.complaints + f.walkouts;
+  if (f.served < 8 && blemishes === 0) {
+    const gap = 8 - f.served;
+    if (gap <= 2) cands.push({ gap, line: `${gap === 1 ? "One more cover" : "Two more covers"} and the brigade star was yours.` });
+  }
+  if (f.served >= 8 && blemishes === 1 && s.penalties >= 1) {
+    cands.push({ gap: 0.5, line: "One ticket stood between you and a clean night. You know which one." });
+  }
+  if (cands.length === 0) return null;
+  return cands.reduce((a, b) => (b.gap < a.gap ? b : a)).line;
+}
+
 export function residencyWon(f: {
   stars: number;
   avgCulinary: number;

@@ -303,6 +303,15 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   margin: .45rem 0 .8rem; font-size: .68rem; letter-spacing: .06em; color: #6d4a24;
 }
 .review .score-breakdown span { white-space: nowrap; }
+/* the near-miss: "you were basically there", said where the next-night
+   decision happens — the strongest restart trigger in the business */
+.review .nearmiss {
+  font-size: .82rem; line-height: 1.45; letter-spacing: .04em;
+  color: #9a5a14; margin: -.3rem 0 .7rem; font-style: italic;
+}
+.review .nearmiss.record { color: #7a3c0c; }
+/* the ghost target beside the live streak: best ×N on the wall */
+.ghost-target { color: rgba(217,164,65,.75); font-weight: 700; }
 .review.service-review .incident { font-size: 1rem; line-height: 1.5; margin: 0 0 .9rem; font-style: italic; }
 .review.service-review .petra-note { color: #8a4a1a; margin-top: -.5rem; }
 .review.service-review .rlabel { font-size: .62rem; letter-spacing: .22em; color: #8a6418; margin-bottom: .2rem; }

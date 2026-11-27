@@ -3514,6 +3514,9 @@ export const useGame = create<GameState>((set, get) => ({
       hospitalitySum += hospitality;
       hospitalityCount += 1;
       if (!options?.batch) sfx("slam");
+      // the hero flourish lands on the core verb: a clean plate leaving the
+      // kitchen gets the rising chime, not just the stamp
+      if (!options?.batch && foodQuality >= 72) sfx("pass", { pan: tablePan(plate.table) });
       // a clean plate going out gets the call — SERVICE, out loud
       if (plate.quality >= 45) shoutLine("Service!", 3);
       if (plate.table === criticTable) {
@@ -3559,6 +3562,12 @@ export const useGame = create<GameState>((set, get) => ({
           feed = pushFeed(feed, `The kitchen hums — ×${streak}.`, "drama");
           ego += 2;
           for (const c of cooks) if (!c.walkedOut) c.morale = Math.min(100, c.morale + 2);
+        }
+        // the house keeps a number on the wall: passing it mid-service is the
+        // beat the player feels — a record is only a target when it's visible
+        const houseBest = loadLegends().bestStreak;
+        if (streak === houseBest + 1 && houseBest > 0) {
+          feed = pushFeed(feed, `×${streak} — first time past your best. The room feels it.`, "drama");
         }
         // streak ceremonies: ×10 leans in, ×15 applauds unasked, ×20 gets remembered
         if (streak === 10 || streak === 15 || streak === 20) {
