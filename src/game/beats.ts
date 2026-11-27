@@ -161,7 +161,9 @@ const houseRule: Rule = (f) => {
     ? "Double shift. You chose it, chef. Broom's by the door."
     : f.career.mutator === "no_bin"
       ? "No bin. You chose it. Everything gets cooked."
-      : "Short fuse. You chose it. We move.";
+      : f.career.mutator === "short_fuse"
+        ? "Short fuse. You chose it. We move."
+        : "No rule. You chose it. The food does the talking.";
   return card(f, line, "houseRule");
 };
 

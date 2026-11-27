@@ -13,7 +13,7 @@ import {
 import { useGame, type Ticket } from "../game/state";
 import FoodModel from "./FoodModel";
 import PlateCorrection from "./PlateCorrection";
-import { INK, LINE_SHIFT, useReducedMotion } from "./artDirection";
+import { INK, LINE_SHIFT, PASS_Z, useReducedMotion } from "./artDirection";
 import { canStartOrder } from "../game/culinary";
 
 /**
@@ -71,6 +71,9 @@ export default function FirstPerson() {
   const inspBlend = useRef(0);
   const stanceW = useRef(0);
   const introFocus = useRef(0);
+  // the diorama leans toward the held plate while it is inspected — the room
+  // turns its attention where the player's is
+  const inspectFocus = useRef(0);
   const lift = useRef(0);
   const locked = useRef(false);
   const aimTick = useRef(0);
@@ -88,6 +91,8 @@ export default function FirstPerson() {
     qMenu: new Quaternion(),
     focusPos: new Vector3(-3.15, 2.1, -1.8 + LINE_SHIFT),
     qFocus: new Quaternion(),
+    inspectPos: new Vector3(0.55, 2.05, PASS_Z + 2.35),
+    qInspect: new Quaternion(),
     qFp: new Quaternion(),
     euler: new Euler(0, 0, 0, "YXZ"),
     // a camera dummy: Object3D.lookAt points +Z at the target, cameras look -Z
@@ -283,6 +288,19 @@ export default function FirstPerson() {
     sc.menuPos.lerp(sc.focusPos, introFocus.current);
     sc.qMenu.slerp(sc.qFocus, introFocus.current);
 
+    // --- inspect lean: eyes on the held plate — a quiet push, not a cut
+    const inspectWanted = s.phase === "service" && !s.firstPerson && s.inspecting && !s.paused;
+    inspectFocus.current = reduced
+      ? inspectWanted ? 1 : 0
+      : inspectFocus.current + ((inspectWanted ? 1 : 0) - inspectFocus.current) * (1 - Math.exp(-d * 4));
+    if (inspectFocus.current > 0.001) {
+      sc.dummy.position.copy(sc.inspectPos);
+      sc.dummy.lookAt(0, 1.28, PASS_Z);
+      sc.qInspect.copy(sc.dummy.quaternion);
+      sc.menuPos.lerp(sc.inspectPos, inspectFocus.current);
+      sc.qMenu.slerp(sc.qInspect, inspectFocus.current);
+    }
+
     // --- first-person camera: eye level at the pass, breathing + bob
     const live = s.tickets.filter((x) => x.state !== "done").length;
     const amped = s.serviceTime < s.adrenalineTil;
@@ -339,7 +357,7 @@ export default function FirstPerson() {
     camera.quaternion.copy(sc.qMenu).slerp(sc.qFp, blend.current).slerp(sc.qInsp, ib);
 
     const pc = camera as PerspectiveCamera;
-    const fovMenu = FOV_MENU + (50 - FOV_MENU) * introFocus.current;
+    const fovMenu = FOV_MENU + (50 - FOV_MENU) * introFocus.current - 9 * inspectFocus.current;
     const fov =
       (fovMenu + (FOV_FP - fovMenu) * blend.current) * (1 - ib) + 40 * ib;
     if (Math.abs(pc.fov - fov) > 0.01) {

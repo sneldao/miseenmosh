@@ -5,5 +5,15 @@
     "chorus-2.mp3",
     "chorus-3.mp3",
     "chorus-4.mp3"
-  ]
+  ],
+  "lines": {
+    "petra-opening-serve": "petra-opening-serve.mp3",
+    "petra-opening-sendback": "petra-opening-sendback.mp3",
+    "petra-opening-smash": "petra-opening-smash.mp3",
+    "petra-rule-double": "petra-rule-double.mp3",
+    "petra-rule-nobin": "petra-rule-nobin.mp3",
+    "petra-rule-shortfuse": "petra-rule-shortfuse.mp3",
+    "petra-rule-none": "petra-rule-none.mp3"
+  },
+  "baked_by": "scripts/elevenlabs-bake.mjs (ElevenLabs eleven_turbo_v2_5)"
 }

@@ -251,3 +251,134 @@ describe("send-back costs (C3)", () => {
     expect(remake.plateDur).toBeGreaterThan(0);
   });
 });
+
+describe("smartServe — the flow assist", () => {
+  let useGame: Game;
+  const ticket = (over: Partial<State["tickets"][number]>): State["tickets"][number] => ({
+    id: 1, dish: "Beef Wellington", table: 11, station: 0, age: 10,
+    state: "rail", plateAt: 0, plateDur: 0, byChef: false,
+    quality: -1, verdict: null, sear: null, sauce: null, ...over,
+  });
+  beforeEach(async () => {
+    storage.clear();
+    useGame = await freshGame();
+    useGame.getState().resetCareer();
+    useGame.setState({
+      phase: "service", paused: false, glossary: false, openingStep: null, correction: null,
+      serviceTime: 30,
+      tickets: [ticket({ id: 5, table: 14, state: "ready", readyAt: 28, quality: 88 })],
+    } satisfies Partial<State>);
+  });
+
+  it("collects the lone ready plate and serves it in one press", () => {
+    useGame.getState().smartServe();
+    const s = useGame.getState();
+    expect(s.served).toBe(1);
+    expect(s.tickets.find((t) => t.id === 5)!.state).toBe("done");
+    expect(s.streak).toBe(1);
+    expect(s.lastDelivery?.table).toBe(14);
+  });
+
+  it("serves the held plate through the normal path when one is already at the pass", () => {
+    useGame.setState({
+      tickets: [ticket({ id: 5, table: 14, state: "pass", quality: 88 })],
+    } satisfies Partial<State>);
+    useGame.getState().smartServe();
+    const s = useGame.getState();
+    expect(s.served).toBe(1);
+    expect(s.tickets.find((t) => t.id === 5)!.state).toBe("done");
+  });
+
+  it("does nothing with two ready plates and no selection — the choice is not unambiguous", () => {
+    useGame.setState({
+      tickets: [
+        ticket({ id: 5, table: 14, state: "ready", readyAt: 28, quality: 88 }),
+        ticket({ id: 6, table: 15, state: "ready", readyAt: 28, quality: 90 }),
+      ],
+    } satisfies Partial<State>);
+    useGame.getState().smartServe();
+    expect(useGame.getState().served).toBe(0);
+    expect(useGame.getState().tickets.find((t) => t.id === 5)!.state).toBe("ready");
+  });
+
+  it("serves the selected ready plate even among several", () => {
+    useGame.setState({
+      selectedTicketId: 6,
+      tickets: [
+        ticket({ id: 5, table: 14, state: "ready", readyAt: 28, quality: 88 }),
+        ticket({ id: 6, table: 15, state: "ready", readyAt: 28, quality: 90 }),
+      ],
+    } satisfies Partial<State>);
+    useGame.getState().smartServe();
+    const s = useGame.getState();
+    expect(s.served).toBe(1);
+    expect(s.tickets.find((t) => t.id === 6)!.state).toBe("done");
+    expect(s.tickets.find((t) => t.id === 5)!.state).toBe("ready");
+  });
+
+  it("keeps the two-step ritual during the authored opening", () => {
+    useGame.setState({ openingStep: "serve" } satisfies Partial<State>);
+    useGame.getState().smartServe();
+    expect(useGame.getState().served).toBe(0);
+    expect(useGame.getState().tickets.find((t) => t.id === 5)!.state).toBe("ready");
+  });
+});
+
+describe("variable-ratio rewards", () => {
+  let useGame: Game;
+  const ticket = (over: Partial<State["tickets"][number]>): State["tickets"][number] => ({
+    id: 1, dish: "Beef Wellington", table: 11, station: 0, age: 10,
+    state: "rail", plateAt: 0, plateDur: 0, byChef: false,
+    quality: -1, verdict: null, sear: null, sauce: null, ...over,
+  });
+  beforeEach(async () => {
+    storage.clear();
+    useGame = await freshGame();
+    useGame.getState().resetCareer();
+    useGame.setState({
+      phase: "service", paused: false, glossary: false, openingStep: null, correction: null,
+      serviceTime: 30, roomStopAt: -999,
+      tickets: [ticket({ id: 5, table: 14, state: "ready", readyAt: 28, quality: 88 })],
+    } satisfies Partial<State>);
+  });
+
+  it("the room sometimes stops at an unscheduled streak — variable, not fixed", () => {
+    useGame.setState({ streak: 5, rng: () => 0 } satisfies Partial<State>);
+    useGame.getState().smartServe();
+    const s = useGame.getState();
+    expect(s.streak).toBe(6);
+    expect(s.feed.some((item) => item.text.includes("the room just stops"))).toBe(true);
+    expect(s.roomStopAt).toBe(30);
+    expect(s.milestoneText).toContain("THE ROOM STOPS");
+  });
+
+  it("respects the cooldown — no second stop right after the first", () => {
+    useGame.setState({ streak: 5, roomStopAt: 25, rng: () => 0 } satisfies Partial<State>);
+    useGame.getState().smartServe();
+    expect(useGame.getState().feed.some((item) => item.text.includes("the room just stops"))).toBe(false);
+  });
+
+  it("never stacks with the scheduled ×5 ceremony", () => {
+    useGame.setState({ streak: 9, rng: () => 0 } satisfies Partial<State>);
+    useGame.getState().smartServe();
+    const s = useGame.getState();
+    expect(s.streak).toBe(10);
+    expect(s.feed.some((item) => item.text.includes("the room just stops"))).toBe(false);
+    expect(s.feed.some((item) => item.text.includes("The kitchen hums"))).toBe(true);
+  });
+
+  it("a pristine plate can draw a standing ovation — the jackpot that can't be scheduled", () => {
+    useGame.setState({ streak: 19, rng: () => 0 } satisfies Partial<State>);
+    useGame.getState().smartServe();
+    const s = useGame.getState();
+    expect(s.feed.some((item) => item.text.includes("rises to applaud"))).toBe(true);
+  });
+
+  it("an ordinary clean plate gets no ovation on a cold roll", () => {
+    useGame.setState({ rng: () => 0.99 } satisfies Partial<State>);
+    useGame.getState().smartServe();
+    const s = useGame.getState();
+    expect(s.feed.some((item) => item.text.includes("rises to applaud"))).toBe(false);
+    expect(s.feed.some((item) => item.text.includes("the room just stops"))).toBe(false);
+  });
+});

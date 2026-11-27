@@ -37,6 +37,38 @@ export function runningAverage(total: number, count: number): number {
   return count > 0 ? total / count : 0;
 }
 
+/** The near-miss line: the closest path to one more star, in kitchen voice.
+ *  The endless-runner lesson — a death that says "you were basically there"
+ *  is a targeting signal, and it belongs exactly where the next-night
+ *  decision happens. Fires only when the gap is small enough to sting;
+ *  a blowout gets silence, not a lecture. */
+export function nearMissLine(f: ServiceScoreFacts, s: ServiceScore): string | null {
+  if (s.stars >= 5) return null;
+  const cands: { gap: number; line: string }[] = [];
+  if (f.served > 0 && f.avgQuality < 85) {
+    const next = f.avgQuality >= 72 ? 85 : f.avgQuality >= 58 ? 72 : 58;
+    const gap = next - f.avgQuality;
+    if (gap <= 5) {
+      const star = next === 58 ? "first food star" : next === 72 ? "second food star" : "third food star";
+      cands.push({ gap, line: `${Math.ceil(gap)} point${Math.ceil(gap) === 1 ? "" : "s"} of heat from the ${star} — ${next} needed, ${Math.round(f.avgQuality)} on the pass.` });
+    }
+  }
+  if (f.served > 0 && f.avgHospitality < 75) {
+    const gap = 75 - f.avgHospitality;
+    if (gap <= 5) cands.push({ gap, line: `${Math.ceil(gap)} point${Math.ceil(gap) === 1 ? "" : "s"} of warmth from the service star — 75 needed, ${Math.round(f.avgHospitality)} on the floor.` });
+  }
+  const blemishes = f.misses + f.complaints + f.walkouts;
+  if (f.served < 8 && blemishes === 0) {
+    const gap = 8 - f.served;
+    if (gap <= 2) cands.push({ gap, line: `${gap === 1 ? "One more cover" : "Two more covers"} and the brigade star was yours.` });
+  }
+  if (f.served >= 8 && blemishes === 1 && s.penalties >= 1) {
+    cands.push({ gap: 0.5, line: "One ticket stood between you and a clean night. You know which one." });
+  }
+  if (cands.length === 0) return null;
+  return cands.reduce((a, b) => (b.gap < a.gap ? b : a)).line;
+}
+
 export function residencyWon(f: {
   stars: number;
   avgCulinary: number;
@@ -51,4 +83,65 @@ export function residencyWon(f: {
     && f.defections < 3
     && f.totalWalkouts < 6
     && f.cash >= -60;
+}
+
+/** The nightly side order: one optional challenge, priced in ego, resolved
+ *  on the review card alongside the bets and the vow. No new systems — the
+ *  checks read facts the service already records. */
+export interface SideOrder {
+  id: string;
+  /** the ask, in the pass's voice */
+  text: string;
+  pay: number;
+}
+
+export const SIDE_ORDERS: readonly SideOrder[] = [
+  { id: "n1_no_walks", text: "The whole brigade still standing at close", pay: 6 },
+  { id: "n2_save_sauce", text: "Dimitri's first sauce whisked back before it goes out", pay: 6 },
+  { id: "n3_golden", text: "One golden Wellington leaves the pass", pay: 6 },
+  { id: "n4_fast", text: "The FAST table served inside its 30 seconds", pay: 8 },
+  { id: "n5_shoo", text: "A runner shooed before it touches the rail", pay: 8 },
+  { id: "n6_no_fire", text: "No station catches fire", pay: 8 },
+  { id: "n7_101", text: "Move 101 mid-rush and still turn it twice", pay: 8 },
+  { id: "n8_champagne", text: "Champagne on the house and eight covers anyway", pay: 8 },
+  { id: "n9_silent", text: "A service with no screams and eight covers", pay: 12 },
+];
+
+export function sideOrderFor(night: number): SideOrder | null {
+  return SIDE_ORDERS[Math.max(0, Math.min(SIDE_ORDERS.length - 1, night - 1))] ?? null;
+}
+
+export interface SideOrderFacts {
+  walkouts: number;
+  sauceOutcomeSaved: boolean;
+  goldenServed: boolean;
+  requestFastLanded: boolean;
+  runnerShooed: boolean;
+  anyBurned: boolean;
+  moved101: boolean;
+  table101Turns: number;
+  comped: boolean;
+  served: number;
+  screams: number;
+}
+
+export function resolveSideOrder(night: number, f: SideOrderFacts): { order: SideOrder; line: string } | null {
+  const order = sideOrderFor(night);
+  if (!order) return null;
+  const won = (() => {
+    switch (order.id) {
+      case "n1_no_walks": return f.walkouts === 0;
+      case "n2_save_sauce": return f.sauceOutcomeSaved;
+      case "n3_golden": return f.goldenServed;
+      case "n4_fast": return f.requestFastLanded;
+      case "n5_shoo": return f.runnerShooed;
+      case "n6_no_fire": return !f.anyBurned;
+      case "n7_101": return f.moved101 && f.table101Turns >= 2;
+      case "n8_champagne": return f.comped && f.served >= 8;
+      case "n9_silent": return f.screams === 0 && f.served >= 8;
+      default: return false;
+    }
+  })();
+  if (!won) return null;
+  return { order, line: `SIDE ORDER HELD: ${order.text.toLowerCase()} — +${order.pay} ego.` };
 }

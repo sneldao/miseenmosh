@@ -85,7 +85,7 @@
 .order-rail {
   position: absolute; top: 1rem; bottom: auto; left: 50%; transform: translateX(-50%);
   display: flex; gap: .45rem; width: max-content;
-  max-width: calc(100vw - 11rem); overflow-x: auto; overflow-y: hidden; z-index: 20;
+  max-width: calc(100vw - 16rem); overflow-x: auto; overflow-y: hidden; z-index: 20;
 }
 .rail-more {
   align-self: flex-start; min-width: 2.4rem; padding: .45rem .5rem;
@@ -181,12 +181,32 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .house-actions .stancebar .btn .kbd { margin-left: 0; }
 /* left mirrors right: same furniture, same compact voice */
 .house-left .status { font-size: .7rem; line-height: 1.55; opacity: .92; }
+/* tonight's food average, live: the thresholds are the review's thresholds */
+.qmeter {
+  display: flex; align-items: center; gap: .45rem; margin: .35rem 0 .1rem;
+  font-size: .62rem; letter-spacing: .1em;
+}
+.qmeter-label { opacity: .75; }
+.qmeter-track {
+  position: relative; width: 7.2rem; height: 7px; border-radius: 3px;
+  background: #183a35; overflow: hidden; border: 1px solid rgba(244, 234, 210, .25);
+}
+.qmeter-fill { height: 100%; transition: width .4s ease; }
+.qmeter-fill.low { background: #b8563a; }
+.qmeter-fill.mid { background: #c9a44a; }
+.qmeter-fill.good { background: #8ac46a; }
+.qmeter-mark { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(244, 234, 210, .4); }
+.qmeter-mark.m58 { left: 58%; }
+.qmeter-mark.m72 { left: 72%; }
+.qmeter-mark.m85 { left: 85%; }
+.qmeter-num { min-width: 2ch; text-align: right; opacity: .9; font-weight: 700; }
 .house-left .brigade { gap: .25rem; font-size: .64rem; }
 .house-left .brigade .cook .cname { width: 3.8rem; }
 .house-left .brigade .mbar { width: 4.2rem; }
-.house-left .ticker { gap: .15rem; font-size: .66rem; line-height: 1.35; max-width: none; }
+.house-left .ticker { gap: .15rem; font-size: .78rem; line-height: 1.35; max-width: none; }
 .house-left .ticker .line {
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 16rem;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; max-width: 19rem; line-clamp: 2;
 }
 
 /* ---- brigade ---- */
@@ -243,7 +263,16 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   background: #f4ead2; color: #221408;
   padding: 2rem 2.6rem; max-width: 30rem; text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  animation: reviewIn .5s cubic-bezier(.2, 0, .2, 1) backwards;
   clip-path: polygon(0 0, 100% 0, 100% 96%, 97% 100%, 94% 97%, 91% 100%, 88% 97%, 85% 100%, 82% 97%, 79% 100%, 76% 97%, 73% 100%, 70% 97%, 67% 100%, 64% 97%, 61% 100%, 58% 97%, 55% 100%, 52% 97%, 49% 100%, 46% 97%, 43% 100%, 40% 97%, 37% 100%, 34% 97%, 31% 100%, 28% 97%, 25% 100%, 22% 97%, 19% 100%, 16% 97%, 13% 100%, 10% 97%, 7% 100%, 4% 97%, 0 100%);
+}
+/* the review slaps down on the pass — one stamped landing, no drift */
+@keyframes reviewIn {
+  0% { opacity: 0; transform: scale(1.06) translateY(-10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .review { animation: none; }
 }
 .review .rhead { font-size: .7rem; letter-spacing: .3em; opacity: .6; margin-bottom: .8rem; }
 .review .stars { font-size: 2.4rem; color: #b06a2a; letter-spacing: .1em; }
@@ -274,7 +303,17 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   margin: .45rem 0 .8rem; font-size: .68rem; letter-spacing: .06em; color: #6d4a24;
 }
 .review .score-breakdown span { white-space: nowrap; }
+/* the near-miss: "you were basically there", said where the next-night
+   decision happens — the strongest restart trigger in the business */
+.review .nearmiss {
+  font-size: .82rem; line-height: 1.45; letter-spacing: .04em;
+  color: #9a5a14; margin: -.3rem 0 .7rem; font-style: italic;
+}
+.review .nearmiss.record { color: #7a3c0c; }
+/* the ghost target beside the live streak: best ×N on the wall */
+.ghost-target { color: rgba(217,164,65,.75); font-weight: 700; }
 .review.service-review .incident { font-size: 1rem; line-height: 1.5; margin: 0 0 .9rem; font-style: italic; }
+.review.service-review .petra-note { color: #8a4a1a; margin-top: -.5rem; }
 .review.service-review .rlabel { font-size: .62rem; letter-spacing: .22em; color: #8a6418; margin-bottom: .2rem; }
 .review.service-review .consequence { font-size: .95rem; line-height: 1.5; color: #4a3010; margin: 0 0 1rem; }
 .review.service-review .main-action { margin-bottom: .8rem; }
@@ -451,8 +490,8 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   100% { opacity: 0; transform: translateY(-14px); }
 }
 .hint {
-  position: absolute; top: 1rem; left: 1rem; font-size: .75rem; opacity: .65;
-  max-width: 16rem; line-height: 1.5;
+  position: absolute; top: 1rem; left: 1rem; font-size: .95rem; opacity: .8;
+  max-width: 20rem; line-height: 1.5;
 }
 
 .ticker,.brigade,.status,.hint {
@@ -544,6 +583,21 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   box-shadow: 0 24px 70px rgba(0,0,0,.7), inset 0 0 60px rgba(160,120,60,.18);
   color: #33240f;
 }
+/* the briefing arrives like a service docket: every block lands a beat
+   after the one above it — the room wakes up as you read down */
+.brief > * { animation: briefIn .55s cubic-bezier(.2, 0, .2, 1) backwards; }
+.brief > *:nth-child(1) { animation-delay: .05s; }
+.brief > *:nth-child(2) { animation-delay: .16s; }
+.brief > *:nth-child(3) { animation-delay: .27s; }
+.brief > *:nth-child(4) { animation-delay: .38s; }
+.brief > *:nth-child(5) { animation-delay: .49s; }
+.brief > *:nth-child(n+6) { animation-delay: .6s; }
+@keyframes briefIn {
+  from { opacity: 0; transform: translateY(12px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brief > * { animation: none; }
+}
 .bhead { font-size: 1.3rem; letter-spacing: .18em; color: #5a3510; margin-bottom: .3rem; }
 .bsub { font-size: .72rem; letter-spacing: .08em; color: #7a6438; font-style: italic; margin-top: .25rem; }
 .bstats {
@@ -592,6 +646,19 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .ending-result { font-size: .74rem; letter-spacing: .24em; color: #9a3f2c; margin: .2rem 0 .45rem; }
 .ending-result.won { color: #3f6b35; }
 .ending-title { font-size: 1.45rem; line-height: 1.2; letter-spacing: .05em; color: #5a3510; margin-bottom: .6rem; }
+/* the curtain call: each cook steps forward on their own beat, the room
+   goes quiet between names — gone cooks stay dimmed and do not step */
+.rollcall { display: flex; flex-direction: column; gap: .55rem; margin: .6rem 0 .9rem; }
+.roll-line {
+  display: flex; gap: .7rem; align-items: baseline; text-align: left;
+  animation: rollIn .5s cubic-bezier(.2, 0, .2, 1) backwards;
+}
+@keyframes rollIn { from { opacity: 0; transform: translateY(8px); } }
+.roll-line .roll-name { font-size: .95rem; font-weight: 700; letter-spacing: .08em; color: #5a3510; min-width: 6.2rem; }
+.roll-line .roll-fate { font-size: .88rem; font-style: italic; line-height: 1.45; color: #3a230c; }
+.roll-line.gone { opacity: .5; }
+.roll-line.gone .roll-name { color: #7a6438; }
+@media (prefers-reduced-motion: reduce) { .roll-line { animation: none; } }
 .ending-ledger { text-align: left; border-top: 1px dashed #b99b68; border-bottom: 1px dashed #b99b68; padding: .5rem 0; margin: .7rem 0 1rem; }
 .ending-ledger p { font-size: .84rem; line-height: 1.5; margin: .45rem 0; }
 .review.ending .rstats { margin-bottom: 1rem; }
@@ -611,13 +678,29 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 }
 
 .market { margin: .9rem 0; border: 1px dashed rgba(140,100,40,.55); padding: .6rem .8rem; }
-.mhead { font-size: .68rem; letter-spacing: .18em; color: #8a6418; margin-bottom: .5rem; }
+.mhead { font-size: .78rem; letter-spacing: .16em; color: #8a6418; margin-bottom: .5rem; }
+/* the night-one mission reads like the ticket rail talks: big, italic, spoken */
+.mission {
+  font-size: 1.18rem; line-height: 1.55; font-style: italic; color: #3a230c;
+  margin: .1rem 0 .7rem;
+}
+/* brigade cards land one by one — the crew assembles while you watch */
+.qcast .ccard { animation: briefIn .5s cubic-bezier(.2, 0, .2, 1) backwards; }
+.qcast .ccard:nth-child(1) { animation-delay: .05s; }
+.qcast .ccard:nth-child(2) { animation-delay: .4s; }
+.qcast .ccard:nth-child(3) { animation-delay: .75s; }
+.qcast .ccard:nth-child(4) { animation-delay: 1.1s; }
+.qcast .ccard:nth-child(5) { animation-delay: 1.45s; }
+.qcast .ccard:nth-child(n+6) { animation-delay: 1.8s; }
+@media (prefers-reduced-motion: reduce) {
+  .qcast .ccard { animation: none; }
+}
 .lot { display: flex; align-items: center; gap: .7rem; padding: .35rem 0; border-top: 1px dotted rgba(90,60,20,.28); }
 .lot:first-of-type { border-top: 0; }
 .lname { min-width: 9.5rem; font-weight: 700; font-size: .82rem; color: #33240f; }
 .ldesc { flex: 1; font-size: .75rem; color: #6a552e; font-style: italic; }
 .lot.gone .lname, .lot.gone .ldesc { opacity: .35; text-decoration: line-through; }
-.ltaken { font-size: .72rem; color: #4d7030; letter-spacing: .08em; }
+.ltaken { font-size: .82rem; color: #4d7030; letter-spacing: .06em; }
 
 /* — morning confessionals: margin notes in the kitchen book — */
 .confess {
@@ -652,6 +735,7 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .lbtns { display: flex; flex-direction: column; gap: .3rem; align-items: flex-end; }
 .lwants { font-size: .68rem; color: #a03a20; letter-spacing: .06em; }
 .lbtn { font-size: .72rem; padding: .3rem .6rem; }
+.lbtn .cost { display: block; margin-top: .18rem; opacity: .7; line-height: 1.35; }
 .lbtn.dim { opacity: .55; }
 .bfeed { font-size: .76rem; color: #5a6a34; font-style: italic; margin: .5rem 0 .2rem; }
 
@@ -684,7 +768,7 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .ccard:nth-child(odd) { transform: rotate(-1.4deg); }
 .ccard:nth-child(even) { transform: rotate(1.2deg); }
 .ccard img { width: 100%; max-height: 16vh; object-fit: cover; object-position: top; display: block; }
-.ccard span { font-size: .6rem; line-height: 1.3; color: #efe6d4; letter-spacing: .03em; }
+.ccard span { font-size: .68rem; line-height: 1.3; color: #efe6d4; letter-spacing: .03em; }
 .ccard.wanted { border-color: #d0735a; cursor: pointer; }
 .ccard.wanted span { color: #e08a70; }
 .ccard.wanted.poked { transform: rotate(0deg) scale(1.04); }
@@ -710,8 +794,12 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .ccard.tall { width: min(7.4rem, 17vw); align-items: stretch; }
 .ccard.tall img { max-height: 20vh; }
 .ccard.tall .cname { font-size: .82rem; font-weight: 700; }
-.ccard .mood { color: #c9a44a; }
-.ccard .intro { color: #9a917f; font-style: italic; }
+.ccard .mood { color: #c9a44a; animation: moodBreathe 4s ease-in-out infinite; }
+@keyframes moodBreathe { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+/* the brigade leans in when you look at them */
+.ccard.qcook { transition: filter .18s ease, border-color .18s ease; }
+.ccard.qcook:hover { filter: brightness(1.18); border-color: #c9a44a; }
+.ccard .intro { color: #a89f8d; font-style: italic; }
 .ccard .freshmeat {
   color: #d0735a; font-size: .62rem; letter-spacing: .1em; font-weight: 700;
 }
@@ -804,6 +892,8 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .title-promise { font-size: .85rem; font-style: italic; letter-spacing: .04em; color: #ffd9a0; text-align: center; max-width: min(90vw, 34rem); line-height: 1.4; }
 .title-hint { font-size: .68rem; letter-spacing: .08em; color: #c9b48a; text-align: center; }
 .title-residency { font-size: .68rem; letter-spacing: .14em; color: #e8c33a; text-align: center; }
+/* the residency line also sits on the cream briefing card — read ink there */
+.brief .title-residency { color: #7a5518; font-size: .78rem; }
 .title-menu { position: absolute; top: 1rem; right: 1rem; text-align: right; z-index: 40; }
 .title-menu > summary {
   cursor: pointer; list-style: none;
@@ -906,9 +996,9 @@ button.ticket:disabled:hover { transform: none; }
 .credit-choice .cost,
 .night-choice .cost { display: block; font-size: .64rem; line-height: 1.35; opacity: .7; margin-top: .18rem; }
 .night-contract { border-top: 1px dashed #a8874f; border-bottom: 1px dashed #a8874f; padding: .7rem 0; margin: .7rem 0; }
-.ndilemma { font-size: .86rem; line-height: 1.45; font-style: italic; color: #4a2c10; margin-bottom: .35rem; }
-.n1body { font-size: .86rem; line-height: 1.45; font-style: italic; color: #4a2c10; margin: .1rem 0 .5rem; }
-.ncondition { font-size: .72rem; line-height: 1.45; color: #6a552e; }
+.ndilemma { font-size: .98rem; line-height: 1.5; font-style: italic; color: #3a230c; margin-bottom: .4rem; }
+.n1body { font-size: .98rem; line-height: 1.5; font-style: italic; color: #3a230c; margin: .1rem 0 .55rem; }
+.ncondition { font-size: .84rem; line-height: 1.55; color: #54401f; }
 .night-feud { display: flex; gap: .8rem; align-items: flex-start; border: 1px solid #8a6230; background: rgba(120,80,40,.12); padding: .65rem .75rem; margin: .7rem 0; border-radius: 3px; }
 .night-feud .feudface { max-width: 6.5rem; max-height: 18vh; }
 .night-feud > div { flex: 1; min-width: 0; }
@@ -937,3 +1027,25 @@ button.ticket:disabled:hover { transform: none; }
   .review.ending .quote { font-size: 1rem; }
   .ending-title { font-size: 1.2rem; }
 }
+
+/* the nightly side order: one extra objective, quiet until it pays */
+.side-order {
+  border: 1px dashed #8a6230; border-radius: 3px;
+  padding: .55rem .75rem; margin: .55rem 0;
+  font-size: .9rem; line-height: 1.45; color: #3a230c;
+}
+.side-order .mhead { margin-bottom: .2rem; }
+.side-order .cost { opacity: .7; font-size: .72rem; }
+
+/* the back door: a quiet stamp for those who knock */
+.mat-drop {
+  position: absolute; top: 2.2rem; left: 50%; transform: translateX(-50%);
+  background: #141210; color: #ffd9a0; border: 1px dashed #c9a44a;
+  padding: .5rem .9rem; font-size: .72rem; letter-spacing: .1em;
+  border-radius: 0 0 3px 3px; z-index: 45;
+  animation: matIn .3s ease-out;
+}
+@keyframes matIn { from { opacity: 0; transform: translate(-50%, -8px); } }
+
+/* chef eats first: the family meal button that shouldn't be there */
+.lbtn.chef-eats { border-color: #c9a44a; color: #ffd9a0; }

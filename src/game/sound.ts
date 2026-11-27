@@ -123,6 +123,7 @@ export type Sfx =
   | "print"
   | "bell"
   | "slam"
+  | "pass"
   | "rip"
   | "shatter"
   | "gasp"
@@ -175,6 +176,12 @@ export function sfx(kind: Sfx, opts: SfxOpts = {}) {
     case "slam":
       osc("sine", 160, 60, t, 0.12, 0.9, bus);
       noise(t, 0.04, 0.3, 800, bus);
+      break;
+    case "pass":
+      // a clean plate leaves the kitchen — a rising third, the room notices
+      osc("triangle", 660, 660, t, 0.16, 0.2, bus);
+      osc("triangle", 831, 831, t + 0.08, 0.2, 0.2, bus);
+      osc("sine", 1662, 1662, t + 0.08, 0.16, 0.07, bus);
       break;
     case "rip":
       noise(t, 0.18, 0.5, 1500, bus);

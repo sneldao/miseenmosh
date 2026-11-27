@@ -27,6 +27,7 @@ Everything else supports one of those two.
 - [verbosity-progressive-disclosure.md](research/verbosity-progressive-disclosure.md) — reading load; adopted rules are design.md §9.
 - [codrops-kitchen-experience.md](research/codrops-kitchen-experience.md) — Ego-browser study of both Codrops collections; source-backed direction for a brighter, expressive kitchen.
 - [virality.md](research/virality.md) — share patterns, judge-eye view.
+- [compulsion-patterns.md](research/compulsion-patterns.md) — the six retention patterns behind Fruit Ninja / runners / roguelikes, and our scored audit.
 - [platform-winners.md](research/platform-winners.md) — what the platform's hits do differently; 7 ranked moves.
 - [platform-sdk.md](research/platform-sdk.md) — SDK facts + what we wired (boards, achievements, events, frame rules).
 - [sponsors.md](research/sponsors.md) — ElevenLabs / fal / Meshy constraints.

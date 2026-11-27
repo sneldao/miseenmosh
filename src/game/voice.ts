@@ -5,7 +5,12 @@
 // no files, no voices, no problem — the game never waits on a voice.
 
 import { BRIGADE_RESPONSES } from "./barks";
-import { audioContext, duckAmbience, isMasterMuted, voiceOutput } from "./sound";
+import {
+  audioContext,
+  duckAmbience,
+  isMasterMuted,
+  voiceOutput,
+} from "./sound";
 
 const VOICE_KEY = "mem-voice";
 
@@ -31,7 +36,8 @@ export function setVoiceEnabled(on: boolean) {
 function synth(): SpeechSynthesis | null {
   if (!enabled || isMasterMuted()) return null;
   try {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
+    if (typeof window === "undefined" || !("speechSynthesis" in window))
+      return null;
     return window.speechSynthesis;
   } catch {
     return null;
@@ -39,11 +45,13 @@ function synth(): SpeechSynthesis | null {
 }
 
 export function stopVoice() {
-  if (reviewTimer !== null && typeof window !== "undefined") window.clearTimeout(reviewTimer);
+  if (reviewTimer !== null && typeof window !== "undefined")
+    window.clearTimeout(reviewTimer);
   reviewTimer = null;
   try {
     // Cancel even while disabled/muted; synth() deliberately refuses then.
-    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
+    if (typeof window !== "undefined" && "speechSynthesis" in window)
+      window.speechSynthesis.cancel();
   } catch {}
   for (const v of Object.values(baked)) {
     try {
@@ -61,13 +69,23 @@ interface BakedVoice {
   routed: boolean;
   src?: MediaElementAudioSourceNode;
 }
+
 const baked: Record<number, BakedVoice> = {};
 const bakedDead = new Set<number>();
+const namedBaked: Record<string, BakedVoice> = {};
+const namedDead = new Set<string>();
+// playback is looked up by file — chorus and named takes share the one cache
+const bakedByFile: Record<string, BakedVoice> = {};
 let lastBakedFailure: string | null = null;
 
 /** Small meter/debug surface for browser QA; never used by gameplay. */
 export function voiceDiagnostics() {
-  return { enabled, bakedLoaded: Object.keys(baked).length, bakedDead: [...bakedDead], lastBakedFailure };
+  return {
+    enabled,
+    bakedLoaded: Object.keys(baked).length + Object.keys(namedBaked).length,
+    bakedDead: [...bakedDead, ...namedDead],
+    lastBakedFailure,
+  };
 }
 
 function routeBaked(v: BakedVoice) {
@@ -86,8 +104,46 @@ function routeBaked(v: BakedVoice) {
 }
 
 function playBaked(idx: number): boolean {
-  if (!enabled || isMasterMuted() || bakedDead.has(idx)) {
-    lastBakedFailure = !enabled ? "voice-disabled" : isMasterMuted() ? "master-muted" : `dead-${idx}`;
+  return playBakedFile(`voice/chorus-${idx}.mp3`, `dead-${idx}`, (v) => {
+    baked[idx] = v;
+  });
+}
+
+/** Named hinge takes — Petra's opening verdicts and house-rule lines, baked
+ *  by scripts/elevenlabs-bake.mjs. A missing file marks itself dead and the
+ *  synth takes the line, exactly like the chorus. */
+const NAMED: Record<string, string> = {
+  "You saw it. You sent it anyway. I heard you.":
+    "voice/petra-opening-serve.mp3",
+  "Dark pastry. Grey centre. You saw it. Back to me.":
+    "voice/petra-opening-sendback.mp3",
+  "You saw it. Then you chose the tiles. So did I.":
+    "voice/petra-opening-smash.mp3",
+  "Double shift. Bring a broom.": "voice/petra-rule-double.mp3",
+  "No bin. Cook everything.": "voice/petra-rule-nobin.mp3",
+  "Short fuse. Move.": "voice/petra-rule-shortfuse.mp3",
+  "Play it straight. Good.": "voice/petra-rule-none.mp3",
+};
+
+function playBakedByName(key: string): boolean {
+  const file = NAMED[key];
+  if (!file) return false;
+  return playBakedFile(file, `dead-${key}`, (v) => {
+    namedBaked[key] = v;
+  });
+}
+
+function playBakedFile(
+  file: string,
+  deadKey: string,
+  cache: (v: BakedVoice) => void,
+): boolean {
+  if (!enabled || isMasterMuted() || namedDead.has(deadKey)) {
+    lastBakedFailure = !enabled
+      ? "voice-disabled"
+      : isMasterMuted()
+        ? "master-muted"
+        : deadKey;
     return false;
   }
   const ac = audioContext();
@@ -97,30 +153,37 @@ function playBaked(idx: number): boolean {
   }
   if (ac.state === "suspended") void ac.resume();
   try {
-    let v = baked[idx];
+    let v = bakedByFile[file];
     if (!v) {
-      const el = new Audio(`${import.meta.env.BASE_URL}voice/chorus-${idx}.mp3`);
+      const el = new Audio(`${import.meta.env.BASE_URL}${file}`);
       el.preload = "auto";
       v = { el, routed: false };
-      el.addEventListener("error", () => bakedDead.add(idx));
-      baked[idx] = v;
+      el.addEventListener("error", () => namedDead.add(deadKey));
+      bakedByFile[file] = v;
+      cache(v);
     }
     routeBaked(v);
     v.el.currentTime = 0;
-    const dur = Number.isFinite(v.el.duration) && v.el.duration > 0 ? v.el.duration : 1.65;
+    const dur =
+      Number.isFinite(v.el.duration) && v.el.duration > 0
+        ? v.el.duration
+        : 1.65;
     duckAmbience(dur + 0.35);
     void v.el.play().catch(() => {});
     lastBakedFailure = null;
     return true;
   } catch (err) {
     lastBakedFailure = err instanceof Error ? err.message : "playback-error";
-    bakedDead.add(idx);
+    namedDead.add(deadKey);
     return false;
   }
 }
 
 /** Pick a roughly-local voice so the read-out works in the offline sandbox. */
-function pickVoice(s: SpeechSynthesis, seed: number): SpeechSynthesisVoice | null {
+function pickVoice(
+  s: SpeechSynthesis,
+  seed: number,
+): SpeechSynthesisVoice | null {
   try {
     const vs = s.getVoices();
     if (!vs.length) return null;
@@ -132,7 +195,10 @@ function pickVoice(s: SpeechSynthesis, seed: number): SpeechSynthesisVoice | nul
   }
 }
 
-function say(text: string, opts: { pitch?: number; rate?: number; seed?: number } = {}) {
+function say(
+  text: string,
+  opts: { pitch?: number; rate?: number; seed?: number } = {},
+) {
   const s = synth();
   if (!s) return;
   try {
@@ -168,12 +234,17 @@ export function speakChorus(line: string, over: boolean) {
   const idx = BRIGADE_RESPONSES.indexOf(line);
   if (idx >= 0 && playBaked(idx)) return;
   const clean = line.replace(/[""]/g, "").slice(0, 40) || "Yes, chef!";
-  say(clean, { pitch: 0.8 + Math.random() * 0.5, rate: 1.15, seed: Math.floor(Math.random() * 8) });
+  say(clean, {
+    pitch: 0.8 + Math.random() * 0.5,
+    rate: 1.15,
+    seed: Math.floor(Math.random() * 8),
+  });
 }
 
 /** One scripted line in a cook's voice — hinge moments only (first plate,
  *  house rule), never the running commentary. Best-effort like the rest. */
 export function speakLine(text: string, seed = 1) {
+  if (playBakedByName(text.trim())) return;
   say(text.slice(0, 140), { pitch: 0.9, rate: 1.0, seed });
 }
 
@@ -182,9 +253,21 @@ let reviewTimer: number | null = null;
 /** The review read-out: a beat after the sting, then stars and the quotable
  *  line. Slower and lower than the brigade so the critic owns the room. */
 export function speakReview(stars: number, quote: string) {
-  const starLine = stars >= 5 ? "Five stars." : stars >= 4 ? "Four stars." : stars === 3 ? "Three stars." : stars === 2 ? "Two stars." : stars === 1 ? "One star." : "No stars.";
+  const starLine =
+    stars >= 5
+      ? "Five stars."
+      : stars >= 4
+        ? "Four stars."
+        : stars === 3
+          ? "Three stars."
+          : stars === 2
+            ? "Two stars."
+            : stars === 1
+              ? "One star."
+              : "No stars.";
   const text = `${starLine} ${quote.slice(0, 220)}`;
-  if (reviewTimer !== null && typeof window !== "undefined") window.clearTimeout(reviewTimer);
+  if (reviewTimer !== null && typeof window !== "undefined")
+    window.clearTimeout(reviewTimer);
   if (typeof window === "undefined") {
     say(text, { pitch: 0.86, rate: 0.96, seed: 3 });
     return;
