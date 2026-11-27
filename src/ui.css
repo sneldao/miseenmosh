@@ -244,7 +244,16 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   background: #f4ead2; color: #221408;
   padding: 2rem 2.6rem; max-width: 30rem; text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  animation: reviewIn .5s cubic-bezier(.2, 0, .2, 1) backwards;
   clip-path: polygon(0 0, 100% 0, 100% 96%, 97% 100%, 94% 97%, 91% 100%, 88% 97%, 85% 100%, 82% 97%, 79% 100%, 76% 97%, 73% 100%, 70% 97%, 67% 100%, 64% 97%, 61% 100%, 58% 97%, 55% 100%, 52% 97%, 49% 100%, 46% 97%, 43% 100%, 40% 97%, 37% 100%, 34% 97%, 31% 100%, 28% 97%, 25% 100%, 22% 97%, 19% 100%, 16% 97%, 13% 100%, 10% 97%, 7% 100%, 4% 97%, 0 100%);
+}
+/* the review slaps down on the pass — one stamped landing, no drift */
+@keyframes reviewIn {
+  0% { opacity: 0; transform: scale(1.06) translateY(-10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .review { animation: none; }
 }
 .review .rhead { font-size: .7rem; letter-spacing: .3em; opacity: .6; margin-bottom: .8rem; }
 .review .stars { font-size: 2.4rem; color: #b06a2a; letter-spacing: .1em; }
@@ -546,6 +555,21 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
   box-shadow: 0 24px 70px rgba(0,0,0,.7), inset 0 0 60px rgba(160,120,60,.18);
   color: #33240f;
 }
+/* the briefing arrives like a service docket: every block lands a beat
+   after the one above it — the room wakes up as you read down */
+.brief > * { animation: briefIn .55s cubic-bezier(.2, 0, .2, 1) backwards; }
+.brief > *:nth-child(1) { animation-delay: .05s; }
+.brief > *:nth-child(2) { animation-delay: .16s; }
+.brief > *:nth-child(3) { animation-delay: .27s; }
+.brief > *:nth-child(4) { animation-delay: .38s; }
+.brief > *:nth-child(5) { animation-delay: .49s; }
+.brief > *:nth-child(n+6) { animation-delay: .6s; }
+@keyframes briefIn {
+  from { opacity: 0; transform: translateY(12px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brief > * { animation: none; }
+}
 .bhead { font-size: 1.3rem; letter-spacing: .18em; color: #5a3510; margin-bottom: .3rem; }
 .bsub { font-size: .72rem; letter-spacing: .08em; color: #7a6438; font-style: italic; margin-top: .25rem; }
 .bstats {
@@ -613,13 +637,13 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 }
 
 .market { margin: .9rem 0; border: 1px dashed rgba(140,100,40,.55); padding: .6rem .8rem; }
-.mhead { font-size: .68rem; letter-spacing: .18em; color: #8a6418; margin-bottom: .5rem; }
+.mhead { font-size: .78rem; letter-spacing: .16em; color: #8a6418; margin-bottom: .5rem; }
 .lot { display: flex; align-items: center; gap: .7rem; padding: .35rem 0; border-top: 1px dotted rgba(90,60,20,.28); }
 .lot:first-of-type { border-top: 0; }
 .lname { min-width: 9.5rem; font-weight: 700; font-size: .82rem; color: #33240f; }
 .ldesc { flex: 1; font-size: .75rem; color: #6a552e; font-style: italic; }
 .lot.gone .lname, .lot.gone .ldesc { opacity: .35; text-decoration: line-through; }
-.ltaken { font-size: .72rem; color: #4d7030; letter-spacing: .08em; }
+.ltaken { font-size: .82rem; color: #4d7030; letter-spacing: .06em; }
 
 /* — morning confessionals: margin notes in the kitchen book — */
 .confess {
@@ -686,7 +710,7 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .ccard:nth-child(odd) { transform: rotate(-1.4deg); }
 .ccard:nth-child(even) { transform: rotate(1.2deg); }
 .ccard img { width: 100%; max-height: 16vh; object-fit: cover; object-position: top; display: block; }
-.ccard span { font-size: .6rem; line-height: 1.3; color: #efe6d4; letter-spacing: .03em; }
+.ccard span { font-size: .68rem; line-height: 1.3; color: #efe6d4; letter-spacing: .03em; }
 .ccard.wanted { border-color: #d0735a; cursor: pointer; }
 .ccard.wanted span { color: #e08a70; }
 .ccard.wanted.poked { transform: rotate(0deg) scale(1.04); }
@@ -712,8 +736,12 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .ccard.tall { width: min(7.4rem, 17vw); align-items: stretch; }
 .ccard.tall img { max-height: 20vh; }
 .ccard.tall .cname { font-size: .82rem; font-weight: 700; }
-.ccard .mood { color: #c9a44a; }
-.ccard .intro { color: #9a917f; font-style: italic; }
+.ccard .mood { color: #c9a44a; animation: moodBreathe 4s ease-in-out infinite; }
+@keyframes moodBreathe { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+/* the brigade leans in when you look at them */
+.ccard.qcook { transition: filter .18s ease, border-color .18s ease; }
+.ccard.qcook:hover { filter: brightness(1.18); border-color: #c9a44a; }
+.ccard .intro { color: #a89f8d; font-style: italic; }
 .ccard .freshmeat {
   color: #d0735a; font-size: .62rem; letter-spacing: .1em; font-weight: 700;
 }
@@ -908,9 +936,9 @@ button.ticket:disabled:hover { transform: none; }
 .credit-choice .cost,
 .night-choice .cost { display: block; font-size: .64rem; line-height: 1.35; opacity: .7; margin-top: .18rem; }
 .night-contract { border-top: 1px dashed #a8874f; border-bottom: 1px dashed #a8874f; padding: .7rem 0; margin: .7rem 0; }
-.ndilemma { font-size: .86rem; line-height: 1.45; font-style: italic; color: #4a2c10; margin-bottom: .35rem; }
-.n1body { font-size: .86rem; line-height: 1.45; font-style: italic; color: #4a2c10; margin: .1rem 0 .5rem; }
-.ncondition { font-size: .72rem; line-height: 1.45; color: #6a552e; }
+.ndilemma { font-size: .98rem; line-height: 1.5; font-style: italic; color: #3a230c; margin-bottom: .4rem; }
+.n1body { font-size: .98rem; line-height: 1.5; font-style: italic; color: #3a230c; margin: .1rem 0 .55rem; }
+.ncondition { font-size: .84rem; line-height: 1.55; color: #54401f; }
 .night-feud { display: flex; gap: .8rem; align-items: flex-start; border: 1px solid #8a6230; background: rgba(120,80,40,.12); padding: .65rem .75rem; margin: .7rem 0; border-radius: 3px; }
 .night-feud .feudface { max-width: 6.5rem; max-height: 18vh; }
 .night-feud > div { flex: 1; min-width: 0; }

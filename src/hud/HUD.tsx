@@ -40,6 +40,29 @@ const moodOf = (c: Cook) =>
     ? "walked out"
     : (c.mood ?? deriveMood({ ...c, working: false })).toLowerCase();
 
+/** A stat that earns its number: counts up once on mount, then holds.
+ *  Reduced motion reads the number straight away. */
+function CountUp({ value }: { value: number }) {
+  const [shown, setShown] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? value : 0,
+  );
+  const raf = useRef(0);
+  useEffect(() => {
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || value === 0) { setShown(value); return; }
+    const t0 = performance.now();
+    const dur = 700;
+    const step = (t: number) => {
+      const k = Math.min(1, (t - t0) / dur);
+      setShown(Math.round(value * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf.current = requestAnimationFrame(step);
+    };
+    raf.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf.current);
+  }, [value]);
+  return <>{shown}</>;
+}
+
 /** Charge-and-release scream: hold Space, the meter fills, let go. */
 function useScreamCharge() {
   const [charge, setCharge] = useState(0);
@@ -736,8 +759,8 @@ function NightOneBrief() {
         <div className="bsub">{INTRO.n1Why}</div>
         <div className="title-residency">{INTRO.residencyLine}</div>
         <div className="bstats">
-          <span>£{career.cash}</span>
-          <span>★ {career.stars}</span>
+          <span>£<CountUp value={career.cash} /></span>
+          <span>★ <CountUp value={career.stars} /></span>
         </div>
         {beat === 0 && (
           <>
@@ -1005,8 +1028,8 @@ function QuickBrief({ onBook }: { onBook: () => void }) {
       <div className="brief quick-brief">
         <div className="bhead">NIGHT {career.night} — {v.name}</div>
         <div className="bstats">
-          <span>£{career.cash}</span>
-          <span>★ {career.stars}</span>
+          <span>£<CountUp value={career.cash} /></span>
+          <span>★ <CountUp value={career.stars} /></span>
         </div>
         <div className="cast row qcast">
           {cooks.map((c) => (
@@ -1138,7 +1161,7 @@ function PrepBook({ onBack }: { onBack: () => void }) {
           <button className="btn ghost bookback" onClick={onBack}>← BACK TO THE DOORS</button>
         </div>
         <div className="bstats">
-          <span>£{career.cash}</span>
+          <span>£<CountUp value={career.cash} /></span>
           <span>{"★".repeat(Math.min(12, career.stars)) || "☆"} {career.stars}★ total</span>
           <span>{9 - career.night + 1} services left</span>
         </div>
