@@ -14,7 +14,7 @@ import { PMREMGenerator } from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { tileTexture, floorTexture } from "./tex";
 import { Group, PointLight } from "three";
-import chefPoster from "../../assets/recraft/raster/chef-pistols-poster.webp";
+import chefPoster from "../../assets/recraft/raster/chef-pistols-poster-1k.webp";
 import FirstPerson from "./FirstPerson";
 import RailDockets from "./RailDockets";
 import SpeechBubble from "./SpeechBubble";

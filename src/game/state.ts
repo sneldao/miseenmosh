@@ -240,8 +240,8 @@ export interface Career {
   /** first-time gentling: first sauce gets 7s, first runner warns 10s out */
   sauceGentled?: boolean;
   runnerGentled?: boolean;
-  /** run mutator: one twist per residency, chosen N1 — double runners, no bin, short fuse */
-  mutator?: "double_runners" | "no_bin" | "short_fuse";
+  /** run mutator: one twist per residency, chosen N1 — double runners, no bin, short fuse, or none */
+  mutator?: "double_runners" | "no_bin" | "short_fuse" | "none";
   /** covers earned this run (4–5★ reviews name the magazine) */
   covers?: string[];
   /** coaching: night a cook was coached (one session a night) */
@@ -1835,10 +1835,12 @@ export const useGame = create<GameState>((set, get) => ({
         ? "HOUSE RULE: DOUBLE SHIFT — BEEFCAKES doubles his runners all residency. Bring a broom."
         : m === "no_bin"
           ? "HOUSE RULE: NO BIN — 86 is off all residency. Cook everything."
-          : "HOUSE RULE: SHORT FUSE — tickets walk 20% faster all residency. Streaks still pay.";
+          : m === "short_fuse"
+            ? "HOUSE RULE: SHORT FUSE — tickets walk 20% faster all residency. Streaks still pay."
+            : "HOUSE RULE: none. The food does the talking.";
     set({ career, feed: pushFeed(s.feed, line, "drama") });
     speakLine(
-      m === "double_runners" ? "Double shift. Bring a broom." : m === "no_bin" ? "No bin. Cook everything." : "Short fuse. Move.",
+      m === "double_runners" ? "Double shift. Bring a broom." : m === "no_bin" ? "No bin. Cook everything." : m === "short_fuse" ? "Short fuse. Move." : "Play it straight. Good.",
       2,
     );
   },
@@ -2355,9 +2357,11 @@ export const useGame = create<GameState>((set, get) => ({
         criticAnnounced = true;
         feed = pushFeed(feed, "The inspector ordered the Wellington. Of course.", "drama");
       }
-      const floor = dessertDone ? 1.8 : 2.5;
+      const floor = dessertDone ? 1.8 : s.career.night === 1 ? 3.5 : 2.5;
+      // night 1 teaches: the printer runs slower and never reaches full speed
+      const pace = s.career.night === 1 ? 10.5 - serviceTime / 30 : 7.5 - serviceTime / 25;
       nextTicketIn =
-        Math.max(floor, 7.5 - serviceTime / 25) * s.spawnMul * (0.8 + rng() * 0.5);
+        Math.max(floor, pace) * s.spawnMul * (0.8 + rng() * 0.5);
     }
 
     // --- pacing floor: a no-empty guard, not a busyness generator. Only
@@ -2462,7 +2466,8 @@ export const useGame = create<GameState>((set, get) => ({
       }
       // idle stations recover; loaded stations drain — drowning is what kills.
       // trauma from past walkouts makes them fragile forever; fire is worse.
-      const drain = load === 0 ? -1.4 : (0.22 + load * 0.15) * (1 + c.trauma * 0.35);
+      // night 1 forgives: the brigade is learning your rhythm with you
+      const drain = load === 0 ? -1.4 : (0.22 + load * 0.15) * (1 + c.trauma * 0.35) * (s.career.night === 1 ? 0.7 : 1);
       const morale = Math.min(100, Math.max(0, c.morale - dt * drain * (burning ? 2 : 1)));
       // the body is the gauge: one derived mood feeds HUD, glyph, pose and barks
       const working = tickets.some((t) => t.station === c.station && t.state === "plating");

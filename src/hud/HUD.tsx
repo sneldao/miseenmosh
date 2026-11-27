@@ -4,7 +4,7 @@ import { deriveMood } from "../game/mood";
 import { morningCards } from "../game/beats";
 import { dishProfile, plateObservations, correctionNeeded, CORRECTION_LABEL, currentWellingtonRecipe, WELLINGTON_FINISHES, type RecipeFinish } from "../game/culinary";
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
-import { reviewNarration } from "../game/serviceReview";
+import { petraCoachingNote, reviewNarration } from "../game/serviceReview";
 import { nightContract, lowestMoraleCook } from "../game/nightArc";
 import { buildEnding } from "../game/ending";
 import { speakReview, voiceEnabled, setVoiceEnabled } from "../game/voice";
@@ -510,6 +510,11 @@ function ReviewCard() {
         </div>
         {review.headline && <div className="headline">{review.headline}</div>}
         <p className="incident">{review.incident}</p>
+        {petraCoachingNote({ stars: review.stars, walkouts: review.walkouts, misses: review.misses, smashed: review.smashed, served: review.covers }) && (
+          <p className="incident petra-note">
+            PETRA'S NOTE — {petraCoachingNote({ stars: review.stars, walkouts: review.walkouts, misses: review.misses, smashed: review.smashed, served: review.covers })}
+          </p>
+        )}
         <div className="rlabel">WHAT FOLLOWS</div>
         <p className="consequence">{review.consequence}</p>
         <div className="rbtns main-action">
@@ -772,7 +777,7 @@ function NightOneBrief() {
               <div className="mhead">HOUSE RULE — one twist, all residency</div>
               {career.mutator ? (
                 <div className="ltaken">
-                  rule set: {career.mutator === "double_runners" ? "DOUBLE SHIFT" : career.mutator === "no_bin" ? "NO BIN" : "SHORT FUSE"}. no take-backs.
+                  rule set: {career.mutator === "double_runners" ? "DOUBLE SHIFT" : career.mutator === "no_bin" ? "NO BIN" : career.mutator === "short_fuse" ? "SHORT FUSE" : "NONE"}. no take-backs.
                 </div>
               ) : (
                 <div className="qmeal-row">
@@ -784,6 +789,9 @@ function NightOneBrief() {
                   </button>
                   <button className="btn lbtn dim" onClick={() => chooseMutator("short_fuse")}>
                     SHORT FUSE<span className="cost">tables walk 20% faster · all 9 nights</span>
+                  </button>
+                  <button className="btn lbtn" onClick={() => chooseMutator("none")}>
+                    NO HOUSE RULE<span className="cost">play it straight · all 9 nights</span>
                   </button>
                 </div>
               )}
@@ -1215,7 +1223,7 @@ function PrepBook({ onBack }: { onBack: () => void }) {
             <div className="market">
               <div className="mhead">HOUSE RULE — one twist, all residency</div>
               {career.mutator ? (
-                <div className="ltaken">rule set: {career.mutator === "double_runners" ? "DOUBLE SHIFT" : career.mutator === "no_bin" ? "NO BIN" : "SHORT FUSE"}. no take-backs.</div>
+                <div className="ltaken">rule set: {career.mutator === "double_runners" ? "DOUBLE SHIFT" : career.mutator === "no_bin" ? "NO BIN" : career.mutator === "short_fuse" ? "SHORT FUSE" : "NONE"}. no take-backs.</div>
               ) : (
                 <>
                   <button className="btn lbtn" onClick={() => chooseMutator("double_runners")}>
@@ -1226,6 +1234,9 @@ function PrepBook({ onBack }: { onBack: () => void }) {
                   </button>
                   <button className="btn lbtn dim" onClick={() => chooseMutator("short_fuse")}>
                     SHORT FUSE <span className="cost">tables walk 20% faster · all 9 nights</span>
+                  </button>
+                  <button className="btn lbtn" onClick={() => chooseMutator("none")}>
+                    NO HOUSE RULE <span className="cost">play it straight · all 9 nights</span>
                   </button>
                 </>
               )}

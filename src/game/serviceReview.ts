@@ -99,6 +99,28 @@ export function buildServiceStory(f: ReviewFacts): ServiceStory {
   };
 }
 
+/** A bad night owes the player one plain sentence about what to do differently.
+ *  The review already says what happened; this is the fix, in Petra's voice.
+ *  Returns null on nights that don't need coaching. */
+export function petraCoachingNote(f: {
+  stars: number;
+  walkouts: number;
+  misses: number;
+  smashed: number;
+  served: number;
+}): string | null {
+  if (f.stars > 1) return null;
+  if (f.walkouts > 0)
+    return "Call tickets in ones. A station drowns at three, and a drowning station burns — and then it leaves.";
+  if (f.misses > 0)
+    return "The rail is not a shelf. Oldest docket first: call it, fire it, judge it. Then the next one.";
+  if (f.smashed > 0)
+    return "The tiles cost £12 a plate. Send it back instead — it comes out golden the second time.";
+  if (f.served < 5)
+    return "Inspect before you judge. The plate tells you everything; you only have to look.";
+  return null;
+}
+
 /** One night's accounts — shared by continueNext (which applies them) and the
  *  review (which needs to know whether tonight is really the last). */
 export function nightAccounts(a: {

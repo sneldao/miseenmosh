@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { criticForNight, criticTell, criticAssessment, CRITICS } from "./critics";
 import { appendServiceEvent, MAX_SERVICE_EVENTS, type ServiceEvent } from "./serviceEvents";
-import { buildServiceStory, nightAccounts, type ReviewFacts } from "./serviceReview";
+import { buildServiceStory, nightAccounts, petraCoachingNote, type ReviewFacts } from "./serviceReview";
 import { conditionFromCooking } from "./culinary";
 import { morningCards } from "./beats";
 import { speakChorus } from "./voice";
@@ -1746,5 +1746,26 @@ describe("flagship station and recipe flow", () => {
     const ev = useGame.getState().events.find((e) => e.kind === "plate") as Extract<ServiceEvent, { kind: "plate" }>;
     expect(ev.quality).toBe(88);
     expect(ev.guestScore).toBe(71);
+  });
+});
+
+describe("petraCoachingNote", () => {
+  const shape = (over: Partial<Parameters<typeof petraCoachingNote>[0]>) =>
+    petraCoachingNote({ stars: 0, walkouts: 0, misses: 0, smashed: 0, served: 0, ...over });
+
+  it("stays quiet on decent nights", () => {
+    expect(shape({ stars: 2, served: 10 })).toBeNull();
+    expect(shape({ stars: 5, served: 10 })).toBeNull();
+  });
+
+  it("coaches the failure the night actually died of", () => {
+    expect(shape({ walkouts: 2 })).toMatch(/Call tickets in ones/);
+    expect(shape({ misses: 3 })).toMatch(/Oldest docket first/);
+    expect(shape({ smashed: 2, served: 6 })).toMatch(/Send it back instead/);
+    expect(shape({ served: 2 })).toMatch(/Inspect before you judge/);
+  });
+
+  it("puts the deadliest failure first", () => {
+    expect(shape({ walkouts: 1, misses: 4, smashed: 3 })).toMatch(/Call tickets in ones/);
   });
 });
