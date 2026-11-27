@@ -13,7 +13,7 @@ import { useTexture } from "@react-three/drei";
 import { PMREMGenerator } from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { tileTexture, floorTexture } from "./tex";
-import { Group, PointLight } from "three";
+import { Group, MeshStandardMaterial, PointLight } from "three";
 import chefPoster from "../../assets/recraft/raster/chef-pistols-poster-1k.webp";
 import FirstPerson from "./FirstPerson";
 import RailDockets from "./RailDockets";
@@ -31,7 +31,7 @@ import PlateCorrection from "./PlateCorrection";
 import KitchenEquipment from "./equipment/KitchenEquipment";
 import StaticMerge from "./StaticMerge";
 import { COPPER, INK, LINE_SHIFT, LOOK, MUSTARD, PASS_Z, PETROL, STATION_X, VERMILION, signTexture, useReducedMotion } from "./artDirection";
-import { type DishCondition, dishProfile } from "../game/culinary";
+import { type DishCondition, correctionNeeded, dishProfile } from "../game/culinary";
 
 const STEEL_DARK = "#4a4d52";
 const IVORY = "#f2ead6";
@@ -191,6 +191,39 @@ function PassCounter() {
 
 /** A plate: big, banded, and carrying real food now. */
 
+/** the glance tell: the plate answers one question before you touch it —
+ *  is anything wrong here? A faulted plate breathes red under the rim; a
+ *  solid one holds a faint gold ring. WHAT is wrong still needs your eyes
+ *  (I) — the ring buys the confident player their gamble, nothing more. */
+function TellRing({ dish, condition, quality, small, pr }: {
+  dish?: string;
+  condition?: DishCondition;
+  quality: number;
+  small?: boolean;
+  pr: number;
+}) {
+  const mat = useRef<MeshStandardMaterial>(null);
+  const faulted = !!dish && (!!condition
+    ? correctionNeeded(dish, condition) != null
+    : quality < 45);
+  const solid = !!dish && !faulted && quality >= 72;
+  const color = faulted ? "#d95a2a" : solid ? "#e8c33a" : null;
+  useFrame(({ clock }) => {
+    if (!mat.current) return;
+    const base = faulted ? 0.55 : solid ? 0.35 : 0;
+    if (base <= 0) { mat.current.opacity = 0; return; }
+    const t = clock.elapsedTime;
+    mat.current.opacity = faulted ? base + Math.sin(t * 2.4) * 0.3 : base;
+  });
+  if (!color) return null;
+  return (
+    <mesh position={[0, 0.024 * (small ? 0.7 : 1), 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <torusGeometry args={[pr * 1.04, small ? 0.006 : 0.011, 6, 40]} />
+      <meshStandardMaterial ref={mat} color={color} transparent opacity={0.4} roughness={0.4} />
+    </mesh>
+  );
+}
+
 function Plate({
   quality,
   position,
@@ -264,6 +297,7 @@ function Plate({
         <torusGeometry args={[pr * 0.7, small ? 0.005 : 0.009, 6, 32]} />
         <meshStandardMaterial color={PETROL} roughness={0.55} />
       </mesh>
+      <TellRing dish={dish} condition={condition} quality={quality} small={small} pr={pr} />
       {dish && (
         <group position={[0, 0.03 * (small ? 0.7 : 1), 0]} rotation={[0, turn ?? 0, 0]}>
           <FoodModel dish={dish} quality={quality} sauce={sauce} condition={condition} scale={small ? 0.55 : 0.9} />

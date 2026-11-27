@@ -67,6 +67,8 @@ export interface Ticket {
   recipeContributor?: string;
   /** authored teaching ticket: first sauce or first judgment */
   lesson?: "split-jus" | "first-sauce" | "opening-judgment";
+  /** the chef put eyes on this plate before judging — false makes a serve a blind bet */
+  inspected?: boolean;
 }
 
 export interface Cook {
@@ -3001,6 +3003,13 @@ export const useGame = create<GameState>((set, get) => ({
     if (s.stance !== "pass") { set({ feed: pushFeed(s.feed, "Collecting happens at the pass. Press 0 — get back.", "info", "THE PASS") }); return; }
     // hands on the plate, brigade answers — the baked YES CHEF where it exists
     speakChorus(pick(s.rng, BRIGADE_RESPONSES), false);
+    // the arrival tell, in the ears: a clean plate lands warm, a faulty one
+    // carries the faint sound of the pan complaining — same info as the ring
+    const held = s.tickets.find((t) => t.id === id);
+    if (held) {
+      const faulted = held.quality < 45 || (held.condition ? correctionNeeded(held.dish, held.condition) != null : false);
+      sfx(faulted ? "hiss" : "sear", { vol: 0.28, pan: STATION_PAN[held.station] ?? 0 });
+    }
     set({ tickets: s.tickets.map((t) => (t.id === id ? { ...t, state: "pass" as const } : t)), selectedTicketId: id, inspecting: false, inspectionTurn: 0 });
   },
 
@@ -3012,7 +3021,10 @@ export const useGame = create<GameState>((set, get) => ({
     }
     if (s.phase !== "service" || s.paused || s.glossary || !s.tickets.some((t) => t.state === "pass")) return;
     if (s.stance !== "pass") { set({ feed: pushFeed(s.feed, "Inspecting happens at the pass. Press 0 — get back.", "info", "THE PASS") }); return; }
-    set({ inspecting: true });
+    set({
+      inspecting: true,
+      tickets: s.tickets.map((t) => (t.state === "pass" ? { ...t, inspected: true } : t)),
+    });
   },
 
   acknowledgeOpeningDefect: () => {
@@ -3397,6 +3409,22 @@ export const useGame = create<GameState>((set, get) => ({
       const egoBefore = ego;
       served += 1;
       const foodQuality = plate.quality;
+      // the blind serve: no eyes on the plate, and the pass bets on itself.
+      // A clean plate served on nerve is bravado, worth the room's respect;
+      // a broken one served blind is a guess the room watched you lose.
+      if (!plate.inspected && !s.openingStep) {
+        if (foodQuality >= 72) {
+          ego += 3;
+          feed = pushFeed(feed, "No eyes on it. Served on nerve. Bravado — and it lands. (+3 ego)", "good", "THE PASS");
+          feed = tiered(feed, egoBefore, ego);
+        } else if (foodQuality < 45) {
+          ego = Math.max(0, ego - 4);
+          feed = pushFeed(feed, "You never looked. You served it anyway. The room watched you guess. (−4 ego)", "bad", "THE PASS");
+          feed = tiered(feed, egoBefore, ego);
+        } else {
+          feed = pushFeed(feed, "Served blind. It was neither good nor a disaster. The room isn't sure what that says.", "info", "THE PASS");
+        }
+      }
       let hospitality = 65;
       let req = s.request;
       let ms: { at: number; text: string } | null = null;

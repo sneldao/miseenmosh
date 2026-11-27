@@ -1710,6 +1710,7 @@ export default function HUD() {
   const criticFlagged = useGame((s) => s.criticFlagged);
   const criticSpotted = useGame((s) => s.criticSpotted);
   const streak = useGame((s) => s.streak);
+  const qualitySum = useGame((s) => s.qualitySum);
   const paused = useGame((s) => s.paused);
   const openingStep = useGame((s) => s.openingStep);
   const toggleGlossary = useGame((s) => s.toggleGlossary);
@@ -1717,6 +1718,8 @@ export default function HUD() {
   const aim = useGame((s) => s.aim);
   const charge = useScreamCharge();
   const locked = usePointerLocked();
+  // tonight's live food average — the star thresholds made visible
+  const avg = served > 0 ? qualitySum / served : 0;
 
   useEffect(() => {
     if (phase !== "service" || paused) {
@@ -1876,25 +1879,22 @@ export default function HUD() {
                                   ? "Spot the inspector — aim and click."
                                   : null}
             </div>
-          ) : runner && !runner.fled ? (
-            <div className="hint">Runner on the floor — SHOO HIM (H)!</div>
-          ) : request ? (
-            <div className="hint">Table {request.table} wants it {request.mod} — D to refuse.</div>
-          ) : sauce ? (
-            <div className="hint">That sauce is splitting — WHISK it (M)!</div>
-          ) : atPass ? null : live.some((t) => t.state === "ready") ? (
-            <div className="hint">A plate is up — F collects it.</div>
-          ) : live.some((t) => t.state === "plating") ? (
-            <div className="hint">Plating… F fires it early — wait for the gold.</div>
-          ) : railAll.length > 0 ? (
-            <div className="hint">Orders on the rail — keys 1–{Math.min(9, railAll.length)} call them in.</div>
-          ) : serviceTime - breadAt >= 18 ? (
-            <div className="hint">Bread service (G) — a basket settles the hanging table.</div>
-          ) : nextTicketIn > 6 ? (
-            <div className="hint">Quiet pass — N waves the next order in early.</div>
-          ) : !criticFlagged && serviceTime < 100 ? (
-            <div className="hint">Spot the inspector — click them.</div>
-          ) : null}
+          ) : (() => {
+            // two hands, two problems: the top two live hints stack instead of
+            // one evicting the other mid-rush
+            const hints = [
+              runner && !runner.fled && "Runner on the floor — SHOO HIM (H)!",
+              request && `Table ${request.table} wants it ${request.mod} — D to refuse.`,
+              sauce && "That sauce is splitting — WHISK it (M)!",
+              !atPass && live.some((t) => t.state === "ready") && "A plate is up — F collects it.",
+              live.some((t) => t.state === "plating") && "Plating… F fires it early — wait for the gold.",
+              railAll.length > 0 && `Orders on the rail — keys 1–${Math.min(9, railAll.length)} call them in.`,
+              serviceTime - breadAt >= 18 && "Bread service (G) — a basket settles the hanging table.",
+              nextTicketIn > 6 && "Quiet pass — N waves the next order in early.",
+              !criticFlagged && serviceTime < 100 && "Spot the inspector — click them.",
+            ].filter((h): h is string => !!h);
+            return hints.slice(0, 2).map((h) => <div key={h} className="hint">{h}</div>);
+          })()}
           {railCards}
           {atPass && <PassPanel plate={atPass} firstPerson={firstPerson} />}
           <div className="house-left">
@@ -1917,6 +1917,21 @@ export default function HUD() {
                 <> · <b>{screams}</b> SCREAMS</>
               )}
             </div>
+            {served > 0 && (
+              <div className="qmeter" title="Tonight's food average — 72 earns the second food star, 85 the third">
+                <span className="qmeter-label">TONIGHT</span>
+                <div className="qmeter-track">
+                  <div
+                    className={`qmeter-fill ${avg >= 72 ? "good" : avg >= 58 ? "mid" : "low"}`}
+                    style={{ width: `${Math.min(100, (avg / 100) * 100)}%` }}
+                  />
+                  <div className="qmeter-mark m58" />
+                  <div className="qmeter-mark m72" />
+                  <div className="qmeter-mark m85" />
+                </div>
+                <span className="qmeter-num">{Math.round(avg)}</span>
+              </div>
+            )}
             <Brigade />
             {/* first person shouts the newest line into the room instead */}
             {!firstPerson && <Ticker />}

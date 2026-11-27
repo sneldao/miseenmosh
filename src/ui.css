@@ -181,6 +181,25 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .house-actions .stancebar .btn .kbd { margin-left: 0; }
 /* left mirrors right: same furniture, same compact voice */
 .house-left .status { font-size: .7rem; line-height: 1.55; opacity: .92; }
+/* tonight's food average, live: the thresholds are the review's thresholds */
+.qmeter {
+  display: flex; align-items: center; gap: .45rem; margin: .35rem 0 .1rem;
+  font-size: .62rem; letter-spacing: .1em;
+}
+.qmeter-label { opacity: .75; }
+.qmeter-track {
+  position: relative; width: 7.2rem; height: 7px; border-radius: 3px;
+  background: #183a35; overflow: hidden; border: 1px solid rgba(244, 234, 210, .25);
+}
+.qmeter-fill { height: 100%; transition: width .4s ease; }
+.qmeter-fill.low { background: #b8563a; }
+.qmeter-fill.mid { background: #c9a44a; }
+.qmeter-fill.good { background: #8ac46a; }
+.qmeter-mark { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(244, 234, 210, .4); }
+.qmeter-mark.m58 { left: 58%; }
+.qmeter-mark.m72 { left: 72%; }
+.qmeter-mark.m85 { left: 85%; }
+.qmeter-num { min-width: 2ch; text-align: right; opacity: .9; font-weight: 700; }
 .house-left .brigade { gap: .25rem; font-size: .64rem; }
 .house-left .brigade .cook .cname { width: 3.8rem; }
 .house-left .brigade .mbar { width: 4.2rem; }
