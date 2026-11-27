@@ -1461,36 +1461,61 @@ function Ending() {
   const career = useGame((s) => s.career);
   const cooks = useGame((s) => s.cooks);
   const enterResidency = useGame((s) => s.enterResidency);
+  const curtain = useGame((s) => s.endingCurtain);
+  const dismissEndingCurtain = useGame((s) => s.dismissEndingCurtain);
   const ending = buildEnding(career, cooks);
+  // the graduation plays in two moments: the brigade faces the room (curtain
+  // call, one fate per cook), then the verdict lands like a stamped review
   return (
     <div className="review-wrap">
       <div className="review ending">
         <div className="rhead">THE RESIDENCY ENDS</div>
-        <div className={`ending-result ${ending.won ? "won" : ""}`}>
-          {ending.broke ? "THE HOUSE CLOSED" : ending.won ? "RESIDENCY WON" : "RESIDENCY UNFINISHED"}
-        </div>
-        <div className="ending-title">{ending.title}</div>
-        <div className="quote">{ending.quote}</div>
-        <div className="ending-ledger">
-          <p>{ending.signature}</p>
-          <p>{ending.brigade}</p>
-          {ending.memory && <p>{ending.memory}</p>}
-          <p>{ending.costs}</p>
-        </div>
-        <div className="rstats">
-          <span>{career.stars}★ earned</span>
-          <span>food {Math.round(ending.avgCulinary)}/100</span>
-          <span>hospitality {Math.round(ending.avgHospitality)}/100</span>
-          <span>{career.defections} defections</span>
-          <span>{career.totalWalkouts ?? 0} walkouts</span>
-          <span>{Math.round(career.totalEgo ?? 0)} lifetime ego</span>
-          {(career.covers ?? []).length > 0 && <span>covers: {(career.covers ?? []).join(" · ")}</span>}
-        </div>
-        <div className="rbtns">
-          <button className="btn serve" onClick={() => enterResidency({ fresh: true })}>
-            NEW RESIDENCY <span className="kbd">↵</span>
-          </button>
-        </div>
+        {curtain ? (
+          <>
+            <div className="ending-title">CURTAIN CALL</div>
+            <div className="rollcall">
+              {ending.rollCall.map((entry, i) => (
+                <div key={entry.name} className={`roll-line ${entry.gone ? "gone" : ""}`} style={{ animationDelay: `${0.15 + i * 0.55}s` }}>
+                  <span className="roll-name">{entry.name}</span>
+                  <span className="roll-fate">{entry.line}</span>
+                </div>
+              ))}
+            </div>
+            <div className="rbtns main-action">
+              <button className="btn serve" autoFocus onClick={dismissEndingCurtain}>
+                THE VERDICT <span className="kbd">↵</span>
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={`ending-result ${ending.won ? "won" : ""}`}>
+              {ending.broke ? "THE HOUSE CLOSED" : ending.won ? "RESIDENCY WON" : "RESIDENCY UNFINISHED"}
+            </div>
+            <div className="ending-title">{ending.title}</div>
+            <div className="quote">{ending.quote}</div>
+            <div className="ending-ledger">
+              <p>{ending.signature}</p>
+              <p>{ending.brigade}</p>
+              {ending.memory && <p>{ending.memory}</p>}
+              <p>{ending.costs}</p>
+            </div>
+            <div className="rstats">
+              <span>{career.stars}★ earned</span>
+              <span>food {Math.round(ending.avgCulinary)}/100</span>
+              <span>hospitality {Math.round(ending.avgHospitality)}/100</span>
+              <span>{career.defections} defections</span>
+              <span>{career.totalWalkouts ?? 0} walkouts</span>
+              <span>{Math.round(career.totalEgo ?? 0)} lifetime ego</span>
+              {(career.covers ?? []).length > 0 && <span>covers: {(career.covers ?? []).join(" · ")}</span>}
+            </div>
+            <div className="rbtns">
+              <button className="btn serve" onClick={() => enterResidency({ fresh: true })}>
+                NEW RESIDENCY <span className="kbd">↵</span>
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -1515,9 +1540,10 @@ function useHotkeys() {
         return;
       }
       if (s.phase === "briefing" && e.key === "Enter") return; // briefing components own Enter
-      if (s.phase === "ending" && (e.key === " " || e.key === "Enter")) {
+      if (s.phase === "ending") {
         if (e.target instanceof Element && e.target.closest("button, summary, input, select, textarea, a")) return;
         e.preventDefault();
+        if (s.endingCurtain) { s.dismissEndingCurtain(); return; }
         s.enterResidency({ fresh: true });
         return;
       }

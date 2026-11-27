@@ -618,6 +618,19 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .ending-result { font-size: .74rem; letter-spacing: .24em; color: #9a3f2c; margin: .2rem 0 .45rem; }
 .ending-result.won { color: #3f6b35; }
 .ending-title { font-size: 1.45rem; line-height: 1.2; letter-spacing: .05em; color: #5a3510; margin-bottom: .6rem; }
+/* the curtain call: each cook steps forward on their own beat, the room
+   goes quiet between names — gone cooks stay dimmed and do not step */
+.rollcall { display: flex; flex-direction: column; gap: .55rem; margin: .6rem 0 .9rem; }
+.roll-line {
+  display: flex; gap: .7rem; align-items: baseline; text-align: left;
+  animation: rollIn .5s cubic-bezier(.2, 0, .2, 1) backwards;
+}
+@keyframes rollIn { from { opacity: 0; transform: translateY(8px); } }
+.roll-line .roll-name { font-size: .95rem; font-weight: 700; letter-spacing: .08em; color: #5a3510; min-width: 6.2rem; }
+.roll-line .roll-fate { font-size: .88rem; font-style: italic; line-height: 1.45; color: #3a230c; }
+.roll-line.gone { opacity: .5; }
+.roll-line.gone .roll-name { color: #7a6438; }
+@media (prefers-reduced-motion: reduce) { .roll-line { animation: none; } }
 .ending-ledger { text-align: left; border-top: 1px dashed #b99b68; border-bottom: 1px dashed #b99b68; padding: .5rem 0; margin: .7rem 0 1rem; }
 .ending-ledger p { font-size: .84rem; line-height: 1.5; margin: .45rem 0; }
 .review.ending .rstats { margin-bottom: 1rem; }

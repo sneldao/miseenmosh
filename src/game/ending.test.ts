@@ -78,3 +78,33 @@ describe("relationship-aware ending", () => {
     expect(ending.title).toBe("THE TILL IS EMPTY");
   });
 });
+
+describe("curtain call", () => {
+  it("gives every cook a fate line, honored above scars above plain service", () => {
+    const ending = buildEnding(career(), [
+      cook({ id: 0, name: "PETRA", honored: true, trauma: 2 }),
+      cook({ id: 1, name: "DIMITRI", trauma: 1 }),
+      cook({ id: 2, name: "ANWAR" }),
+      cook({ id: 3, name: "DIMITRI", station: 1, walkedOut: true }),
+    ]);
+    expect(ending.rollCall.map((r) => r.name)).toEqual(["PETRA", "DIMITRI", "ANWAR", "DIMITRI"]);
+    expect(ending.rollCall[0].line).toMatch(/honor/);
+    expect(ending.rollCall[1].line).toMatch(/scars/);
+    expect(ending.rollCall[2].line).toMatch(/stayed every service/);
+    expect(ending.rollCall[3].gone).toBe(true);
+    expect(ending.rollCall[3].line).toMatch(/did not come back/);
+  });
+
+  it("keeps a replacement cook standing while the departed namesake stays gone", () => {
+    const ending = buildEnding(
+      career({ departedCooks: ["ANWAR"], defections: 1 }),
+      [
+        cook({ id: 2, name: "ANWAR", station: 2, walkedOut: true }),
+        cook({ id: 5, name: "ANWAR", station: 2, morale: 90 }),
+      ],
+    );
+    expect(ending.rollCall[0].gone).toBe(true);
+    expect(ending.rollCall[1].gone).toBe(false);
+    expect(ending.rollCall[1].line).toMatch(/stayed every service/);
+  });
+});

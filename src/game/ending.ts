@@ -2,6 +2,12 @@ import { currentWellingtonRecipe, WELLINGTON_FINISHES } from "./culinary";
 import { residencyWon } from "./serviceScore";
 import type { Career, Cook } from "./state";
 
+export interface RollCallEntry {
+  name: string;
+  line: string;
+  gone: boolean;
+}
+
 export interface EndingResult {
   won: boolean;
   broke: boolean;
@@ -12,6 +18,8 @@ export interface EndingResult {
   brigade: string;
   costs: string;
   memory: string;
+  /** the curtain call: one fate line per cook, in station order */
+  rollCall: RollCallEntry[];
   avgCulinary: number;
   avgHospitality: number;
 }
@@ -105,6 +113,26 @@ export function buildEnding(career: Career, cooks: readonly Cook[]): EndingResul
       : null,
   ].filter(Boolean);
 
+  // the curtain call: the brigade faces the room one last time. The line is
+  // what the residency did to them — honored above scars, scars above mood.
+  const walkedOutIds = new Set(walked.map((cook) => cook.id));
+  const departedNames = new Set(departed);
+  const liveNames = new Set(live.map((cook) => cook.name));
+  const rollCall: RollCallEntry[] = cooks
+    .filter((cook) => !cook.name.toLowerCase().includes("commis"))
+    .map((cook) => {
+      // walked out by identity; departed by name, but only when no standing
+      // cook carries the same name (a replacement inherits the name, not the exit)
+      const gone = walkedOutIds.has(cook.id) || (departedNames.has(cook.name) && !liveNames.has(cook.name));
+      let line: string;
+      if (gone) line = "did not come back for the last service.";
+      else if (cook.honored) line = "carries the house's honor — and earned it.";
+      else if (cook.grudge) line = `leaves with ${cook.grudge} unforgiven.`;
+      else if (cook.trauma > 0) line = "still carries the scars. Stays anyway.";
+      else line = "stayed every service, and it showed.";
+      return { name: cook.name, line, gone };
+    });
+
   return {
     won,
     broke,
@@ -115,6 +143,7 @@ export function buildEnding(career: Career, cooks: readonly Cook[]): EndingResul
     brigade: brigadeParts.join(". ") + ".",
     costs,
     memory: memories.join(" "),
+    rollCall,
     avgCulinary,
     avgHospitality,
   };

@@ -661,6 +661,8 @@ interface GameState {
   table101Turns: number;
   moved101: boolean;
   review: Review | null;
+  /** the graduation plays in two moments: curtain call first, verdict second */
+  endingCurtain: boolean;
   // --- career layer ---
   career: Career;
   feud: Feud | null;
@@ -724,6 +726,8 @@ interface GameState {
   flagGuest: (id: number) => void;
   togglePause: () => void;
   toggleGlossary: () => void;
+  /** curtain call → verdict: the graduation's second moment */
+  dismissEndingCurtain: () => void;
   /** platform: handshake, host pause/mute — safe anywhere, game never waits */
   initPlatform: () => void;
   /** where the chef's body is — the pass loop only runs at the pass */
@@ -1195,6 +1199,7 @@ export const useGame = create<GameState>((set, get) => ({
   table101Turns: 0,
   moved101: false,
   review: null,
+  endingCurtain: true,
   career: bootSave?.career ?? freshCareer(),
   events: [],
   folkloreOutcome: null,
@@ -1221,6 +1226,7 @@ export const useGame = create<GameState>((set, get) => ({
       const career = saved.career;
       set({
         phase: career.night > MAX_NIGHTS ? "ending" : "briefing",
+        endingCurtain: true,
         career,
         cooks,
         feud: makeFeud(career, cooks),
@@ -1567,6 +1573,7 @@ export const useGame = create<GameState>((set, get) => ({
     }
     set({
       phase: done ? "ending" : "briefing",
+      endingCurtain: true,
       career,
       cooks,
       nightTake,
@@ -3762,6 +3769,13 @@ export const useGame = create<GameState>((set, get) => ({
     } else {
       set({ glossary: true, glossaryResume: s.phase === "service" && !s.paused, paused: s.phase === "service" ? true : s.paused });
     }
+  },
+
+  dismissEndingCurtain: () => {
+    const s = get();
+    if (s.phase !== "ending" || !s.endingCurtain) return;
+    sfx("bell");
+    set({ endingCurtain: false });
   },
 
   initPlatform: () => {
