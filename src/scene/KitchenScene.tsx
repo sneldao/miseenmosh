@@ -192,9 +192,11 @@ function PassCounter() {
 /** A plate: big, banded, and carrying real food now. */
 
 /** the glance tell: the plate answers one question before you touch it —
- *  is anything wrong here? A faulted plate breathes red under the rim; a
- *  solid one holds a faint gold ring. WHAT is wrong still needs your eyes
- *  (I) — the ring buys the confident player their gamble, nothing more. */
+ *  is anything wrong here? A faulted plate wears a breathing red halo; a
+ *  solid one holds a faint gold one. WHAT is wrong still needs your eyes
+ *  (I) — the halo buys the confident player their gamble, nothing more.
+ *  It rides slightly above the rim as an emissive glow, because a flat
+ *  ring under the plate is invisible from the diorama's high angle. */
 function TellRing({ dish, condition, quality, small, pr }: {
   dish?: string;
   condition?: DishCondition;
@@ -207,19 +209,25 @@ function TellRing({ dish, condition, quality, small, pr }: {
     ? correctionNeeded(dish, condition) != null
     : quality < 45);
   const solid = !!dish && !faulted && quality >= 72;
-  const color = faulted ? "#d95a2a" : solid ? "#e8c33a" : null;
+  const color = faulted ? "#ff4a1a" : solid ? "#ffc83a" : null;
   useFrame(({ clock }) => {
     if (!mat.current) return;
-    const base = faulted ? 0.55 : solid ? 0.35 : 0;
-    if (base <= 0) { mat.current.opacity = 0; return; }
     const t = clock.elapsedTime;
-    mat.current.opacity = faulted ? base + Math.sin(t * 2.4) * 0.3 : base;
+    if (faulted) mat.current.emissiveIntensity = 2.2 + Math.sin(t * 2.4) * 1.4;
+    else if (solid) mat.current.emissiveIntensity = 0.9;
   });
   if (!color) return null;
   return (
-    <mesh position={[0, 0.024 * (small ? 0.7 : 1), 0]} rotation={[Math.PI / 2, 0, 0]}>
-      <torusGeometry args={[pr * 1.04, small ? 0.006 : 0.011, 6, 40]} />
-      <meshStandardMaterial ref={mat} color={color} transparent opacity={0.4} roughness={0.4} />
+    <mesh position={[0, 0.055 * (small ? 0.7 : 1), 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <torusGeometry args={[pr * 1.16, small ? 0.012 : 0.022, 8, 44]} />
+      <meshStandardMaterial
+        ref={mat}
+        color={color}
+        emissive={color}
+        emissiveIntensity={faulted ? 2.2 : 0.9}
+        toneMapped={false}
+        roughness={0.3}
+      />
     </mesh>
   );
 }
