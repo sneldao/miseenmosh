@@ -34,3 +34,28 @@ pipeline (see docs/research/sponsors.md).
   game systems.
 - Everything generated is **baked into the bundle** (review runs offline).
 - No crypto, payments, accounts, ads or tracking. Mouse + keyboard.
+
+## Voice — the ElevenLabs bake
+
+The brigade talks. Petra's hinge lines (the three opening verdicts, the
+house-rule calls) and the chorus that answers every scream are baked at
+asset time by [`scripts/elevenlabs-bake.mjs`](scripts/elevenlabs-bake.mjs)
+through the **ElevenLabs API** (`eleven_turbo_v2_5`):
+
+- **PETRA** — Alice: cut-glass, clear, commands the pass
+- **DIMITRI** — Brian: deep, resonant, has seen things
+- **ANWAR** — Will: lighter, younger, fragile-adjacent
+
+```
+ELEVENLABS_API_KEY=... node scripts/elevenlabs-bake.mjs
+```
+
+17 takes land in `public/voice/` (~276 KB total) and ship inside the
+bundle — the game never calls the API at runtime, so it plays offline and
+draws its first frame with no server, exactly as the jam requires. The
+runtime wiring lives in `src/game/voice.ts`: the chorus answers your
+scream first, Petra speaks her verdict the moment you judge the first
+plate, and every baked take degrades gracefully to the platform synth if
+a file is missing. The earlier fal/Kokoro bake
+([`assets/voice/bake.mjs`](assets/voice/bake.mjs)) remains in the tree as
+the fallback pipeline.

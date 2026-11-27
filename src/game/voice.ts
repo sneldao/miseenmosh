@@ -61,13 +61,16 @@ interface BakedVoice {
   routed: boolean;
   src?: MediaElementAudioSourceNode;
 }
+
 const baked: Record<number, BakedVoice> = {};
 const bakedDead = new Set<number>();
+const namedBaked: Record<string, BakedVoice> = {};
+const namedDead = new Set<string>();
 let lastBakedFailure: string | null = null;
 
 /** Small meter/debug surface for browser QA; never used by gameplay. */
 export function voiceDiagnostics() {
-  return { enabled, bakedLoaded: Object.keys(baked).length, bakedDead: [...bakedDead], lastBakedFailure };
+  return { enabled, bakedLoaded: Object.keys(baked).length + Object.keys(namedBaked).length, bakedDead: [...bakedDead, ...namedDead], lastBakedFailure };
 }
 
 function routeBaked(v: BakedVoice) {
@@ -86,8 +89,31 @@ function routeBaked(v: BakedVoice) {
 }
 
 function playBaked(idx: number): boolean {
-  if (!enabled || isMasterMuted() || bakedDead.has(idx)) {
-    lastBakedFailure = !enabled ? "voice-disabled" : isMasterMuted() ? "master-muted" : `dead-${idx}`;
+  return playBakedFile(`voice/chorus-${idx}.mp3`, `dead-${idx}`, (v) => { baked[idx] = v; });
+}
+
+/** Named hinge takes — Petra's opening verdicts and house-rule lines, baked
+ *  by scripts/elevenlabs-bake.mjs. A missing file marks itself dead and the
+ *  synth takes the line, exactly like the chorus. */
+const NAMED: Record<string, string> = {
+  "You saw it. You sent it anyway. I heard you.": "voice/petra-opening-serve.mp3",
+  "Dark pastry. Grey centre. You saw it. Back to me.": "voice/petra-opening-sendback.mp3",
+  "You saw it. Then you chose the tiles. So did I.": "voice/petra-opening-smash.mp3",
+  "Double shift. Bring a broom.": "voice/petra-rule-double.mp3",
+  "No bin. Cook everything.": "voice/petra-rule-nobin.mp3",
+  "Short fuse. Move.": "voice/petra-rule-shortfuse.mp3",
+  "Play it straight. Good.": "voice/petra-rule-none.mp3",
+};
+
+function playBakedByName(key: string): boolean {
+  const file = NAMED[key];
+  if (!file) return false;
+  return playBakedFile(file, `dead-${key}`, (v) => { namedBaked[key] = v; });
+}
+
+function playBakedFile(file: string, deadKey: string, cache: (v: BakedVoice) => void): boolean {
+  if (!enabled || isMasterMuted() || namedDead.has(deadKey)) {
+    lastBakedFailure = !enabled ? "voice-disabled" : isMasterMuted() ? "master-muted" : deadKey;
     return false;
   }
   const ac = audioContext();
@@ -97,13 +123,13 @@ function playBaked(idx: number): boolean {
   }
   if (ac.state === "suspended") void ac.resume();
   try {
-    let v = baked[idx];
+    let v = namedBaked[file] ?? Object.values(baked).find((b) => b.el.src.endsWith(file));
     if (!v) {
-      const el = new Audio(`${import.meta.env.BASE_URL}voice/chorus-${idx}.mp3`);
+      const el = new Audio(`${import.meta.env.BASE_URL}${file}`);
       el.preload = "auto";
       v = { el, routed: false };
-      el.addEventListener("error", () => bakedDead.add(idx));
-      baked[idx] = v;
+      el.addEventListener("error", () => namedDead.add(deadKey));
+      cache(v);
     }
     routeBaked(v);
     v.el.currentTime = 0;
@@ -114,7 +140,7 @@ function playBaked(idx: number): boolean {
     return true;
   } catch (err) {
     lastBakedFailure = err instanceof Error ? err.message : "playback-error";
-    bakedDead.add(idx);
+    namedDead.add(deadKey);
     return false;
   }
 }
@@ -174,6 +200,7 @@ export function speakChorus(line: string, over: boolean) {
 /** One scripted line in a cook's voice — hinge moments only (first plate,
  *  house rule), never the running commentary. Best-effort like the rest. */
 export function speakLine(text: string, seed = 1) {
+  if (playBakedByName(text.trim())) return;
   say(text.slice(0, 140), { pitch: 0.9, rate: 1.0, seed });
 }
 

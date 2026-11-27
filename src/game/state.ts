@@ -3385,6 +3385,7 @@ export const useGame = create<GameState>((set, get) => ({
       if (career !== s.career) {
         saveCareer(career, s.cooks);
         feed = pushFeed(feed, petraOpeningReply(v), "drama", "PETRA");
+        speakLine(petraOpeningReply(v), 0);
       }
       const egoBefore = ego;
       served += 1;
@@ -3562,6 +3563,7 @@ export const useGame = create<GameState>((set, get) => ({
       if (career !== s.career) {
         saveCareer(career, s.cooks);
         feed = pushFeed(feed, petraOpeningReply(v), "drama", "PETRA");
+        speakLine(petraOpeningReply(v), 0);
       }
       if (plate.lesson === "first-sauce" && plate.condition?.sauce === "split") {
         career = rememberSauceOutcome(career, plate, cook?.name ?? "THE KITCHEN", "remade");
@@ -3618,7 +3620,10 @@ export const useGame = create<GameState>((set, get) => ({
     // the kitchen remembers what you smashed — tomorrow's family meal is haunted by it
     const openingCareer = rememberOpeningVerdict(s.career, plate, v);
     const career = { ...openingCareer, lastSmashed: plate.dish };
-    if (openingCareer !== s.career) feed = pushFeed(feed, petraOpeningReply(v), "drama", "PETRA");
+    if (openingCareer !== s.career) {
+      feed = pushFeed(feed, petraOpeningReply(v), "drama", "PETRA");
+      speakLine(petraOpeningReply(v), 0);
+    }
     saveCareer(career, cooks);
     set({
       tickets: s.tickets.map((t) => (t.id === plate.id ? { ...t, state: "done", verdict: v } : t)),
