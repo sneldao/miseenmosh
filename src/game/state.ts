@@ -595,6 +595,8 @@ interface GameState {
   /** streak-ceremony overlay: what the room just witnessed, and when */
   milestoneAt: number;
   milestoneText: string;
+  /** serviceTime of the last unscheduled room-stop — cooldown for the variable beat */
+  roomStopAt: number;
   /** coursing: last good-serve serviceTime per table — eat together (+6) */
   tableServeAt: Record<number, number>;
   /** BEEFCAKES' runner: approaching the rail until at, stealing unless shooed */
@@ -732,6 +734,10 @@ interface GameState {
   borrow: () => void;
   repay: () => void;
   judge: (v: Verdict, options?: { batch?: boolean }) => void;
+  /** flow assist: S with an empty pass collects the ready plate and serves it
+   *  in one press — the kitchen makes the call when the choice is unambiguous;
+   *  to inspect first, the chef still collects with F */
+  smartServe: () => void;
   scream: (power?: number) => void;
   flagGuest: (id: number) => void;
   togglePause: () => void;
@@ -1171,6 +1177,7 @@ export const useGame = create<GameState>((set, get) => ({
   bestStreak: 0,
   milestoneAt: 0,
   milestoneText: "",
+  roomStopAt: -999,
   selectedTicketId: null,
   breadAt: -999,
   inspecting: false,
@@ -1474,6 +1481,7 @@ export const useGame = create<GameState>((set, get) => ({
       bestStreak: 0,
       milestoneAt: 0,
       milestoneText: "",
+      roomStopAt: -999,
       tableServeAt: {},
       runner: null,
       request: openingRequest,
@@ -3428,6 +3436,20 @@ export const useGame = create<GameState>((set, get) => ({
     }
   },
 
+  smartServe: () => {
+    const s = get();
+    if (s.phase !== "service" || s.paused || s.glossary) return;
+    const held = s.tickets.find((t) => t.state === "pass");
+    // a held plate or an authored opening keeps the two-step ritual
+    if (held || s.openingStep || s.correction) return s.judge("serve");
+    const ready = s.tickets.filter((t) => t.state === "ready");
+    const target = (s.selectedTicketId != null ? ready.find((t) => t.id === s.selectedTicketId) : null)
+      ?? (ready.length === 1 ? ready[0] : null);
+    if (!target) return s.judge("serve");
+    s.collectPlate(target.id);
+    get().judge("serve");
+  },
+
   judge: (v, options) => {
     const s = get();
     if (s.phase !== "service" || s.paused || s.glossary || s.correction) return;
@@ -3439,7 +3461,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (!plate) return;
     const sideFlags = { ...s.sideFlags };
     if (s.openingStep === "judge" && plate.lesson === "opening-judgment" && !s.openingTurned) return;
-    let { feed, ego, served, sentBack, smashed, complaints, qualitySum, hospitalitySum, hospitalityCount, streak, bestStreak } = s;
+    let { feed, ego, served, sentBack, smashed, complaints, qualitySum, hospitalitySum, hospitalityCount, streak, bestStreak, roomStopAt } = s;
     let { criticServed, criticQ, criticHospitalityQ, criticHospitalityCount } = s;
     let wellingtonRun = s.wellingtonRun;
     let trilogyTonight = s.trilogyTonight;
@@ -3555,6 +3577,13 @@ export const useGame = create<GameState>((set, get) => ({
           } else {
             wellingtonRun = 0;
           }
+          // rare standing ovation for a pristine plate — the jackpot the pass
+          // can't schedule; unpredictable, so the next one always feels possible
+          if (plate.quality >= 85 && s.rng() < 0.06) {
+            ego += 3;
+            feed = pushFeed(feed, `Table ${plate.table} rises to applaud the ${plate.dish}. (+3 ego)`, "drama");
+            if (!options?.batch) sfx("applause", { vol: 0.8 });
+          }
         } else {
           feed = pushFeed(feed, `Table ${plate.table} eats in silence.`, "info");
         }
@@ -3568,6 +3597,20 @@ export const useGame = create<GameState>((set, get) => ({
         const houseBest = loadLegends().bestStreak;
         if (streak === houseBest + 1 && houseBest > 0) {
           feed = pushFeed(feed, `×${streak} — first time past your best. The room feels it.`, "drama");
+        }
+        // variable-ratio reward: the room sometimes stops for a streak nobody
+        // scheduled — irregular beats keep the next reward feeling imminent
+        if (
+          streak >= 6 && streak % 5 !== 0
+          && s.serviceTime - roomStopAt > 20
+          && s.rng() < 0.14
+        ) {
+          roomStopAt = s.serviceTime;
+          ego += 4;
+          ms = { at: performance.now(), text: `THE ROOM STOPS — ×${streak}. Nobody planned this.` };
+          feed = pushFeed(feed, `×${streak} — and the room just stops. Even Beefcakes looks up from the bins. (+4 ego)`, "drama");
+          if (!options?.batch) { sfx("hush", { vol: 0.7 }); sfx("applause", { vol: 0.9 }); }
+          for (const c of cooks) if (!c.walkedOut) c.morale = Math.min(100, c.morale + 3);
         }
         // streak ceremonies: ×10 leans in, ×15 applauds unasked, ×20 gets remembered
         if (streak === 10 || streak === 15 || streak === 20) {
@@ -3649,6 +3692,7 @@ export const useGame = create<GameState>((set, get) => ({
         events: appendServiceEvent(s.events, { kind: "plate", at: s.serviceTime, ticketId: plate.id, dish: plate.dish, table: plate.table, cookName: plate.byChef ? "THE CHEF" : cook?.name ?? "THE CHEF", verdict: "serve", quality: foodQuality, guestScore: hospitality }),
         milestoneAt: ms?.at ?? s.milestoneAt,
         milestoneText: ms?.text ?? s.milestoneText,
+        roomStopAt,
         ...stamp("SERVED"),
       });
       return;

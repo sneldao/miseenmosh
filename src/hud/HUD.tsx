@@ -1621,7 +1621,7 @@ function useHotkeys() {
       if (k === "0") { s.setStance("pass"); return; }
       if (k === "q") { s.stepStance(-1); return; }
       if (k === "w") { s.stepStance(1); return; }
-      if (k === "s") return s.judge("serve");
+      if (k === "s") return s.smartServe();
       if (k === "b") return s.judge("sendback");
       if (k === "x") return s.judge("smash");
       if (k === "f") {
@@ -1663,7 +1663,7 @@ function Glossary() {
   const toggleGlossary = useGame((s) => s.toggleGlossary);
   const rows: [string, string][] = [
     ["1–9", "plate rail ticket to pass"],
-    ["S / B / X", "serve · send back · smash the held plate"],
+    ["S / B / X", "serve (collects a ready plate if the pass is empty) · send back · smash the held plate"],
     ["F", "fire / collect the aimed ticket"],
     ["I", "inspect the held plate"],
     ["E", "86 the dish — displaced covers count as misses"],
