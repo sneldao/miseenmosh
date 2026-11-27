@@ -313,6 +313,8 @@ export interface Career {
   dessertNight?: number; // clout: regulars forgive twice tonight
   doorNamed?: boolean; // clout: name above the door, accolade banked
   totalEgo?: number; // lifetime ego banked at reviews — legends need 200
+  /** the 86 knock paid out — one gift a residency, whoever leaves it leaves it once */
+  matClaimed?: boolean;
   /** call the board: one wager a night, resolved at review */
   bet?: { kind: "covers" | "walks" | "spot"; stake: number; stakeEgo: number };
   /** the man with the van: £100 now, £130 before the residency ends */
@@ -993,6 +995,8 @@ interface GameState {
   sideFlags: Record<string, boolean>;
   /** the 86 knock on the back door — a timestamp the title card reads */
   matDrop: number;
+  /** what the last knock found — the mat pays once a residency, then reads empty */
+  matDropKind: "cash" | "empty";
   // --- career layer ---
   career: Career;
   feud: Feud | null;
@@ -1731,6 +1735,7 @@ export const useGame = create<GameState>((set, get) => ({
   endingCurtain: true,
   sideFlags: {},
   matDrop: 0,
+  matDropKind: "cash" as const,
   career: bootSave?.career ?? freshCareer(),
   events: [],
   folkloreOutcome: null,
@@ -5985,9 +5990,13 @@ export const useGame = create<GameState>((set, get) => ({
     const s = get();
     if (s.phase !== "title") return;
     sfx("boardTap");
-    const career = { ...s.career, cash: s.career.cash + 60 };
+    if (s.career.matClaimed) {
+      set({ matDrop: Date.now(), matDropKind: "empty" });
+      return;
+    }
+    const career = { ...s.career, cash: s.career.cash + 60, matClaimed: true };
     saveCareer(career, s.cooks);
-    set({ career, matDrop: Date.now() });
+    set({ career, matDrop: Date.now(), matDropKind: "cash" });
   },
 
   initPlatform: () => {

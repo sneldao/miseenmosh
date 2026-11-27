@@ -2662,8 +2662,9 @@ export default function HUD() {
           </button>
           {matVisible && (
             <div className="mat-drop" role="status">
-              THE BACK DOOR — sixty quid under the mat. £
-              {useGame.getState().career.cash} in the pocket.
+              {useGame.getState().matDropKind === "empty"
+                ? "THE BACK DOOR — the mat is empty. Sixty quid was the whole kindness."
+                : `THE BACK DOOR — sixty quid under the mat. £${useGame.getState().career.cash} in the pocket.`}
             </div>
           )}
           {!hasSave && <div className="title-hint">{INTRO.titleHint}</div>}

@@ -162,3 +162,53 @@ describe("makeLots — the night-2 teaching showcase", () => {
     expect(contestedSeen).toBeGreaterThan(150);
   });
 });
+
+describe("the back door — one gift a residency", () => {
+  let useGame: Game;
+  beforeEach(async () => {
+    storage.clear();
+    useGame = await freshGame();
+    useGame.getState().resetCareer();
+    useGame.setState({ phase: "title" } satisfies Partial<State>);
+  });
+
+  it("the first knock pays sixty quid and claims the mat", () => {
+    const cash = useGame.getState().career.cash;
+    useGame.getState().theBackDoor();
+    const s = useGame.getState();
+    expect(s.career.cash).toBe(cash + 60);
+    expect(s.career.matClaimed).toBe(true);
+    expect(s.matDropKind).toBe("cash");
+  });
+
+  it("the second knock finds the mat empty and pays nothing", () => {
+    useGame.getState().theBackDoor();
+    const cash = useGame.getState().career.cash;
+    useGame.getState().theBackDoor();
+    useGame.getState().theBackDoor();
+    const s = useGame.getState();
+    expect(s.career.cash).toBe(cash);
+    expect(s.matDropKind).toBe("empty");
+  });
+
+  it("a fresh residency can knock again — the cap is per career, not forever", () => {
+    useGame.getState().theBackDoor();
+    useGame.getState().resetCareer();
+    useGame.setState({ phase: "title" } satisfies Partial<State>);
+    const cash = useGame.getState().career.cash;
+    useGame.getState().theBackDoor();
+    expect(useGame.getState().career.cash).toBe(cash + 60);
+  });
+
+  it("the claim survives a reload through the save", async () => {
+    useGame.getState().theBackDoor();
+    // boot a fresh store against the same storage — the save round-trips
+    const again = await freshGame();
+    expect(again.getState().career.matClaimed).toBe(true);
+    again.setState({ phase: "title" } satisfies Partial<State>);
+    const cash = again.getState().career.cash;
+    again.getState().theBackDoor();
+    expect(again.getState().career.cash).toBe(cash);
+    expect(again.getState().matDropKind).toBe("empty");
+  });
+});
