@@ -6,3 +6,4 @@
 *.webp -text -diff
 *.wav -text -diff
 *.ogg -text -diff
+*.mp3 -text -diff
