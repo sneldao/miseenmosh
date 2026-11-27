@@ -285,7 +285,7 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 }
 .review .score-breakdown span { white-space: nowrap; }
 .review.service-review .incident { font-size: 1rem; line-height: 1.5; margin: 0 0 .9rem; font-style: italic; }
-.review.service-review .petra-note { color: #ffd9a0; margin-top: -.5rem; }
+.review.service-review .petra-note { color: #8a4a1a; margin-top: -.5rem; }
 .review.service-review .rlabel { font-size: .62rem; letter-spacing: .22em; color: #8a6418; margin-bottom: .2rem; }
 .review.service-review .consequence { font-size: .95rem; line-height: 1.5; color: #4a3010; margin: 0 0 1rem; }
 .review.service-review .main-action { margin-bottom: .8rem; }
@@ -678,6 +678,7 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .lbtns { display: flex; flex-direction: column; gap: .3rem; align-items: flex-end; }
 .lwants { font-size: .68rem; color: #a03a20; letter-spacing: .06em; }
 .lbtn { font-size: .72rem; padding: .3rem .6rem; }
+.lbtn .cost { display: block; margin-top: .18rem; opacity: .7; line-height: 1.35; }
 .lbtn.dim { opacity: .55; }
 .bfeed { font-size: .76rem; color: #5a6a34; font-style: italic; margin: .5rem 0 .2rem; }
 
@@ -834,6 +835,8 @@ button.ticket { font-family: inherit; font-size: .72rem; flex: 0 0 9rem; width: 
 .title-promise { font-size: .85rem; font-style: italic; letter-spacing: .04em; color: #ffd9a0; text-align: center; max-width: min(90vw, 34rem); line-height: 1.4; }
 .title-hint { font-size: .68rem; letter-spacing: .08em; color: #c9b48a; text-align: center; }
 .title-residency { font-size: .68rem; letter-spacing: .14em; color: #e8c33a; text-align: center; }
+/* the residency line also sits on the cream briefing card — read ink there */
+.brief .title-residency { color: #7a5518; font-size: .78rem; }
 .title-menu { position: absolute; top: 1rem; right: 1rem; text-align: right; z-index: 40; }
 .title-menu > summary {
   cursor: pointer; list-style: none;

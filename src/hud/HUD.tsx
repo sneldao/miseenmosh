@@ -792,7 +792,6 @@ function NightOneBrief() {
         )}
         {beat === 1 && (
           <>
-            <div className="mhead">{INTRO.beat2Head}</div>
             <div className="n1body">{INTRO.beat2Body}</div>
             <NightContractCard />
             {veteran && FamilyMeal}
