@@ -6,16 +6,17 @@ Everything else supports one of those two.
 
 ## Live
 
-| Doc | Role |
-|---|---|
-| [design.md](design.md) | Game specification: baseline behaviour, flagship direction and art/performance contract. |
-| [roadmap.md](roadmap.md) | 30-day build plan with checkboxes. Decisions tracked here. |
-| [player-attachment-plan.md](player-attachment-plan.md) | Current execution tracker: flagship M0–M3, six workstreams, acceptance and evidence. |
-| [Flagship local proof](devlog/flagship-local-proof.md) | Verified connected route, renderer/resource observations and remaining acceptance gates. |
-| [Kitchen production plan](kitchen-production-plan.md) | Next whole-room asset, animation and sound milestone; preserves the owner-approved faces. |
-| [first-person-upgrade.md](first-person-upgrade.md) | Form plan, Phases 1–4. Phases 1–2 shipped; 3–4 pending. |
-| [deploy.md](deploy.md) | Deploy runbook: repo root, `dist/`, five slots a day. |
-| [meshy-pipeline.md](meshy-pipeline.md) | Prop pipeline prompt → GLB → pass (Z-Axis evidence). |
+| Doc                                                    | Role                                                                                                       |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| [design.md](design.md)                                 | Game specification: baseline behaviour, flagship direction and art/performance contract.                   |
+| [roadmap.md](roadmap.md)                               | 30-day build plan with checkboxes. Decisions tracked here.                                                 |
+| [player-attachment-plan.md](player-attachment-plan.md) | Current execution tracker: flagship M0–M3, six workstreams, acceptance and evidence.                       |
+| [Flagship local proof](devlog/flagship-local-proof.md) | Verified connected route, renderer/resource observations and remaining acceptance gates.                   |
+| [Kitchen production plan](kitchen-production-plan.md)  | Next whole-room asset, animation and sound milestone; preserves the owner-approved faces.                  |
+| [heygen-video-contest.md](heygen-video-contest.md)     | HeyGen Video Contest candidate-film brief: Best Edit concept, footage budget, provenance and no-post gate. |
+| [first-person-upgrade.md](first-person-upgrade.md)     | Form plan, Phases 1–4. Phases 1–2 shipped; 3–4 pending.                                                    |
+| [deploy.md](deploy.md)                                 | Deploy runbook: repo root, `dist/`, five slots a day.                                                      |
+| [meshy-pipeline.md](meshy-pipeline.md)                 | Prop pipeline prompt → GLB → pass (Z-Axis evidence).                                                       |
 
 ## Reference (read before building in that area)
 
