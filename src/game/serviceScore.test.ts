@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { residencyWon, scoreService } from "./serviceScore";
+import { residencyWon, resolveSideOrder, scoreService } from "./serviceScore";
 
 const solid = {
   served: 12,
@@ -49,5 +49,18 @@ describe("service scoring", () => {
     expect(residencyWon({ ...earned, avgCulinary: 60 })).toBe(false);
     expect(residencyWon({ ...earned, avgHospitality: 50 })).toBe(false);
     expect(residencyWon({ ...earned, defections: 3 })).toBe(false);
+  });
+});
+
+describe("nightly side orders", () => {
+  it("pays each night's challenge on its own evidence", () => {
+    expect(resolveSideOrder(1, { walkouts: 0, sauceOutcomeSaved: false, goldenServed: false, requestFastLanded: false, runnerShooed: false, anyBurned: true, moved101: false, table101Turns: 0, comped: false, served: 4, screams: 3 })?.order.pay).toBe(6);
+    expect(resolveSideOrder(2, { walkouts: 2, sauceOutcomeSaved: true, goldenServed: false, requestFastLanded: false, runnerShooed: false, anyBurned: false, moved101: false, table101Turns: 0, comped: false, served: 4, screams: 2 })?.line).toMatch(/SIDE ORDER HELD/);
+    expect(resolveSideOrder(3, { walkouts: 0, sauceOutcomeSaved: false, goldenServed: true, requestFastLanded: false, runnerShooed: false, anyBurned: false, moved101: false, table101Turns: 0, comped: false, served: 8, screams: 0 })?.order.id).toBe("n3_golden");
+  });
+
+  it("stays quiet when the ask wasn't met", () => {
+    expect(resolveSideOrder(6, { walkouts: 0, sauceOutcomeSaved: false, goldenServed: false, requestFastLanded: false, runnerShooed: false, anyBurned: true, moved101: false, table101Turns: 0, comped: false, served: 6, screams: 0 })).toBeNull();
+    expect(resolveSideOrder(9, { walkouts: 0, sauceOutcomeSaved: false, goldenServed: false, requestFastLanded: false, runnerShooed: false, anyBurned: false, moved101: false, table101Turns: 0, comped: false, served: 7, screams: 0 })).toBeNull();
   });
 });

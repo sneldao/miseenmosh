@@ -6,6 +6,7 @@ import { dishProfile, plateObservations, correctionNeeded, CORRECTION_LABEL, cur
 import { readyOg, ogHandleNow, onOgHandle } from "../game/og";
 import { petraCoachingNote, reviewNarration } from "../game/serviceReview";
 import { nightContract, lowestMoraleCook } from "../game/nightArc";
+import { sideOrderFor } from "../game/serviceScore";
 import { buildEnding } from "../game/ending";
 import { speakReview, voiceEnabled, setVoiceEnabled } from "../game/voice";
 import { sfx } from "../game/sound";
@@ -550,6 +551,7 @@ function ReviewCard() {
           <summary>Service details</summary>
           <div className="critic-line">{review.criticVerdict}</div>
           {review.folkloreLine && <div className="critic-line">{review.folkloreLine}</div>}
+          {review.sideLine && <div className="board-line">{review.sideLine}</div>}
           {review.vowLine && <div className="board-line">{review.vowLine}</div>}
           {review.betLine && <div className="board-line">{review.betLine}</div>}
           {review.cover && <div className="cover-line">{review.cover}</div>}
@@ -729,10 +731,13 @@ function NightOneBrief() {
           { label: "RAISE A TOAST", i: 0 },
           { label: "SHARE THE CRISPY BIT", i: 1 },
           { label: "EAT QUIETLY", i: 2 },
-        ].map(({ label, i }) => (
+          ...((career.lastReview?.avgQuality ?? 100) < 58 && (career.lastReview?.walkoutNames?.length ?? 0) === 0
+            ? [{ label: "EAT THE CRISPY BIT YOURSELF", i: 3, chefEatsFirst: true }]
+            : []),
+        ].map(({ label, i, chefEatsFirst }: { label: string; i: number; chefEatsFirst?: boolean }) => (
           <button
             key={i}
-            className={`btn lbtn ${picked === i ? "picked" : ""}`}
+            className={`btn lbtn ${picked === i ? "picked" : ""}${chefEatsFirst ? " chef-eats" : ""}`}
             disabled={mealDone || picked !== null}
             onClick={() => { meal(i); setPicked(i); }}
           >
@@ -812,6 +817,15 @@ function NightOneBrief() {
           <>
             <div className="mission">{INTRO.beat2Body}</div>
             <NightContractCard />
+            {(() => {
+              const side = sideOrderFor(career.night);
+              return side ? (
+                <div className="side-order">
+                  <div className="mhead">TONIGHT'S SIDE ORDER</div>
+                  {side.text}<span className="cost"> · +{side.pay} ego if it lands</span>
+                </div>
+              ) : null;
+            })()}
             {veteran && FamilyMeal}
             <div className="qmeal">
               <div className="mhead">HOUSE RULE — one twist, all residency</div>
@@ -1066,6 +1080,15 @@ function QuickBrief({ onBook }: { onBook: () => void }) {
         </div>
         {career.night >= 2 && <RecipeRow />}
         <NightContractCard />
+        {(() => {
+          const side = sideOrderFor(career.night);
+          return side ? (
+            <div className="side-order">
+              <div className="mhead">TONIGHT'S SIDE ORDER</div>
+              {side.text}<span className="cost"> · +{side.pay} ego if it lands</span>
+            </div>
+          ) : null;
+        })()}
         <FeudPanel />
         <div className="qmeal">
           <div className="mhead">FAMILY MEAL</div>
@@ -1728,7 +1751,28 @@ export default function HUD() {
   }, [phase, paused]);
 
   const unlockCriticCam = useGame((s) => s.unlockCriticCam);
+  const theBackDoor = useGame((s) => s.theBackDoor);
+  const matDrop = useGame((s) => s.matDrop);
+  const [matVisible, setMatVisible] = useState(false);
   const [pokes, setPokes] = useState(0);
+  // the back door: type 8-6 at the title and sixty quid sits under the mat
+  const knockBuffer = useRef("");
+  useEffect(() => {
+    if (phase !== "title") { knockBuffer.current = ""; return; }
+    const h = (e: KeyboardEvent) => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (!/^[0-9]$/.test(e.key)) return;
+      knockBuffer.current = (knockBuffer.current + e.key).slice(-2);
+      if (knockBuffer.current === "86") {
+        knockBuffer.current = "";
+        theBackDoor();
+        setMatVisible(true);
+        window.setTimeout(() => setMatVisible(false), 3600);
+      }
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [phase, theBackDoor]);
   const [voiceOn, setVoiceOn] = useState(voiceEnabled());
   const pokeBeefcakes = () => {
     if (career.criticCam) return;
@@ -1775,6 +1819,7 @@ export default function HUD() {
           <button className="btn title-play" autoFocus disabled={!!saveIssue} onClick={() => { preloadKitchenModels(); enterResidency(); }}>
             {hasSave ? `CONTINUE — NIGHT ${career.night}` : "TAKE THE PASS"}
           </button>
+          {matVisible && <div className="mat-drop" role="status">THE BACK DOOR — sixty quid under the mat. £{useGame.getState().career.cash} in the pocket.</div>}
           {!hasSave && <div className="title-hint">{INTRO.titleHint}</div>}
           {!hasSave && <div className="title-residency">{INTRO.residencyLine}</div>}
           <details className="title-menu">

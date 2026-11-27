@@ -1018,3 +1018,25 @@ button.ticket:disabled:hover { transform: none; }
   .review.ending .quote { font-size: 1rem; }
   .ending-title { font-size: 1.2rem; }
 }
+
+/* the nightly side order: one extra objective, quiet until it pays */
+.side-order {
+  border: 1px dashed #8a6230; border-radius: 3px;
+  padding: .55rem .75rem; margin: .55rem 0;
+  font-size: .9rem; line-height: 1.45; color: #3a230c;
+}
+.side-order .mhead { margin-bottom: .2rem; }
+.side-order .cost { opacity: .7; font-size: .72rem; }
+
+/* the back door: a quiet stamp for those who knock */
+.mat-drop {
+  position: absolute; top: 2.2rem; left: 50%; transform: translateX(-50%);
+  background: #141210; color: #ffd9a0; border: 1px dashed #c9a44a;
+  padding: .5rem .9rem; font-size: .72rem; letter-spacing: .1em;
+  border-radius: 0 0 3px 3px; z-index: 45;
+  animation: matIn .3s ease-out;
+}
+@keyframes matIn { from { opacity: 0; transform: translate(-50%, -8px); } }
+
+/* chef eats first: the family meal button that shouldn't be there */
+.lbtn.chef-eats { border-color: #c9a44a; color: #ffd9a0; }

@@ -21,6 +21,7 @@ import { CRITICS, criticForNight, criticTell, type CriticPersona } from "./criti
 import { appendServiceEvent, type FolkloreOutcome, type ServiceEvent, type TellKind } from "./serviceEvents";
 import { deriveMood, spikeStrengths } from "./mood";
 import { buildServiceStory, nightAccounts, reviewNarration } from "./serviceReview";
+import { resolveSideOrder, sideOrderFor } from "./serviceScore";
 import { scoreService } from "./serviceScore";
 import { nightContract, lowestMoraleCook, retentionTarget, chefCoverMultiplier, recoveryCorrectionBonus } from "./nightArc";
 import { buildEnding } from "./ending";
@@ -149,6 +150,8 @@ export interface Review {
   screams: number;
   /** call-the-board result line + cash payout (applied next morning) */
   betLine?: string;
+  /** the nightly side order, held — ego paid at close */
+  sideLine?: string;
   betCash?: number;
   /** 9/10 missions: vow judged first, folklore paid off */
   vowLine?: string;
@@ -355,6 +358,7 @@ const LOT_DECK: Omit<Lot, "bought">[] = [
   { name: "Normandy butter", desc: "a brick of gold. pastry +6", note: "82% fat, cultured — it laminates instead of tearing.", voice: "THE FARM", cost: 40, station: 2, qBonus: 6, contested: false },
   { name: "Layby shrooms", desc: "a guy, a layby, no receipt. garnish +5, story +10", note: "Brush, never wash — they drink water like a sponge and fry like one.", voice: "THE FARM", cost: 22, station: 2, qBonus: 5, contested: false, origin: "a guy, a layby, no receipt", storyTag: "layby" },
   { name: "Yesterday's fish", desc: "technically fish. everything −2, but it's £8", note: "On ice since Tuesday. It gets cooked through or it gets binned.", voice: "THE FISHMONGER", cost: 8, station: -1, qBonus: -2, contested: false, risk: true },
+  { name: "Allen's cod", desc: "with the sauce already inside it. £65", note: "The sauce is inside it. That's the problem. It will be judged anyway.", voice: "THE FISHMONGER", cost: 65, station: -1, qBonus: -6, contested: false, risk: true, origin: "a parcel, no questions" },
   { name: "A lamb", desc: "with the sauce already inside it. grill +9", note: "Rest it half its cook or the juices run across the board.", voice: "THE BUTCHER", cost: 70, station: 0, qBonus: 9, contested: true },
   { name: "Saffron threads", desc: "worth more than the pans. sauté +8", note: "Bloom it in warm stock first — dry threads in the pan are confetti.", voice: "THE FARM", cost: 65, station: 1, qBonus: 8, contested: true },
   { name: "Farm eggs, still warm", desc: "the hen glared. pastry +5", note: "Room-temp whites whip; cold ones sulk.", voice: "THE FARM", cost: 28, station: 2, qBonus: 5, contested: false },
@@ -665,6 +669,10 @@ interface GameState {
   review: Review | null;
   /** the graduation plays in two moments: curtain call first, verdict second */
   endingCurtain: boolean;
+  /** nightly side-order evidence, collected live during service */
+  sideFlags: Record<string, boolean>;
+  /** the 86 knock on the back door — a timestamp the title card reads */
+  matDrop: number;
   // --- career layer ---
   career: Career;
   feud: Feud | null;
@@ -730,6 +738,8 @@ interface GameState {
   toggleGlossary: () => void;
   /** curtain call → verdict: the graduation's second moment */
   dismissEndingCurtain: () => void;
+  /** eight-six, typed at the title: sixty quid under the back door mat */
+  theBackDoor: () => void;
   /** platform: handshake, host pause/mute — safe anywhere, game never waits */
   initPlatform: () => void;
   /** where the chef's body is — the pass loop only runs at the pass */
@@ -1037,6 +1047,10 @@ function makeLots(night: number): Lot[] {
     const d = pool.splice(Math.floor(r() * pool.length), 1)[0];
     lots.push({ ...d, bought: false });
   }
+  // night 2 is the market's teaching night — the deep cut gets one showcase
+  if (night === 2 && !lots.some((l) => l.name === "Allen's cod")) {
+    lots[2] = { ...LOT_DECK.find((d) => d.name === "Allen's cod")!, bought: false };
+  }
   // Beefcakes shops the same market — guarantee a contested lot when one fits
   if (!lots.some((l) => l.contested)) {
     const extra = LOT_DECK.find((d) => d.contested && !lots.some((l) => l.name === d.name));
@@ -1202,6 +1216,8 @@ export const useGame = create<GameState>((set, get) => ({
   moved101: false,
   review: null,
   endingCurtain: true,
+  sideFlags: {},
+  matDrop: 0,
   career: bootSave?.career ?? freshCareer(),
   events: [],
   folkloreOutcome: null,
@@ -1316,6 +1332,7 @@ export const useGame = create<GameState>((set, get) => ({
       speakLine(INTRO.serviceChyrons[0].text);
     }
     const v = VENUES[career.venue];
+    const side = sideOrderFor(career.night);
     const rng = mulberry32(daySeed() + career.night * 104729);
     const criticId = Math.floor(rng() * 5);
     // teaching order, not rotation: GILLIAM N1–5 (noise), MADAME V N6–8 (fork), KID N9 (graduation).
@@ -1390,17 +1407,22 @@ export const useGame = create<GameState>((set, get) => ({
       rng,
       guests,
       career: careerNext,
+      sideFlags: {},
       spawnMul: v.spawnMul,
       tellMul: v.tellMul,
       // cooks persist across nights — they rest a little, they don't forget
       cooks: s.cooks.map((c) => withFreshNight({ ...c, morale: Math.min(85, c.morale + 20) })),
       tickets: opening,
       feed: coldOpen
-        ? [{ id: feedId++, text: INTRO.serviceChyrons[0].text, kind: "info" as const, who: INTRO.serviceChyrons[0].who }]
+        ? [
+          { id: feedId++, text: INTRO.serviceChyrons[0].text, kind: "info" as const, who: INTRO.serviceChyrons[0].who },
+          ...(side ? [{ id: feedId++, text: `TONIGHT'S SIDE ORDER — ${side.text}. Pays +${side.pay} ego.`, kind: "good" as const }] : []),
+        ]
         : [
         { id: feedId++, text: `Night ${career.night} — ${v.name}. ${v.sub}.`, kind: "drama" },
         { id: feedId++, text: `${nightContract(career.night).name}: ${nightContract(career.night).dilemma}`, kind: "info" },
         { id: feedId++, text: CRITICS[persona].introduction, kind: "drama" },
+        ...(side ? [{ id: feedId++, text: `TONIGHT'S SIDE ORDER — ${side.text}. Pays +${side.pay} ego.`, kind: "good" as const }] : []),
         ...(career.night === 2 ? [{ id: feedId++, text: "DIMITRI's first sauce is on the rail. Watch the pan, not the clock.", kind: "info" as const, who: "DIMITRI" }] : []),
         ...(openingRequest ? [{ id: feedId++, text: `Table ${openingRequest.table} wants the ${openingRequest.dish} FAST. They are already waiting.`, kind: "drama" as const }] : []),
         ...(career.vow ? [{ id: feedId++, text: VOW_LINES[career.vow], kind: "drama" as const }] : []),
@@ -1639,6 +1661,11 @@ export const useGame = create<GameState>((set, get) => ({
           : { ...k, morale: Math.min(100, k.morale + 6), grudge: null }
       );
       line = `Family meal — ${dish}. The crispy bit goes to ${low?.name ?? "nobody"}. The table forgives everything.`;
+    } else if (i === 3) {
+      // chef eats first: the night before went badly, nobody walked, and the
+      // room needs to see the pass hold its own head up
+      cooks = cooks.map((k) => ({ ...k, morale: Math.min(100, k.morale + 10) }));
+      line = "Family meal — you, standing over the bin, eating the crispy bit yourself. Chef eats last. Tonight, chef eats first.";
     } else {
       // silence: yesterday's dead are buried, not discussed
       cooks = cooks.map((k) => ({
@@ -2706,6 +2733,26 @@ export const useGame = create<GameState>((set, get) => ({
       else if (vow === "star") vowLine = "STAR VOW BROKEN: the guide writes 'ambition without control.'";
       else if (vow === "house") vowLine = s.table101Turns >= 2 ? "HOUSE VOW HELD: 101 turned twice. The regulars are permanent." : "HOUSE VOW BROKEN: 101 wobbled away.";
       else if (vow === "brigade") vowLine = walkouts === 0 ? "BRIGADE VOW HELD: nobody walked. Trauma −1 all." : "BRIGADE VOW BROKEN: aprons on the tiles.";
+      // the side order resolves where the bets do: same card, same voice
+      let sideLine: string | undefined;
+      const side = resolveSideOrder(s.career.night, {
+        walkouts,
+        sauceOutcomeSaved: s.career.lastSauceOutcome?.night === s.career.night && s.career.lastSauceOutcome.result === "saved",
+        goldenServed: !!s.sideFlags.golden,
+        requestFastLanded: !!s.sideFlags.fast,
+        runnerShooed: !!s.sideFlags.shoo,
+        anyBurned: cooks.some((c) => c.burning),
+        moved101: s.moved101,
+        table101Turns: s.table101Turns,
+        comped: s.comped,
+        served,
+        screams: s.screams,
+      });
+      if (side) {
+        ego += side.order.pay;
+        sideLine = side.line;
+        feed = pushFeed(feed, sideLine, "good", "THE PASS");
+      }
       // the accounts answer the question the review can't fudge: does the residency end here?
       const v2 = VENUES[s.career.venue];
       const lastNight2 = s.career.night + 1 > MAX_NIGHTS;
@@ -2769,6 +2816,7 @@ export const useGame = create<GameState>((set, get) => ({
         screams: s.screams,
         betLine,
         betCash,
+        sideLine,
         vowLine,
         folkloreLine: story.folkloreLine,
         cover: story.cover,
@@ -3200,6 +3248,7 @@ export const useGame = create<GameState>((set, get) => ({
     sfx("slam", { pan: 0.8 });
     set({
       runner: { ...r, shooed: true, fled: true },
+      sideFlags: { ...s.sideFlags, shoo: true },
       events: appendServiceEvent(s.events, { kind: "intervention", at: s.serviceTime, action: "shoo" }),
       ego: s.ego + 2,
       feed: tiered(
@@ -3388,6 +3437,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (s.openingStep === "call" || s.openingStep === "inspect") return;
     const plate = s.tickets.find((t) => t.state === "pass");
     if (!plate) return;
+    const sideFlags = { ...s.sideFlags };
     if (s.openingStep === "judge" && plate.lesson === "opening-judgment" && !s.openingTurned) return;
     let { feed, ego, served, sentBack, smashed, complaints, qualitySum, hospitalitySum, hospitalityCount, streak, bestStreak } = s;
     let { criticServed, criticQ, criticHospitalityQ, criticHospitalityCount } = s;
@@ -3425,6 +3475,7 @@ export const useGame = create<GameState>((set, get) => ({
           feed = pushFeed(feed, "Served blind. It was neither good nor a disaster. The room isn't sure what that says.", "info", "THE PASS");
         }
       }
+      if (plate.sear === "golden") sideFlags.golden = true;
       let hospitality = 65;
       let req = s.request;
       let ms: { at: number; text: string } | null = null;
@@ -3441,6 +3492,7 @@ export const useGame = create<GameState>((set, get) => ({
         const nailed = mod === "FAST" ? plate.age < 30 : plate.sear === "golden";
         if (nailed) {
           hospitality += 10;
+          if (mod === "FAST") sideFlags.fast = true;
           feed = pushFeed(feed, `Table ${plate.table} wanted ${mod} — nailed it (+10 service).`, "good");
         } else {
           hospitality -= 8;
@@ -3804,6 +3856,15 @@ export const useGame = create<GameState>((set, get) => ({
     if (s.phase !== "ending" || !s.endingCurtain) return;
     sfx("bell");
     set({ endingCurtain: false });
+  },
+
+  theBackDoor: () => {
+    const s = get();
+    if (s.phase !== "title") return;
+    sfx("boardTap");
+    const career = { ...s.career, cash: s.career.cash + 60 };
+    saveCareer(career, s.cooks);
+    set({ career, matDrop: Date.now() });
   },
 
   initPlatform: () => {
