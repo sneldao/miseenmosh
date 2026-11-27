@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { useTexture } from "@react-three/drei";
 import { CanvasTexture } from "three";
-import wellingtonSprite from "../../assets/recraft/food-lino/wellington.webp";
-import seaBassSprite from "../../assets/recraft/food-lino/sea-bass.webp";
-import quenelleSprite from "../../assets/recraft/food-lino/quenelle.webp";
+import wellingtonSprite from "../../assets/recraft/food-lino/wellington-q80.webp";
+import seaBassSprite from "../../assets/recraft/food-lino/sea-bass-q80.webp";
+import quenelleSprite from "../../assets/recraft/food-lino/quenelle-q80.webp";
 
 export const DISH_SPRITE: Record<string, string> = {
   "Beef Wellington": wellingtonSprite,
