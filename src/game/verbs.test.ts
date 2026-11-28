@@ -289,7 +289,7 @@ describe("smartServe — the flow assist", () => {
     expect(s.tickets.find((t) => t.id === 5)!.state).toBe("done");
   });
 
-  it("does nothing with two ready plates and no selection — the choice is not unambiguous", () => {
+  it("does nothing with two ready plates and no selection — but names the choice", () => {
     useGame.setState({
       tickets: [
         ticket({ id: 5, table: 14, state: "ready", readyAt: 28, quality: 88 }),
@@ -299,6 +299,7 @@ describe("smartServe — the flow assist", () => {
     useGame.getState().smartServe();
     expect(useGame.getState().served).toBe(0);
     expect(useGame.getState().tickets.find((t) => t.id === 5)!.state).toBe("ready");
+    expect(useGame.getState().feed.some((item) => item.text.includes("doesn't guess"))).toBe(true);
   });
 
   it("serves the selected ready plate even among several", () => {
@@ -380,5 +381,43 @@ describe("variable-ratio rewards", () => {
     const s = useGame.getState();
     expect(s.feed.some((item) => item.text.includes("rises to applaud"))).toBe(false);
     expect(s.feed.some((item) => item.text.includes("the room just stops"))).toBe(false);
+  });
+});
+
+describe("the one that got away", () => {
+  let useGame: Game;
+  const ticket = (over: Partial<State["tickets"][number]>): State["tickets"][number] => ({
+    id: 1, dish: "Beef Wellington", table: 11, station: 0, age: 10,
+    state: "rail", plateAt: 0, plateDur: 0, byChef: false,
+    quality: -1, verdict: null, sear: null, sauce: null, ...over,
+  });
+  beforeEach(async () => {
+    storage.clear();
+    useGame = await freshGame();
+    useGame.getState().resetCareer();
+    useGame.setState({
+      phase: "service", paused: false, glossary: false, openingStep: null, correction: null,
+      serviceTime: 30, misses: 0, gotAway: null,
+      career: { ...useGame.getState().career, night: 5 },
+    } satisfies Partial<State>);
+  });
+
+  it("names the near-miss when a plate dies seconds from done", () => {
+    useGame.setState({
+      tickets: [ticket({ id: 7, state: "plating", age: 50, plateAt: 45, plateDur: 6 })],
+    } satisfies Partial<State>);
+    useGame.getState().tick(7); // age 57 crosses the 55s TTL; the plate was 8s from done
+    const s = useGame.getState();
+    expect(s.misses).toBe(1);
+    expect(s.feed.some((item) => item.text.includes("seconds from the pass"))).toBe(true);
+    expect(s.gotAway).toEqual({ dish: "Beef Wellington", table: 11 });
+  });
+
+  it("does not name it when the plate had far to go", () => {
+    useGame.setState({
+      tickets: [ticket({ id: 7, state: "plating", age: 50, plateAt: 95, plateDur: 60 })],
+    } satisfies Partial<State>);
+    useGame.getState().tick(7);
+    expect(useGame.getState().gotAway).toBeNull();
   });
 });

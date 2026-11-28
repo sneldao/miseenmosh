@@ -2397,6 +2397,7 @@ function useHotkeys() {
         return;
       }
       if (k === "s") return s.smartServe();
+      if (e.key === "Enter") return s.smartServe(); // the commit key: same call, muscle memory from the review card
       if (k === "b") return s.judge("sendback");
       if (k === "x") return s.judge("smash");
       if (k === "f") {

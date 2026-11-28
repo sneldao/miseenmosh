@@ -21,6 +21,8 @@ export interface ReviewFacts {
   folkloreOutcome: FolkloreOutcome | null;
   persona: CriticPersona;
   isFinalNight: boolean;
+  /** the one that got away: a near-miss walkout, seconds from the pass */
+  gotAway?: { dish: string; table: number } | null;
 }
 
 export interface ServiceStory {
@@ -60,7 +62,9 @@ export function buildServiceStory(f: ReviewFacts): ServiceStory {
     consequence = `Tomorrow’s coaching is a chance to acknowledge ${rescue.cookName}.`;
   } else if (f.misses > 0) {
     headline = "THE ROOM RAN OUT OF PATIENCE";
-    incident = `${f.misses} order${f.misses === 1 ? "" : "s"} expired before delivery. ${f.served} dishes made it through.`;
+    incident = `${f.misses} order${f.misses === 1 ? "" : "s"} expired before delivery. ${f.served} dishes made it through.${
+      f.gotAway ? ` The ${f.gotAway.dish} for table ${f.gotAway.table} was seconds from the pass when the door took it.` : ""
+    }`;
     consequence = "Tomorrow, watch the oldest docket before adding another order to the pass.";
   } else if (f.screams === 0 && f.served >= 8) {
     headline = "A SERVICE WITHOUT SHOUTING";

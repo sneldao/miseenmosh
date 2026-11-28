@@ -895,6 +895,8 @@ interface GameState {
   milestoneText: string;
   /** serviceTime of the last unscheduled room-stop — cooldown for the variable beat */
   roomStopAt: number;
+  /** the one that got away: tonight's near-miss walkout, seconds from done */
+  gotAway: { dish: string; table: number } | null;
   /** coursing: last good-serve serviceTime per table — eat together (+6) */
   tableServeAt: Record<number, number>;
   /** BEEFCAKES' runner: approaching the rail until at, stealing unless shooed */
@@ -1688,6 +1690,7 @@ export const useGame = create<GameState>((set, get) => ({
   milestoneAt: 0,
   milestoneText: "",
   roomStopAt: -999,
+  gotAway: null,
   selectedTicketId: null,
   breadAt: -999,
   inspecting: false,
@@ -2167,6 +2170,7 @@ export const useGame = create<GameState>((set, get) => ({
       milestoneAt: 0,
       milestoneText: "",
       roomStopAt: -999,
+      gotAway: null,
       tableServeAt: {},
       runner: null,
       request: openingRequest,
@@ -3044,6 +3048,7 @@ export const useGame = create<GameState>((set, get) => ({
     // --- tickets: expire first, then age, finish plating, cool ready food ---
     const tickets: Ticket[] = [];
     const expiredIds = new Set<number>();
+    let gotAway = s.gotAway;
     let correction = s.correction;
     let selectedTicketId = s.selectedTicketId;
     let inspecting = s.inspecting;
@@ -3083,6 +3088,13 @@ export const useGame = create<GameState>((set, get) => ({
         sfx("gasp", { pan: tablePan(t.table) });
         misses += 1;
         streak = 0;
+        // the one that got away: a plate that died seconds from the pass is
+        // the sting the player remembers — name the gap, let the review carry it
+        if (t.state === "plating" && t.plateAt > 0 && t.plateAt - serviceTime <= 8) {
+          gotAway = { dish: t.dish, table: t.table };
+          const secs = Math.max(1, Math.ceil(t.plateAt - serviceTime));
+          feed = pushFeed(feed, `The ${t.dish} dies ${secs === 1 ? "a single second" : `${secs} seconds`} from the pass. You know the one.`, "bad");
+        }
         continue;
       }
       if (t.state === "plating" && !t.byChef && s.cooks[t.station]?.walkedOut) {
@@ -4179,6 +4191,7 @@ export const useGame = create<GameState>((set, get) => ({
         folkloreOutcome,
         persona,
         isFinalNight,
+        gotAway: s.gotAway,
       });
       const review: Review = {
         stars,
@@ -4336,6 +4349,7 @@ export const useGame = create<GameState>((set, get) => ({
       folkloreDone,
       events,
       folkloreOutcome,
+      gotAway,
       criticQ: s.criticQ,
       criticHospitalityQ: s.criticHospitalityQ + folkloreHospitalityQ,
       criticHospitalityCount:
@@ -5270,10 +5284,23 @@ export const useGame = create<GameState>((set, get) => ({
     // a held plate or an authored opening keeps the two-step ritual
     if (held || s.openingStep || s.correction) return s.judge("serve");
     const ready = s.tickets.filter((t) => t.state === "ready");
-    const target =
-      (s.selectedTicketId != null
+    const aimed =
+      s.selectedTicketId != null
         ? ready.find((t) => t.id === s.selectedTicketId)
-        : null) ?? (ready.length === 1 ? ready[0] : null);
+        : null;
+    if (ready.length > 1 && !aimed) {
+      // the assist never guesses for the chef — but it names the choice
+      set({
+        feed: pushFeed(
+          s.feed,
+          "Two up and the pass doesn't guess. Aim one (click or F), then S.",
+          "info",
+          "THE PASS",
+        ),
+      });
+      return;
+    }
+    const target = aimed ?? (ready.length === 1 ? ready[0] : null);
     if (!target) return s.judge("serve");
     s.collectPlate(target.id);
     get().judge("serve");

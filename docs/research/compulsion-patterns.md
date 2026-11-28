@@ -43,8 +43,8 @@ of, and how much of each do we facilitate?*
 | Juice | 23 synthesized SFX with stereo panning (`sound.ts`), camera shake (`FirstPerson.tsx`), critic flash (`DiningRoom.tsx`), streak ceremonies ×5/×10/×15/×20, arrival cues, quality microbar, rising-third chime on every clean plate out (`sfx("pass")`) | 8.5/10 |
 | Near-miss | Mercy system (regulars forgive before walking); review card names the closest path to the next star in kitchen voice; record line when the streak came within two of the house best | 8.5/10 |
 | Variable reward | Golden Wellington, Allen's cod, mercy draws, back door — plus the unscheduled room-stop (14% per qualifying serve past ×6, cooldown 20s, never on round fives) and the 1-in-16 standing ovation for a pristine plate | 8/10 |
-| Beatable unfairness | Per-night RNG in arrivals, orders, market lots, critics; scripted nights keep it fair-feeling | 7/10 |
-| Frictionless loop | First-person sim is inherently multi-input; mitigated by tell halos, capped hints, one-key inspect — and now the flow assist: `S` with an empty pass collects the lone (or selected) ready plate and serves it in one press (`smartServe`) | 7/10 |
+| Beatable unfairness | Per-night RNG in arrivals, orders, market lots, critics; scripted nights keep it fair-feeling — and the near-miss walkout is now *named*: a plate that dies seconds from the pass gets its own line in the feed and its own sentence in the review ("the one that got away") | 8/10 |
+| Frictionless loop | First-person sim is inherently multi-input; tell halos, capped hints, one-key inspect, the flow assist (`S`/Enter with an empty pass collects and serves in one press), and the two-ready ambiguity now names itself instead of stalling silently | 7.5/10 |
 | Visible target | The ghost target: `best ×N` beside the live streak, `NEW HOUSE BEST` the moment it falls, the beat marked in the feed | 8/10 |
 
 Overall: **~7.8/10**, with the residual owned as design intent rather than
@@ -75,14 +75,20 @@ submission with a finishable story.
 - **The standing ovation** — a 1-in-16 chance a pristine (85+) plate gets a
   table on its feet: +3 ego and applause. The jackpot the pass can't
   schedule.
-- **The flow assist** — `S` with an empty pass collects the lone (or
-  explicitly selected) ready plate and serves it in one press
-  (`smartServe`); with two ready plates and no selection it does nothing,
-  so the assist never makes the choice for the chef. The inspect-first
-  ritual (F → I → S) is untouched, and the authored opening keeps its
-  two-step teaching rhythm.
+- **The flow assist** — `S` (or Enter) with an empty pass collects the lone
+  (or explicitly selected) ready plate and serves it in one press
+  (`smartServe`); with two ready plates and no selection it does nothing but
+  *names the choice*, so the assist never guesses for the chef. The
+  inspect-first ritual (F → I → S) is untouched, and the authored opening
+  keeps its two-step teaching rhythm.
+- **The one that got away** — a walkout whose plate was seconds from the
+  pass gets named in the feed ("The Wellington dies 8 seconds from the pass.
+  You know the one.") and remembered in the review. Near-miss and unfairness
+  in one beat: the sting is legible, survivable, and creates the "I fire
+  earlier next time" intention.
 
-Judged against the pattern list, the average now sits at **~7.8/10**. The
-remaining gap is structural (input friction is the genre's identity, and the
-9-night arc is a feature — a schedule, not a treadmill) and is the right
-trade for a jam submission.
+Judged against the pattern list, the average now sits at **≈ 8.1/10**. The
+residual friction is the genre's identity — you are a body in a kitchen,
+and a body has to walk — which is the fantasy, not a leak. The finite arc
+is a schedule, not a treadmill, and that is the right trade for a jam
+submission with a finishable story.
